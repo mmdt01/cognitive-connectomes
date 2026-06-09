@@ -16,7 +16,8 @@ from src.nulls import (
 )
 from src.nulls.validation import validate_null
 from src.reservoir.weights import apply_weight_scheme
-from src.reservoir.build import rescale_spectral_radius
+from src.reservoir.build import rescale_spectral_radius, build_from_adjacency
+from src.tasks import narma as narma_task
 
 
 @pytest.fixture(scope="module")
@@ -234,6 +235,51 @@ def test_apply_weight_scheme_asymmetric_empirical_signed_requires_kwargs(
         apply_weight_scheme(
             mask_input, "asymmetric_empirical_signed", seed=0,
             empirical_weights=np.array([1.0]), neuron_signs=np.zeros(n),
+        )
+
+
+# ---------------------------------------------------------------------------
+# NARMA-10 task.
+# ---------------------------------------------------------------------------
+
+
+def test_narma10_matches_reservoirpy():
+    """The local generator reproduces reservoirpy.datasets.narma bit-for-bit."""
+    from reservoirpy.datasets import narma as rpy_narma
+
+    rng = np.random.default_rng(0)
+    order = 10
+    length = 600
+    u = rng.uniform(0, 0.5, size=(length, 1))
+    _, y_rpy = rpy_narma(
+        n_timesteps=length - order, order=10, a1=0.3, a2=0.05, b=1.5, c=0.1, u=u
+    )
+    y_mine = narma_task.narma10(u.ravel())
+    assert np.array_equal(y_mine[order:], y_rpy.ravel())
+
+
+def _narma_test_reservoir():
+    conn = load("binary_undirected_chemical").adjacency
+    weighted = apply_weight_scheme(conn, "symmetric_gaussian", seed=0)
+    return build_from_adjacency(
+        weighted, target_spectral_radius=0.9, leak_rate=1.0, input_scaling=0.2, seed=0
+    )
+
+
+def test_narma_evaluate_runs_and_returns_config():
+    out = narma_task.evaluate(
+        _narma_test_reservoir(), seed=1000, T=1500, washout=200, n_train=900, n_test=400
+    )
+    assert np.isfinite(out["nrmse"])
+    assert 0.0 < out["nrmse"] < 1.5
+    for key in ("n_input", "n_train", "n_test", "n_rejected_inputs", "ridge_alpha"):
+        assert key in out
+
+
+def test_narma_evaluate_rejects_oversized_split():
+    with pytest.raises(ValueError):
+        narma_task.evaluate(
+            _narma_test_reservoir(), seed=0, T=1000, washout=200, n_train=700, n_test=200
         )
 
 
