@@ -1,0 +1,15 @@
+neuron_class,neurotransmitter,category,sign
+DD,GABA,inhibitory,-1
+VD,GABA,inhibitory,-1
+RME,GABA,inhibitory,-1
+AVL,GABA,inhibitory,-1
+DVB,GABA,inhibitory,-1
+RIS,GABA,inhibitory,-1
+ADE,dopamine,modulatory,1
+CEP,dopamine,modulatory,1
+PDE,dopamine,modulatory,1
+NSM,serotonin,modulatory,1
+ADF,serotonin,modulatory,1
+HSN,serotonin,modulatory,1
+RIM,tyramine,modulatory,1
+RIC,octopamine,modulatory,1
