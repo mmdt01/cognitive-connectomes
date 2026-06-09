@@ -179,3 +179,103 @@ def test_apply_weight_scheme_asymmetric_empirical(directed_weighted_adjacency):
     assert np.all(np.isin(drawn, pool))
     # Likely asymmetric in general (the mask is asymmetric here).
     assert not _is_symmetric(weighted)
+
+
+# ---------------------------------------------------------------------------
+# Directed higher-order nulls (rung 3 + rung 4 extended to directed graphs).
+#
+# Exercised on a small synthetic directed graph (two communities, each a
+# directed circulant carrying directed triangles) so the rewire loops run fast
+# and deterministically. The full-scale runs on the C. elegans directed
+# connectome happen in the bridge experiment's probe runner.
+# ---------------------------------------------------------------------------
+
+_DIRECTED_BLOCK_SIZE = 15
+
+
+def _two_block_directed_graph() -> np.ndarray:
+    """Two 15-node communities, each a directed circulant (i->i+1, i->i+2),
+    joined by a few reciprocal inter-block edges. Has directed triangles and
+    clear block structure for the rung-3/rung-4 directed tests."""
+    block = _DIRECTED_BLOCK_SIZE
+    n = 2 * block
+    adjacency = np.zeros((n, n))
+    for base in (0, block):
+        members = [base + k for k in range(block)]
+        for position, node in enumerate(members):
+            adjacency[node, members[(position + 1) % block]] = 1.0
+            adjacency[node, members[(position + 2) % block]] = 1.0
+    # A handful of inter-block edges (kept sparse so blocks stay distinct).
+    for i, j in [(0, block), (block, 0), (3, block + 5), (block + 6, 4)]:
+        adjacency[i, j] = 1.0
+    np.fill_diagonal(adjacency, 0)
+    return adjacency
+
+
+def _directed_partition() -> list[set[int]]:
+    block = _DIRECTED_BLOCK_SIZE
+    return [set(range(block)), set(range(block, 2 * block))]
+
+
+def test_directed_clustering_rewire_preserves_degree_and_clustering():
+    adjacency = _two_block_directed_graph()
+    out = clustering_rewire.generate(adjacency, seed=0, directed=True, tolerance=0.05)
+    assert out.shape == adjacency.shape
+    assert _is_binary(out)
+    assert not _is_symmetric(out), "directed rewire output must be asymmetric"
+    assert np.all(np.diag(out) == 0)
+    in_check = validate_null(adjacency, out, "in_degree_sequence")
+    out_check = validate_null(adjacency, out, "out_degree_sequence")
+    assert in_check["preserved"], "in-degree sequence must be preserved"
+    assert out_check["preserved"], "out-degree sequence must be preserved"
+    cluster_check = validate_null(adjacency, out, "directed_clustering", tolerance=0.05)
+    assert cluster_check["preserved"], (
+        f"directed clustering not preserved within 5% "
+        f"(expected={cluster_check['expected']:.4f}, "
+        f"actual={cluster_check['actual']:.4f})"
+    )
+
+
+def test_directed_modularity_rewire_preserves_degree_and_block_matrix():
+    adjacency = _two_block_directed_graph()
+    partition = _directed_partition()
+    out = modularity_rewire.generate(
+        adjacency, seed=0, directed=True, community_partition=partition
+    )
+    assert out.shape == adjacency.shape
+    assert _is_binary(out)
+    assert np.all(np.diag(out) == 0)
+    in_check = validate_null(adjacency, out, "in_degree_sequence")
+    out_check = validate_null(adjacency, out, "out_degree_sequence")
+    assert in_check["preserved"], "in-degree sequence must be preserved"
+    assert out_check["preserved"], "out-degree sequence must be preserved"
+    block_check = validate_null(
+        adjacency, out, "directed_block_matrix", community_partition=partition
+    )
+    assert block_check["preserved"], "directed block edge-count matrix must be exact"
+
+
+def test_directed_clustering_rewire_actually_rewires():
+    """A sanity check that swaps actually happened (output differs from input)."""
+    adjacency = _two_block_directed_graph()
+    out = clustering_rewire.generate(adjacency, seed=1, directed=True, tolerance=0.05)
+    assert not np.array_equal(out, adjacency), "rewire produced an identical graph"
+
+
+def test_validate_null_directed_block_matrix_requires_partition():
+    adjacency = _two_block_directed_graph()
+    with pytest.raises(ValueError):
+        validate_null(adjacency, adjacency, "directed_block_matrix")
+
+
+def test_validate_null_directed_clustering_flags_violation():
+    adjacency = _two_block_directed_graph()
+    # Identical graphs -> preserved.
+    same = validate_null(adjacency, adjacency, "directed_clustering")
+    assert same["preserved"] is True
+    # Delete every inter-and-intra edge of one node -> clustering changes.
+    broken = adjacency.copy()
+    broken[0, :] = 0
+    broken[:, 0] = 0
+    changed = validate_null(adjacency, broken, "directed_clustering", tolerance=0.001)
+    assert changed["preserved"] is False
