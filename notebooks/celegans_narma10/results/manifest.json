@@ -1,0 +1,143 @@
+{
+  "generated_utc": "2026-06-09T18:50:10.603699+00:00",
+  "n_evaluations": 3600,
+  "elapsed_seconds": 585.3,
+  "conditions": [
+    "v2a",
+    "v2b",
+    "v2d"
+  ],
+  "variants": [
+    "connectome",
+    "random_gaussian",
+    "erdos_renyi",
+    "degree_rewire",
+    "clustering_rewire",
+    "modularity_rewire"
+  ],
+  "spectral_radii": [
+    0.0,
+    0.1053,
+    0.2105,
+    0.3158,
+    0.4211,
+    0.5263,
+    0.6316,
+    0.7368,
+    0.8421,
+    0.9474,
+    1.0526,
+    1.1579,
+    1.2632,
+    1.3684,
+    1.4737,
+    1.5789,
+    1.6842,
+    1.7895,
+    1.8947,
+    2.0
+  ],
+  "n_seeds": 10,
+  "substrate_summary": {
+    "n_nodes_undirected": 300,
+    "n_nodes_directed": 300,
+    "n_directed_edges": 3669,
+    "empirical_pool_size": 3669,
+    "weight_transform": "raw",
+    "n_inhibitory": 26,
+    "n_excitatory": 274,
+    "partition_sizes": {
+      "undirected": [
+        98,
+        97,
+        44,
+        41,
+        20
+      ],
+      "directed": [
+        101,
+        80,
+        60,
+        39,
+        20
+      ]
+    }
+  },
+  "config": {
+    "conditions": [
+      "v2a",
+      "v2b",
+      "v2d"
+    ],
+    "condition_spec": {
+      "v2a": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_gaussian",
+        "label": "v2a \u00b7 undirected signed-Gaussian"
+      },
+      "v2b": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical",
+        "label": "v2b \u00b7 directed empirical"
+      },
+      "v2d": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_signed",
+        "label": "v2d \u00b7 directed empirical + Dale sign"
+      }
+    },
+    "variants": [
+      "connectome",
+      "random_gaussian",
+      "erdos_renyi",
+      "degree_rewire",
+      "clustering_rewire",
+      "modularity_rewire"
+    ],
+    "spectral_radii": [
+      0.0,
+      0.1053,
+      0.2105,
+      0.3158,
+      0.4211,
+      0.5263,
+      0.6316,
+      0.7368,
+      0.8421,
+      0.9474,
+      1.0526,
+      1.1579,
+      1.2632,
+      1.3684,
+      1.4737,
+      1.5789,
+      1.6842,
+      1.7895,
+      1.8947,
+      2.0
+    ],
+    "n_seeds": 10,
+    "weight_transform": "raw",
+    "clustering_tolerance": 0.05,
+    "louvain_seed": 0,
+    "swap_multiplier": 10,
+    "input_scaling": 0.2,
+    "leak_rate": 1.0,
+    "narma_params": {
+      "T": 3000,
+      "washout": 200,
+      "n_train": 2000,
+      "n_test": 800,
+      "ridge_alpha": 1e-08,
+      "readout_bias": true,
+      "u_low": 0.0,
+      "u_high": 0.5,
+      "divergence_bound": 10.0,
+      "max_input_tries": 50
+    },
+    "input_seed_offset": 1000,
+    "n_permutations": 10000,
+    "permutation_seed": 0,
+    "alpha": 0.05
+  }
+}
