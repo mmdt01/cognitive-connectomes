@@ -107,6 +107,7 @@ Python 3.12 venv at `.venv/`; editable-installed via `pyproject.toml`.
 ```
 cognitive-connectomes/
 ├── PROJECT_KNOWLEDGE_BASE.md       (this document)
+├── PROJECT_PLAN.md                 (canonical forward plan)
 ├── pyproject.toml
 ├── data/cook2019_connectome.xlsx   (Cook 2019 SI, corrected July 2020)
 ├── presentations/
@@ -130,7 +131,7 @@ cognitive-connectomes/
 │   └── viz/
 │       ├── connectome_overview.py
 │       └── results.py              mc_vs_spectral_radius, eigenvalue_spectra, etc.
-├── tests/test_smoke.py             tripwire tests (13+/13+ passing)
+├── tests/test_smoke.py             tripwire tests (19 passing)
 └── notebooks/
     ├── v2a_continuous_weights/
     │   ├── notebook.ipynb           (v2a + v2c probe in Stages 7/7b)
@@ -153,7 +154,10 @@ not as a separate notebook folder.
 
 Each notebook directory contains `notebook.ipynb`, `figures/`,
 `results.parquet`, and any probe runners (`_run_probe.py`,
-`_run_probe_v2c.py`) plus their parquet outputs.
+`_run_probe_v2c.py`) plus their parquet outputs. The parquet outputs
+(results and probes) live in each notebook directory locally but are
+gitignored as regenerable artefacts, so a fresh clone won't contain
+them.
 
 The five null modules all expose the same interface:
 `generate(adjacency, seed, **kwargs) -> np.ndarray`. Inputs and
