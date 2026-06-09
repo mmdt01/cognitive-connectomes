@@ -187,6 +187,31 @@ def generate(
     return result
 
 
+def _directed_triangle_counts(symmetrised: np.ndarray) -> np.ndarray:
+    """Per-node directed-triangle counts ``(S^3)_ii`` for ``S = A + A.T``.
+
+    This is exactly networkx's directed-triangle count (the set-intersection
+    count in ``_directed_triangles_and_degree_iter`` equals ``(S^3)_ii`` with
+    reciprocal edges weighted by their multiplicity in ``S``).
+    """
+    s_squared = symmetrised @ symmetrised
+    return np.einsum("ik,ik->i", symmetrised, s_squared).astype(np.int64)
+
+
+def _directed_clustering_vector(
+    triangle_counts: np.ndarray, deg_term: np.ndarray, reciprocal: np.ndarray
+) -> np.ndarray:
+    """Per-node Fagiolo directed clustering from triangle counts and degrees.
+
+    ``C_i = (S^3)_ii / (2 * (d_tot_i*(d_tot_i - 1) - 2*d_recip_i))``, matching
+    networkx (zero where the denominator is non-positive). ``deg_term`` is the
+    constant ``d_tot*(d_tot - 1)``; ``reciprocal`` is the per-node reciprocal
+    degree (the only degree term a swap changes).
+    """
+    denominator = 2 * (deg_term - 2 * reciprocal)
+    return np.where(denominator > 0, triangle_counts / denominator, 0.0)
+
+
 def _generate_directed(
     adjacency: np.ndarray,
     seed: int,
@@ -195,26 +220,39 @@ def _generate_directed(
     max_attempts_multiplier: int,
     return_diagnostics: bool,
 ) -> np.ndarray | tuple[np.ndarray, dict]:
-    """Directed clustering-preserving rewire.
+    """Directed clustering-preserving rewire (incremental, numpy).
 
     Two-edge head-swaps ``a->b, c->d  =>  a->d, c->b`` preserve every node's
     in- and out-degree exactly. A swap is accepted only if the mean Fagiolo
     (2007) directed clustering coefficient stays within ``tolerance`` of the
-    input's. Only nodes adjacent (in either direction) to {a, b, c, d} can
-    change clustering, so each accepted/proposed swap recomputes clustering
-    for that affected set; a full recompute every ``n_edges`` accepted swaps
-    resyncs the running mean against ``nx.average_clustering`` to guard
-    against drift.
+    input's.
+
+    Maintains the symmetrised matrix ``S = A + A.T`` and the per-node triangle
+    counts ``t = (S^3)_ii`` incrementally. A head-swap toggles four symmetric
+    ``S`` pairs; toggling pair ``{p, q}`` by ``delta`` changes triangle counts
+    by exactly ``delta * (S^2)_pq`` at ``p`` and ``q`` and ``delta * S_pw*S_wq``
+    at each common neighbour ``w`` (here scaled by 2 because ``t`` stores the
+    un-halved ``(S^3)_ii``). The denominator changes only for the four
+    endpoints (via their reciprocal degree; total degree is swap-invariant),
+    so each proposed swap costs a handful of O(N) vector operations rather than
+    a per-node clustering recompute. A full recompute every ``n_edges``
+    accepted swaps resyncs the running mean and guards against drift.
     """
-    binary = (adjacency != 0).astype(int)
-    graph = nx.from_numpy_array(binary, create_using=nx.DiGraph)
-    n_nodes = graph.number_of_nodes()
-    n_edges = graph.number_of_edges()
+    A = (adjacency != 0).astype(np.int64)
+    np.fill_diagonal(A, 0)
+    n_nodes = A.shape[0]
+    n_edges = int(A.sum())
     n_swaps_target = n_swaps_multiplier * n_edges
     max_attempts = max_attempts_multiplier * n_swaps_target
 
-    clustering = nx.clustering(graph)  # node -> Fagiolo directed clustering
-    sum_clustering = sum(clustering.values())
+    symmetrised = A + A.T  # entries in {0, 1, 2}
+    total_degree = symmetrised.sum(axis=1)  # in + out; invariant under swaps
+    deg_term = total_degree * (total_degree - 1)  # constant
+    reciprocal = (A * A.T).sum(axis=1)  # per-node reciprocal degree; varies
+
+    triangle_counts = _directed_triangle_counts(symmetrised)
+    clustering = _directed_clustering_vector(triangle_counts, deg_term, reciprocal)
+    sum_clustering = float(clustering.sum())
     mean_initial = sum_clustering / n_nodes
     if mean_initial == 0:
         raise ValueError(
@@ -223,12 +261,13 @@ def _generate_directed(
         )
 
     rng = np.random.default_rng(seed)
-    edges = list(graph.edges())
+    edges = [(int(u), int(v)) for u, v in np.argwhere(A > 0)]
     resync_interval = max(n_edges, 1)
 
     n_accepted = 0
     n_attempted = 0
     since_resync = 0
+    max_drift = 0.0
 
     while n_accepted < n_swaps_target and n_attempted < max_attempts:
         n_attempted += 1
@@ -239,48 +278,92 @@ def _generate_directed(
 
         if len({a, b, c, d}) != 4:
             continue
-        if graph.has_edge(a, d) or graph.has_edge(c, b):
+        if A[a, d] or A[c, b]:
             continue
 
-        # Affected nodes: the four endpoints plus everything adjacent to them
-        # (in either direction), collected both before and after the swap so
-        # newly-formed adjacencies are included. A superset of the truly
-        # affected set is fine — unaffected nodes recompute to the same value.
-        affected = {a, b, c, d}
-        for node in (a, b, c, d):
-            affected.update(graph.succ[node])
-            affected.update(graph.pred[node])
+        # Snapshot everything a reverted swap must restore.
+        s_cells = [(a, b), (b, a), (c, d), (d, c), (a, d), (d, a), (c, b), (b, c)]
+        s_backup = [int(symmetrised[p, q]) for p, q in s_cells]
+        recip_backup = (
+            int(reciprocal[a]),
+            int(reciprocal[b]),
+            int(reciprocal[c]),
+            int(reciprocal[d]),
+        )
+        triangle_backup: dict[int, int] = {}
+        touched: set[int] = set()
 
-        graph.remove_edge(a, b)
-        graph.remove_edge(c, d)
-        graph.add_edge(a, d)
-        graph.add_edge(c, b)
+        # Apply the four S-pair toggles, updating S and the triangle counts.
+        for p, q, delta in ((a, b, -1), (c, d, -1), (a, d, 1), (c, b, 1)):
+            contributions = symmetrised[p] * symmetrised[:, q]  # S_pw * S_wq
+            s_squared_pq = int(contributions.sum())  # (S^2)_pq
+            for node in (p, q):
+                if node not in triangle_backup:
+                    triangle_backup[node] = int(triangle_counts[node])
+            triangle_counts[p] += 2 * delta * s_squared_pq
+            triangle_counts[q] += 2 * delta * s_squared_pq
+            touched.add(p)
+            touched.add(q)
+            for w in np.nonzero(contributions)[0]:
+                w = int(w)
+                if w not in triangle_backup:
+                    triangle_backup[w] = int(triangle_counts[w])
+                triangle_counts[w] += 2 * delta * int(contributions[w])
+                touched.add(w)
+            symmetrised[p, q] += delta
+            symmetrised[q, p] += delta
 
-        for node in (a, b, c, d):
-            affected.update(graph.succ[node])
-            affected.update(graph.pred[node])
+        # Reciprocal-degree update. The reverse edges (b->a, d->c, d->a, b->c)
+        # are not among the swapped cells, so their presence in A is stable.
+        if A[b, a]:
+            reciprocal[a] -= 1
+            reciprocal[b] -= 1
+        if A[d, c]:
+            reciprocal[c] -= 1
+            reciprocal[d] -= 1
+        if A[d, a]:
+            reciprocal[a] += 1
+            reciprocal[d] += 1
+        if A[b, c]:
+            reciprocal[c] += 1
+            reciprocal[b] += 1
+        touched.update((a, b, c, d))
 
-        clustering_new = nx.clustering(graph, affected)
-        delta = sum(clustering_new[node] - clustering[node] for node in affected)
-        mean_new = (sum_clustering + delta) / n_nodes
+        touched_idx = np.fromiter(touched, dtype=np.int64, count=len(touched))
+        clustering_touched = _directed_clustering_vector(
+            triangle_counts[touched_idx], deg_term[touched_idx], reciprocal[touched_idx]
+        )
+        sum_new = sum_clustering - float(clustering[touched_idx].sum()) + float(
+            clustering_touched.sum()
+        )
+        mean_new = sum_new / n_nodes
 
         if abs(mean_new - mean_initial) / mean_initial <= tolerance:
-            for node in affected:
-                clustering[node] = clustering_new[node]
-            sum_clustering += delta
+            clustering[touched_idx] = clustering_touched
+            sum_clustering = sum_new
+            A[a, b] = 0
+            A[c, d] = 0
+            A[a, d] = 1
+            A[c, b] = 1
             edges[i] = (a, d)
             edges[j] = (c, b)
             n_accepted += 1
             since_resync += 1
             if since_resync >= resync_interval:
-                clustering = nx.clustering(graph)
-                sum_clustering = sum(clustering.values())
+                triangle_counts = _directed_triangle_counts(symmetrised)
+                clustering = _directed_clustering_vector(
+                    triangle_counts, deg_term, reciprocal
+                )
+                resynced = float(clustering.sum())
+                max_drift = max(max_drift, abs(resynced - sum_clustering))
+                sum_clustering = resynced
                 since_resync = 0
         else:
-            graph.remove_edge(a, d)
-            graph.remove_edge(c, b)
-            graph.add_edge(a, b)
-            graph.add_edge(c, d)
+            for (p, q), value in zip(s_cells, s_backup):
+                symmetrised[p, q] = value
+            for node, value in triangle_backup.items():
+                triangle_counts[node] = value
+            reciprocal[a], reciprocal[b], reciprocal[c], reciprocal[d] = recip_backup
 
     acceptance_rate = n_accepted / max(n_attempted, 1)
     if acceptance_rate < 0.01:
@@ -292,9 +375,21 @@ def _generate_directed(
             RuntimeWarning,
             stacklevel=2,
         )
+    if max_drift > 1e-6 * n_nodes:
+        warnings.warn(
+            f"clustering_rewire(directed=True): incremental running mean drifted "
+            f"from the full recompute by {max_drift:.3e} (sum over {n_nodes} "
+            f"nodes) — the incremental update may be inconsistent.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
 
-    result = nx.to_numpy_array(graph, dtype=float)
-    mean_final = float(nx.average_clustering(graph))
+    result = A.astype(float)
+    triangle_counts = _directed_triangle_counts(A + A.T)
+    mean_final = float(
+        _directed_clustering_vector(triangle_counts, deg_term, reciprocal).sum()
+        / n_nodes
+    )
 
     if return_diagnostics:
         diagnostics = {
@@ -304,6 +399,7 @@ def _generate_directed(
             "n_attempted": n_attempted,
             "clustering_initial": float(mean_initial),
             "clustering_final": mean_final,
+            "max_running_mean_drift": float(max_drift),
         }
         return result, diagnostics
 
