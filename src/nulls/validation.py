@@ -39,10 +39,18 @@ def validate_null(
         - ``"modularity"`` — absolute difference in modularity Q under
           ``community_partition`` within ``tolerance`` (default 0.01).
           Requires ``community_partition``.
+        - ``"directed_clustering"`` — relative difference in mean Fagiolo
+          (2007) directed clustering (``nx.average_clustering`` on the
+          DiGraph) within ``tolerance`` (default 0.05).
+        - ``"directed_block_matrix"`` — exact equality of the directed
+          block edge-count matrix ``B[r, s]`` (number of directed edges
+          from a node in block ``r`` to a node in block ``s``) under
+          ``community_partition``. Requires ``community_partition``.
     tolerance
         Property-dependent — see above for defaults.
     community_partition
-        Required for ``"modularity"``; ignored otherwise.
+        Required for ``"modularity"`` and ``"directed_block_matrix"``;
+        ignored otherwise.
 
     Returns
     -------
@@ -132,6 +140,50 @@ def validate_null(
         details = (
             f"modularity Q absolute diff {abs_diff:.4f} vs tolerance {tol} "
             f"(partition of {len(community_partition)} communities)"
+        )
+
+    elif preserved_property == "directed_clustering":
+        tol = 0.05 if tolerance is None else tolerance
+        graph_original = nx.from_numpy_array(
+            (original != 0).astype(int), create_using=nx.DiGraph
+        )
+        graph_generated = nx.from_numpy_array(
+            (generated != 0).astype(int), create_using=nx.DiGraph
+        )
+        expected = float(nx.average_clustering(graph_original))
+        actual = float(nx.average_clustering(graph_generated))
+        rel_diff = abs(actual - expected) / max(expected, 1e-12)
+        preserved = rel_diff <= tol
+        details = (
+            f"mean Fagiolo directed clustering: relative diff "
+            f"{rel_diff:.4f} vs tolerance {tol}"
+        )
+
+    elif preserved_property == "directed_block_matrix":
+        if community_partition is None:
+            raise ValueError(
+                "preserved_property='directed_block_matrix' requires "
+                "community_partition."
+            )
+        n_blocks = len(community_partition)
+        node_to_block: dict[int, int] = {}
+        for block_id, members in enumerate(community_partition):
+            for node in members:
+                node_to_block[int(node)] = block_id
+
+        def _directed_block_matrix(matrix: np.ndarray) -> np.ndarray:
+            block_matrix = np.zeros((n_blocks, n_blocks), dtype=int)
+            # matrix[i, j] != 0 is a directed edge i -> j; B[block(i), block(j)].
+            for i, j in np.argwhere(matrix != 0):
+                block_matrix[node_to_block[int(i)], node_to_block[int(j)]] += 1
+            return block_matrix
+
+        expected = _directed_block_matrix(original)
+        actual = _directed_block_matrix(generated)
+        preserved = bool(np.array_equal(expected, actual))
+        details = (
+            f"directed block edge-count matrix ({n_blocks}x{n_blocks}) "
+            f"exact preservation"
         )
 
     else:
