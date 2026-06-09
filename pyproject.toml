@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cognitive-connectomes"
+version = "0.2.0"
+description = "Connectome-based reservoir computing experiments"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "pandas",
+    "networkx",
+    "matplotlib",
+    "scikit-learn",
+    "openpyxl",
+    "tqdm",
+    "threadpoolctl",
+    "reservoirpy",
+    "scipy",
+    "pyarrow",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
