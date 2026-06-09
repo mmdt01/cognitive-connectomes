@@ -19,7 +19,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 import config
@@ -66,11 +65,17 @@ def plot_nrmse_vs_sr(results: pd.DataFrame, path: Path) -> None:
             ax.fill_between(sub.spectral_radius, sub["mean"] - sub["sem"],
                             sub["mean"] + sub["sem"], color=style["color"], alpha=0.15)
         _supercritical_span(ax)
+        # NRMSE > 1 = worse than predicting the mean (no skill). Supercritical
+        # nulls diverge far past this; cap the axis so the skilled band (~0.3-0.9)
+        # stays legible — divergent lines simply exit the top of the panel.
+        ax.axhline(1.0, color="grey", lw=0.9, ls="--", zorder=1)
+        ax.set_ylim(0, 1.5)
         ax.set_title(config.CONDITION_SPEC[condition]["label"], fontsize=11)
         ax.set_xlabel("spectral radius")
         ax.grid(alpha=0.25)
     axes[0].set_ylabel("NARMA-10 NRMSE  (lower = better)")
-    axes[-1].legend(fontsize=8, framealpha=0.9, loc="upper right")
+    axes[0].text(0.04, 1.02, "no skill (NRMSE = 1)", fontsize=7, color="grey")
+    axes[-1].legend(fontsize=8, framealpha=0.9, loc="upper left")
     fig.suptitle("NARMA-10 emulation: connectome vs null ladder", fontsize=13)
     fig.tight_layout()
     fig.savefig(path, dpi=300, bbox_inches="tight")

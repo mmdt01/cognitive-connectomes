@@ -35,17 +35,17 @@ CONDITION_SPEC = {
     "v2a": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
-        "label": "v2a · undirected signed-Gaussian",
+        "label": "(1) Undirected with gaussian weights",
     },
     "v2b": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
-        "label": "v2b · directed empirical",
+        "label": "(2) Directed with empirical weights (non-negative)",
     },
     "v2d": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
-        "label": "v2d · directed empirical + Dale sign",
+        "label": "(3) Directed with empirical weights (signed)",
     },
 }
 
