@@ -6,6 +6,7 @@ import pytest
 import networkx as nx
 
 from src.connectomes.celegans_cook2019 import load
+from src.connectomes.neurotransmitters import load_neuron_signs, _cell_in_class
 from src.nulls import (
     random_gaussian,
     erdos_renyi,
@@ -179,6 +180,117 @@ def test_apply_weight_scheme_asymmetric_empirical(directed_weighted_adjacency):
     assert np.all(np.isin(drawn, pool))
     # Likely asymmetric in general (the mask is asymmetric here).
     assert not _is_symmetric(weighted)
+
+
+def test_apply_weight_scheme_asymmetric_empirical_signed(directed_weighted_adjacency):
+    mask_input = (directed_weighted_adjacency != 0).astype(float)
+    n = mask_input.shape[0]
+    pool = np.array([1.0, 2.0, 5.0, 10.0])
+    rng = np.random.default_rng(0)
+    signs = rng.choice([-1.0, 1.0], size=n)
+    weighted = apply_weight_scheme(
+        mask_input,
+        "asymmetric_empirical_signed",
+        seed=0,
+        empirical_weights=pool,
+        neuron_signs=signs,
+    )
+    assert weighted.shape == mask_input.shape
+    assert np.all(np.diag(weighted) == 0)
+    # Nonzero pattern matches the mask exactly.
+    assert np.array_equal((weighted != 0).astype(float), mask_input)
+    # Magnitudes are drawn from the pool.
+    assert np.all(np.isin(np.abs(weighted[weighted != 0]), pool))
+    # Dale's principle: every outgoing synapse of neuron j (column j) carries
+    # neuron j's sign. Check each column that has any edges.
+    for j in range(n):
+        col = weighted[:, j]
+        nonzero = col[col != 0]
+        if nonzero.size:
+            assert np.all(np.sign(nonzero) == signs[j]), f"column {j} violates Dale sign"
+
+
+def test_apply_weight_scheme_asymmetric_empirical_signed_requires_kwargs(
+    directed_weighted_adjacency,
+):
+    mask_input = (directed_weighted_adjacency != 0).astype(float)
+    n = mask_input.shape[0]
+    with pytest.raises(ValueError):  # missing neuron_signs
+        apply_weight_scheme(
+            mask_input, "asymmetric_empirical_signed", seed=0,
+            empirical_weights=np.array([1.0, 2.0]),
+        )
+    with pytest.raises(ValueError):  # missing empirical_weights
+        apply_weight_scheme(
+            mask_input, "asymmetric_empirical_signed", seed=0,
+            neuron_signs=np.ones(n),
+        )
+    with pytest.raises(AssertionError):  # wrong-length sign vector
+        apply_weight_scheme(
+            mask_input, "asymmetric_empirical_signed", seed=0,
+            empirical_weights=np.array([1.0]), neuron_signs=np.ones(n - 1),
+        )
+    with pytest.raises(AssertionError):  # non +/-1 signs
+        apply_weight_scheme(
+            mask_input, "asymmetric_empirical_signed", seed=0,
+            empirical_weights=np.array([1.0]), neuron_signs=np.zeros(n),
+        )
+
+
+# ---------------------------------------------------------------------------
+# v2d: per-neuron Dale sign vector.
+# ---------------------------------------------------------------------------
+
+_CANONICAL_GABA = (
+    [f"DD0{i}" for i in range(1, 7)]
+    + [f"VD{i:02d}" for i in range(1, 14)]
+    + ["RMED", "RMEL", "RMER", "RMEV", "AVL", "DVB", "RIS"]
+)
+
+
+def test_cell_in_class_membership():
+    # positives
+    assert _cell_in_class("DD01", "DD")
+    assert _cell_in_class("VD13", "VD")
+    assert _cell_in_class("RMED", "RME")
+    assert _cell_in_class("AVL", "AVL")
+    assert _cell_in_class("ADFL", "ADF")
+    # negatives: cholinergic look-alikes must NOT match the GABA classes
+    assert not _cell_in_class("VB01", "VD")
+    assert not _cell_in_class("DA01", "DD")
+    assert not _cell_in_class("AVAL", "AVL")
+    assert not _cell_in_class("RMDL", "RME")
+
+
+def test_load_neuron_signs_canonical_gaba():
+    labels = load(processing="directed_weighted_chemical").node_labels
+    signs, coverage = load_neuron_signs(labels)
+    assert signs.shape == (len(labels),)
+    assert set(np.unique(signs).tolist()) <= {-1.0, 1.0}
+    # The inhibitory set is exactly the 26 canonical GABA-synthesizing cells.
+    assert coverage["n_inhibitory"] == 26
+    assert set(coverage["inhibitory_labels"]) == set(_CANONICAL_GABA)
+    assert coverage["n_excitatory"] == len(labels) - 26
+    # Signs align to node order.
+    for label in _CANONICAL_GABA:
+        assert signs[labels.index(label)] == -1.0
+
+
+def test_neuron_signs_feed_signed_weight_scheme():
+    conn = load(processing="directed_weighted_chemical")
+    signs, _ = load_neuron_signs(conn.node_labels)
+    mask = (conn.adjacency != 0).astype(float)
+    pool = np.array([1.0, 2.0, 5.0])
+    weighted = apply_weight_scheme(
+        mask, "asymmetric_empirical_signed", seed=0,
+        empirical_weights=pool, neuron_signs=signs,
+    )
+    # Inhibitory neurons' out-columns are non-positive; excitatory non-negative.
+    for j, s in enumerate(signs):
+        col = weighted[:, j]
+        nz = col[col != 0]
+        if nz.size:
+            assert np.all(np.sign(nz) == s)
 
 
 # ---------------------------------------------------------------------------
