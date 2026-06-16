@@ -132,7 +132,7 @@ cognitive-connectomes/
 │       ├── connectome_overview.py
 │       └── results.py              mc_vs_spectral_radius, eigenvalue_spectra, etc.
 ├── tests/test_smoke.py             tripwire tests (19 passing)
-└── notebooks/
+└── experiments/
     ├── v2a_continuous_weights/
     │   ├── notebook.ipynb           (v2a + v2c probe in Stages 7/7b)
     │   ├── _run_probe.py            v2a Stage 7 probe runner

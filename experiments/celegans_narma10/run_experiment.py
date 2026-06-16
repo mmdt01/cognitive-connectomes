@@ -5,8 +5,8 @@ spectral-radius sweep x seeds. Each cell builds a reservoir and scores it on
 NARMA-10; results are written to ``results/results.parquet``.
 
 Usage:
-    python notebooks/celegans_narma10/run_experiment.py            # full run
-    python notebooks/celegans_narma10/run_experiment.py --smoke    # tiny check
+    python experiments/celegans_narma10/run_experiment.py            # full run
+    python experiments/celegans_narma10/run_experiment.py --smoke    # tiny check
 """
 
 import sys

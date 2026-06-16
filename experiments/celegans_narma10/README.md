@@ -38,13 +38,13 @@ own five-rung null ladder (directed nulls for v2b/v2d).
 
 ```bash
 # from the repo root
-python notebooks/celegans_narma10/run_all.py --smoke   # ~1 min end-to-end check
-python notebooks/celegans_narma10/run_all.py           # full run (~25-30 min)
+python experiments/celegans_narma10/run_all.py --smoke   # ~1 min end-to-end check
+python experiments/celegans_narma10/run_all.py           # full run (~25-30 min)
 
 # or stage by stage
-python notebooks/celegans_narma10/run_experiment.py
-python notebooks/celegans_narma10/stats.py
-python notebooks/celegans_narma10/plots.py
+python experiments/celegans_narma10/run_experiment.py
+python experiments/celegans_narma10/stats.py
+python experiments/celegans_narma10/plots.py
 ```
 
 ## Conventions & decisions

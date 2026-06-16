@@ -1,7 +1,7 @@
 """Orchestrator: run the matrix, then statistics, then figures.
 
-    python notebooks/celegans_narma10/run_all.py           # full pipeline
-    python notebooks/celegans_narma10/run_all.py --smoke    # tiny end-to-end check
+    python experiments/celegans_narma10/run_all.py           # full pipeline
+    python experiments/celegans_narma10/run_all.py --smoke    # tiny end-to-end check
 """
 
 import sys

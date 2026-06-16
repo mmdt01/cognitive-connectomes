@@ -225,5 +225,5 @@ Thumbs.db
 *.pkl
 hyperopt_results/
 
-# Experiment result artefacts (regenerable from notebooks)
+# Experiment result artefacts (regenerable from experiments)
 *.parquet
