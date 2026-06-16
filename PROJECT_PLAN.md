@@ -24,7 +24,7 @@ dropped under time pressure.
 structure helps generic dynamical-system prediction, mapped along two
 intersecting lines: a *scale row* across cellular connectomes of increasing
 size, and a *realism column* walking up biological detail on a single
-connectome. The two lines form a cross, not a grid (see section 2). This
+connectome. The two lines form a cross, not a grid (see section 3). This
 stands alone as a thesis that satisfies the one-line statement even if (B)
 does not converge. (A) is completed before (B) begins, and its core is also
 the scientific content of the ECCV submission.
@@ -37,7 +37,56 @@ defensible thesis.
 
 ---
 
-## 2. Load-bearing decisions already taken
+## 2. Why dynamical-system prediction bridges to the JEPA
+
+Stage (A) and Stage (B) are the same computation in two coordinate systems. In
+both, a fixed connectome reservoir ingests the recent history of a temporal
+trajectory, folds it into a high-dimensional state, and a trained linear readout
+maps that state to the next point; the reservoir machinery is identical and only
+the input and target change. In (A) they are an observable signal (NARMA, a
+Lorenz coordinate); in (B) they are encoder latents z(t) = encoder(frame_t),
+with the target the future latent z(t+k). A latent trajectory is itself a
+dynamical system, so predicting the next latent is the same problem as
+predicting the next state of an attractor, in a learned high-dimensional
+coordinate system rather than a hand-specified one. This is why the build
+inherits the substrate pipeline unchanged and only the task module differs.
+
+The progression is therefore a de-risking probe, not a warm-up. The thesis
+premise (that connectome wiring is a useful inductive bias for predicting how a
+representation evolves) splits into two claims: that the connectome is a good
+predictive substrate at all, and that it stays good when the target is a learned
+latent. The dynamical tasks test the first claim with every confound removed: no
+encoder, no latent geometry, no collapse, and benchmark targets whose answers
+are known. Because the mechanism is substrate-level (memory depth, nonlinear
+mixing, echo-state separation, all set by wiring), the null-ladder attribution
+transfers: a structural feature that Stage (A) shows is responsible for
+predictive skill becomes a pre-registered hypothesis for what should help latent
+prediction in Stage (B).
+
+**A ladder of world-model-likeness within the three tasks.** NARMA-10 is
+input-driven emulation, the tightest step up from memory capacity but not yet
+autonomous. Mackey-Glass is autonomous forecasting of an evolving system.
+Closed-loop free-running Lorenz feeds the reservoir's own predictions back as
+input, so it must sustain a model of the dynamics with no ground-truth crutch,
+which is mechanically what a world model does when it rolls a latent trajectory
+forward in imagination. The sequence is a march from passive memory, to driven
+nonlinear computation, to autonomous forecasting, to self-sustaining rollout;
+the JEPA is that last capability applied to latent observations.
+
+**Two honest caveats.** First, it is the frozen encoder that makes the analogy
+tight: with the encoder fixed, the latent target trajectory is fixed and
+known-in-principle, exactly like Lorenz, which is why the de-risking transfers.
+Unfreezing the encoder sets the target moving and admits collapse, and the
+analogy weakens. Second, success on low-dimensional known systems is necessary
+evidence, not sufficient proof: latent space is high-dimensional and its
+geometry is shaped by the encoder's objective rather than by physics. And as
+section 3 notes, the dynamical tasks validate the mechanism and the methodology,
+not the fly's specific advantage, which is ecological and only testable in the
+optic-flow JEPA itself.
+
+---
+
+## 3. Load-bearing decisions already taken
 
 - **V-JEPA-style latent prediction, not optic-flow regression.** The training
   objective is self-supervised prediction of future or masked latents; optic
@@ -98,7 +147,7 @@ defensible thesis.
 
 ---
 
-## 3. Decision gates
+## 4. Decision gates
 
 These are the moments where the plan branches. Each has an explicit trigger
 and a fallback.
@@ -123,7 +172,7 @@ and a fallback.
 
 ---
 
-## 4. Phase and week schedule
+## 5. Phase and week schedule
 
 Week 1 begins the week of 8 June. Date ranges are Monday to Sunday.
 
@@ -180,7 +229,7 @@ built around their shared anchor cell.
   Run the statistics (permutation tests, Holm correction, effect sizes per the
   established convention); produce paper-grade figures. **Gate 1: ECCV results
   freeze.** (MICCAI deadline 1 July falls here and is being skipped; see
-  section 6.)
+  section 7.)
 - **Week 5 (6 to 12 July): consolidate and draft.** Robustness and sensitivity
   checks; finalise figures. Begin the ECCV draft (framing and methods adapt
   heavily from the existing interim report Chapters 1 to 3). Any (A) breadth
@@ -243,11 +292,11 @@ results and discussion on an existing scaffold, not a cold start.
 
 ---
 
-## 5. Risk register
+## 6. Risk register
 
 - **Combinatorial blow-up in Stage (A).** Crossing biological realism with the
   full connectome set is intractable at fly scale and would threaten Gate 1.
-  Mitigation: the cross-not-grid design (section 2). The realism column is
+  Mitigation: the cross-not-grid design (section 3). The realism column is
   three named conditions on *C. elegans* only; the scale row holds every
   organism at one canonical condition. No cell outside the cross is run.
 - **Fly-scale compute (Phase 1, Weeks 2 to 3).** The largest concrete risk in
@@ -272,7 +321,7 @@ results and discussion on an existing scaffold, not a cold start.
 
 ---
 
-## 6. Conference targets
+## 7. Conference targets
 
 - **MICCAI GRAIL, 1 July.** Skipping. Weakest fit, tightest deadline; chasing
   it would spend a writing week on a marginal-fit venue during the (A) to (B)
@@ -289,7 +338,7 @@ results and discussion on an existing scaffold, not a cold start.
 
 ---
 
-## 7. Scope guardrails (what this project will not do)
+## 8. Scope guardrails (what this project will not do)
 
 - Will not cross biological realism with the full connectome set: Stage (A) is
   a cross, not a grid. The fly and mouse run at one canonical condition; the
