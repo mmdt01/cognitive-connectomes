@@ -1,17 +1,19 @@
 """Illustrative figure: NARMA-10 dynamics + the connectome reservoir's prediction.
 
-Reproduces a single experiment cell exactly (same frozen hyperparameters, same
-seed convention as run_experiment), then draws a window spanning the train ->
-held-out-test boundary: the random input on top, and the NARMA-10 target with
-the reservoir's prediction overlaid on the held-out region below.
+Reproduces a single experiment cell exactly (same frozen hyperparameters and
+seed convention), then draws a window spanning the train -> held-out-test
+boundary: the random input on top, and the NARMA-10 target with the reservoir's
+prediction overlaid on the held-out region below.
 
-    python experiments/celegans_narma10/plot_narma_demo.py
+    python -m experiments.celegans.celegans_narma10.plot_demo
 """
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+_ROOT = Path(__file__).resolve().parents[3]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 import matplotlib
 
@@ -26,9 +28,8 @@ from src.tasks.narma import (
     _fit_ridge_readout,
     _predict,
 )
-
-import config
-from substrates import SubstrateBuilder
+from experiments.celegans.substrates import SubstrateBuilder
+from experiments.celegans.celegans_narma10.run import build_config
 
 # Which connectome reservoir to showcase (a single, honest experiment cell).
 CONDITION = "v2b"        # directed empirical -- the biologically realistic substrate
@@ -42,7 +43,8 @@ SHOW_AFTER = 160         # held-out test steps shown after the boundary
 
 
 def main() -> None:
-    params = config.NARMA_PARAMS
+    cfg = build_config()
+    params = cfg.task_params
     washout, n_train, n_test = params["washout"], params["n_train"], params["n_test"]
 
     builder = SubstrateBuilder()
@@ -50,13 +52,13 @@ def main() -> None:
     reservoir = build_from_adjacency(
         weighted_adjacency=weighted,
         target_spectral_radius=SPECTRAL_RADIUS,
-        leak_rate=config.LEAK_RATE,
-        input_scaling=config.INPUT_SCALING,
+        leak_rate=cfg.leak_rate,
+        input_scaling=cfg.input_scaling,
         seed=SEED,
     )
 
-    # Same input stream + split as run_experiment for this seed.
-    rng = np.random.default_rng(SEED + config.INPUT_SEED_OFFSET)
+    # Same input stream + split as the experiment for this seed.
+    rng = np.random.default_rng(SEED + cfg.input_seed_offset)
     u, y, _ = _generate_input_and_target(
         rng, params["T"], params["u_low"], params["u_high"],
         params["divergence_bound"], params["max_input_tries"],
@@ -108,7 +110,6 @@ def main() -> None:
     ax_y.legend(loc="upper left", fontsize=9, framealpha=0.95)
     ax_y.margins(x=0.005)
 
-    ymax = float(max(target_window.max(), pred_window.max()))
     ax_y.text(n_train + 0.5 * SHOW_AFTER, 0.04, "held-out test", color="#b35900",
               ha="center", va="bottom", fontsize=9)
     ax_y.text(n_train - 0.5 * SHOW_BEFORE, 0.04, "training", color="grey",
@@ -117,12 +118,13 @@ def main() -> None:
               ha="right", va="top", fontsize=10,
               bbox=dict(boxstyle="round", fc="white", ec="grey", alpha=0.9))
 
-    label = config.CONDITION_SPEC[CONDITION]["label"]
+    label = cfg.condition_spec[CONDITION]["label"]
     fig.text(0.5, 0.005, f"substrate: {label}, connectome  ·  "
              f"spectral radius {SPECTRAL_RADIUS}  ·  seed {SEED}",
              ha="center", fontsize=8, color="grey")
 
-    out = config.FIGURES_DIR / "narma_dynamics_demo.png"
+    cfg.figures_dir.mkdir(parents=True, exist_ok=True)
+    out = cfg.figures_dir / "narma_dynamics_demo.png"
     fig.savefig(out, dpi=300, bbox_inches="tight")
     plt.close(fig)
     print(f"test NRMSE = {nrmse:.3f}")

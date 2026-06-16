@@ -1,27 +1,21 @@
-"""Substrate construction for the NARMA-10 bridge.
+"""Substrate construction for C. elegans experiments (task-agnostic).
 
 A ``SubstrateBuilder`` loads both connectome processings once, precomputes the
 empirical weight pool, the Dale sign vector, and the (per-topology) Louvain
 partitions, then turns any ``(condition, variant, seed)`` cell into a weighted
-recurrent matrix ``W``.
+recurrent matrix ``W``. It is shared across every C. elegans task (NARMA-10,
+Mackey-Glass, ...); the task only changes downstream of the weighted ``W``.
 
 Key efficiency point: v2b and v2d share the same *directed* topology, so their
-null masks are identical. Masks are therefore cached on ``(topology, variant,
-seed)`` and reused across conditions — the expensive directed rung-3 clustering
-rewire is generated once, not twice.
+null masks are identical. Masks are cached on ``(topology, variant, seed)`` and
+reused across conditions — the expensive directed rung-3 clustering rewire is
+generated once, not twice.
 
-Conventions (mirroring v2b, minus the sqrt transform):
-- The connectome variant keeps its *real* weights (v2b/v2d) or gets fresh
-  symmetric-Gaussian weights (v2a). Nulls sample magnitudes from the empirical
-  pool (v2b/v2d) or get fresh Gaussian weights (v2a).
-- Every null is validated against the property it claims to preserve before
-  use; diagnostics are collected for the audit trail.
+Conventions: the connectome variant keeps its *real* weights (v2b/v2d) or gets
+fresh symmetric-Gaussian weights (v2a); nulls sample magnitudes from the
+empirical pool (v2b/v2d) or get fresh Gaussian weights (v2a). Every null is
+validated against the property it claims to preserve before use.
 """
-
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import warnings
 
@@ -40,7 +34,7 @@ from src.nulls import (
 from src.nulls.validation import validate_null
 from src.reservoir.weights import apply_weight_scheme
 
-import config
+from experiments.celegans import matrix_config as config
 
 
 class SubstrateBuilder:

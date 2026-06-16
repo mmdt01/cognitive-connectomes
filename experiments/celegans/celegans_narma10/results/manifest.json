@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-06-09T18:50:10.603699+00:00",
+  "generated_utc": "2026-06-16T15:57:32.563200+00:00",
   "n_evaluations": 3600,
-  "elapsed_seconds": 585.3,
+  "elapsed_seconds": 669.5,
   "conditions": [
     "v2a",
     "v2b",
@@ -64,6 +64,8 @@
     }
   },
   "config": {
+    "experiment_name": "celegans_narma10",
+    "task_name": "NARMA-10 emulation",
     "conditions": [
       "v2a",
       "v2b",
@@ -73,17 +75,17 @@
       "v2a": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
-        "label": "v2a \u00b7 undirected signed-Gaussian"
+        "label": "(1) Undirected with gaussian weights"
       },
       "v2b": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
-        "label": "v2b \u00b7 directed empirical"
+        "label": "(2) Directed with empirical weights (non-negative)"
       },
       "v2d": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
-        "label": "v2d \u00b7 directed empirical + Dale sign"
+        "label": "(3) Directed with empirical weights (signed)"
       }
     },
     "variants": [
@@ -123,7 +125,7 @@
     "swap_multiplier": 10,
     "input_scaling": 0.2,
     "leak_rate": 1.0,
-    "narma_params": {
+    "task_params": {
       "T": 3000,
       "washout": 200,
       "n_train": 2000,
@@ -136,6 +138,7 @@
       "max_input_tries": 50
     },
     "input_seed_offset": 1000,
+    "metric": "nrmse",
     "n_permutations": 10000,
     "permutation_seed": 0,
     "alpha": 0.05
