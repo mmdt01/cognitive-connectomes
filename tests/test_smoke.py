@@ -18,6 +18,7 @@ from src.nulls.validation import validate_null
 from src.reservoir.weights import apply_weight_scheme
 from src.reservoir.build import rescale_spectral_radius, build_from_adjacency
 from src.tasks import narma as narma_task
+from src.tasks import mackey_glass as mackey_glass_task
 
 
 @pytest.fixture(scope="module")
@@ -281,6 +282,65 @@ def test_narma_evaluate_rejects_oversized_split():
         narma_task.evaluate(
             _narma_test_reservoir(), seed=0, T=1000, washout=200, n_train=700, n_test=200
         )
+
+
+# ---------------------------------------------------------------------------
+# Mackey-Glass task.
+# ---------------------------------------------------------------------------
+
+
+def test_mackey_glass_matches_reservoirpy():
+    """The local generator reproduces reservoirpy.datasets.mackey_glass bit-for-bit."""
+    from reservoirpy.datasets import mackey_glass as rpy_mackey_glass
+
+    tau = 17
+    history_length = int(np.floor(tau / 1.0))
+    rng = np.random.default_rng(0)
+    history = 1.2 * np.ones(history_length) + 0.2 * (rng.random(history_length) - 0.5)
+    # Pass the SAME explicit history to both -> deterministic, RNG-independent
+    # bit-exact check (the analogue of NARMA's shared explicit input u).
+    y_mine = mackey_glass_task.mackey_glass(2000, history, tau=tau)
+    y_rpy = rpy_mackey_glass(2000, tau=tau, history=history).ravel()
+    assert np.array_equal(y_mine, y_rpy)
+    assert y_mine[0] == 1.2  # first sample is x0, matching reservoirpy's convention
+
+
+def _mackey_glass_test_reservoir():
+    conn = load("binary_undirected_chemical").adjacency
+    weighted = apply_weight_scheme(conn, "symmetric_gaussian", seed=0)
+    return build_from_adjacency(
+        weighted, target_spectral_radius=0.95, leak_rate=0.3, input_scaling=0.5, seed=0
+    )
+
+
+def test_mackey_glass_evaluate_runs_and_returns_config():
+    out = mackey_glass_task.evaluate(
+        _mackey_glass_test_reservoir(), seed=1000,
+        T=1500, washout=200, n_train=900, n_test=400, horizon=84,
+    )
+    assert np.isfinite(out["nrmse"])
+    assert 0.0 < out["nrmse"] < 1.5
+    for key in ("n_input", "n_train", "n_test", "horizon", "ridge_alpha"):
+        assert key in out
+    assert out["horizon"] == 84
+
+
+def test_mackey_glass_evaluate_rejects_oversized_split():
+    with pytest.raises(ValueError):
+        mackey_glass_task.evaluate(
+            _mackey_glass_test_reservoir(), seed=0,
+            T=1000, washout=200, n_train=700, n_test=200,
+        )
+
+
+def test_mackey_glass_sanity_gate_passes():
+    """The dormant validate=True gate must run and pass on a working setup."""
+    out = mackey_glass_task.evaluate(
+        _mackey_glass_test_reservoir(), seed=1000,
+        T=1500, washout=200, n_train=900, n_test=400, horizon=84,
+        validate=True, sanity_horizon=17, sanity_max_nrmse=0.8,
+    )
+    assert np.isfinite(out["nrmse"])
 
 
 # ---------------------------------------------------------------------------

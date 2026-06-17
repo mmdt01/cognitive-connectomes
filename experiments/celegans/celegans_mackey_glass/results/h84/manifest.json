@@ -1,0 +1,150 @@
+{
+  "generated_utc": "2026-06-17T11:52:16.206912+00:00",
+  "n_evaluations": 3600,
+  "elapsed_seconds": 597.1,
+  "conditions": [
+    "v2a",
+    "v2b",
+    "v2d"
+  ],
+  "variants": [
+    "connectome",
+    "random_gaussian",
+    "erdos_renyi",
+    "degree_rewire",
+    "clustering_rewire",
+    "modularity_rewire"
+  ],
+  "spectral_radii": [
+    0.0,
+    0.1053,
+    0.2105,
+    0.3158,
+    0.4211,
+    0.5263,
+    0.6316,
+    0.7368,
+    0.8421,
+    0.9474,
+    1.0526,
+    1.1579,
+    1.2632,
+    1.3684,
+    1.4737,
+    1.5789,
+    1.6842,
+    1.7895,
+    1.8947,
+    2.0
+  ],
+  "n_seeds": 10,
+  "substrate_summary": {
+    "n_nodes_undirected": 300,
+    "n_nodes_directed": 300,
+    "n_directed_edges": 3669,
+    "empirical_pool_size": 3669,
+    "weight_transform": "raw",
+    "n_inhibitory": 26,
+    "n_excitatory": 274,
+    "partition_sizes": {
+      "undirected": [
+        98,
+        97,
+        44,
+        41,
+        20
+      ],
+      "directed": [
+        101,
+        80,
+        60,
+        39,
+        20
+      ]
+    }
+  },
+  "config": {
+    "experiment_name": "celegans_mackey_glass_h84",
+    "task_name": "Mackey-Glass 84-step forecast",
+    "conditions": [
+      "v2a",
+      "v2b",
+      "v2d"
+    ],
+    "condition_spec": {
+      "v2a": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_gaussian",
+        "label": "(1) Undirected with gaussian weights"
+      },
+      "v2b": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical",
+        "label": "(2) Directed with empirical weights (non-negative)"
+      },
+      "v2d": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_signed",
+        "label": "(3) Directed with empirical weights (signed)"
+      }
+    },
+    "variants": [
+      "connectome",
+      "random_gaussian",
+      "erdos_renyi",
+      "degree_rewire",
+      "clustering_rewire",
+      "modularity_rewire"
+    ],
+    "spectral_radii": [
+      0.0,
+      0.1053,
+      0.2105,
+      0.3158,
+      0.4211,
+      0.5263,
+      0.6316,
+      0.7368,
+      0.8421,
+      0.9474,
+      1.0526,
+      1.1579,
+      1.2632,
+      1.3684,
+      1.4737,
+      1.5789,
+      1.6842,
+      1.7895,
+      1.8947,
+      2.0
+    ],
+    "n_seeds": 10,
+    "weight_transform": "raw",
+    "clustering_tolerance": 0.05,
+    "louvain_seed": 0,
+    "swap_multiplier": 10,
+    "input_scaling": 0.5,
+    "leak_rate": 0.3,
+    "task_params": {
+      "T": 3000,
+      "washout": 200,
+      "n_train": 2000,
+      "n_test": 800,
+      "n_transient": 200,
+      "ridge_alpha": 1e-08,
+      "readout_bias": true,
+      "tau": 17,
+      "a": 0.2,
+      "b": 0.1,
+      "n": 10,
+      "x0": 1.2,
+      "h": 1.0,
+      "horizon": 84
+    },
+    "input_seed_offset": 1000,
+    "metric": "nrmse",
+    "n_permutations": 10000,
+    "permutation_seed": 0,
+    "alpha": 0.05
+  }
+}
