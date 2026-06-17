@@ -32,13 +32,19 @@ statistics only** before driving the reservoir.
 | Axis | Values |
 |---|---|
 | Conditions | **v2a** undirected gaussian · **v2b** directed empirical (non-negative) · **v2d** directed empirical (signed) |
-| Variants | connectome + rungs 0–4 (random, ER, degree, clustering, modularity) |
+| Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
 | Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
 | Seeds | 10 (each draws a different Mackey-Glass trajectory; connectome & nulls paired per seed) |
 | Horizons | **h = 84** (canonical benchmark, moderate) and **h = 300** (chaos-limited, hard) |
 
-3 × 6 × 20 × 10 = **3600 evaluations per horizon** (7200 total). The two horizons
+3 × 7 × 20 × 10 = **4200 evaluations per horizon** (8400 total). The two horizons
 reuse one `SubstrateBuilder`, so the directed null masks are generated once.
+
+The **weight-placement control** (`connectome_weight_permuted`) keeps the
+connectome's exact topology and exact weight multiset but permutes which edge
+carries which weight (per seed). It decomposes the topology-vs-weights confound:
+`connectome vs control` isolates **weight placement**, `control vs degree_rewire`
+isolates **topology**. In v2a (already random-weighted) it is a negative control.
 
 ## Where the code lives
 
@@ -85,9 +91,13 @@ python -m experiments.celegans.celegans_mackey_glass.plot_demo      # intuition 
 
 ## Caveats carried forward (from the NARMA bridge)
 
-- **Topology vs weights (v2b/v2d).** The connectome keeps its *real* weights while
-  nulls resample, so those conditions conflate directed topology with the
-  connectome's real weight placement. Only **v2a** is a clean topology-only test.
+- **Topology vs weights (v2b/v2d) — addressed by the `connectome_weight_permuted`
+  control.** The connectome keeps its *real* weights while the rung nulls resample,
+  conflating directed topology with the connectome's real weight placement. The
+  control keeps the connectome's exact topology and weight multiset but permutes
+  placement, decomposing the two. Probe finding (h=84, n=50): the connectome's
+  supercritical deficit is **weight placement** (`connectome vs control` d ≈ −2 to
+  −3); the topology leg (`control vs degree_rewire`) is null — consistent with v2a.
 - **Divergence-robustness.** Some supercritical reservoirs can blow up (huge or
   non-finite NRMSE → reported as no-skill); a median-based or NRMSE-capped
   statistic would harden the permutation tests against those outliers.

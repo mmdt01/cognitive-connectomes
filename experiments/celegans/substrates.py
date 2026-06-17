@@ -135,6 +135,12 @@ class SubstrateBuilder:
 
     # -- weighting per condition -------------------------------------------
     def weighted(self, condition: str, variant: str, seed: int) -> np.ndarray:
+        # Placement control: the connectome's real topology + a permutation of
+        # its real weights. Bypasses the mask ladder entirely (it is built
+        # directly from the real connectome).
+        if variant == "connectome_weight_permuted":
+            return self._weight_permuted(condition, seed)
+
         spec = config.CONDITION_SPEC[condition]
         mask = self.get_mask(spec["topology"], variant, seed)
 
@@ -158,6 +164,45 @@ class SubstrateBuilder:
             mask, "asymmetric_empirical_signed", seed=seed,
             empirical_weights=self.empirical_pool, neuron_signs=self.signs,
         )
+
+    def _weight_permuted(self, condition: str, seed: int) -> np.ndarray:
+        """Connectome topology + a permutation of its real weights.
+
+        Keeps the connectome's exact topology and exact weight multiset, but
+        scrambles which edge carries which weight (permutation, not the rung
+        nulls' with-replacement resample, so the distribution is held *exactly*,
+        not just in expectation). Decomposes the topology-vs-weights confound:
+
+            connectome  vs this           -> weight PLACEMENT (topology + multiset fixed)
+            this        vs degree_rewire   -> TOPOLOGY (placement randomised in both)
+
+        For v2d the per-neuron Dale sign is re-applied column-wise (as for the
+        v2d nulls), so only magnitudes are permuted, not signs. For v2a the
+        "real weights" are a symmetric-Gaussian draw, so permuting them is
+        distribution-preserving -> a negative control that should match the
+        connectome.
+        """
+        rng = np.random.default_rng(seed)
+
+        if condition == "v2a":
+            # Permute the connectome's symmetric-Gaussian weights among its real
+            # (undirected) edges only -- topology preserved, placement scrambled.
+            base_W = apply_weight_scheme(
+                self.undirected_mask, "symmetric_gaussian", seed=seed
+            )
+            upper_edges = np.triu(self.undirected_mask, k=1).astype(bool)
+            permuted = np.zeros_like(base_W)
+            permuted[upper_edges] = rng.permutation(base_W[upper_edges])
+            return permuted + permuted.T
+
+        # v2b / v2d: permute the connectome's real magnitudes across its real
+        # directed edges (empirical_pool is exactly those nonzero weights).
+        nonzero = self.directed_mask.astype(bool)
+        weighted = np.zeros_like(self.directed_weighted)
+        weighted[nonzero] = rng.permutation(self.empirical_pool)
+        if condition == "v2d":
+            weighted = weighted * self.signs[np.newaxis, :]
+        return weighted
 
     # -- validation recorders ----------------------------------------------
     # Each rung is validated against the property it actually claims to

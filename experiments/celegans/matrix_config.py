@@ -34,9 +34,17 @@ CONDITION_SPEC = {
     },
 }
 
-# The connectome plus its five-rung null ladder.
+# The connectome, a weight-placement control, and the five-rung null ladder.
+# "connectome_weight_permuted" keeps the connectome's exact topology AND its
+# exact weight multiset but permutes which edge carries which weight (per seed),
+# isolating weight PLACEMENT from topology -- it resolves the topology-vs-weights
+# confound (connectome keeps real weights while rung nulls resample). It is a
+# control, not a ladder rung (rung = -1); in v2a, whose weights are already a
+# random Gaussian draw, the permutation is distribution-preserving, so there it
+# is a negative control that should match the connectome.
 VARIANTS = [
     "connectome",
+    "connectome_weight_permuted",  # placement control (not a rung)
     "random_gaussian",   # rung 0
     "erdos_renyi",       # rung 1
     "degree_rewire",     # rung 2
@@ -46,6 +54,7 @@ VARIANTS = [
 NULL_VARIANTS = VARIANTS[1:]
 
 VARIANT_RUNG = {
+    "connectome_weight_permuted": -1,  # control, not a ladder rung
     "random_gaussian": 0,
     "erdos_renyi": 1,
     "degree_rewire": 2,

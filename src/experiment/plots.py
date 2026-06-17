@@ -15,6 +15,8 @@ import pandas as pd
 
 _VARIANT_STYLE = {
     "connectome": dict(color="black", lw=2.4, zorder=5, marker="o", ms=4),
+    "connectome_weight_permuted": dict(color="#9467bd", lw=1.8, ls="-.",
+                                       marker="s", ms=3, zorder=4),
     "random_gaussian": dict(color="#bbbbbb", lw=1.3, ls="--"),
     "erdos_renyi": dict(color="#88aadd", lw=1.3, ls="--"),
     "degree_rewire": dict(color="#e377c2", lw=1.6),
@@ -23,6 +25,7 @@ _VARIANT_STYLE = {
 }
 _VARIANT_LABEL = {
     "connectome": "connectome",
+    "connectome_weight_permuted": "connectome · perm. weights",
     "random_gaussian": "rung 0 · random",
     "erdos_renyi": "rung 1 · ER",
     "degree_rewire": "rung 2 · degree",
