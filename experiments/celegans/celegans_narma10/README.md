@@ -13,12 +13,22 @@ memory capacity, but with the nonlinear computation MC lacked.
 | Axis | Values |
 |---|---|
 | Conditions | **v2a** undirected gaussian · **v2b** directed empirical (non-negative) · **v2d** directed empirical (signed) |
-| Variants | connectome + rungs 0–4 (random, ER, degree, clustering, modularity) |
+| Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
 | Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
 | Seeds | 10 |
 
-3 × 6 × 20 × 10 = **3600 evaluations**, each connectome vs its own five-rung
-(directed for v2b/v2d) ladder.
+3 × 7 × 20 × 10 = **4200 evaluations**, each connectome vs its own five-rung
+(directed for v2b/v2d) ladder plus the weight-placement control.
+
+The **weight-placement control** (`connectome_weight_permuted`, shared via
+`matrix_config`) keeps the connectome's exact topology and weight multiset but
+permutes which edge carries which weight, decomposing the topology-vs-weights
+confound: `connectome vs control` = placement, `control vs degree_rewire` =
+topology. Finding: NARMA's supercritical advantage is **mostly topology**
+(control vs degree d ≈ +4.3–4.9, v2b/v2d) with a smaller **weight-placement**
+bonus (connectome vs control d ≈ +1, Holm-significant in v2b); v2a is a null
+negative control. This is the mirror image of the Mackey-Glass forecasting task,
+where topology is null and placement is *harmful*.
 
 ## Where the code lives
 

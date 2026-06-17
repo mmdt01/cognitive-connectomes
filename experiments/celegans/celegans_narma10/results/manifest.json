@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-06-16T15:57:32.563200+00:00",
-  "n_evaluations": 3600,
-  "elapsed_seconds": 669.5,
+  "generated_utc": "2026-06-17T16:31:05.691031+00:00",
+  "n_evaluations": 4200,
+  "elapsed_seconds": 612.1,
   "conditions": [
     "v2a",
     "v2b",
@@ -9,6 +9,7 @@
   ],
   "variants": [
     "connectome",
+    "connectome_weight_permuted",
     "random_gaussian",
     "erdos_renyi",
     "degree_rewire",
@@ -90,6 +91,7 @@
     },
     "variants": [
       "connectome",
+      "connectome_weight_permuted",
       "random_gaussian",
       "erdos_renyi",
       "degree_rewire",
