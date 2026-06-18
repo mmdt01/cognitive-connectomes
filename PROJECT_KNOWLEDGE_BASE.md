@@ -28,15 +28,27 @@ and/or modularity (degree-only mechanism ruled out).
 
 The project has since turned the task axis from passive memory toward
 **dynamical-system prediction** (north star: a connectome-as-JEPA world model).
-The **Phase-0 NARMA-10 bridge is complete**, and the prediction picture is more
-nuanced than MC. The supercritical advantage is **regime-dependent** on NARMA:
-strong in the directed empirically-weighted conditions (v2b/v2d — the connectome
-beats *every* null including clustering and modularity, Cohen's d up to ~+10)
-but **absent in the clean undirected-topology condition (v2a)**. It manifests as
-supercritical *robustness*, not superiority (nulls are better at canonical sr),
-and in v2b/v2d it is **confounded with the connectome's real weight placement**
-(nulls resample weights; only v2a is a clean topology-only test). Next builds:
-**Mackey-Glass** then **Lorenz**.
+The **NARMA-10 bridge and the Mackey-Glass forecasting task are both complete**,
+and the prediction picture is more nuanced than MC. The supercritical advantage
+is **regime-dependent**: on NARMA it is strong in the directed empirically-weighted
+conditions (v2b/v2d — the connectome beats *every* null, Cohen's d up to ~+10) but
+**absent in the clean undirected condition (v2a)**, manifesting as supercritical
+*robustness* not canonical superiority.
+
+The **topology-vs-weights confound is now resolved** by a weight-placement control
+(`connectome_weight_permuted`: the connectome's exact topology + a permutation of
+its exact weights), which splits the effect into a topology leg (control vs
+degree_rewire) and a placement leg (connectome vs control). The answer
+**dissociates by task**: on **NARMA** the advantage is *mostly topology*
+(control vs degree d ≈ +4.3–4.9, v2b/v2d) with a smaller weight-placement bonus
+(connectome vs control d ≈ +1, Holm-sig in v2b) — so it is **topology-led**, not
+"plausibly weight-driven" as previously feared. On **Mackey-Glass** the connectome
+is instead *worse* supercritically, and that deficit is **entirely weight
+placement** (connectome vs control d ≈ −2 to −3) with a **null topology leg** — the
+mirror image of NARMA. v2a is a null negative control in both. Net: the connectome's
+directed topology helps input-driven emulation and is neutral for autonomous
+forecasting; its weight placement helps emulation slightly and *hurts* forecasting.
+Next build: **Lorenz** (closed-loop free-running).
 
 ---
 
@@ -101,12 +113,13 @@ cognitive-connectomes/
 │   ├── nulls/        random_gaussian, erdos_renyi, degree_rewire, clustering_rewire,
 │   │                 modularity_rewire, validation.py        (all directed-aware)
 │   ├── reservoir/    blas.py, weights.py, build.py
-│   ├── tasks/        memory_capacity.py, narma.py
+│   ├── tasks/        memory_capacity.py, narma.py, mackey_glass.py
 │   └── experiment/   GENERIC runner.py / stats.py / plots.py / config.py
 ├── experiments/
 │   ├── celegans/                              (connectome-shared, task-agnostic)
-│   │   ├── substrates.py   (SubstrateBuilder), matrix_config.py
-│   │   └── celegans_narma10/   task_config.py, run.py, plot_demo.py, results/, figures/
+│   │   ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
+│   │   ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
+│   │   └── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
 │   ├── v2a_continuous_weights/   (legacy MC: notebook + probe scripts)
 │   └── v2b_directed_weighted/    (legacy MC: notebook + probe scripts)
 └── tests/test_smoke.py
@@ -208,12 +221,44 @@ weights. Findings:
 - **Mechanism: robustness, not superiority.** The connectome's NRMSE is flat
   (~0.5) across sr; nulls are U-shaped — better canonically, then destabilise
   supercritically. The connectome wins only by being robust where nulls fail.
-- **Confound: topology vs weights.** In v2b/v2d the connectome keeps its *real*
-  weights while nulls resample from the pool, so those conditions conflate
-  directed topology with the connectome's real weight placement. v2a (all-random
-  weights) is the clean topology test and is null → the NARMA effect is
-  plausibly weight-driven, not pure topology. v2d's inhibition is sparse (~3.6%
-  of edges) so v2d ≈ v2b spectrally.
+- **Confound: topology vs weights (since resolved — see below).** In v2b/v2d the
+  connectome keeps its *real* weights while nulls resample from the pool, so those
+  conditions conflate directed topology with the connectome's real weight
+  placement. This was the headline open question for prediction; the
+  weight-placement control (next entry) resolves it — and contrary to the prior
+  guess that the effect was "plausibly weight-driven," it is **topology-led**.
+  v2d's inhibition is sparse (~3.6% of edges) so v2d ≈ v2b spectrally.
+
+**Weight-placement control (topology-vs-weights confound resolved).** Added a
+shared control variant `connectome_weight_permuted` — the connectome's *exact*
+topology and *exact* weight multiset, but a per-seed **permutation** of which edge
+carries which weight (Dale signs re-applied for v2d; v2a is a
+distribution-preserving negative control). Because the connectome, the control,
+and the rung nulls all share the empirical weight distribution, two comparisons
+decompose the effect cleanly: **connectome vs control = weight placement**;
+**control vs degree_rewire = topology**. Confirmed first by an n=50 probe, then by
+the full n=10 matrix (each task re-run with the 7-variant ladder). v2a is a null
+negative control throughout (permuting already-random weights changes nothing),
+validating the construction.
+
+**Mackey-Glass forecasting (complete).** Second prediction task: *driven
+(teacher-forced) k-step-ahead* forecasting of the mildly chaotic Mackey-Glass
+delay system (β=0.2, γ=0.1, n=10, τ=17), same 3 conditions × 7-variant ladder ×
+20-point sr sweep × 10 seeds, at two horizons (h=84 canonical benchmark, h=300
+chaos-limited). Local generator bit-exact vs `reservoirpy.datasets.mackey_glass`;
+frozen `input_scaling=0.5, leak_rate=0.3` (MG's smooth series wants a far lower
+leak than NARMA's 1.0). Findings:
+- **Driven MG is easy at the classic horizons** (rung-0 NRMSE ≈ 0.09 at h=84): a
+  single-scalar drive lets the reservoir reconstruct the delay embedding. The
+  discriminative regime is long horizons (NRMSE ≈ 0.47 at h=300).
+- **The supercritical sign flips vs NARMA.** v2a is null; in v2b/v2d the connectome
+  is *worse* than its nulls at h=84 (connectome vs degree d down to ≈−3.3,
+  Holm-sig), and the deficit **washes out at h=300**.
+- **The h=84 deficit is entirely weight placement.** Connectome vs control
+  d ≈ −2 to −3 (Holm-sig, v2b/v2d); the topology leg (control vs degree_rewire) is
+  **null**. So the connectome's *real weight placement* is anomalously bad for this
+  forecasting task; its topology is indistinguishable from a degree-matched random
+  graph. Mirror image of NARMA, where topology is the dominant *positive* effect.
 
 ---
 
@@ -233,8 +278,16 @@ weights. Findings:
 6. **On NARMA prediction the supercritical advantage is regime-dependent** —
    strong in directed empirical conditions (v2b/v2d, beating *all* nulls), absent
    in the clean undirected-topology test (v2a). It is supercritical *robustness*
-   rather than superiority, and in v2b/v2d is confounded with the connectome's
-   real weight placement (the headline open question for prediction tasks).
+   rather than superiority.
+7. **The topology-vs-weights confound is resolved, and the answer dissociates by
+   task** (via the `connectome_weight_permuted` placement control). NARMA's
+   advantage is **mostly topology** (control vs degree d ≈ +4.3–4.9) plus a smaller
+   weight-placement bonus (connectome vs control d ≈ +1) — i.e. topology-led, not
+   weight-driven. Mackey-Glass is the **mirror image**: the connectome is *worse*
+   supercritically, the deficit is **entirely weight placement** (d ≈ −2 to −3) and
+   the topology leg is null. The connectome's directed topology helps input-driven
+   emulation and is neutral for autonomous forecasting; its weight placement helps
+   emulation slightly and *hurts* forecasting. v2a is a null negative control in both.
 
 ---
 
@@ -264,7 +317,14 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 - **The connectome is one fixed graph; nulls are sampled.** Inference is "is
   *this* connectome anomalous vs the null distribution?", not connectomes in
   general. In v2b/v2d the connectome also keeps real weights while nulls resample
-  (the topology-vs-weights confound above).
+  — the topology-vs-weights confound, now decomposed by the
+  `connectome_weight_permuted` placement control (§6).
+- **To isolate weight *placement*, permute — don't resample.** The rung nulls draw
+  weights *with replacement* (a bootstrap, so the distribution is preserved only in
+  expectation). The placement control instead **permutes the connectome's exact
+  weights** onto its exact topology, holding the multiset fixed so the comparison
+  isolates placement alone. As the highest-variance null (heavy weights on
+  high-leverage edges), it warrants more seeds; n=50 confirmed the n=10 read.
 
 ---
 
@@ -272,22 +332,22 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 
 `PROJECT_PLAN.md` is canonical: the thirteen-week schedule, the Stage-A
 scale-row/realism-cross design, decision gates, conference targets, and the task
-progression (NARMA-10 ✓ → Mackey-Glass → Lorenz, toward the connectome-as-JEPA
-world model). The immediate next build is the **Mackey-Glass** experiment;
-`MACKEY_GLASS_KICKOFF.md` is its full brief (a thin task module + task dir on the
-shared infra). Lorenz (closed-loop free-running) follows on the same
-infrastructure.
+progression (NARMA-10 ✓ → Mackey-Glass ✓ → Lorenz, toward the connectome-as-JEPA
+world model). The immediate next build is the **Lorenz** task (closed-loop
+free-running prediction), on the same shared infrastructure — only a new task
+module + task dir, inheriting the substrate pipeline and the weight-placement
+control unchanged.
 
 ---
 
 ## 10. Open methodological questions
 
-- **Topology vs weights in v2b/v2d (highest priority for prediction).** The
-  connectome keeps real weights; nulls resample. A "connectome topology +
-  resampled weights" null would isolate topology from weight placement.
-- **Divergence-robust statistics.** Some supercritical nulls blow up (huge
-  NRMSE); a median-based or NRMSE-capped statistic would harden the permutation
-  tests against those outliers.
+- **Topology vs weights in v2b/v2d — RESOLVED** by the `connectome_weight_permuted`
+  placement control (§6–7): NARMA is topology-led, Mackey-Glass placement-driven.
+- **Divergence-robust statistics (now pressing).** Some supercritical nulls — and
+  the high-variance placement control — blow up (huge/non-finite NRMSE), clipping
+  the figures; a median-based or NRMSE-capped statistic would harden the
+  permutation tests and clean the supercritical tails.
 - **Weight transform for prediction.** The NARMA bridge uses raw synapse counts;
   sqrt is a one-line switch (`matrix_config.WEIGHT_TRANSFORM`) and the documented
   heavy-tail mitigation.
@@ -331,9 +391,16 @@ infrastructure.
   ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
 - **MC spectral sweep:** `[0.5,0.7,0.85,0.9,0.95,1.0,1.05,1.1,1.25,1.5,1.75]`;
   supercritical probes at sr∈{1.25,1.5,1.75}, n=50, 10k-permutation Holm tests.
-- **Prediction sweep (NARMA bridge):** 20-point `linspace(0,2,20)`, n=10, 3
-  conditions × 6 variants; NARMA frozen reservoir hyperparameters
-  `input_scaling=0.2, leak=1.0` (tuned on rung-0).
+- **Prediction sweep (NARMA + Mackey-Glass):** 20-point `linspace(0,2,20)`, n=10,
+  3 conditions × **7 variants** (connectome + `connectome_weight_permuted`
+  placement control + 5-rung ladder). Frozen reservoir hyperparameters tuned on
+  rung-0: NARMA `input_scaling=0.2, leak=1.0`; Mackey-Glass `input_scaling=0.5,
+  leak=0.3`. MG is *driven k-step-ahead* (teacher-forced) at horizons h=84
+  (benchmark) and h=300 (chaos-limited); local generator bit-exact vs `reservoirpy`.
+- **Weight-placement control:** `connectome_weight_permuted` — connectome's exact
+  topology + a per-seed permutation of its exact weights (Dale signs kept; v2a a
+  negative control). `connectome vs control` = placement, `control vs degree` =
+  topology.
 - **Realism conditions:** v2a `symmetric_gaussian`/undirected, v2b
   `asymmetric_empirical`/directed, v2d `asymmetric_empirical_signed`/directed.
 
