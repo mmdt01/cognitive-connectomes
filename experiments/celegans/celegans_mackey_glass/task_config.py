@@ -75,4 +75,7 @@ def task(horizon: int) -> dict:
         extra_metric_fields=("horizon",),
         results_dir=_DIR / "results" / f"h{horizon}",
         figures_dir=_DIR / "figures" / f"h{horizon}",
+        # NRMSE > 2 is an unambiguous blow-up (a working ESN scores well under 1.5);
+        # such seeds are capped and counted in the divergence rate.
+        metric_divergence_cap=2.0,
     )

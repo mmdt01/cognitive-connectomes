@@ -50,4 +50,7 @@ def task() -> dict:
         extra_metric_fields=("n_rejected_inputs",),
         results_dir=RESULTS_DIR,
         figures_dir=FIGURES_DIR,
+        # NRMSE > 2 is an unambiguous blow-up (a working ESN scores well under 1.5);
+        # such seeds are capped and counted in the divergence rate.
+        metric_divergence_cap=2.0,
     )

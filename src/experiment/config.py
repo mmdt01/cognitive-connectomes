@@ -50,6 +50,12 @@ class ExperimentConfig:
     # output paths (per experiment)
     results_dir: Path
     figures_dir: Path
+    # divergence-robust statistics (optional; default off). A metric value beyond
+    # this cap (above it for lower-is-better, below for higher-is-better) or
+    # non-finite is treated as a blow-up: clipped to the cap for the parametric
+    # effect and counted in the divergence rate. None -> only non-finite values
+    # are treated as divergent.
+    metric_divergence_cap: float | None = None
 
     @property
     def results_parquet(self) -> Path:
@@ -89,4 +95,5 @@ class ExperimentConfig:
             "n_permutations": self.n_permutations,
             "permutation_seed": self.permutation_seed,
             "alpha": self.alpha,
+            "metric_divergence_cap": self.metric_divergence_cap,
         }

@@ -544,3 +544,42 @@ def test_spectral_normalized_eigenvalues_and_decay():
     decay = spectral.magnitude_decay(W)
     assert np.isclose(decay[0], 1.0)
     assert np.all(np.diff(decay) <= 1e-12)  # descending
+
+
+# ---------------------------------------------------------------------------
+# Divergence-robust statistics (src/experiment/stats.py).
+# ---------------------------------------------------------------------------
+
+
+def test_robustify_caps_blowups_and_flags_divergence():
+    from src.experiment import stats
+
+    vals = np.array([0.4, 0.5, np.inf, 7.0, 0.45])
+    capped, diverged = stats._robustify(vals, cap=2.0, lower_is_better=True)
+    assert np.all(np.isfinite(capped)) and capped.max() <= 2.0
+    assert diverged.tolist() == [False, False, True, True, False]
+    assert np.isclose(diverged.mean(), 0.4)
+    # with no cap, only non-finite counts as divergence
+    _, div_nocap = stats._robustify(vals, cap=None, lower_is_better=True)
+    assert div_nocap.tolist() == [False, False, True, False, False]
+
+
+def test_cliffs_delta_robust_to_blowup():
+    from src.experiment import stats
+
+    connectome = np.array([0.5, 0.5, 0.5, 0.5])
+    worse = np.array([0.9, 0.9, 0.9, 0.9])
+    assert stats.cliffs_delta(connectome, worse, lower_is_better=True) == 1.0
+    # a blown-up null (capped) is still strictly worse -> connectome wins on ranks
+    capped, _ = stats._robustify(np.array([7.0, np.inf, 5.0, 9.0]), 2.0, True)
+    assert stats.cliffs_delta(connectome, capped, lower_is_better=True) == 1.0
+
+
+def test_rank_permutation_pvalue_separated_vs_overlapping():
+    from src.experiment import stats
+
+    rng = np.random.default_rng(0)
+    a = np.array([0.10, 0.12, 0.11, 0.13, 0.10])
+    b = np.array([0.50, 0.52, 0.51, 0.49, 0.53])  # cleanly separated
+    assert stats.rank_permutation_pvalue(a, b, 2000, rng) < 0.05
+    assert stats.rank_permutation_pvalue(a, a.copy(), 2000, rng) > 0.5
