@@ -8,8 +8,10 @@ degree-matched baselines.
 This document is the single canonical reference for the project. It is intended
 to be loaded into fresh Claude conversations as the starting context. Companion
 docs: `PROJECT_PLAN.md` (the forward plan), `NULL_MODELS_METHODOLOGY.md` and
-`SIGNED_WEIGHTS_METHODOLOGY.md` (method references), `MACKEY_GLASS_KICKOFF.md`
-(the next build's brief).
+`SIGNED_WEIGHTS_METHODOLOGY.md` (method references),
+`PREDICTION_TASKS_INTERPRETATION.md` (mechanism interpretation of the NARMA/MG
+results + pre-registered Lorenz predictions; an uncommitted working doc),
+`MACKEY_GLASS_KICKOFF.md` (the completed Mackey-Glass build's brief).
 
 ---
 
@@ -105,6 +107,7 @@ at `.venv/`; editable-installed via `pyproject.toml` (only `src*` is packaged).
 cognitive-connectomes/
 ├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md / IMPLEMENTATION_PHASE0_BRIDGE.md
 ├── NULL_MODELS_METHODOLOGY.md / SIGNED_WEIGHTS_METHODOLOGY.md / MACKEY_GLASS_KICKOFF.md
+├── PREDICTION_TASKS_INTERPRETATION.md        (mechanism interpretation; uncommitted)
 ├── data/
 │   ├── cook2019_connectome.xlsx              (Cook 2019 SI, corrected July 2020)
 │   └── celegans_neurotransmitters.csv        (v2d Dale signs; eLife 95402)
@@ -114,12 +117,14 @@ cognitive-connectomes/
 │   │                 modularity_rewire, validation.py        (all directed-aware)
 │   ├── reservoir/    blas.py, weights.py, build.py
 │   ├── tasks/        memory_capacity.py, narma.py, mackey_glass.py
-│   └── experiment/   GENERIC runner.py / stats.py / plots.py / config.py
+│   ├── experiment/   GENERIC runner.py / stats.py (divergence-robust) / plots.py / config.py
+│   └── analysis/     spectral.py  (substrate analysis, connectome-agnostic; first of a series)
 ├── experiments/
 │   ├── celegans/                              (connectome-shared, task-agnostic)
 │   │   ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
 │   │   ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
-│   │   └── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
+│   │   ├── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
+│   │   └── analysis/                spectral.py driver (uses src/analysis); figures/, results/
 │   ├── v2a_continuous_weights/   (legacy MC: notebook + probe scripts)
 │   └── v2b_directed_weighted/    (legacy MC: notebook + probe scripts)
 └── tests/test_smoke.py
@@ -127,13 +132,22 @@ cognitive-connectomes/
 
 **Experiment infrastructure is split into three reuse tiers** (refactored June
 2026): generic, task- & connectome-agnostic code lives in `src/experiment/`
-(the conditions × variants × sr × seeds matrix runner, permutation stats,
-figures, and the `ExperimentConfig` dataclass); connectome-shared, task-agnostic
-code in `experiments/<connectome>/` (the `SubstrateBuilder` and `matrix_config`);
-each task is a thin `experiments/<connectome>/<task>/` (a `task_config.py`, a
-~15-line `run.py`, a `plot_demo.py`, and outputs). A run assembles its config as
-`ExperimentConfig(**matrix_config.shared(), **task_config.task())` and is
-launched with e.g. `python -m experiments.celegans.celegans_narma10.run`.
+(the conditions × variants × sr × seeds matrix runner, divergence-robust rank
+stats, figures, and the `ExperimentConfig` dataclass); connectome-shared,
+task-agnostic code in `experiments/<connectome>/` (the `SubstrateBuilder` and
+`matrix_config`); each task is a thin `experiments/<connectome>/<task>/` (a
+`task_config.py`, a ~15-line `run.py`, a `plot_demo.py`, and outputs). A run
+assembles its config as `ExperimentConfig(**matrix_config.shared(),
+**task_config.task())` and is launched with e.g. `python -m
+experiments.celegans.celegans_narma10.run`.
+
+A parallel **substrate-analysis tier** characterises the recurrent matrices
+themselves (independent of any task): generic, connectome-agnostic tools in
+`src/analysis/` (first module: `spectral.py`) with connectome-specific drivers
+in `experiments/<connectome>/analysis/`. `spectral.py` grounds the
+placement→memory mechanism (the connectome's eigenvalue bulk is the most
+compressed); it is the template for the planned deeper topological analyses
+(degree, clustering, motifs, modularity, reciprocity).
 
 The legacy memory-capacity experiments (v2a/v2c, v2b) remain as Jupyter
 notebooks + probe scripts under `experiments/v2*_*/`. All `*.parquet` outputs are
@@ -287,7 +301,12 @@ leak than NARMA's 1.0). Findings:
    supercritically, the deficit is **entirely weight placement** (d ≈ −2 to −3) and
    the topology leg is null. The connectome's directed topology helps input-driven
    emulation and is neutral for autonomous forecasting; its weight placement helps
-   emulation slightly and *hurts* forecasting. v2a is a null negative control in both.
+   emulation slightly and *hurts* forecasting. v2a is a null negative control in
+   both. **Mechanism (diagnostics):** the placement effect is spectrally grounded
+   — the connectome's heavy weights compress its eigenvalue bulk, giving it the
+   least linear memory (shown via the `src/analysis/` spectral tier +
+   memory-capacity + a sqrt-weight sensitivity check); the topology effect is real
+   but mechanistically open. Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
 ---
 
@@ -344,10 +363,13 @@ control unchanged.
 
 - **Topology vs weights in v2b/v2d — RESOLVED** by the `connectome_weight_permuted`
   placement control (§6–7): NARMA is topology-led, Mackey-Glass placement-driven.
-- **Divergence-robust statistics (now pressing).** Some supercritical nulls — and
-  the high-variance placement control — blow up (huge/non-finite NRMSE), clipping
-  the figures; a median-based or NRMSE-capped statistic would harden the
-  permutation tests and clean the supercritical tails.
+- **Divergence-robust statistics — DONE.** `src/experiment/stats.py` now caps
+  blow-ups (`cfg.metric_divergence_cap`, default 2.0 for NRMSE), reports a
+  per-variant divergence rate, and tests significance with a rank-based
+  permutation test (Cliff's delta + median alongside the capped Cohen's d).
+  Re-running NARMA/MG left the headlines unchanged — the effects are clean rank
+  separations (δ≈±1) at ~0% divergence. Built ahead of Lorenz, where closed-loop
+  divergence is the primary failure mode.
 - **Weight transform for prediction.** The NARMA bridge uses raw synapse counts;
   sqrt is a one-line switch (`matrix_config.WEIGHT_TRANSFORM`) and the documented
   heavy-tail mitigation.
@@ -401,6 +423,13 @@ control unchanged.
   topology + a per-seed permutation of its exact weights (Dale signs kept; v2a a
   negative control). `connectome vs control` = placement, `control vs degree` =
   topology.
+- **Prediction statistics:** divergence-robust — rank-based permutation test
+  (Holm-corrected) for significance, with Cliff's delta, capped Cohen's d, median,
+  and a per-variant divergence rate; `metric_divergence_cap=2.0` (NRMSE).
+- **Substrate analysis tier:** `src/analysis/spectral.py` (connectome-agnostic
+  spectral metrics + plots) + `experiments/celegans/analysis/spectral.py` driver
+  (`python -m experiments.celegans.analysis.spectral`). Grounds the
+  placement→memory mechanism; first of the planned topological-analysis series.
 - **Realism conditions:** v2a `symmetric_gaussian`/undirected, v2b
   `asymmetric_empirical`/directed, v2d `asymmetric_empirical_signed`/directed.
 
@@ -414,8 +443,13 @@ context per task:
   and the task's `task_config.py` + `results/`; the methodology docs
   (`NULL_MODELS_METHODOLOGY.md`, `SIGNED_WEIGHTS_METHODOLOGY.md`) for the nulls
   and Dale signs.
-- **Starting the next task:** `MACKEY_GLASS_KICKOFF.md` is a self-contained brief
-  (which docs/code to read, the thin deliverables, decisions to lock).
+- **Starting the next task (Lorenz):** no kickoff brief yet, but the infra is
+  ready (substrate pipeline + placement control + divergence-robust stats);
+  `PREDICTION_TASKS_INTERPRETATION.md` §4 holds the pre-registered Lorenz
+  predictions and the metric decision to lock first (valid-time vs climate).
+  `MACKEY_GLASS_KICKOFF.md` is the template for a thin task build.
+- **Running a substrate analysis:** `src/analysis/` + the
+  `experiments/celegans/analysis/` drivers; see that dir's README.
 - **Continuing a legacy MC experiment:** load that notebook's `results.parquet`
   and the relevant `src/` modules.
 
