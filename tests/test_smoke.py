@@ -497,3 +497,50 @@ def test_validate_null_directed_clustering_flags_violation():
     broken[:, 0] = 0
     changed = validate_null(adjacency, broken, "directed_clustering", tolerance=0.001)
     assert changed["preserved"] is False
+
+
+# ---------------------------------------------------------------------------
+# Spectral analysis (src/analysis/spectral.py).
+# ---------------------------------------------------------------------------
+
+
+def test_spectral_metrics_shape_and_scale_invariance():
+    from src.analysis import spectral
+
+    rng = np.random.default_rng(0)
+    W = rng.standard_normal((50, 50))
+    m = spectral.spectral_metrics(W)
+    for key in ("spectral_radius", "lambda2_ratio", "bulk95_ratio", "mean_ratio",
+                "participation_ratio", "n_critical"):
+        assert key in m
+    assert 0.0 <= m["bulk95_ratio"] <= 1.0
+    assert 0.0 <= m["lambda2_ratio"] <= 1.0
+    # The ratio metrics are scale-invariant (the reservoir rescales W); only the
+    # raw spectral_radius scales with the matrix.
+    m2 = spectral.spectral_metrics(3.0 * W)
+    assert np.isclose(m2["bulk95_ratio"], m["bulk95_ratio"])
+    assert np.isclose(m2["mean_ratio"], m["mean_ratio"])
+    assert np.isclose(m2["spectral_radius"], 3.0 * m["spectral_radius"])
+
+
+def test_spectral_metrics_compression_ordering():
+    """A one-dominant-mode matrix is more compressed than a full random one."""
+    from src.analysis import spectral
+
+    rng = np.random.default_rng(1)
+    full = rng.standard_normal((40, 40))
+    v = rng.standard_normal((40, 1))
+    dominant = 5.0 * (v @ v.T) + 0.01 * rng.standard_normal((40, 40))
+    assert (spectral.spectral_metrics(dominant)["bulk95_ratio"]
+            < spectral.spectral_metrics(full)["bulk95_ratio"])
+
+
+def test_spectral_normalized_eigenvalues_and_decay():
+    from src.analysis import spectral
+
+    rng = np.random.default_rng(2)
+    W = rng.standard_normal((30, 30))
+    assert np.isclose(np.abs(spectral.normalized_eigenvalues(W)).max(), 1.0)
+    decay = spectral.magnitude_decay(W)
+    assert np.isclose(decay[0], 1.0)
+    assert np.all(np.diff(decay) <= 1e-12)  # descending
