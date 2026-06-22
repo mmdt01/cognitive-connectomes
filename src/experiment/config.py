@@ -56,6 +56,10 @@ class ExperimentConfig:
     # effect and counted in the divergence rate. None -> only non-finite values
     # are treated as divergent.
     metric_divergence_cap: float | None = None
+    # number of reservoir input channels (Win columns). 1 for the single-channel
+    # driven tasks (NARMA, Mackey-Glass -- left at the default so they build
+    # byte-identically); 3 for Lorenz (the 3-D state fed back in closed loop).
+    input_dim: int = 1
 
     @property
     def results_parquet(self) -> Path:
@@ -67,7 +71,11 @@ class ExperimentConfig:
 
     @property
     def stats_parquet(self) -> Path:
-        return self.results_dir / "stats.parquet"
+        # Metric-tagged so tasks that score one matrix on two metrics (Lorenz:
+        # vpt + climate_error, sharing a single results.parquet) write distinct
+        # stats files instead of overwriting. Single-metric tasks (NARMA,
+        # Mackey-Glass) just get e.g. stats_nrmse.parquet.
+        return self.results_dir / f"stats_{self.metric}.parquet"
 
     @property
     def manifest_json(self) -> Path:

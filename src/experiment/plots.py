@@ -118,6 +118,8 @@ def run(cfg) -> None:
     print(f"Saved {metric_fig}")
     if cfg.stats_parquet.exists():
         stats = pd.read_parquet(cfg.stats_parquet)
-        effect_fig = cfg.figures_dir / "effect_sizes_vs_spectral_radius.png"
+        # Metric-tagged so a two-metric task (Lorenz) doesn't overwrite one
+        # metric's effect-size figure with the other's.
+        effect_fig = cfg.figures_dir / f"effect_sizes_{cfg.metric}_vs_spectral_radius.png"
         plot_effect_sizes(stats, cfg, effect_fig)
         print(f"Saved {effect_fig}")

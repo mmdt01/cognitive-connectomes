@@ -23,6 +23,7 @@ def build_from_adjacency(
     leak_rate: float,
     input_scaling: float,
     seed: int,
+    input_dim: int = 1,
 ) -> Reservoir:
     """Rescale a weighted adjacency to target spectral radius and build a Reservoir.
 
@@ -30,11 +31,18 @@ def build_from_adjacency(
     rescales, generates a per-seed Bernoulli ±1 input matrix scaled by
     ``input_scaling`` (preserving v1's input statistics), and hands W
     and Win to ReservoirPy's ``Reservoir`` constructor.
+
+    ``input_dim`` is the number of input channels (columns of ``Win``). It
+    defaults to 1 -- the single-channel drive used by the driven tasks (NARMA,
+    Mackey-Glass), so those build byte-identically. Multi-dimensional tasks
+    (Lorenz: 3-D state fed back in closed loop) pass ``input_dim=3``; each
+    channel gets its own independent Bernoulli ±1 column from the *same* per-seed
+    RNG stream, so the single-channel case is unchanged.
     """
     rescaled_W = rescale_spectral_radius(weighted_adjacency, target_spectral_radius)
     n_units = rescaled_W.shape[0]
 
     rng = np.random.default_rng(seed)
-    Win = rng.choice([-1.0, 1.0], size=(n_units, 1)) * input_scaling
+    Win = rng.choice([-1.0, 1.0], size=(n_units, input_dim)) * input_scaling
 
     return Reservoir(W=rescaled_W, Win=Win, lr=leak_rate, seed=seed)

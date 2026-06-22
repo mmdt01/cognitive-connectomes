@@ -1,0 +1,161 @@
+{
+  "generated_utc": "2026-06-22T15:27:26.417552+00:00",
+  "n_evaluations": 4200,
+  "elapsed_seconds": 11928.1,
+  "conditions": [
+    "v2a",
+    "v2b",
+    "v2d"
+  ],
+  "variants": [
+    "connectome",
+    "connectome_weight_permuted",
+    "random_gaussian",
+    "erdos_renyi",
+    "degree_rewire",
+    "clustering_rewire",
+    "modularity_rewire"
+  ],
+  "spectral_radii": [
+    0.0,
+    0.1053,
+    0.2105,
+    0.3158,
+    0.4211,
+    0.5263,
+    0.6316,
+    0.7368,
+    0.8421,
+    0.9474,
+    1.0526,
+    1.1579,
+    1.2632,
+    1.3684,
+    1.4737,
+    1.5789,
+    1.6842,
+    1.7895,
+    1.8947,
+    2.0
+  ],
+  "n_seeds": 10,
+  "substrate_summary": {
+    "n_nodes_undirected": 300,
+    "n_nodes_directed": 300,
+    "n_directed_edges": 3669,
+    "empirical_pool_size": 3669,
+    "weight_transform": "raw",
+    "n_inhibitory": 26,
+    "n_excitatory": 274,
+    "partition_sizes": {
+      "undirected": [
+        98,
+        97,
+        44,
+        41,
+        20
+      ],
+      "directed": [
+        101,
+        80,
+        60,
+        39,
+        20
+      ]
+    }
+  },
+  "config": {
+    "experiment_name": "celegans_lorenz",
+    "task_name": "Lorenz attractor (closed-loop free-running)",
+    "conditions": [
+      "v2a",
+      "v2b",
+      "v2d"
+    ],
+    "condition_spec": {
+      "v2a": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_gaussian",
+        "label": "(1) Undirected with gaussian weights"
+      },
+      "v2b": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical",
+        "label": "(2) Directed with empirical weights (non-negative)"
+      },
+      "v2d": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_signed",
+        "label": "(3) Directed with empirical weights (signed)"
+      }
+    },
+    "variants": [
+      "connectome",
+      "connectome_weight_permuted",
+      "random_gaussian",
+      "erdos_renyi",
+      "degree_rewire",
+      "clustering_rewire",
+      "modularity_rewire"
+    ],
+    "spectral_radii": [
+      0.0,
+      0.1053,
+      0.2105,
+      0.3158,
+      0.4211,
+      0.5263,
+      0.6316,
+      0.7368,
+      0.8421,
+      0.9474,
+      1.0526,
+      1.1579,
+      1.2632,
+      1.3684,
+      1.4737,
+      1.5789,
+      1.6842,
+      1.7895,
+      1.8947,
+      2.0
+    ],
+    "n_seeds": 10,
+    "weight_transform": "raw",
+    "clustering_tolerance": 0.05,
+    "louvain_seed": 0,
+    "swap_multiplier": 10,
+    "input_scaling": 0.1,
+    "leak_rate": 1.0,
+    "task_params": {
+      "n_transient": 1000,
+      "washout": 200,
+      "n_train": 10000,
+      "sync_len": 200,
+      "n_windows": 20,
+      "window_spacing": 500,
+      "free_run_len": 600,
+      "climate_len": 3000,
+      "climate_washout": 500,
+      "epsilon": 0.4,
+      "ridge_alpha": 1e-07,
+      "readout_bias": true,
+      "sigma": 10.0,
+      "rho": 28.0,
+      "beta": 2.6666666666666665,
+      "h": 0.03,
+      "x0": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "lambda_max": 0.9056
+    },
+    "input_seed_offset": 1000,
+    "metric": "vpt",
+    "n_permutations": 10000,
+    "permutation_seed": 0,
+    "alpha": 0.05,
+    "metric_divergence_cap": null
+  }
+}

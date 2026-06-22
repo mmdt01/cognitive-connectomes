@@ -19,6 +19,7 @@ from src.reservoir.weights import apply_weight_scheme
 from src.reservoir.build import rescale_spectral_radius, build_from_adjacency
 from src.tasks import narma as narma_task
 from src.tasks import mackey_glass as mackey_glass_task
+from src.tasks import lorenz as lorenz_task
 
 
 @pytest.fixture(scope="module")
@@ -341,6 +342,67 @@ def test_mackey_glass_sanity_gate_passes():
         validate=True, sanity_horizon=17, sanity_max_nrmse=0.8,
     )
     assert np.isfinite(out["nrmse"])
+
+
+# ---------------------------------------------------------------------------
+# Lorenz: closed-loop free-running (3-D, two metrics).
+# ---------------------------------------------------------------------------
+def test_lorenz_rk4_matches_reservoirpy_short_horizon():
+    """The local RK4 generator integrates the same Lorenz vector field as
+    reservoirpy. Bit-exactness is impossible (reservoirpy uses adaptive
+    solve_ivp/RK45 on a non-constant grid, and Lorenz chaos decorrelates any two
+    integrators within a few Lyapunov times), so this asserts *short-horizon*
+    agreement: matched initial condition and (near-matched) step, close over the
+    first ~50 steps before chaos amplifies the integrator difference."""
+    from reservoirpy.datasets import lorenz as rpy_lorenz
+
+    mine = lorenz_task.lorenz_rk4(300, x0=[1.0, 1.0, 1.0])
+    # Large n so reservoirpy's grid step n*h/(n-1) ~ h; compare the first slice.
+    rpy = rpy_lorenz(10000, x0=[1.0, 1.0, 1.0], h=0.03)[:300]
+    diff = np.linalg.norm(mine - rpy, axis=1)
+    assert np.allclose(mine[0], [1.0, 1.0, 1.0])  # row 0 is the initial condition
+    # First few steps agree very tightly (correct vector field + integration);
+    # the RK4-vs-RK45 truncation difference then settles to ~0.2 and stays there
+    # until chaos decorrelates the two integrators well past this window. State
+    # scale is ~20, so these are ~0.05% / ~1% relative.
+    assert diff[:6].max() < 0.01
+    assert diff[:200].max() < 0.3
+
+
+def _lorenz_test_reservoir():
+    conn = load("binary_undirected_chemical").adjacency
+    weighted = apply_weight_scheme(conn, "symmetric_gaussian", seed=0)
+    return build_from_adjacency(
+        weighted, target_spectral_radius=0.95, leak_rate=1.0, input_scaling=0.1,
+        seed=0, input_dim=3,
+    )
+
+
+# A tiny but non-trivial closed-loop protocol for the smoke tests.
+_LORENZ_SMOKE = dict(
+    n_transient=200, washout=100, n_train=1500, sync_len=100, n_windows=3,
+    window_spacing=300, free_run_len=400, climate_len=1000, climate_washout=200,
+)
+
+
+def test_lorenz_evaluate_runs_and_returns_both_metrics():
+    out = lorenz_task.evaluate(_lorenz_test_reservoir(), seed=1000, **_LORENZ_SMOKE)
+    assert np.isfinite(out["vpt"]) and out["vpt"] >= 0.0
+    # vpt is bounded by the roll-out length (in Lyapunov time); never blows up.
+    assert out["vpt"] <= _LORENZ_SMOKE["free_run_len"] * 0.03 * lorenz_task.LAMBDA_MAX + 1e-6
+    # climate is finite-or-inf; a working canonical reservoir stays bounded here.
+    assert np.isfinite(out["climate_error"])
+    for key in ("vpt", "climate_error", "n_train", "epsilon", "free_run_len"):
+        assert key in out
+
+
+def test_lorenz_sanity_gate_passes():
+    """The validate=True gate must run and pass on a working closed-loop setup."""
+    out = lorenz_task.evaluate(
+        _lorenz_test_reservoir(), seed=1000, validate=True, sanity_min_vpt=0.3,
+        **_LORENZ_SMOKE,
+    )
+    assert np.isfinite(out["vpt"])
 
 
 # ---------------------------------------------------------------------------

@@ -48,6 +48,7 @@ def run_matrix(builder, cfg, conditions=None, variants=None,
                         leak_rate=cfg.leak_rate,
                         input_scaling=cfg.input_scaling,
                         seed=seed,
+                        input_dim=cfg.input_dim,
                     )
                     metrics = cfg.task_evaluate(
                         reservoir,
