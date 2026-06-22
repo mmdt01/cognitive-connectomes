@@ -33,28 +33,44 @@ from src.tasks.lorenz import (
 from experiments.celegans.substrates import SubstrateBuilder
 from experiments.celegans.celegans_lorenz.run import build_config
 
-# Which connectome reservoir to showcase (a single, honest experiment cell).
-CONDITION = "v2b"        # directed empirical -- the biologically realistic substrate
-VARIANT = "connectome"
-SPECTRAL_RADIUS = 0.95   # canonical operating point
-SEED = 0                 # representative seed
+# The cells to showcase. Two honest, contrasting experiment cells:
+#   1. The real connectome at its canonical operating point -- collapses to a
+#      fixed point after ~1.4 Lyapunov times (poor climate; the headline result).
+#   2. The weight-placement control supercritically -- the best-performing cell in
+#      the sweep: free-runs faithfully for ~6 Lyapunov times and reproduces the
+#      attractor (near-zero climate). Scrambling the connectome's weight placement
+#      is exactly what unlocks this, so the pair visualises the placement effect.
+DEMOS = [
+    dict(condition="v2b", variant="connectome", spectral_radius=0.95, seed=0,
+         out="lorenz_dynamics_demo.png"),
+    dict(condition="v2d", variant="connectome_weight_permuted",
+         spectral_radius=1.8947, seed=0,
+         out="lorenz_dynamics_demo_v2d_control_sr1.9.png"),
+]
 SHOW_LYAP = 8.0          # Lyapunov times of free-run to draw in the time series
 
+# Readable variant labels for the figure caption.
+_VARIANT_LABEL = {
+    "connectome": "connectome",
+    "connectome_weight_permuted": "connectome · permuted weights (placement control)",
+}
 
-def render(builder: SubstrateBuilder) -> None:
+
+def render(builder: SubstrateBuilder, condition: str, variant: str,
+           spectral_radius: float, seed: int, out: str) -> None:
     cfg = build_config("vpt")
     p = cfg.task_params
 
-    weighted = builder.weighted(CONDITION, VARIANT, SEED)
+    weighted = builder.weighted(condition, variant, seed)
     reservoir = build_from_adjacency(
-        weighted_adjacency=weighted, target_spectral_radius=SPECTRAL_RADIUS,
-        leak_rate=cfg.leak_rate, input_scaling=cfg.input_scaling, seed=SEED,
+        weighted_adjacency=weighted, target_spectral_radius=spectral_radius,
+        leak_rate=cfg.leak_rate, input_scaling=cfg.input_scaling, seed=seed,
         input_dim=cfg.input_dim,
     )
 
     # Reproduce the experiment cell: z-scored trajectory, teacher-forced readout.
     S, holdout_start, _, _ = build_trajectory(
-        SEED + cfg.input_seed_offset, p["n_transient"], p["washout"], p["n_train"],
+        seed + cfg.input_seed_offset, p["n_transient"], p["washout"], p["n_train"],
         p["sync_len"], p["n_windows"], p["window_spacing"], p["free_run_len"],
         p["sigma"], p["rho"], p["beta"], p["h"], p["x0"],
     )
@@ -113,20 +129,30 @@ def render(builder: SubstrateBuilder) -> None:
     ax3d.set_xlabel("$x$"); ax3d.set_ylabel("$y$"); ax3d.set_zlabel("$z$")
     ax3d.legend(loc="upper left", fontsize=8)
 
-    label = cfg.condition_spec[CONDITION]["label"]
-    fig.text(0.5, 0.005, f"substrate: {label}, connectome  ·  "
-             f"spectral radius {SPECTRAL_RADIUS}  ·  seed {SEED}",
+    label = cfg.condition_spec[condition]["label"]
+    fig.text(0.5, 0.005, f"substrate: {label}, {_VARIANT_LABEL.get(variant, variant)}  ·  "
+             f"spectral radius {spectral_radius}  ·  seed {seed}",
              ha="center", fontsize=8, color="grey")
 
     cfg.figures_dir.mkdir(parents=True, exist_ok=True)
-    out = cfg.figures_dir / "lorenz_dynamics_demo.png"
-    fig.savefig(out, dpi=300, bbox_inches="tight")
+    out_path = cfg.figures_dir / out
+    fig.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print(f"vpt = {vpt:.2f} Lyapunov times  ->  saved {out}")
+    climate_str = (f"{_climate_of(long_free[p['climate_washout']:], long_true):.3f}"
+                   if np.all(np.isfinite(long_free)) else "diverged")
+    print(f"{condition}/{variant} sr={spectral_radius}: vpt = {vpt:.2f} Lyapunov times, "
+          f"climate = {climate_str}  ->  saved {out_path}")
+
+
+def _climate_of(free, reference):
+    from scipy.stats import wasserstein_distance
+    return float(np.mean([wasserstein_distance(free[:, d], reference[:, d]) for d in range(3)]))
 
 
 def main() -> None:
-    render(SubstrateBuilder())
+    builder = SubstrateBuilder()  # one builder, reused across demos
+    for spec in DEMOS:
+        render(builder, **spec)
 
 
 if __name__ == "__main__":
