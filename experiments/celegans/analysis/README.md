@@ -98,6 +98,44 @@ preserved by construction) but only partial clustering. **Reciprocity is the
 feature no rung recovers** — the connectome's 0.37 vs ≤0.18 for every null —
 flagging a directed-motif structure the ladder never reaches.
 
+## Weight-realization analysis
+
+```bash
+python -m experiments.celegans.analysis.realizations
+```
+
+Why it matters: the null-ladder analysis above walks the *topology* axis; this
+one fixes the variant to the **connectome** and walks the *weight* axis — the
+three realism conditions (v2a undirected gaussian → v2b directed empirical → v2d
+directed signed/Dale). It makes the three concrete differences legible:
+**directionality** (v2a symmetric vs v2b/v2d asymmetric), **magnitude** (abstract
+gaussian vs heavy-tailed synapse counts), and **sign** (balanced ± vs all-positive
+vs sparse structured inhibition).
+
+**Tools:** `src/analysis/weight_structure.py` (weighted-matrix + distribution
+helpers) plus `src/analysis/spectral.py` reused for the eigenvalue view.
+
+**Outputs:**
+- `figures/realization_weighted_matrices.png` — the **recommended headline**:
+  community-ordered weighted matrices coloured by sign (red = +, blue = −). v2a is
+  symmetric across the diagonal and balanced ±; v2b is asymmetric and all-red; v2d
+  adds visible blue inhibition. The weight-axis analog of the adjacency ladder.
+- `figures/realization_weight_distributions.png` — nonzero-weight histograms (log
+  count): a symmetric gaussian bell → a one-sided heavy tail → the same tail with
+  a negative lobe. The magnitude realism the matrix can't show.
+- `figures/realization_eigenvalue_spectra.png` — the dynamical consequence:
+  connectome spectra (`λ/|λ₁|`) sit on the real axis (symmetric ⇒ all-real), then
+  collapse to a dominant Perron mode over a compressed complex bulk (all-positive),
+  then spread slightly once Dale signs break positivity.
+- `results/realization_summary.csv` / `.md` — per-condition weight + spectral
+  summary (symmetry, `frac_negative`, mean/max `|w|`, `|λ₁|`, real-eigenvalue
+  fraction).
+
+**Headline:** v2a is a symmetric, balanced (52% −), real-spectrum matrix; v2b/v2d
+are asymmetric, heavy-tailed (mean `|w|` 5.7, max 75) with a huge Perron radius
+(`|λ₁|≈105`); v2d differs from v2b only by 3.6% structured inhibition (26 neurons),
+so the two are near-identical spectrally — the project's "v2d ≈ v2b" point, shown.
+
 ## Conventions
 
 Raw synapse-count weights (`matrix_config.WEIGHT_TRANSFORM`), matching the
