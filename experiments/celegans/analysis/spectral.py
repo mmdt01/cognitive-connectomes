@@ -53,6 +53,13 @@ CONDITION_TITLE = {
     "v2b": "v2b · directed empirical",
     "v2d": "v2d · directed signed",
 }
+# Slide-clean condition labels (no v2a/v2b/v2d prefix) used for the eigenvalue
+# spectra figure; the bars/decay figures and the table keep the prefixed labels.
+CONDITION_TITLE_DISPLAY = {
+    "v2a": "Undirected Gaussian",
+    "v2b": "Directed Empirical",
+    "v2d": "Directed Signed (Dale)",
+}
 VARIANT_TITLE = {
     "connectome": "connectome",
     "connectome_weight_permuted": "control (perm. wts)",
@@ -136,7 +143,7 @@ def main() -> None:
 
     # --- figures --------------------------------------------------------------
     spectral.plot_eigenvalue_grid(
-        spectra, CONDITIONS, KEY_VARIANTS, CONDITION_TITLE, VARIANT_TITLE,
+        spectra, CONDITIONS, KEY_VARIANTS, CONDITION_TITLE_DISPLAY, VARIANT_TITLE,
         VARIANT_COLOR, FIGURES_DIR / "eigenvalue_spectra.png",
         suptitle="Normalized eigenvalue spectra (λ / |λ₁|): connectome vs nulls",
     )
