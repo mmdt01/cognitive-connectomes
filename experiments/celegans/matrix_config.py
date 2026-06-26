@@ -62,8 +62,15 @@ VARIANT_RUNG = {
     "modularity_rewire": 4,
 }
 
-# Full 20-point spectral-radius sweep from 0.0 to 2.0.
-SPECTRAL_RADII = [round(float(sr), 4) for sr in np.linspace(0.0, 2.0, 20)]
+# Full 39-point spectral-radius sweep from 0.0 to 4.0 (Suarez-width). Preserves
+# the prior 0.105 spacing (4/38 == 2/19), so this grid is a strict SUPERSET of the
+# old linspace(0, 2, 20): the first 20 points reproduce the earlier runs bit-for-
+# bit, and the new tail (sr 2.1 -> 4.0) extends coverage into the regime where the
+# connectome's compressed bulk finally reaches criticality (bulk95/|l1| ~ 0.30 ->
+# bulk critical at top ~ 3.3) and beyond. Top-eigenvalue matching is unchanged; the
+# wider sweep is what stops it from silently under-covering directed non-normal
+# connectomes whose bulk decouples from the top (cf. Suarez et al. 2021, alpha->3.5).
+SPECTRAL_RADII = [round(float(sr), 4) for sr in np.linspace(0.0, 4.0, 39)]
 SUPERCRITICAL_RADII = [sr for sr in SPECTRAL_RADII if sr >= 1.25]
 
 N_SEEDS = 10
