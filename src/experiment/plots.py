@@ -11,6 +11,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import pandas as pd
 
 _VARIANT_STYLE = {
@@ -34,10 +35,28 @@ _VARIANT_LABEL = {
 }
 
 
-def _supercritical_span(ax, cfg):
-    ax.axvspan(min(cfg.supercritical_radii), max(cfg.spectral_radii),
-               color="#fff3e0", zorder=0)
+_SUPERCRITICAL_COLOR = "#fff3e0"
+
+
+def _supercritical_span(ax, cfg, condition=None):
+    # Shade where the connectome's eigenvalue bulk is supercritical (sr >= its
+    # sr_crit = 1/bulk95_ratio), per condition, when the run supplies it; else
+    # fall back to the fixed nominal-supercritical threshold.
+    span = getattr(cfg, "supercritical_span", None)
+    start = span.get(condition) if (span and condition in span) else None
+    if start is None:
+        start = min(cfg.supercritical_radii)
+    ax.axvspan(start, max(cfg.spectral_radii), color=_SUPERCRITICAL_COLOR, zorder=0)
     ax.axvline(1.0, color="grey", lw=0.8, ls=":", zorder=1)
+
+
+def _supercritical_legend_handle(cfg):
+    """Legend proxy explaining the shaded band."""
+    if getattr(cfg, "supercritical_span", None):
+        label = "connectome eigenvalue-bulk\nsupercritical (sr ≥ $sr_{crit}$)"
+    else:
+        label = f"supercritical (sr ≥ {min(cfg.supercritical_radii):g})"
+    return mpatches.Patch(facecolor=_SUPERCRITICAL_COLOR, edgecolor="none", label=label)
 
 
 def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
@@ -58,7 +77,7 @@ def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
             ax.plot(sub.spectral_radius, sub["mean"], label=_VARIANT_LABEL[variant], **style)
             ax.fill_between(sub.spectral_radius, sub["mean"] - sub["sem"],
                             sub["mean"] + sub["sem"], color=style["color"], alpha=0.15)
-        _supercritical_span(ax, cfg)
+        _supercritical_span(ax, cfg, condition)
         if cfg.metric_no_skill is not None:
             ax.axhline(cfg.metric_no_skill, color="grey", lw=0.9, ls="--", zorder=1)
         if cfg.metric_ymax is not None:
@@ -71,7 +90,11 @@ def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
         axes[0].text(0.04, cfg.metric_no_skill + 0.02 * (cfg.metric_ymax or 1.0),
                      f"no skill ({metric} = {cfg.metric_no_skill:g})",
                      fontsize=7, color="grey")
-    axes[-1].legend(fontsize=8, framealpha=0.9, loc="upper left")
+    handles, labels = axes[-1].get_legend_handles_labels()
+    patch = _supercritical_legend_handle(cfg)
+    axes[-1].legend(handles + [patch], labels + [patch.get_label()],
+                    fontsize=8, framealpha=0.9, loc="upper left",
+                    bbox_to_anchor=(1.02, 1.0))
     fig.suptitle(f"{cfg.task_name}: connectome vs null ladder", fontsize=13)
     fig.tight_layout()
     fig.savefig(path, dpi=300, bbox_inches="tight")
@@ -96,13 +119,17 @@ def plot_effect_sizes(stats: pd.DataFrame, cfg, path: Path) -> None:
             sig = sub[sub.significant]
             ax.scatter(sig.spectral_radius, sig.cohens_d, color=style["color"],
                        s=40, zorder=5, edgecolor="black", linewidth=0.5)
-        _supercritical_span(ax, cfg)
+        _supercritical_span(ax, cfg, condition)
         ax.axhline(0.0, color="black", lw=1.0)
         ax.set_title(cfg.condition_spec[condition]["label"], fontsize=11)
         ax.set_xlabel("spectral radius")
         ax.grid(alpha=0.25)
     axes[0].set_ylabel("Cohen's d  (>0 ⇒ connectome better)")
-    axes[-1].legend(fontsize=8, framealpha=0.9, loc="best")
+    handles, labels = axes[-1].get_legend_handles_labels()
+    patch = _supercritical_legend_handle(cfg)
+    axes[-1].legend(handles + [patch], labels + [patch.get_label()],
+                    fontsize=8, framealpha=0.9, loc="upper left",
+                    bbox_to_anchor=(1.02, 1.0))
     fig.suptitle("Connectome vs null: effect size across the sweep "
                  "(filled markers = Holm-significant)", fontsize=12)
     fig.tight_layout()

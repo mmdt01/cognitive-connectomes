@@ -60,6 +60,12 @@ class ExperimentConfig:
     # driven tasks (NARMA, Mackey-Glass -- left at the default so they build
     # byte-identically); 3 for Lorenz (the 3-D state fed back in closed loop).
     input_dim: int = 1
+    # optional {condition: spectral_radius} marking where the *connectome's*
+    # eigenvalue bulk becomes supercritical (sr_crit = 1/bulk95_ratio). The
+    # metric/effect-size figures shade each condition's panel from this point
+    # rather than the fixed nominal-supercritical threshold (min(supercritical_radii)).
+    # None -> fall back to that fixed threshold. Set per run from the substrate.
+    supercritical_span: dict | None = None
 
     @property
     def results_parquet(self) -> Path:

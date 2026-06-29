@@ -35,8 +35,11 @@ def main(smoke: bool = False) -> None:
     # One builder for both horizons: null masks are horizon-independent and
     # cached on (topology, variant, seed), so the directed rewires are built once.
     builder = SubstrateBuilder()
+    # Connectome bulk-supercritical radii are horizon-independent: compute once.
+    span = builder.connectome_supercritical_radii(matrix_config.CONDITIONS)
     for horizon in task_config.HORIZONS:
         cfg = build_config(horizon)
+        cfg.supercritical_span = span
         print(f"\n{'=' * 72}\n  Mackey-Glass  horizon = {horizon}\n{'=' * 72}")
         if smoke:
             runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2)

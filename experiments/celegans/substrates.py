@@ -274,6 +274,30 @@ class SubstrateBuilder:
             Q_initial=diag.get("Q_initial"), Q_final=diag.get("Q_final"),
         ))
 
+    # -- operating-point helper --------------------------------------------
+    def connectome_supercritical_radii(self, conditions, n_seeds: int = 5) -> dict:
+        """Per-condition spectral radius at which the CONNECTOME's bulk goes
+        supercritical: ``sr_crit = 1 / bulk95_ratio``, where the 95th-percentile
+        ``|lambda|`` reaches the unit circle under top-eigenvalue rescaling. Used
+        to shade each metric-vs-sr panel's "connectome supercritical" region.
+
+        Seed-averaged (matters only for v2a, whose connectome weights are a
+        per-seed Gaussian draw; v2b/v2d use the fixed real weights, so the average
+        is exact there). Lazy import of ``spectral`` keeps this module light.
+        """
+        from src.analysis.spectral import spectral_metrics
+
+        out = {}
+        for condition in conditions:
+            ratios = [
+                spectral_metrics(self.weighted(condition, "connectome", s))["bulk95_ratio"]
+                for s in range(n_seeds)
+            ]
+            mean_ratio = float(np.mean(ratios))
+            if mean_ratio > 1e-9:
+                out[condition] = 1.0 / mean_ratio
+        return out
+
     # -- summary ------------------------------------------------------------
     def summary(self) -> dict:
         return {

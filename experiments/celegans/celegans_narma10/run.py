@@ -35,6 +35,8 @@ def main(smoke: bool = False) -> None:
         runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2)
     else:
         runner.run_matrix(builder, cfg)
+    # Shade each figure's panel from where the connectome's bulk goes supercritical.
+    cfg.supercritical_span = builder.connectome_supercritical_radii(cfg.conditions)
     stats.run(cfg)
     plots.run(cfg)
     print("\nPipeline complete.")

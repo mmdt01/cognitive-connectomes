@@ -40,6 +40,8 @@ def build_config(metric: str) -> ExperimentConfig:
 
 def main(smoke: bool = False) -> None:
     builder = SubstrateBuilder()
+    # Where the connectome's bulk goes supercritical (shading for the figures).
+    span = builder.connectome_supercritical_radii(matrix_config.CONDITIONS)
 
     # Run the matrix once. The vpt config carries climate_error along, so the
     # single results.parquet holds both metrics' columns.
@@ -53,6 +55,7 @@ def main(smoke: bool = False) -> None:
     # Stats + figures per metric, both reading the shared results.parquet.
     for metric in METRICS:
         cfg = build_config(metric)
+        cfg.supercritical_span = span
         print(f"\n{'-' * 72}\n  Metric: {metric}\n{'-' * 72}")
         stats.run(cfg)
         plots.run(cfg)
