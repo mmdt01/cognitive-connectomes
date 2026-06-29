@@ -24,7 +24,13 @@ points** (edge-of-chaos) and **yes in the supercritical regime**, where the
 connectome maintains higher MC than its degree-preserving rewire. This effect
 is **regime-independent on MC**: it reproduces across undirected signed-Gaussian
 (v2a) and directed empirical (v2b) weights, and v2c attributes it to clustering
-and/or modularity (degree-only mechanism ruled out).
+and/or modularity (degree-only mechanism ruled out). A later **unified wide-sweep
+re-run** (7-variant ladder × `[0,4]` sweep) reproduces all of this and reframes it
+through the operating-point lens: the connectome's MC is the *lowest* at canonical
+and the *highest* deep supercritically (an operating-point shift), and its
+supercritical "advantage" is a **robustness crossover** — a wide flat memory plateau
+where the disk-like nulls peak sharply and collapse — not a higher ceiling (its peak
+MC sits *below* theirs). Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
 The project has since turned the task axis from passive memory toward
 **dynamical-system prediction** (north star: a connectome-as-JEPA world model).
@@ -298,6 +304,21 @@ and **climate** (per-coordinate marginal Wasserstein-1, lower=better). Findings:
   20–25%), and below sr≈0.8 the connectome is *better* on climate — but at canonical
   sr it is tied, not best.
 
+**Memory capacity (unified re-run, complete).** Re-ran MC on the shared 7-variant
+ladder × 3 conditions × `[0,4]` wide sweep × 10 seeds (v1-pinned MC params,
+`experiments/celegans/celegans_mc/`), putting the foundational task on the same footing
+as the prediction tasks. Reproduces the original findings — connectome lowest at
+canonical (v2b MC 9.1, d≈−6 vs degree), connectome > degree supercritically in v2a
+(d≈+1.3 at sr≈1.8, the v2a/v2c result) — and unifies them under the operating-point
+picture: the connectome's MC peaks late (sr≈2) on a **flat plateau that holds to sr=4**
+while the disk-like nulls peak sharply near sr≈1.2 and collapse, so the connectome
+**dominates supercritically** (connectome−degree d≈+8.5 at sr 3) by **robustness, not
+ceiling** (peak MC ~11.7 < nulls' ~12.3–13.0; lower participation ratio). New beyond the
+original: in the *directed* conditions the topology leg (control vs degree) is ~0 at
+canonical but grows to a **large emergent** memory advantage (d≈+3.5 at sr 2.5). Full
+account — plus the robustness–performance trade-off and its biology — in
+`PREDICTION_TASKS_INTERPRETATION.md` §3 and §5.
+
 ---
 
 ## 7. Key findings to date
@@ -306,11 +327,17 @@ and **climate** (per-coordinate marginal Wasserstein-1, lower=better). Findings:
    weight regimes (v2a, v2b).
 2. **Higher-order structure matters in the supercritical regime on MC**
    (connectome > degree_rewire, d up to 1.47); v2c attributes it to clustering
-   and/or modularity, degree-only ruled out.
+   and/or modularity, degree-only ruled out. The wide-sweep re-run reproduces this
+   (v2a d≈+1.3) and adds a **large emergent topology advantage in the directed
+   conditions** (control > degree d≈+3.5 supercritically), reframing the supercritical
+   "advantage" as a **robustness crossover** (flat memory plateau vs the nulls' sharp
+   peak-and-collapse), not a higher ceiling.
 3. **The MC supercritical effect is regime-independent** (v2b reproduces v2c's
    d≈1.0 in a structurally different reservoir).
 4. **Spectral-radius matching ≠ effective-criticality matching when degree
-   distributions differ** — a generalisable methodological contribution.
+   distributions differ** — a generalisable methodological contribution, now the basis
+   of the operating-point analysis across all four tasks (`sr_crit = 1/bulk95_ratio`;
+   compare curve-vs-curve, not at a single matched sr).
 5. **Perron–Frobenius compression** shifts the crossover location for all-
    positive weights but does not eliminate the effect.
 6. **On NARMA prediction the supercritical advantage is regime-dependent** —
