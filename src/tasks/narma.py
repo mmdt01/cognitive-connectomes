@@ -23,8 +23,8 @@ NARMA-10 recurrence (order ``n = 10``):
 Convention note: this matches ``reservoirpy.datasets.narma`` exactly (verified
 bit-for-bit in the test suite) — the sum window is ``y[t-n:t]`` and the input
 product is ``u[t-n]*u[t]``. This differs by a one-step index shift from the
-canonical Atiya-Parlos form transcribed in IMPLEMENTATION_PHASE0_BRIDGE.md §3.1
-(``sum_{i=0}^{n-1} y(t-i)`` and ``u(t-n+1)*u(t)``). Both are standard NARMA-10
+canonical Atiya-Parlos form (``sum_{i=0}^{n-1} y(t-i)`` and
+``u(t-n+1)*u(t)``). Both are standard NARMA-10
 variants; the shift is immaterial to the task. Matching reservoirpy buys a
 clean reference cross-check.
 """

@@ -7,11 +7,9 @@ degree-matched baselines.
 
 This document is the single canonical reference for the project. It is intended
 to be loaded into fresh Claude conversations as the starting context. Companion
-docs: `PROJECT_PLAN.md` (the forward plan), `NULL_MODELS_METHODOLOGY.md` and
-`SIGNED_WEIGHTS_METHODOLOGY.md` (method references),
+docs: `PROJECT_PLAN.md` (the forward plan) and
 `PREDICTION_TASKS_INTERPRETATION.md` (the reference summary + mechanism
-interpretation of all three prediction tasks; an uncommitted working doc),
-`MACKEY_GLASS_KICKOFF.md` (the completed Mackey-Glass build's brief).
+interpretation of all three prediction tasks; an uncommitted working doc).
 
 ---
 
@@ -110,8 +108,7 @@ at `.venv/`; editable-installed via `pyproject.toml` (only `src*` is packaged).
 
 ```
 cognitive-connectomes/
-├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md / IMPLEMENTATION_PHASE0_BRIDGE.md
-├── NULL_MODELS_METHODOLOGY.md / SIGNED_WEIGHTS_METHODOLOGY.md / MACKEY_GLASS_KICKOFF.md
+├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md
 ├── PREDICTION_TASKS_INTERPRETATION.md        (mechanism interpretation; uncommitted)
 ├── data/
 │   ├── cook2019_connectome.xlsx              (Cook 2019 SI, corrected July 2020)
@@ -179,8 +176,7 @@ gitignored as regenerable; `figures/*.png` are tracked.
 
 Each rung preserves more structure than the last; if the connectome beats a
 null, structure beyond that rung's preserved feature is doing work. Rungs 2–4
-have directed paths (`directed=True`); full reference in
-`NULL_MODELS_METHODOLOGY.md`.
+have directed paths (`directed=True`).
 
 - **Rung 0 — Random Gaussian.** Preserves N and (in expectation) density.
 - **Rung 1 — Erdős–Rényi.** Preserves N and exact edge count.
@@ -441,7 +437,7 @@ infrastructure.
   `W[i,j]` = weight j→i (the directed loader transposes Cook's native layout).
 - **Dale signs (v2d):** `data/celegans_neurotransmitters.csv` — GABA-synthesizing
   neurons (DD, VD, RME, AVL, DVB, RIS = 26) inhibitory (−1), all else +1; source
-  eLife 95402. See `SIGNED_WEIGHTS_METHODOLOGY.md`.
+  eLife 95402.
 - **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,
   ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
 - **MC spectral sweep:** `[0.5,0.7,0.85,0.9,0.95,1.0,1.05,1.1,1.25,1.5,1.75]`;
@@ -476,9 +472,7 @@ infrastructure.
 Paste this document as the first message, then state the task. Recommended extra
 context per task:
 - **Continuing/analysing a prediction experiment:** also load `PROJECT_PLAN.md`
-  and the task's `task_config.py` + `results/`; the methodology docs
-  (`NULL_MODELS_METHODOLOGY.md`, `SIGNED_WEIGHTS_METHODOLOGY.md`) for the nulls
-  and Dale signs.
+  and the task's `task_config.py` + `results/`.
 - **Reviewing the prediction-task results:** `PREDICTION_TASKS_INTERPRETATION.md`
   is the reference summary across all three tasks (mechanisms + the Lorenz
   results); each task's `task_config.py` + `results/` + `figures/` hold the
