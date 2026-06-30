@@ -11,27 +11,54 @@ connectome-level fields of the ``ExperimentConfig``.
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Conditions: each fixes a (topology, weight-scheme) substrate. The realism
-# column walks undirected gaussian -> directed empirical -> + Dale sign.
+# Conditions: each fixes a (topology, weight-scheme) substrate. The first four
+# form a topology x weight-distribution 2x2 factorial that dissociates
+# non-normality (undirected/normal vs directed/non-normal) from weight
+# heterogeneity (gaussian/homogeneous vs empirical/heavy-tailed); v2d is the
+# orthogonal Dale-sign extension on top of the directed-empirical cell.
+#
+#                | gaussian weights | empirical (heavy-tailed) weights
+#   -------------+------------------+---------------------------------
+#   undirected   | v2a              | v2ae
+#   directed     | v2bg             | v2b   (+ Dale signs -> v2d)
 # ---------------------------------------------------------------------------
-CONDITIONS = ["v2a", "v2b", "v2d"]
+CONDITIONS = ["v2a", "v2ae", "v2bg", "v2b", "v2d"]
 
 CONDITION_SPEC = {
     "v2a": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
-        "label": "(1) Undirected with gaussian weights",
+        "label": "Undirected · gaussian weights",
+    },
+    "v2ae": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical",
+        "label": "Undirected · empirical weights",
+    },
+    "v2bg": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_gaussian",
+        "label": "Directed · gaussian weights",
     },
     "v2b": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
-        "label": "(2) Directed with empirical weights (non-negative)",
+        "label": "Directed · empirical weights",
     },
     "v2d": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
-        "label": "(3) Directed with empirical weights (signed)",
+        "label": "Directed · empirical weights (signed)",
     },
+}
+
+# The topology x weight-distribution 2x2 factorial (the first four conditions),
+# laid out for the factorial figure: rows = topology, cols = weight scheme.
+# v2d (signed) is the orthogonal Dale extension and is excluded from the grid.
+FACTORIAL_2X2 = {
+    "grid": [["v2a", "v2ae"], ["v2bg", "v2b"]],
+    "row_labels": ["Undirected\n(normal)", "Directed\n(non-normal)"],
+    "col_labels": ["Gaussian weights", "Empirical weights"],
 }
 
 # The connectome, a weight-placement control, and the five-rung null ladder.
@@ -102,6 +129,7 @@ def shared() -> dict:
     return dict(
         conditions=CONDITIONS,
         condition_spec=CONDITION_SPEC,
+        factorial_2x2=FACTORIAL_2X2,
         variants=VARIANTS,
         null_variants=NULL_VARIANTS,
         variant_rung=VARIANT_RUNG,

@@ -59,6 +59,26 @@ def _supercritical_legend_handle(cfg):
     return mpatches.Patch(facecolor=_SUPERCRITICAL_COLOR, edgecolor="none", label=label)
 
 
+def _metric_panel(ax, grouped, cfg, condition) -> None:
+    """Render one condition's connectome-vs-ladder metric-vs-sr curves onto ``ax``
+    (shared by the 1xN figure and the 2x2 factorial grid)."""
+    for variant in cfg.variants:
+        sub = grouped[(grouped.condition == condition)
+                      & (grouped.variant == variant)].sort_values("spectral_radius")
+        if sub.empty:
+            continue
+        style = _VARIANT_STYLE[variant]
+        ax.plot(sub.spectral_radius, sub["mean"], label=_VARIANT_LABEL[variant], **style)
+        ax.fill_between(sub.spectral_radius, sub["mean"] - sub["sem"],
+                        sub["mean"] + sub["sem"], color=style["color"], alpha=0.15)
+    _supercritical_span(ax, cfg, condition)
+    if cfg.metric_no_skill is not None:
+        ax.axhline(cfg.metric_no_skill, color="grey", lw=0.9, ls="--", zorder=1)
+    if cfg.metric_ymax is not None:
+        ax.set_ylim(0, cfg.metric_ymax)
+    ax.grid(alpha=0.25)
+
+
 def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
     metric = cfg.metric
     conditions = [c for c in cfg.conditions if c in results.condition.unique()]
@@ -68,23 +88,9 @@ def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
     grouped = (results.groupby(["condition", "variant", "spectral_radius"])[metric]
                .agg(["mean", "sem"]).reset_index())
     for ax, condition in zip(axes, conditions):
-        for variant in cfg.variants:
-            sub = grouped[(grouped.condition == condition)
-                          & (grouped.variant == variant)].sort_values("spectral_radius")
-            if sub.empty:
-                continue
-            style = _VARIANT_STYLE[variant]
-            ax.plot(sub.spectral_radius, sub["mean"], label=_VARIANT_LABEL[variant], **style)
-            ax.fill_between(sub.spectral_radius, sub["mean"] - sub["sem"],
-                            sub["mean"] + sub["sem"], color=style["color"], alpha=0.15)
-        _supercritical_span(ax, cfg, condition)
-        if cfg.metric_no_skill is not None:
-            ax.axhline(cfg.metric_no_skill, color="grey", lw=0.9, ls="--", zorder=1)
-        if cfg.metric_ymax is not None:
-            ax.set_ylim(0, cfg.metric_ymax)
+        _metric_panel(ax, grouped, cfg, condition)
         ax.set_title(cfg.condition_spec[condition]["label"], fontsize=11)
         ax.set_xlabel("spectral radius")
-        ax.grid(alpha=0.25)
     axes[0].set_ylabel(cfg.metric_label)
     if cfg.metric_no_skill is not None:
         axes[0].text(0.04, cfg.metric_no_skill + 0.02 * (cfg.metric_ymax or 1.0),
@@ -97,6 +103,51 @@ def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
                     bbox_to_anchor=(1.02, 1.0))
     fig.suptitle(f"{cfg.task_name}: connectome vs null ladder", fontsize=13)
     fig.tight_layout()
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_factorial_grid(results: pd.DataFrame, cfg, path: Path) -> None:
+    """Topology x weight-distribution factorial: a grid of metric-vs-sr panels.
+
+    Rows = topology (undirected/normal vs directed/non-normal), columns = weight
+    scheme (gaussian/homogeneous vs empirical/heavy-tailed), per ``cfg.factorial_2x2``.
+    Reads the connectome-vs-ladder curves of each cell so the dissociation is read
+    by eye: left->right isolates weight heterogeneity, top->bottom isolates
+    non-normality.
+    """
+    spec = cfg.factorial_2x2
+    grid = spec["grid"]
+    present = set(results.condition.unique())
+    nrows, ncols = len(grid), len(grid[0])
+    grouped = (results.groupby(["condition", "variant", "spectral_radius"])[cfg.metric]
+               .agg(["mean", "sem"]).reset_index())
+    fig, axes = plt.subplots(nrows, ncols, figsize=(6 * ncols, 4.6 * nrows),
+                             sharex=True, sharey=True, squeeze=False)
+    for i, row in enumerate(grid):
+        for j, condition in enumerate(row):
+            ax = axes[i][j]
+            if condition in present:
+                _metric_panel(ax, grouped, cfg, condition)
+            ax.set_title(cfg.condition_spec[condition]["label"], fontsize=10)
+            if i == nrows - 1:
+                ax.set_xlabel("spectral radius")
+            if i == 0 and spec.get("col_labels"):
+                ax.annotate(spec["col_labels"][j], xy=(0.5, 1.22), xycoords="axes fraction",
+                            ha="center", va="bottom", fontsize=13, fontweight="bold")
+            if j == 0:
+                ax.set_ylabel(cfg.metric_label)
+                if spec.get("row_labels"):
+                    ax.annotate(spec["row_labels"][i], xy=(-0.30, 0.5),
+                                xycoords="axes fraction", ha="center", va="center",
+                                fontsize=12, fontweight="bold", rotation=90)
+    handles, labels = axes[0][0].get_legend_handles_labels()
+    patch = _supercritical_legend_handle(cfg)
+    fig.legend(handles + [patch], labels + [patch.get_label()], fontsize=8,
+               framealpha=0.9, loc="center left", bbox_to_anchor=(1.0, 0.5))
+    fig.suptitle(f"{cfg.task_name}: topology × weight-distribution factorial "
+                 "(rows = directedness, columns = weight heterogeneity)", fontsize=13)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
@@ -143,6 +194,10 @@ def run(cfg) -> None:
     metric_fig = cfg.figures_dir / f"{cfg.metric}_vs_spectral_radius.png"
     plot_metric_vs_sr(results, cfg, metric_fig)
     print(f"Saved {metric_fig}")
+    if getattr(cfg, "factorial_2x2", None):
+        factorial_fig = cfg.figures_dir / f"{cfg.metric}_factorial_2x2.png"
+        plot_factorial_grid(results, cfg, factorial_fig)
+        print(f"Saved {factorial_fig}")
     if cfg.stats_parquet.exists():
         stats = pd.read_parquet(cfg.stats_parquet)
         # Metric-tagged so a two-metric task (Lorenz) doesn't overwrite one

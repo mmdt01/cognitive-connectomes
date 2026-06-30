@@ -58,6 +58,23 @@ class SubstrateBuilder:
         self.directed_weighted = weighted
         self.empirical_pool = weighted[weighted != 0].copy()
 
+        # Symmetric (undirected) empirical substrate for v2ae. The connectome's
+        # REAL directed weights are reduced to an undirected, *normal* matrix by
+        # summing reciprocal synapses (W_sym[i, j] = W[i, j] + W[j, i] = total
+        # synaptic mass between the pair), restricted to the undirected mask.
+        # This is the v2ae connectome; its per-edge magnitudes are the v2ae
+        # empirical pool the nulls sample from. v2ae isolates weight heterogeneity
+        # (heavy-tailed magnitudes on hubs) from non-normality: it shares v2a's
+        # symmetric topology but carries real heavy-tailed weights, not Gaussian.
+        sym = (self.directed_weighted + self.directed_weighted.T) * self.undirected_mask
+        assert np.array_equal(sym > 0, self.undirected_mask.astype(bool)), (
+            "undirected mask support must equal the summed-reciprocal-weight "
+            "support (every undirected edge carries >=1 synapse)."
+        )
+        self.undirected_weighted = sym
+        self._undirected_upper = np.triu(self.undirected_mask, k=1).astype(bool)
+        self.undirected_empirical_pool = sym[self._undirected_upper].copy()
+
         # Dale sign vector for v2d (aligned to directed node order).
         self.signs, self.sign_coverage = load_neuron_signs(self.directed.node_labels)
 
@@ -147,6 +164,23 @@ class SubstrateBuilder:
         if condition == "v2a":
             return apply_weight_scheme(mask, "symmetric_gaussian", seed=seed)
 
+        if condition == "v2bg":
+            # Directed topology + homogeneous gaussian weights (non-normal,
+            # no heavy tail). Like v2a, every variant gets fresh gaussian draws;
+            # the mask is what differs (connectome = real, nulls = rewired).
+            return apply_weight_scheme(mask, "asymmetric_gaussian", seed=seed)
+
+        if condition == "v2ae":
+            # Undirected topology + real heavy-tailed weights. Like v2b, the
+            # connectome keeps its real (summed-symmetric) weights; the nulls
+            # sample the undirected empirical pool with replacement.
+            if variant == "connectome":
+                return self.undirected_weighted.copy()
+            return apply_weight_scheme(
+                mask, "symmetric_empirical", seed=seed,
+                empirical_weights=self.undirected_empirical_pool,
+            )
+
         # v2b / v2d: connectome keeps its real weights; nulls sample the pool.
         if variant == "connectome":
             weighted = self.directed_weighted.copy()
@@ -194,6 +228,28 @@ class SubstrateBuilder:
             permuted = np.zeros_like(base_W)
             permuted[upper_edges] = rng.permutation(base_W[upper_edges])
             return permuted + permuted.T
+
+        if condition == "v2ae":
+            # Permute the connectome's REAL (summed-symmetric) magnitudes across
+            # its real undirected edges -- topology + multiset fixed, placement
+            # scrambled. The empirical analogue of the v2a control.
+            permuted = np.zeros_like(self.undirected_weighted)
+            permuted[self._undirected_upper] = rng.permutation(
+                self.undirected_empirical_pool
+            )
+            return permuted + permuted.T
+
+        if condition == "v2bg":
+            # Directed gaussian: permuting already-random gaussian draws across
+            # the real directed edges is distribution-preserving -> a negative
+            # control that should match the connectome (as v2a's is).
+            base_W = apply_weight_scheme(
+                self.directed_mask, "asymmetric_gaussian", seed=seed
+            )
+            nonzero = self.directed_mask.astype(bool)
+            permuted = np.zeros_like(base_W)
+            permuted[nonzero] = rng.permutation(base_W[nonzero])
+            return permuted
 
         # v2b / v2d: permute the connectome's real magnitudes across its real
         # directed edges (empirical_pool is exactly those nonzero weights).

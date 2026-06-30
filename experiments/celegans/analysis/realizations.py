@@ -39,16 +39,20 @@ _DIR = Path(__file__).resolve().parent
 FIGURES_DIR = _DIR / "figures"
 RESULTS_DIR = _DIR / "results"
 
-CONDITIONS = matrix_config.CONDITIONS  # v2a, v2b, v2d
-REPRESENTATIVE_SEED = 0  # v2a weights are a gaussian draw; show one representative
+CONDITIONS = matrix_config.CONDITIONS  # v2a, v2ae, v2bg, v2b, v2d
+REPRESENTATIVE_SEED = 0  # gaussian-weight conditions are a draw; show one representative
 
 CONDITION_TITLE = {
     "v2a": "Undirected Gaussian",
+    "v2ae": "Undirected Empirical",
+    "v2bg": "Directed Gaussian",
     "v2b": "Directed Empirical",
     "v2d": "Directed Signed (Dale)",
 }
 CONDITION_COLOR = {
     "v2a": "#4477aa",
+    "v2ae": "#66ccee",
+    "v2bg": "#ee8866",
     "v2b": "#cc6677",
     "v2d": "#9467bd",
 }

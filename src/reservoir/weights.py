@@ -29,6 +29,25 @@ def apply_weight_scheme(
         kwarg. ``W[i, j]`` and ``W[j, i]`` are independent even when
         the mask is symmetric. Diagonal stays zero.
 
+        ``"symmetric_empirical"`` (v2ae): the undirected, *normal*
+        analogue of ``asymmetric_empirical``. One draw per undirected
+        upper-triangle edge, sampled with replacement from
+        ``empirical_weights``, written to both ``W[i, j]`` and
+        ``W[j, i]`` so W is exactly symmetric (hence normal). Requires a
+        symmetric mask. Same symmetric topology treatment as
+        ``symmetric_gaussian`` (v2a) but with real heavy-tailed
+        empirical magnitudes instead of Gaussian draws -- it isolates
+        weight heterogeneity from non-normality. Diagonal stays zero.
+
+        ``"asymmetric_gaussian"`` (v2bg): the directed, *non-normal*
+        analogue of ``symmetric_gaussian``. One independent N(0, 1)
+        draw per nonzero (directed) entry of the mask, so ``W[i, j]``
+        and ``W[j, i]`` are independent (asymmetric, non-normal) but the
+        magnitude distribution is homogeneous (Gaussian, no heavy tail).
+        Same directed topology as ``asymmetric_empirical`` (v2b) but
+        homogeneous weights -- the fourth cell of the
+        topology x weight-distribution 2x2. Diagonal stays zero.
+
         ``"asymmetric_empirical_signed"`` (v2d): the v2b magnitude
         pipeline followed by a per-neuron Dale sign. Magnitudes are
         sampled from ``abs(empirical_weights)``; the per-neuron sign
@@ -125,6 +144,35 @@ def apply_weight_scheme(
         # In reservoir convention W[i, j] is the weight from j to i, so neuron j's
         # out-synapses are column j; scale each column by its presynaptic sign.
         weighted = weighted * neuron_signs[np.newaxis, :]
+        return weighted
+
+    if scheme == "symmetric_empirical":
+        empirical_weights = kwargs.get("empirical_weights")
+        if empirical_weights is None:
+            raise ValueError(
+                "symmetric_empirical requires the `empirical_weights` kwarg "
+                "(1D array of magnitudes to sample from with replacement)."
+            )
+        assert np.allclose(adjacency_mask, adjacency_mask.T), \
+            "symmetric_empirical requires a symmetric mask"
+        empirical_weights = np.asarray(empirical_weights, dtype=float).ravel()
+        assert empirical_weights.size > 0, "empirical_weights must be non-empty"
+        rng = np.random.default_rng(seed)
+        upper_mask = np.triu(adjacency_mask, k=1).astype(bool)
+        weighted = np.zeros_like(adjacency_mask, dtype=float)
+        # one draw per undirected edge, mirrored -> exactly symmetric (normal)
+        weighted[upper_mask] = rng.choice(
+            empirical_weights, size=int(upper_mask.sum()), replace=True
+        )
+        weighted = weighted + weighted.T
+        return weighted
+
+    if scheme == "asymmetric_gaussian":
+        rng = np.random.default_rng(seed)
+        nonzero_mask = adjacency_mask.astype(bool)
+        weighted = np.zeros_like(adjacency_mask, dtype=float)
+        # one independent N(0, 1) draw per directed edge -> asymmetric (non-normal)
+        weighted[nonzero_mask] = rng.normal(0.0, 1.0, size=int(nonzero_mask.sum()))
         return weighted
 
     raise NotImplementedError(f"Unknown weight scheme: {scheme!r}")
