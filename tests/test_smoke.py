@@ -20,6 +20,7 @@ from src.reservoir.build import rescale_spectral_radius, build_from_adjacency
 from src.tasks import narma as narma_task
 from src.tasks import mackey_glass as mackey_glass_task
 from src.tasks import lorenz as lorenz_task
+from src.tasks.memory_capacity import _measure as _mc_measure
 
 
 @pytest.fixture(scope="module")
@@ -116,6 +117,38 @@ def test_rescale_spectral_radius(connectome_adjacency):
     rescaled = rescale_spectral_radius(weighted, target_spectral_radius=0.95)
     achieved = float(np.max(np.abs(np.linalg.eigvals(rescaled))))
     assert abs(achieved - 0.95) < 1e-9
+
+
+def test_memory_capacity_downdate_matches_direct(connectome_adjacency):
+    """The Gram-down-date MC measure reproduces a direct per-lag recomputation
+    (the optimisation must be numerically equivalent, not just faster)."""
+    from scipy.stats import pearsonr
+
+    weighted = apply_weight_scheme(connectome_adjacency, "symmetric_gaussian", seed=0)
+    reservoir = build_from_adjacency(
+        weighted, target_spectral_radius=1.5, leak_rate=1.0, input_scaling=1.0, seed=0
+    )
+    params = dict(T=600, warmup=100, max_lag=8, ridge_alpha=1e-6, input_scaling=1.0)
+    mc_downdate, _ = _mc_measure(reservoir, seed=1000, **params)
+
+    # Reference: rebuild the Gram from scratch each lag (the pre-optimisation form).
+    rng = np.random.default_rng(1000)
+    u = rng.uniform(-1.0, 1.0, size=(params["T"], 1))
+    reservoir.reset()
+    S = reservoir.run(u)[params["warmup"]:]
+    uf = u[params["warmup"]:, 0]
+    n, N = S.shape
+    mc_direct = 0.0
+    for k in range(1, params["max_lag"] + 1):
+        X = S[k:]
+        y = uf[: n - k]
+        w = np.linalg.solve(X.T @ X + params["ridge_alpha"] * np.eye(N), X.T @ y)
+        pred = X @ w
+        if np.std(pred) >= 1e-12 and np.std(y) >= 1e-12:
+            mc_direct += pearsonr(pred, y)[0] ** 2
+
+    assert mc_downdate > 0.0  # a real reservoir has nonzero linear memory
+    assert np.isclose(mc_downdate, mc_direct, rtol=1e-7, atol=1e-7)
 
 
 # ---------------------------------------------------------------------------

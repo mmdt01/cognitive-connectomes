@@ -21,7 +21,18 @@ def _measure(
     ridge_alpha: float,
     input_scaling: float,
 ) -> tuple[float, np.ndarray]:
-    """Run the MC measurement loop. Returns ``(mc_total, mc_per_lag)``."""
+    """Run the MC measurement loop. Returns ``(mc_total, mc_per_lag)``.
+
+    Per lag ``k`` the design matrix is ``X_k = states[k:]`` and the ridge readout
+    needs the Gram ``X_k.T @ X_k`` (the dominant cost: ``O((n-k) N^2)`` per lag).
+    The ``X_k`` are **nested** -- each drops the first row of the previous -- so
+    the Gram is computed once for ``k=1`` and **down-dated** by a rank-1 update
+    thereafter, ``gram_{k+1} = gram_k - outer(states[k], states[k])``, turning the
+    total Gram cost from ``O(max_lag * (n-k) N^2)`` into ``O(n N^2)`` (the rest --
+    one ``N x N`` solve per lag -- then dominates). Numerically identical to
+    rebuilding each Gram up to float round-off: with ``max_lag << n`` the down-date
+    removes only ~2% of the Gram's mass, so there is no meaningful cancellation.
+    """
     rng = np.random.default_rng(seed)
     u = rng.uniform(-input_scaling, input_scaling, size=(T, 1))
 
@@ -34,18 +45,25 @@ def _measure(
     n_after_warmup = states_after_warmup.shape[0]
     n_units = states_after_warmup.shape[1]
 
+    ridge_eye = ridge_alpha * np.eye(n_units)
+    # gram holds X_k.T @ X_k (no ridge); initialise at k=1 and down-date per lag.
+    gram = states_after_warmup[1:].T @ states_after_warmup[1:]
+
     mc_per_lag = np.zeros(max_lag)
     for k in range(1, max_lag + 1):
         X = states_after_warmup[k:]
         y = u_flat[: n_after_warmup - k]
-        gram = X.T @ X + ridge_alpha * np.eye(n_units)
-        w = np.linalg.solve(gram, X.T @ y)
+        w = np.linalg.solve(gram + ridge_eye, X.T @ y)
         pred = X @ w
         if np.std(pred) < 1e-12 or np.std(y) < 1e-12:
             mc_per_lag[k - 1] = 0.0
         else:
             r, _ = pearsonr(pred, y)
             mc_per_lag[k - 1] = r ** 2
+        # Down-date for the next lag: drop row k (the first row of the current X).
+        if k < max_lag:
+            row = states_after_warmup[k]
+            gram = gram - np.outer(row, row)
     return float(mc_per_lag.sum()), mc_per_lag
 
 
