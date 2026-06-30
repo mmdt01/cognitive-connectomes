@@ -9,7 +9,7 @@ This document is the single canonical reference for the project. It is intended
 to be loaded into fresh Claude conversations as the starting context. Companion
 docs: `PROJECT_PLAN.md` (the forward plan) and
 `PREDICTION_TASKS_INTERPRETATION.md` (the reference summary + mechanism
-interpretation of all three prediction tasks; an uncommitted working doc).
+interpretation of all four tasks, evaluated on the wide spectral-radius sweep).
 
 ---
 
@@ -32,34 +32,41 @@ supercritical "advantage" is a **robustness crossover** — a wide flat memory p
 where the disk-like nulls peak sharply and collapse — not a higher ceiling (its peak
 MC sits *below* theirs). Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
-The project has since turned the task axis from passive memory toward
-**dynamical-system prediction** (north star: a connectome-as-JEPA world model).
-**All three prediction tasks are complete** — NARMA-10 (input-driven emulation),
-Mackey-Glass (driven forecasting), and Lorenz (closed-loop free-running) — and the
-picture is more nuanced than MC. The supercritical advantage is **regime-dependent**:
-on NARMA it is strong in the directed empirically-weighted conditions (v2b/v2d — the
-connectome beats *every* null, Cohen's d up to ~+10) but **absent in the clean
-undirected condition (v2a)**, manifesting as supercritical *robustness* not
-canonical superiority.
+The project then turned the task axis from passive memory toward **dynamical-system
+prediction** (north star: a connectome-as-JEPA world model), adding three prediction
+tasks — NARMA-10 (input-driven emulation), Mackey-Glass (driven forecasting), and
+Lorenz (closed-loop free-running) — on the same shared infrastructure. All four tasks
+(MC + the three) are now evaluated across a **wide spectral-radius sweep**
+(`linspace(0, 4, 39)`), which is the key methodological correction: a narrow `[0,2]`
+sweep compares variants at *different effective criticalities*, because the
+connectome's heavy weights compress its eigenvalue bulk so its operating point sits at
+a **higher nominal spectral radius** than the disk-like nulls (`sr_crit = 1/bulk₉₅_ratio
+≈ 3.3` vs `≈ 2.2–2.7`).
+
+**Read curve-vs-curve across the wide sweep, the four tasks tell one story.** At the
+canonical operating point (sr ≈ 0.95) the connectome is **worse-or-equal** on every
+task. In the supercritical regime — once the sweep reaches each variant's operating
+point — the connectome is the **most robust** variant: where the disk-like nulls peak
+**sharply** and collapse, it rises slowly to a **wide, flat plateau** slightly below
+the nulls' peak but holding far into the regime. This is a **robustness–performance
+trade-off** rooted in the connectome's spectral heterogeneity (a likely signature of
+biological connectivity statistics): best on the driven tasks (NARMA flat where nulls
+destabilise; MC/MG best-and-holding where nulls collapse) and at parity with the best
+structured null on closed-loop Lorenz.
 
 The **topology-vs-weights confound is resolved** by a weight-placement control
-(`connectome_weight_permuted`: the connectome's exact topology + a permutation of
-its exact weights), splitting the effect into a topology leg (control vs
-degree_rewire) and a placement leg (connectome vs control). The answer
-**dissociates by task**. On **NARMA** the advantage is *mostly topology*
-(control vs degree d ≈ +4.3–4.9, v2b/v2d) with a smaller weight-placement bonus
-(connectome vs control d ≈ +1) — **topology-led**, not weight-driven. On
-**Mackey-Glass** the connectome is instead *worse* supercritically, the deficit
-**entirely weight placement** (d ≈ −2 to −3) with a **null topology leg** — the
-mirror image of NARMA. **Lorenz** repeats and doubles the MG story: supercritically
-the connectome is *worse than its nulls on both metrics* (valid-prediction time and
-attractor-climate fidelity), the deficit again **entirely weight placement**
-(d ≈ −2 on both) with a **null topology leg** — refuting the pre-registered
-fidelity-for-stability trade (the metrics agree, not flip). v2a is a null negative
-control throughout. Net: the connectome's directed topology helps input-driven
-emulation and is **neutral for both autonomous tasks**; its weight placement helps
-emulation slightly and *hurts* both forecasting and closed-loop generation. At the
-canonical operating point it is worse-or-equal on all three tasks.
+(`connectome_weight_permuted`: the connectome's exact topology + a per-seed permutation
+of its exact weights), splitting the effect into a **placement** leg (connectome vs
+control) and a **topology** leg (control vs degree_rewire). The wide sweep reframes
+both. (1) **Weight placement is an operating-point shift, not a handicap:** the
+placement leg is a deficit at low–mid sr and **reverses to advantage/parity at high
+sr** on every task — the connectome's apparent supercritical "deficits" on MG and
+Lorenz under the old narrow sweep were an artifact of comparing *below* its operating
+point. (2) **Directed topology is a separate, task-dependent advantage** that **emerges
+supercritically**: large for memory (MC) and input-driven emulation (NARMA), emergent
+under strong drive for forecasting (MG tail), and absent for closed-loop generation
+(Lorenz, where degree-rewiring matches it). v2a is a spectral negative control
+throughout. Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
 ---
 
@@ -115,7 +122,7 @@ at `.venv/`; editable-installed via `pyproject.toml` (only `src*` is packaged).
 ```
 cognitive-connectomes/
 ├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md
-├── PREDICTION_TASKS_INTERPRETATION.md        (mechanism interpretation; uncommitted)
+├── PREDICTION_TASKS_INTERPRETATION.md        (four-task interpretation summary)
 ├── data/
 │   ├── cook2019_connectome.xlsx              (Cook 2019 SI, corrected July 2020)
 │   └── celegans_neurotransmitters.csv        (v2d Dale signs; eLife 95402)
@@ -144,7 +151,7 @@ cognitive-connectomes/
 stats, figures, and the `ExperimentConfig` dataclass); connectome-shared,
 task-agnostic code in `experiments/<connectome>/` (the `SubstrateBuilder` and
 `matrix_config`); each task is a thin `experiments/<connectome>/<task>/` (a
-`task_config.py`, a ~15-line `run.py`, a `plot_demo.py`, and outputs). A run
+`task_config.py`, a ~15-line `run.py`, an optional `plot_demo.py`, and outputs). A run
 assembles its config as `ExperimentConfig(**matrix_config.shared(),
 **task_config.task())` and is launched with e.g. `python -m
 experiments.celegans.celegans_narma10.run`.
@@ -171,7 +178,8 @@ All `*.parquet` outputs are gitignored as regenerable; `figures/*.png` are track
   (v2a), `asymmetric_empirical` (v2b), `asymmetric_empirical_signed` (v2d Dale).
 - `load_neuron_signs(node_labels)` → per-neuron ±1 Dale vector + coverage.
 - Task evaluators `evaluate(reservoir, seed, **cfg) -> dict`: `memory_capacity`
-  (returns `mc`), `narma` (returns `nrmse`).
+  (returns `mc`), `narma` (`nrmse`), `mackey_glass` (`nrmse`), `lorenz` (`vpt` +
+  `climate_error`).
 
 ---
 
@@ -199,6 +207,12 @@ preservation. Self-loops are forced to zero everywhere.
 
 ## 6. Experimental history
 
+*The v1→v2b entries below are the framework's methodological provenance (confound
+cleanup, the null ladder, directed weights); their narrow-sweep MC numbers are
+reproduced and reframed by the unified wide-sweep runs — the four task entries that
+follow (NARMA, Mackey-Glass, Lorenz, and the MC re-run), which hold the current
+results.*
+
 **v1 (pre-framework).** Connectome ≈ degree_rewire on MC at sr=0.95, both far
 below random_Gaussian. Caught post-hoc to be a confound stack (binary-vs-
 continuous weights, symmetry, self-loops, miscounted edges). Prompted the entire
@@ -225,28 +239,21 @@ matching v2c despite a structurally different reservoir → **the supercritical
 effect is regime-independent on MC**. Transform choice (sqrt vs raw) shifts
 *where* the crossover sits, not *whether* it appears.
 
-**Phase-0 NARMA-10 bridge (complete).** First prediction task: NARMA-10
-emulation across three realism conditions (**v2a** undirected gaussian, **v2b**
-directed empirical non-negative, **v2d** directed empirical signed/Dale) ×
-full 5-rung ladder × 20-point sr sweep (0→2) × 10 seeds = 3600 evals; raw
-weights. Findings:
-- **v2a: clean null.** Connectome ≈ every null across the whole sweep (degree
-  supercritical d≈0, all p_holm≈1). The MC supercritical advantage did **not**
-  transfer to NARMA in the undirected-topology regime.
-- **v2b/v2d: strong supercritical advantage.** Connectome beats degree_rewire
-  (d +3.9→+10.5 for v2b, +2.1→+9.9 for v2d, all Holm-significant) **and** beats
-  clustering/modularity (rungs 3–4 do **not** close the gap, unlike MC).
-  Crossover at sr≈1.26; nulls are *better* at canonical sr.
-- **Mechanism: robustness, not superiority.** The connectome's NRMSE is flat
-  (~0.5) across sr; nulls are U-shaped — better canonically, then destabilise
-  supercritically. The connectome wins only by being robust where nulls fail.
-- **Confound: topology vs weights (since resolved — see below).** In v2b/v2d the
-  connectome keeps its *real* weights while nulls resample from the pool, so those
-  conditions conflate directed topology with the connectome's real weight
-  placement. This was the headline open question for prediction; the
-  weight-placement control (next entry) resolves it — and contrary to the prior
-  guess that the effect was "plausibly weight-driven," it is **topology-led**.
-  v2d's inhibition is sparse (~3.6% of edges) so v2d ≈ v2b spectrally.
+**NARMA-10 (input-driven emulation, complete).** First prediction task: NARMA-10
+across three realism conditions (**v2a** undirected gaussian, **v2b** directed
+empirical non-negative, **v2d** directed empirical signed/Dale) × the 7-variant ladder
+× 39-point `[0,4]` sweep × 10 seeds; raw weights; frozen `input_scaling=0.2, leak=1.0`.
+Findings (wide sweep):
+- **v2a: clean null** — connectome ≈ every null across the sweep.
+- **v2b/v2d: supercritical robustness.** The connectome's NRMSE is **flat (~0.55)
+  across the entire `[0,4]` sweep** — the only variant that never destabilises — while
+  every null (including the placement control) climbs to ~0.80 supercritically. So the
+  connectome **beats every null** supercritically and the margin **widens in the
+  tail**. Both legs favour it supercritically: placement reverses to an advantage
+  (connectome vs control d ~+3 at sr 3) and topology is a large advantage (control vs
+  degree d ~+4.3 in the mid-band, +1 in the tail). NARMA is noise-driven and prone to
+  supercritical blow-up; the connectome's compressed-bulk **stability** is exactly what
+  it rewards. (v2d's inhibition is sparse, ~3.6% of edges, so v2d ≈ v2b spectrally.)
 
 **Weight-placement control (topology-vs-weights confound resolved).** Added a
 shared control variant `connectome_weight_permuted` — the connectome's *exact*
@@ -261,45 +268,48 @@ negative control throughout (permuting already-random weights changes nothing),
 validating the construction.
 
 **Mackey-Glass forecasting (complete).** Second prediction task: *driven
-(teacher-forced) k-step-ahead* forecasting of the mildly chaotic Mackey-Glass
-delay system (β=0.2, γ=0.1, n=10, τ=17), same 3 conditions × 7-variant ladder ×
-20-point sr sweep × 10 seeds, at two horizons (h=84 canonical benchmark, h=300
-chaos-limited). Local generator bit-exact vs `reservoirpy.datasets.mackey_glass`;
-frozen `input_scaling=0.5, leak_rate=0.3` (MG's smooth series wants a far lower
-leak than NARMA's 1.0). Findings:
-- **Driven MG is easy at the classic horizons** (rung-0 NRMSE ≈ 0.09 at h=84): a
-  single-scalar drive lets the reservoir reconstruct the delay embedding. The
-  discriminative regime is long horizons (NRMSE ≈ 0.47 at h=300).
-- **The supercritical sign flips vs NARMA.** v2a is null; in v2b/v2d the connectome
-  is *worse* than its nulls at h=84 (connectome vs degree d down to ≈−3.3,
-  Holm-sig), and the deficit **washes out at h=300**.
-- **The h=84 deficit is entirely weight placement.** Connectome vs control
-  d ≈ −2 to −3 (Holm-sig, v2b/v2d); the topology leg (control vs degree_rewire) is
-  **null**. So the connectome's *real weight placement* is anomalously bad for this
-  forecasting task; its topology is indistinguishable from a degree-matched random
-  graph. Mirror image of NARMA, where topology is the dominant *positive* effect.
+(teacher-forced) k-step-ahead* forecasting of the mildly chaotic Mackey-Glass delay
+system (β=0.2, γ=0.1, n=10, τ=17), 3 conditions × 7-variant ladder × 39-point `[0,4]`
+sweep × 10 seeds, at two horizons (h=84 canonical, h=300 chaos-limited). Local
+generator bit-exact vs `reservoirpy.datasets.mackey_glass`; frozen `input_scaling=0.5,
+leak_rate=0.3`. Findings (wide sweep):
+- **v2a null; a v2b/v2d phenomenon.** Driven MG is easy at the classic horizons
+  (rung-0 NRMSE ≈ 0.09 at h=84).
+- **The connectome's deficit is an operating-point artifact.** At matched low–mid sr it
+  is *worse* (the narrow-sweep finding: connectome vs control/degree d ~−2.5 at sr 1.5),
+  but its NRMSE **improves monotonically with sr** to the best of all variants at its
+  operating point (h=84: 0.15 → **0.03** by sr ≈ 3, vs nulls degrading to 0.07–0.24;
+  h=300 similar). The placement leg reverses (d −2.5 → +2.0 by sr 3), and a **topology
+  advantage emerges in the tail** (control vs degree d ~+1.7 at sr 3, h=84) invisible at
+  low sr. MG is memory-limited; the connectome's memory peaks at its higher operating
+  sr, so once the sweep reaches it the connectome is the best-and-most-robust forecaster
+  (nulls degrade past their own optima while it holds). *(At each variant's own optimum
+  the variants are roughly tied; the connectome's distinction is its later optimum and
+  graceful degradation.)*
 
-**Lorenz attractor (complete).** Third and final prediction task: *closed-loop
-free-running* generation of the chaotic Lorenz attractor (σ=10, ρ=28, β=8/3) — the
-reservoir is teacher-forced, then cut loose to feed its own 3-D output back as
-input. Same 3 conditions × 7-variant ladder × 20-point sr sweep × 10 seeds; local
-RK4 generator (short-horizon cross-check vs `reservoirpy` — bit-exactness is
-impossible against its adaptive `solve_ivp` under chaos); 3-channel `Win`; **direct
-next-state** readout (the increment form blows the climate metric up at the
-connectome-fixed N=300); frozen `input_scaling=0.1, leak_rate=1.0, ridge=1e-7`.
-Two metrics per cell: **VPT** (valid-prediction time, Lyapunov units, higher=better)
-and **climate** (per-coordinate marginal Wasserstein-1, lower=better). Findings:
-- **The connectome is worse on *both* metrics supercritically** (v2b/v2d): nulls and
-  the placement control lift into the regime that reconstructs Lorenz (VPT ~1.6→~4.8
-  Lyapunov times, climate ~7→~0.6) while the connectome stays flat (VPT ~2, climate
-  ~6 — a collapsed attractor); sig. in 88/96 (VPT) and 79/96 (climate) cells.
-- **Entirely weight placement, again.** Connectome vs control d ≈ −2 on both metrics;
-  the topology leg (control vs degree) is **null** on both — the MG result doubled.
-- **Pre-registration refuted.** The predicted fidelity-for-stability *trade* (good
-  VPT, bad climate, a metric flip) did not occur; the metrics **agree**. A faint
-  robustness echo survives only in v2a (connectome diverges 3% of seeds vs nulls
-  20–25%), and below sr≈0.8 the connectome is *better* on climate — but at canonical
-  sr it is tied, not best.
+**Lorenz attractor (complete).** Third prediction task: *closed-loop free-running*
+generation of the chaotic Lorenz attractor (σ=10, ρ=28, β=8/3) — teacher-force a ridge
+readout, then cut the reservoir loose to feed its own 3-D output back as input. 3
+conditions × 7-variant ladder × 39-point `[0,4]` sweep × 10 seeds; local RK4 generator
+(short-horizon cross-check vs `reservoirpy` only — chaos precludes bit-exactness against
+its adaptive `solve_ivp`); 3-channel `Win`; **direct next-state** readout (the increment
+form blows the climate metric up at N=300); frozen `input_scaling=0.1, leak_rate=1.0,
+ridge=1e-7`. Two metrics: **VPT** (valid-prediction time, Lyapunov units, higher=better)
+and **climate** (per-coordinate marginal Wasserstein-1, lower=better). Findings (wide
+sweep):
+- **The connectome recovers at its operating point.** Under the old narrow `[0,2]` sweep
+  it looked *worse on both metrics* supercritically — an artifact of stopping below its
+  `sr_crit ≈ 3.3`. On the wide sweep it **recovers at sr ≈ 3.0–3.3 to parity with the
+  best structured null** (degree): VPT 1.6 → ~4.6 (vs degree ~4.6, random ~2.6), climate
+  6.5 → ~2 (vs random *diverged* to 20+); and it is the **most divergence-robust**
+  variant — **0%** closed-loop blow-ups in v2b/v2d vs **26–31%** for random/ER. The
+  placement leg reverses from a mid-sweep deficit (d −2 at sr 1.5) to parity (d ~+0.5 at
+  sr 3).
+- **Topology does not favour the connectome on Lorenz** in the tail (control vs degree
+  d ≈ −0.8 — degree-rewiring matches it), unlike MC/NARMA. So on the autonomous task the
+  connectome's structure is **sufficient and robust, but not superior** — the
+  pre-registered fidelity-for-stability trade did not occur (the metrics agree, and
+  below sr ≈ 0.8 the connectome is *better* on climate).
 
 **Memory capacity (unified re-run, complete).** Re-ran MC on the shared 7-variant
 ladder × 3 conditions × `[0,4]` wide sweep × 10 seeds (v1-pinned MC params,
@@ -337,27 +347,29 @@ account — plus the robustness–performance trade-off and its biology — in
    compare curve-vs-curve, not at a single matched sr).
 5. **Perron–Frobenius compression** shifts the crossover location for all-
    positive weights but does not eliminate the effect.
-6. **On NARMA prediction the supercritical advantage is regime-dependent** —
-   strong in directed empirical conditions (v2b/v2d, beating *all* nulls), absent
-   in the clean undirected-topology test (v2a). It is supercritical *robustness*
-   rather than superiority.
-7. **The topology-vs-weights confound is resolved, and the answer dissociates by
-   task** (via the `connectome_weight_permuted` placement control). NARMA's
-   advantage is **mostly topology** (control vs degree d ≈ +4.3–4.9) plus a smaller
-   weight-placement bonus (connectome vs control d ≈ +1) — i.e. topology-led, not
-   weight-driven. Mackey-Glass is the **mirror image**: the connectome is *worse*
-   supercritically, the deficit **entirely weight placement** (d ≈ −2 to −3),
-   topology leg null. **Lorenz repeats this on both its metrics** (placement d ≈ −2
-   on VPT *and* climate, topology leg null), refuting the pre-registered
-   fidelity-for-stability trade. Net: the connectome's directed topology helps
-   input-driven emulation and is **neutral for both autonomous tasks**; its weight
-   placement helps emulation slightly and *hurts* both forecasting and closed-loop
-   generation. v2a is a null negative control throughout. **Mechanism
-   (diagnostics):** the placement effect is spectrally grounded — the connectome's
-   heavy weights compress its eigenvalue bulk, giving it the least linear memory and
-   dynamical richness (shown via the `src/analysis/` spectral tier + memory-capacity
-   + a sqrt-weight sensitivity check); the topology effect is real but
-   mechanistically open. Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
+6. **At the canonical operating point the connectome is worse-or-equal on all four
+   tasks; its distinctive behaviour is supercritical.** Read curve-vs-curve across the
+   wide `[0,4]` sweep it is the **most robust** variant on every task — a wide flat
+   plateau where the disk-like nulls peak sharply and collapse. This is a
+   **robustness–performance trade-off**: it wins supercritically by robustness, *not* a
+   higher ceiling (its peak performance is at or below the best null's). The cause is
+   spectral heterogeneity (heavy weights on hubs spread the eigenvalue radii), a likely
+   signature of biological connectivity statistics.
+7. **The topology-vs-weights confound is resolved** (via the `connectome_weight_permuted`
+   placement control), and the wide sweep reframes both legs. **Placement is an
+   operating-point shift, not a handicap:** the placement leg reverses from a low–mid-sr
+   deficit to high-sr advantage/parity on every task — the connectome's compressed bulk
+   moves its optimum to a higher nominal sr (`sr_crit ≈ 3.3`), so its old narrow-sweep
+   "deficits" on MG/Lorenz were an artifact of comparing *below* that point. **Directed
+   topology is a separate, task-dependent advantage that emerges supercritically:** large
+   for memory (MC, control vs degree d ~+3.5) and input-driven emulation (NARMA, ~+4.3),
+   emergent for forecasting (MG tail, ~+1.7), and absent for autonomous generation
+   (Lorenz, where degree-rewiring matches it). v2a is a spectral negative control
+   throughout. **Mechanism:** placement is spectrally grounded — the connectome's heavy
+   weights compress its eigenvalue bulk (`src/analysis/spectral.py`), which both shifts
+   its operating point higher and grants the wide stable operating range; the topology
+   effect is real but mechanistically open. Full account in
+   `PREDICTION_TASKS_INTERPRETATION.md`.
 
 ---
 
@@ -368,16 +380,23 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 - **Binary-vs-continuous weights, symmetric-vs-asymmetric W, and drifting
   self-loops are silent confounds at fixed sr.** Standardise all three across
   conditions; force zero diagonal. (v1 → v2a.)
-- **Spectral-radius matching understates broad-degree topologies** (depressed
-  bulk vs λ_max). Sweep sr or control on bulk criticality. (v2a.)
+- **Spectral-radius matching ≠ effective-criticality matching** when degree/weight
+  distributions differ (the connectome's heavy hub weights depress its bulk vs λ_max).
+  A variant's bulk becomes critical at `sr_crit = 1/bulk₉₅_ratio` — connectome ≈ 3.3 vs
+  nulls ≈ 2.2–2.7 — so sweep **wide** (`[0,4]`) and compare at operating points. (v2a →
+  operating-point analysis.)
 - **Perron–Frobenius compression** in all-positive matrices shifts the effective
   regime upward in sr; sign assignment (E/I) mitigates it. (v2b → v2d.)
 - **Heavy-tailed raw weights kneecap reservoirs** (a few large edges dominate the
   spectral radius). sqrt/log transform mitigates; the current NARMA bridge uses
   raw, so v2b/v2d there carry this caveat. (v2b.)
-- **Compare connectome vs null at *matched* sr, not best-over-sweep.** Each
-  variant's own optimum lives at a different sr; a "best NRMSE per variant"
-  glance inverts the real story. (NARMA bridge.)
+- **Compare curve-vs-curve at operating points, not at a single nominal sr.** Each
+  variant's optimum lives at a different sr (the connectome's is higher — its bulk
+  reaches criticality later), so *both* naive readings mislead: best-over-sweep-per-
+  variant inverts the story, and a single "matched nominal sr" compares variants at
+  *different effective criticalities* (this is what manufactured the connectome's
+  apparent MG/Lorenz deficits on the old `[0,2]` sweep). Sweep wide and read whole
+  curves. (NARMA bridge → operating-point analysis.)
 - **NMSE vs NRMSE.** Report NRMSE = √(MSE/Var); many RC papers report NMSE (no
   root), so a literature "NARMA-10 ≈ 0.3" is NRMSE ≈ 0.55.
 - **n=10 sweeps predict n=50 probe direction and zero-crossings** to within
@@ -402,30 +421,44 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 
 `PROJECT_PLAN.md` is canonical: the thirteen-week schedule, the Stage-A
 scale-row/realism-cross design, decision gates, conference targets, and the task
-progression (NARMA-10 ✓ → Mackey-Glass ✓ → Lorenz ✓, toward the connectome-as-JEPA
-world model). The prediction-task arc is **complete**; the open threads are the
-substrate-analysis tier (a Lyapunov-exponent module could join the spectral one)
-and the `sqrt`-vs-`raw` weight-transform sensitivity (§10), both on the same shared
-infrastructure.
+progression (memory capacity ✓ → NARMA-10 ✓ → Mackey-Glass ✓ → Lorenz ✓, all on the
+wide `[0,4]` sweep, toward the connectome-as-JEPA world model). The four-task arc is
+**complete and unified** under the operating-point / robustness framework. Open
+threads: the `sqrt`-vs-`raw` weight-transform sensitivity (§10); a possible
+Lyapunov-exponent analysis module (an autonomous-LLE probe was explored and parked as a
+future JEPA collapse-diagnostic — it is top-dominated, so not a substitute for the
+spectral operating-point analysis); the MC evaluator speedup (it refits a Gram per lag,
+~50× the other tasks' linear algebra); and the **scale row** (fly optic lobe, mouse) per
+`PROJECT_PLAN.md`.
 
 ---
 
 ## 10. Open methodological questions
 
-- **Topology vs weights in v2b/v2d — RESOLVED** by the `connectome_weight_permuted`
-  placement control (§6–7): NARMA topology-led, Mackey-Glass and Lorenz
-  placement-driven.
+- **Topology vs weights — RESOLVED** by the `connectome_weight_permuted` placement
+  control and reframed by the wide sweep (§6–7): placement is an **operating-point
+  shift** (the placement leg reverses deficit→advantage as sr reaches the connectome's
+  operating point, not a fixed handicap); directed topology is a **separate
+  task-dependent advantage** that emerges supercritically (large MC/NARMA, emergent
+  MG-tail, absent Lorenz).
+- **Operating-point normalisation — ADOPTED.** Shared normaliser = top-eigenvalue
+  matching with a **Suárez-width `[0,4]` sweep** (`matrix_config.SPECTRAL_RADII =
+  linspace(0,4,39)`), with curve-vs-curve comparison; `sr_crit = 1/bulk₉₅_ratio` per
+  variant. Top-matching is field-standard (Suárez et al. 2021) and the only cheap
+  normaliser at scale (λ₁ via sparse eigs); just sweep wide enough to cover every
+  variant's operating point.
 - **Divergence-robust statistics — DONE.** `src/experiment/stats.py` caps blow-ups
   (`cfg.metric_divergence_cap`), reports a per-variant divergence rate, and tests
-  significance with a rank-based permutation test (Cliff's delta + median alongside
-  the capped Cohen's d). Used across all three prediction tasks; it earns its keep
-  on Lorenz, where closed-loop divergence is the primary failure mode (capped
-  climate, VPT bounded by construction).
-- **Weight transform for prediction.** All three tasks use raw synapse counts;
-  `sqrt` is a one-line switch (`matrix_config.WEIGHT_TRANSFORM`) and the documented
-  heavy-tail mitigation. It ~halves the MG placement penalty; the same is expected
-  on Lorenz (untested) — the deficit's *sign/structure* should survive, its
-  *magnitude* is partly a raw-weight artefact.
+  significance with a rank-based permutation test (Cliff's delta + median alongside the
+  capped Cohen's d). Used across all four tasks; it earns its keep on Lorenz, where
+  closed-loop divergence is the primary failure mode (MC's bounded metric rarely
+  diverges).
+- **Weight transform.** All four tasks use raw synapse counts; `sqrt` is a one-line
+  switch (`matrix_config.WEIGHT_TRANSFORM`) and the documented heavy-tail mitigation. It
+  compresses the spectrum less, *raising* `bulk₉₅_ratio` and so *lowering* `sr_crit` —
+  the connectome would recover at a lower nominal sr. Sign/structure of the results
+  should survive; the exact operating points are a weight-transform choice. (Untested on
+  the wide sweep.)
 - **Clustering vs modularity disambiguation** (from v2c) — still confounded on
   this connectome; needs a dual-constraint null or decoupled block model.
 - **Asymmetric mask sampling** between the fixed connectome and the sampled nulls
@@ -464,24 +497,26 @@ infrastructure.
   eLife 95402.
 - **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,
   ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
-- **MC spectral sweep:** `[0.5,0.7,0.85,0.9,0.95,1.0,1.05,1.1,1.25,1.5,1.75]`;
-  supercritical probes at sr∈{1.25,1.5,1.75}, n=50, 10k-permutation Holm tests.
-- **Prediction sweep (all three tasks):** 20-point `linspace(0,2,20)`, n=10,
-  3 conditions × **7 variants** (connectome + `connectome_weight_permuted`
-  placement control + 5-rung ladder). Frozen reservoir hyperparameters tuned on
-  rung-0: NARMA `input_scaling=0.2, leak=1.0`; Mackey-Glass `input_scaling=0.5,
-  leak=0.3`; Lorenz `input_scaling=0.1, leak=1.0, ridge=1e-7`. MG is *driven
-  k-step-ahead* (teacher-forced) at h=84/h=300, local generator bit-exact vs
-  `reservoirpy`. Lorenz is *closed-loop free-running* (3-channel `Win`, direct
-  next-state readout), two metrics (VPT + climate), local RK4 generator
-  (short-horizon cross-check only — bit-exactness impossible under chaos).
+- **Shared spectral-radius sweep (all four tasks):** 39-point `linspace(0,4,39)`
+  (Suárez-width, strict superset of the old `[0,2]` 20-point grid);
+  `experiments/celegans/matrix_config.SPECTRAL_RADII`. `sr_crit = 1/bulk₉₅_ratio` locates
+  each variant's operating point (connectome ≈ 3.3, nulls ≈ 2.2–2.7).
+- **Task matrix (all four tasks):** 3 conditions × **7 variants** (connectome +
+  `connectome_weight_permuted` placement control + 5-rung ladder) × the 39-point sweep ×
+  n=10 seeds. Frozen reservoir hyperparameters: MC (v1-pinned) `input_scaling=1.0,
+  leak=1.0, ridge=1e-6`; NARMA `input_scaling=0.2, leak=1.0`; Mackey-Glass
+  `input_scaling=0.5, leak=0.3` (h=84/h=300, driven teacher-forced, local generator
+  bit-exact vs `reservoirpy`); Lorenz `input_scaling=0.1, leak=1.0, ridge=1e-7`
+  (closed-loop free-running, 3-channel `Win`, direct next-state readout, metrics
+  VPT + climate, local RK4 short-horizon cross-check only).
 - **Weight-placement control:** `connectome_weight_permuted` — connectome's exact
   topology + a per-seed permutation of its exact weights (Dale signs kept; v2a a
   negative control). `connectome vs control` = placement, `control vs degree` =
   topology.
-- **Prediction statistics:** divergence-robust — rank-based permutation test
-  (Holm-corrected) for significance, with Cliff's delta, capped Cohen's d, median,
-  and a per-variant divergence rate; `metric_divergence_cap=2.0` (NRMSE).
+- **Statistics:** divergence-robust — rank-based permutation test (Holm-corrected) for
+  significance, with Cliff's delta, capped Cohen's d, median, and a per-variant
+  divergence rate; `metric_divergence_cap` = 2.0 (NRMSE), 10.0 (Lorenz climate), none for
+  VPT/MC (bounded).
 - **Substrate analysis tier:** `src/analysis/spectral.py` (connectome-agnostic
   spectral metrics + plots) + `experiments/celegans/analysis/spectral.py` driver
   (`python -m experiments.celegans.analysis.spectral`). Grounds the
@@ -497,9 +532,9 @@ Paste this document as the first message, then state the task. Recommended extra
 context per task:
 - **Continuing/analysing a prediction experiment:** also load `PROJECT_PLAN.md`
   and the task's `task_config.py` + `results/`.
-- **Reviewing the prediction-task results:** `PREDICTION_TASKS_INTERPRETATION.md`
-  is the reference summary across all three tasks (mechanisms + the Lorenz
-  results); each task's `task_config.py` + `results/` + `figures/` hold the
+- **Reviewing the task results:** `PREDICTION_TASKS_INTERPRETATION.md` is the
+  reference summary across all four tasks (the operating-point + robustness picture and
+  per-task results); each task's `task_config.py` + `results/` + `figures/` hold the
   specifics.
 - **Running a substrate analysis:** `src/analysis/` + the
   `experiments/celegans/analysis/` drivers; see that dir's README.
