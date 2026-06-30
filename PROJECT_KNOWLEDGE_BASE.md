@@ -123,9 +123,10 @@ at `.venv/`; editable-installed via `pyproject.toml` (only `src*` is packaged).
 cognitive-connectomes/
 ├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md
 ├── PREDICTION_TASKS_INTERPRETATION.md        (four-task interpretation summary)
-├── data/
-│   ├── cook2019_connectome.xlsx              (Cook 2019 SI, corrected July 2020)
-│   └── celegans_neurotransmitters.csv        (v2d Dale signs; eLife 95402)
+├── data/                                     (per-species subdirs)
+│   └── celegans/
+│       ├── cook2019_connectome.xlsx          (Cook 2019 SI, corrected July 2020)
+│       └── celegans_neurotransmitters.csv    (v2d Dale signs; eLife 95402)
 ├── src/                                       (the library; editable-installed)
 │   ├── connectomes/  celegans_cook2019.py (load modes), neurotransmitters.py
 │   ├── nulls/        random_gaussian, erdos_renyi, degree_rewire, clustering_rewire,
@@ -488,11 +489,11 @@ spectral operating-point analysis); the MC evaluator speedup (it refits a Gram p
 
 ## 12. Quick reference
 
-- **Connectome data:** `data/cook2019_connectome.xlsx`, sheet "hermaphrodite
+- **Connectome data:** `data/celegans/cook2019_connectome.xlsx`, sheet "hermaphrodite
   chemical" (SI corrected July 2020). N=300; 3000 undirected / 3669 directed
   off-diagonal edges; 38 autaptic self-loops dropped. Reservoir convention
   `W[i,j]` = weight j→i (the directed loader transposes Cook's native layout).
-- **Dale signs (v2d):** `data/celegans_neurotransmitters.csv` — GABA-synthesizing
+- **Dale signs (v2d):** `data/celegans/celegans_neurotransmitters.csv` — GABA-synthesizing
   neurons (DD, VD, RME, AVL, DVB, RIS = 26) inhibitory (−1), all else +1; source
   eLife 95402.
 - **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,

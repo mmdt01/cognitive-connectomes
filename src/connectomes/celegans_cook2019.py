@@ -15,7 +15,7 @@ from . import ConnectomeData
 
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_DATA_PATH = _REPO_ROOT / "data" / "cook2019_connectome.xlsx"
+_DATA_PATH = _REPO_ROOT / "data" / "celegans" / "cook2019_connectome.xlsx"
 
 
 def load(processing: str = "binary_undirected_chemical") -> ConnectomeData:

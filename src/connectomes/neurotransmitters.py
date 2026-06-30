@@ -1,11 +1,11 @@
 """Per-neuron Dale sign vector for the v2d ``asymmetric_empirical_signed`` scheme.
 
 Maps each *C. elegans* cell label to its neuron class, looks the class up in
-the curated neurotransmitter table (``data/celegans_neurotransmitters.csv``),
+the curated neurotransmitter table (``data/celegans/celegans_neurotransmitters.csv``),
 and returns a length-N vector of signs (+1 excitatory / -1 inhibitory) aligned
 to ``node_labels``.
 
-Sign model (Dale's principle; see ``data/README.md`` for provenance):
+Sign model (Dale's principle; see ``data/celegans/README.md`` for provenance):
 GABA-synthesizing neurons (DD, VD, RME, AVL, DVB, RIS) are inhibitory (-1);
 every other neuron — acetylcholine, glutamate, monoamine, or unclassified — is
 excitatory (+1). The table lists the GABAergic and monoaminergic classes
@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_TABLE_PATH = _REPO_ROOT / "data" / "celegans_neurotransmitters.csv"
+_TABLE_PATH = _REPO_ROOT / "data" / "celegans" / "celegans_neurotransmitters.csv"
 
 # Suffixes that turn a neuron-class name into a cell name: positional labels
 # (left/right, dorsal/ventral and their combinations) or a member number.
@@ -57,7 +57,7 @@ def load_neuron_signs(
         neuron_signs=signs)`` for the connectome and (unchanged) for its nulls.
     table_path
         Override for the neurotransmitter CSV; defaults to
-        ``data/celegans_neurotransmitters.csv``.
+        ``data/celegans/celegans_neurotransmitters.csv``.
     unknown_sign
         Sign for any cell whose class is not listed in the table (+1 by the
         v2d excitatory-default policy).
