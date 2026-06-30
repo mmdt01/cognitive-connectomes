@@ -227,3 +227,7 @@ hyperopt_results/
 
 # Experiment result artefacts (regenerable from experiments)
 *.parquet
+
+# Large downloaded datasets (provenance documented in each data/<species>/README.md;
+# small curated files such as the C. elegans xlsx/csv stay committed)
+data/**/*.mat

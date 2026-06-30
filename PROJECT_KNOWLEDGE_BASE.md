@@ -124,9 +124,11 @@ cognitive-connectomes/
 ├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md
 ├── PREDICTION_TASKS_INTERPRETATION.md        (four-task interpretation summary)
 ├── data/                                     (per-species subdirs)
-│   └── celegans/
-│       ├── cook2019_connectome.xlsx          (Cook 2019 SI, corrected July 2020)
-│       └── celegans_neurotransmitters.csv    (v2d Dale signs; eLife 95402)
+│   ├── celegans/
+│   │   ├── cook2019_connectome.xlsx          (Cook 2019 SI, corrected July 2020)
+│   │   └── celegans_neurotransmitters.csv    (v2d Dale signs; eLife 95402)
+│   └── human/                                (Suárez 2021 Lausanne SC/FC; .mat gitignored)
+│       └── README.md                         (dataset provenance + structure)
 ├── src/                                       (the library; editable-installed)
 │   ├── connectomes/  celegans_cook2019.py (load modes), neurotransmitters.py
 │   ├── nulls/        random_gaussian, erdos_renyi, degree_rewire, clustering_rewire,
