@@ -15,6 +15,30 @@ Scale-invariant ratios of the eigenvalue bulk to the dominant mode |λ₁|. Lowe
 | v2a | rung 3 (clustering) | 13 | 0.957 | 0.674 | 0.277 | 190.257 | 3 |
 | v2a | rung 4 (modularity) | 12 | 0.974 | 0.742 | 0.292 | 186.668 | 4 |
 
+## v2ae · undirected empirical
+
+| condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
+|---|---|---|---|---|---|---|---|
+| v2ae | connectome | 317 | 0.858 | 0.339 | 0.107 | 126.198 | 1 |
+| v2ae | control (perm. wts) | 221 | 0.725 | 0.482 | 0.174 | 162.562 | 1 |
+| v2ae | rung 0 (random) | 166 | 0.789 | 0.608 | 0.251 | 189.694 | 1 |
+| v2ae | rung 1 (ER) | 163 | 0.784 | 0.612 | 0.254 | 189.765 | 1 |
+| v2ae | rung 2 (degree) | 213 | 0.673 | 0.500 | 0.182 | 165.374 | 1 |
+| v2ae | rung 3 (clustering) | 257 | 0.572 | 0.400 | 0.152 | 167.350 | 1 |
+| v2ae | rung 4 (modularity) | 217 | 0.696 | 0.488 | 0.178 | 164.975 | 1 |
+
+## v2bg · directed gaussian
+
+| condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
+|---|---|---|---|---|---|---|---|
+| v2bg | connectome | 4 | 0.975 | 0.843 | 0.429 | 223.829 | 7 |
+| v2bg | control (perm. wts) | 4 | 0.975 | 0.857 | 0.430 | 224.562 | 10 |
+| v2bg | rung 0 (random) | 4 | 0.979 | 0.912 | 0.593 | 259.971 | 22 |
+| v2bg | rung 1 (ER) | 4 | 0.984 | 0.931 | 0.607 | 260.548 | 29 |
+| v2bg | rung 2 (degree) | 4 | 0.990 | 0.874 | 0.441 | 221.054 | 12 |
+| v2bg | rung 3 (clustering) | 4 | 0.982 | 0.859 | 0.424 | 214.899 | 9 |
+| v2bg | rung 4 (modularity) | 4 | 0.994 | 0.883 | 0.443 | 220.611 | 13 |
+
 ## v2b · directed empirical
 
 | condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
