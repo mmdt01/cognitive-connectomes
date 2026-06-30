@@ -128,14 +128,13 @@ cognitive-connectomes/
 │   ├── experiment/   GENERIC runner.py / stats.py (divergence-robust) / plots.py / config.py
 │   └── analysis/     spectral.py  (substrate analysis, connectome-agnostic; first of a series)
 ├── experiments/
-│   ├── celegans/                              (connectome-shared, task-agnostic)
-│   │   ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
-│   │   ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
-│   │   ├── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
-│   │   ├── celegans_lorenz/         task_config.py (2 metrics), run.py, plot_demo.py, results/, figures/
-│   │   └── analysis/                spectral.py driver (uses src/analysis); figures/, results/
-│   ├── v2a_continuous_weights/   (legacy MC: notebook + probe scripts)
-│   └── v2b_directed_weighted/    (legacy MC: notebook + probe scripts)
+│   └── celegans/                              (connectome-shared, task-agnostic)
+│       ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
+│       ├── celegans_mc/             task_config.py, run.py, results/, figures/  (Jaeger memory capacity)
+│       ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
+│       ├── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
+│       ├── celegans_lorenz/         task_config.py (2 metrics), run.py, plot_demo.py, results/, figures/
+│       └── analysis/                spectral.py driver (uses src/analysis); figures/, results/
 └── tests/test_smoke.py
 ```
 
@@ -158,9 +157,7 @@ placement→memory mechanism (the connectome's eigenvalue bulk is the most
 compressed); it is the template for the planned deeper topological analyses
 (degree, clustering, motifs, modularity, reciprocity).
 
-The legacy memory-capacity experiments (v2a/v2c, v2b) remain as Jupyter
-notebooks + probe scripts under `experiments/v2*_*/`. All `*.parquet` outputs are
-gitignored as regenerable; `figures/*.png` are tracked.
+All `*.parquet` outputs are gitignored as regenerable; `figures/*.png` are tracked.
 
 **Key library interfaces.**
 - Connectome loader `load(processing=...)`: `binary_undirected_chemical` (v2a),
@@ -506,8 +503,6 @@ context per task:
   specifics.
 - **Running a substrate analysis:** `src/analysis/` + the
   `experiments/celegans/analysis/` drivers; see that dir's README.
-- **Continuing a legacy MC experiment:** load that notebook's `results.parquet`
-  and the relevant `src/` modules.
 
 The progression v1 → v2a → v2c → v2b → v2d → prediction tasks is a controlled
 chain; breaking the one-variable-at-a-time discipline is the single failure mode
