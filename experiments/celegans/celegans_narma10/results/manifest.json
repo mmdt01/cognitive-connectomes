@@ -1,9 +1,11 @@
 {
-  "generated_utc": "2026-06-29T11:00:43.827885+00:00",
-  "n_evaluations": 8190,
-  "elapsed_seconds": 1101.6,
+  "generated_utc": "2026-06-30T14:45:29.094829+00:00",
+  "n_evaluations": 13650,
+  "elapsed_seconds": 1692.6,
   "conditions": [
     "v2a",
+    "v2ae",
+    "v2bg",
     "v2b",
     "v2d"
   ],
@@ -88,6 +90,8 @@
     "task_name": "NARMA-10 emulation",
     "conditions": [
       "v2a",
+      "v2ae",
+      "v2bg",
       "v2b",
       "v2d"
     ],
@@ -95,17 +99,27 @@
       "v2a": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
-        "label": "(1) Undirected with gaussian weights"
+        "label": "Undirected \u00b7 gaussian weights"
+      },
+      "v2ae": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical",
+        "label": "Undirected \u00b7 empirical weights"
+      },
+      "v2bg": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_gaussian",
+        "label": "Directed \u00b7 gaussian weights"
       },
       "v2b": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
-        "label": "(2) Directed with empirical weights (non-negative)"
+        "label": "Directed \u00b7 empirical weights"
       },
       "v2d": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
-        "label": "(3) Directed with empirical weights (signed)"
+        "label": "Directed \u00b7 empirical weights (signed)"
       }
     },
     "variants": [
