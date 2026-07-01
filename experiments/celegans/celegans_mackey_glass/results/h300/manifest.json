@@ -1,9 +1,13 @@
 {
-  "generated_utc": "2026-06-29T11:56:15.742161+00:00",
-  "n_evaluations": 8190,
-  "elapsed_seconds": 1262.9,
+  "generated_utc": "2026-07-01T14:38:49.265397+00:00",
+  "n_evaluations": 19110,
+  "elapsed_seconds": 2834.3,
   "conditions": [
     "v2a",
+    "v2ae_randsign",
+    "v2ae",
+    "v2bg",
+    "v2b_randsign",
     "v2b",
     "v2d"
   ],
@@ -88,6 +92,10 @@
     "task_name": "Mackey-Glass 300-step forecast",
     "conditions": [
       "v2a",
+      "v2ae_randsign",
+      "v2ae",
+      "v2bg",
+      "v2b_randsign",
       "v2b",
       "v2d"
     ],
@@ -95,17 +103,37 @@
       "v2a": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
-        "label": "(1) Undirected with gaussian weights"
+        "label": "Undirected \u00b7 gaussian weights"
+      },
+      "v2ae": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical",
+        "label": "Undirected \u00b7 empirical weights"
+      },
+      "v2bg": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_gaussian",
+        "label": "Directed \u00b7 gaussian weights"
       },
       "v2b": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
-        "label": "(2) Directed with empirical weights (non-negative)"
+        "label": "Directed \u00b7 empirical weights"
       },
       "v2d": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
-        "label": "(3) Directed with empirical weights (signed)"
+        "label": "Directed \u00b7 empirical weights (signed)"
+      },
+      "v2ae_randsign": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical_randsign",
+        "label": "Undirected \u00b7 empirical weights (balanced \u00b1 sign)"
+      },
+      "v2b_randsign": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_randsign",
+        "label": "Directed \u00b7 empirical weights (balanced \u00b1 sign)"
       }
     },
     "variants": [
