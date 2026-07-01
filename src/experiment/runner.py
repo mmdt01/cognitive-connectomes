@@ -8,8 +8,10 @@ builds a reservoir at the target spectral radius, and scores it with the task's
 """
 
 import json
+import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
 
@@ -17,7 +19,7 @@ from src.reservoir.build import build_from_adjacency
 
 
 def run_matrix(builder, cfg, conditions=None, variants=None,
-               spectral_radii=None, n_seeds=None) -> pd.DataFrame:
+               spectral_radii=None, n_seeds=None, checkpoint_path=None) -> pd.DataFrame:
     conditions = conditions or cfg.conditions
     variants = variants or cfg.variants
     spectral_radii = spectral_radii or cfg.spectral_radii
@@ -29,14 +31,37 @@ def run_matrix(builder, cfg, conditions=None, variants=None,
     print(f"\nInhibitory neurons: {builder.sign_coverage['n_inhibitory']} "
           f"({builder.sign_coverage['inhibitory_labels']})\n")
 
-    rows = []
+    # Optional resumable checkpointing (opt-in; None -> unchanged behaviour).
+    # After each (condition, variant, seed) finishes its spectral-radius sweep,
+    # the accumulated rows are flushed atomically to ``checkpoint_path``; on a
+    # restart those cells are skipped. Intended for the long closed-loop Lorenz
+    # run, so a hard interruption costs at most one cell's sweep, not the whole run.
+    rows, done = [], set()
+    if checkpoint_path is not None and Path(checkpoint_path).exists():
+        prev = pd.read_parquet(checkpoint_path)
+        rows = prev.to_dict("records")
+        done = set(zip(prev.condition, prev.variant, prev.seed))
+        print(f"Resuming from checkpoint {checkpoint_path}: {len(done)} "
+              f"(condition,variant,seed) cells already complete ({len(rows)} rows).")
+
+    def _flush_checkpoint():
+        if checkpoint_path is None:
+            return
+        Path(checkpoint_path).parent.mkdir(parents=True, exist_ok=True)
+        tmp = f"{checkpoint_path}.tmp"
+        pd.DataFrame(rows).to_parquet(tmp)
+        os.replace(tmp, checkpoint_path)  # atomic swap: never a half-written file
+
     total = len(conditions) * len(variants) * len(spectral_radii) * n_seeds
-    n_done = 0
+    n_done = len(rows)
+    n_this_session = 0
     t0 = time.time()
 
     for condition in conditions:
         for variant in variants:
             for seed in range(n_seeds):
+                if (condition, variant, seed) in done:
+                    continue
                 # Weight the substrate once per (condition, variant, seed);
                 # reuse across the spectral-radius sweep (rescale happens in
                 # build_from_adjacency).
@@ -67,11 +92,13 @@ def run_matrix(builder, cfg, conditions=None, variants=None,
                         row[field] = metrics[field]
                     rows.append(row)
                     n_done += 1
+                    n_this_session += 1
                     if n_done % 100 == 0 or n_done == total:
                         elapsed = time.time() - t0
-                        eta = elapsed * (total - n_done) / max(n_done, 1)
+                        eta = elapsed * (total - n_done) / max(n_this_session, 1)
                         print(f"  {n_done}/{total} ({100*n_done/total:.0f}%) "
                               f"elapsed={elapsed:.0f}s eta={eta:.0f}s", flush=True)
+                _flush_checkpoint()  # cell complete -> safe resume point
 
     elapsed = time.time() - t0
     print(f"\nMatrix done in {elapsed:.0f}s ({elapsed/60:.1f} min)")
