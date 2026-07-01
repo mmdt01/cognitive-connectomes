@@ -181,6 +181,35 @@ class SubstrateBuilder:
                 empirical_weights=self.undirected_empirical_pool,
             )
 
+        if condition == "v2ae_randsign":
+            # v2ae with a balanced random sign per edge (sign control). Connectome
+            # keeps its exact real magnitudes; only the sign is randomised.
+            if variant == "connectome":
+                rng = np.random.default_rng(seed)
+                up = self._undirected_upper
+                signs = rng.choice([-1.0, 1.0], size=int(up.sum()))
+                signed = np.zeros_like(self.undirected_weighted)
+                signed[up] = self.undirected_weighted[up] * signs
+                return signed + signed.T
+            return apply_weight_scheme(
+                mask, "symmetric_empirical_randsign", seed=seed,
+                empirical_weights=self.undirected_empirical_pool,
+            )
+
+        if condition == "v2b_randsign":
+            # v2b with a balanced random sign per directed edge (sign control).
+            if variant == "connectome":
+                rng = np.random.default_rng(seed)
+                nonzero = self.directed_mask.astype(bool)
+                signs = rng.choice([-1.0, 1.0], size=int(nonzero.sum()))
+                weighted = np.zeros_like(self.directed_weighted)
+                weighted[nonzero] = self.directed_weighted[nonzero] * signs
+                return weighted
+            return apply_weight_scheme(
+                mask, "asymmetric_empirical_randsign", seed=seed,
+                empirical_weights=self.empirical_pool,
+            )
+
         # v2b / v2d: connectome keeps its real weights; nulls sample the pool.
         if variant == "connectome":
             weighted = self.directed_weighted.copy()
@@ -250,6 +279,21 @@ class SubstrateBuilder:
             permuted = np.zeros_like(base_W)
             permuted[nonzero] = rng.permutation(base_W[nonzero])
             return permuted
+
+        if condition == "v2ae_randsign":
+            # permuted real magnitudes + balanced random signs (symmetric)
+            up = self._undirected_upper
+            signs = rng.choice([-1.0, 1.0], size=int(up.sum()))
+            permuted = np.zeros_like(self.undirected_weighted)
+            permuted[up] = rng.permutation(self.undirected_empirical_pool) * signs
+            return permuted + permuted.T
+
+        if condition == "v2b_randsign":
+            nonzero = self.directed_mask.astype(bool)
+            signs = rng.choice([-1.0, 1.0], size=int(nonzero.sum()))
+            weighted = np.zeros_like(self.directed_weighted)
+            weighted[nonzero] = rng.permutation(self.empirical_pool) * signs
+            return weighted
 
         # v2b / v2d: permute the connectome's real magnitudes across its real
         # directed edges (empirical_pool is exactly those nonzero weights).

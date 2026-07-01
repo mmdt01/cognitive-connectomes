@@ -175,4 +175,49 @@ def apply_weight_scheme(
         weighted[nonzero_mask] = rng.normal(0.0, 1.0, size=int(nonzero_mask.sum()))
         return weighted
 
+    if scheme == "symmetric_empirical_randsign":
+        # Sign control for v2ae: same empirical (heavy-tailed) magnitudes as
+        # symmetric_empirical, but each undirected edge gets a balanced random
+        # sign (P(-)=P(+)=1/2), applied symmetrically so W stays symmetric
+        # (normal). Removes the all-positive Perron structure while holding the
+        # magnitude distribution + topology fixed -- isolates SIGN from tail.
+        empirical_weights = kwargs.get("empirical_weights")
+        if empirical_weights is None:
+            raise ValueError(
+                "symmetric_empirical_randsign requires the `empirical_weights` kwarg."
+            )
+        assert np.allclose(adjacency_mask, adjacency_mask.T), \
+            "symmetric_empirical_randsign requires a symmetric mask"
+        magnitudes = np.abs(np.asarray(empirical_weights, dtype=float).ravel())
+        assert magnitudes.size > 0, "empirical_weights must be non-empty"
+        rng = np.random.default_rng(seed)
+        upper_mask = np.triu(adjacency_mask, k=1).astype(bool)
+        n_edges = int(upper_mask.sum())
+        signed = (rng.choice(magnitudes, size=n_edges, replace=True)
+                  * rng.choice([-1.0, 1.0], size=n_edges))
+        weighted = np.zeros_like(adjacency_mask, dtype=float)
+        weighted[upper_mask] = signed
+        weighted = weighted + weighted.T
+        return weighted
+
+    if scheme == "asymmetric_empirical_randsign":
+        # Sign control for v2b: empirical magnitudes with a balanced random sign
+        # per directed edge (vs v2d's structured per-neuron Dale sign). Isolates
+        # the effect of removing all-positivity on the directed substrate.
+        empirical_weights = kwargs.get("empirical_weights")
+        if empirical_weights is None:
+            raise ValueError(
+                "asymmetric_empirical_randsign requires the `empirical_weights` kwarg."
+            )
+        magnitudes = np.abs(np.asarray(empirical_weights, dtype=float).ravel())
+        assert magnitudes.size > 0, "empirical_weights must be non-empty"
+        rng = np.random.default_rng(seed)
+        nonzero_mask = adjacency_mask.astype(bool)
+        n_edges = int(nonzero_mask.sum())
+        signed = (rng.choice(magnitudes, size=n_edges, replace=True)
+                  * rng.choice([-1.0, 1.0], size=n_edges))
+        weighted = np.zeros_like(adjacency_mask, dtype=float)
+        weighted[nonzero_mask] = signed
+        return weighted
+
     raise NotImplementedError(f"Unknown weight scheme: {scheme!r}")

@@ -44,15 +44,19 @@ REPRESENTATIVE_SEED = 0  # gaussian-weight conditions are a draw; show one repre
 
 CONDITION_TITLE = {
     "v2a": "Undirected Gaussian",
+    "v2ae_randsign": "Undirected Empirical ±",
     "v2ae": "Undirected Empirical",
     "v2bg": "Directed Gaussian",
+    "v2b_randsign": "Directed Empirical ±",
     "v2b": "Directed Empirical",
     "v2d": "Directed Signed (Dale)",
 }
 CONDITION_COLOR = {
     "v2a": "#4477aa",
+    "v2ae_randsign": "#88ccee",
     "v2ae": "#66ccee",
     "v2bg": "#ee8866",
+    "v2b_randsign": "#ee99aa",
     "v2b": "#cc6677",
     "v2d": "#9467bd",
 }
@@ -74,7 +78,14 @@ def _matrix_caption(weighted: np.ndarray) -> str:
 def _distribution_caption(weighted: np.ndarray, sign_coverage: dict,
                           condition: str) -> str:
     nonzero = weighted[weighted != 0]
-    lines = [f"{nonzero.size} edges",
+    frac_neg = float((nonzero < 0).mean()) if nonzero.size else 0.0
+    if frac_neg == 0.0:
+        sign = "all positive (+)"
+    elif frac_neg > 0.4:
+        sign = f"{frac_neg:.0%} negative (balanced ±)"
+    else:
+        sign = f"{frac_neg:.1%} negative (sparse)"
+    lines = [f"{nonzero.size} edges", sign,
              f"|w|: mean {np.abs(nonzero).mean():.2f}, max {np.abs(nonzero).max():.1f}"]
     if condition == "v2d":
         lines.append(f"{sign_coverage['n_inhibitory']} inhibitory neurons")
@@ -140,8 +151,9 @@ def main() -> None:
         weight_arrays, CONDITIONS, CONDITION_TITLE, CONDITION_COLOR,
         FIGURES_DIR / "realization_weight_distributions.png",
         panel_captions=distribution_captions,
-        suptitle="Edge-weight distributions across realizations "
-                 "(gaussian → empirical heavy tail → + sparse inhibition)",
+        suptitle="Edge-weight distributions across the five substrates "
+                 "(sign confound: gaussian schemes are signed ±, empirical schemes "
+                 "all-positive; log-count y-axis exposes the empirical heavy tail)",
     )
     print(f"Saved {FIGURES_DIR / 'realization_weight_distributions.png'}")
 

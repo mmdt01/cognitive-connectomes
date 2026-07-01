@@ -11,18 +11,23 @@ connectome-level fields of the ``ExperimentConfig``.
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Conditions: each fixes a (topology, weight-scheme) substrate. The first four
-# form a topology x weight-distribution 2x2 factorial that dissociates
-# non-normality (undirected/normal vs directed/non-normal) from weight
-# heterogeneity (gaussian/homogeneous vs empirical/heavy-tailed); v2d is the
-# orthogonal Dale-sign extension on top of the directed-empirical cell.
+# Conditions: each fixes a (topology, weight-scheme) substrate. The weight axis
+# decomposes into a SIGN factor (balanced ± vs all-positive) and a TAIL factor
+# (homogeneous gaussian vs heavy-tailed empirical), crossed with topology. The
+# per-topology weight ladder gaussian -> signed-empirical -> empirical isolates
+# both: gaussian->signed-empirical is the TAIL step (sign held balanced);
+# signed-empirical->empirical is the SIGN step (tail held heavy). The MC sign
+# control showed the supercritical robustness is driven mainly by SIGN (the
+# non-negative Perron structure), heavy-tail secondary, directedness minimal.
+# v2d is the biological Dale-sign anchor on the directed-empirical cell.
 #
-#                | gaussian weights | empirical (heavy-tailed) weights
-#   -------------+------------------+---------------------------------
-#   undirected   | v2a              | v2ae
-#   directed     | v2bg             | v2b   (+ Dale signs -> v2d)
+#              | gaussian (signed) | empirical ± (signed) | empirical (positive)
+#   -----------+-------------------+----------------------+---------------------
+#   undirected | v2a               | v2ae_randsign        | v2ae
+#   directed   | v2bg              | v2b_randsign         | v2b   (+ Dale -> v2d)
 # ---------------------------------------------------------------------------
-CONDITIONS = ["v2a", "v2ae", "v2bg", "v2b", "v2d"]
+CONDITIONS = ["v2a", "v2ae_randsign", "v2ae",
+              "v2bg", "v2b_randsign", "v2b", "v2d"]
 
 CONDITION_SPEC = {
     "v2a": {
@@ -50,15 +55,36 @@ CONDITION_SPEC = {
         "weight_scheme": "asymmetric_empirical_signed",
         "label": "Directed · empirical weights (signed)",
     },
+    # --- sign controls (middle rung of each weight ladder) --------------------
+    # The empirical (heavy-tailed) magnitudes of v2ae/v2b but with a BALANCED
+    # random sign per edge, so the all-positive Perron structure is removed while
+    # topology + magnitude distribution are held fixed. v2ae vs v2ae_randsign (and
+    # v2b vs v2b_randsign) isolate the contribution of weight SIGN, decoupling it
+    # from the heavy tail in the gaussian-vs-empirical comparison.
+    "v2ae_randsign": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical_randsign",
+        "label": "Undirected · empirical weights (balanced ± sign)",
+    },
+    "v2b_randsign": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_randsign",
+        "label": "Directed · empirical weights (balanced ± sign)",
+    },
 }
 
-# The topology x weight-distribution 2x2 factorial (the first four conditions),
-# laid out for the factorial figure: rows = topology, cols = weight scheme.
-# v2d (signed) is the orthogonal Dale extension and is excluded from the grid.
-FACTORIAL_2X2 = {
-    "grid": [["v2a", "v2ae"], ["v2bg", "v2b"]],
+# The sign x tail decomposition grid: rows = topology, columns = the weight
+# ladder gaussian(signed) -> signed-empirical -> empirical(positive). Reading
+# left->middle isolates the heavy tail (sign held balanced); middle->right
+# isolates sign (tail held heavy). v2d (Dale) is the biological anchor, shown in
+# the per-condition figure rather than this mechanism grid.
+FACTORIAL_GRID = {
+    "grid": [["v2a", "v2ae_randsign", "v2ae"],
+             ["v2bg", "v2b_randsign", "v2b"]],
     "row_labels": ["Undirected\n(normal)", "Directed\n(non-normal)"],
-    "col_labels": ["Gaussian weights", "Empirical weights"],
+    "col_labels": ["Gaussian\n(signed, homog.)",
+                   "Signed empirical\n(± heavy tail)",
+                   "Empirical\n(all-positive tail)"],
 }
 
 # The connectome, a weight-placement control, and the five-rung null ladder.
@@ -129,7 +155,7 @@ def shared() -> dict:
     return dict(
         conditions=CONDITIONS,
         condition_spec=CONDITION_SPEC,
-        factorial_2x2=FACTORIAL_2X2,
+        factorial_grid=FACTORIAL_GRID,
         variants=VARIANTS,
         null_variants=NULL_VARIANTS,
         variant_rung=VARIANT_RUNG,

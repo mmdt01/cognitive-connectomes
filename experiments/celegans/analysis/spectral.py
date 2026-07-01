@@ -50,8 +50,10 @@ REPRESENTATIVE_SEED = 0  # eigenvalue positions aren't averageable; show one gra
 
 CONDITION_TITLE = {
     "v2a": "v2a · undirected gaussian",
+    "v2ae_randsign": "v2ae_randsign · undirected empirical ±",
     "v2ae": "v2ae · undirected empirical",
     "v2bg": "v2bg · directed gaussian",
+    "v2b_randsign": "v2b_randsign · directed empirical ±",
     "v2b": "v2b · directed empirical",
     "v2d": "v2d · directed signed",
 }
@@ -59,8 +61,10 @@ CONDITION_TITLE = {
 # spectra figure; the bars/decay figures and the table keep the prefixed labels.
 CONDITION_TITLE_DISPLAY = {
     "v2a": "Undirected Gaussian",
+    "v2ae_randsign": "Undirected Empirical ±",
     "v2ae": "Undirected Empirical",
     "v2bg": "Directed Gaussian",
+    "v2b_randsign": "Directed Empirical ±",
     "v2b": "Directed Empirical",
     "v2d": "Directed Signed (Dale)",
 }

@@ -110,13 +110,12 @@ def plot_metric_vs_sr(results: pd.DataFrame, cfg, path: Path) -> None:
 def plot_factorial_grid(results: pd.DataFrame, cfg, path: Path) -> None:
     """Topology x weight-distribution factorial: a grid of metric-vs-sr panels.
 
-    Rows = topology (undirected/normal vs directed/non-normal), columns = weight
-    scheme (gaussian/homogeneous vs empirical/heavy-tailed), per ``cfg.factorial_2x2``.
-    Reads the connectome-vs-ladder curves of each cell so the dissociation is read
-    by eye: left->right isolates weight heterogeneity, top->bottom isolates
-    non-normality.
+    Rows = topology, columns = the weight ladder (per ``cfg.factorial_grid``).
+    Reads the connectome-vs-ladder curves of each cell so the decomposition is
+    read by eye: stepping along the columns isolates the weight sub-factors
+    (tail, then sign), top->bottom isolates non-normality.
     """
-    spec = cfg.factorial_2x2
+    spec = cfg.factorial_grid
     grid = spec["grid"]
     present = set(results.condition.unique())
     nrows, ncols = len(grid), len(grid[0])
@@ -145,8 +144,9 @@ def plot_factorial_grid(results: pd.DataFrame, cfg, path: Path) -> None:
     patch = _supercritical_legend_handle(cfg)
     fig.legend(handles + [patch], labels + [patch.get_label()], fontsize=8,
                framealpha=0.9, loc="center left", bbox_to_anchor=(1.0, 0.5))
-    fig.suptitle(f"{cfg.task_name}: topology × weight-distribution factorial "
-                 "(rows = directedness, columns = weight heterogeneity)", fontsize=13)
+    fig.suptitle(f"{cfg.task_name}: weight sign × tail decomposition  (rows = "
+                 "directedness; columns = gaussian → signed-empirical → empirical)",
+                 fontsize=13)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -194,8 +194,8 @@ def run(cfg) -> None:
     metric_fig = cfg.figures_dir / f"{cfg.metric}_vs_spectral_radius.png"
     plot_metric_vs_sr(results, cfg, metric_fig)
     print(f"Saved {metric_fig}")
-    if getattr(cfg, "factorial_2x2", None):
-        factorial_fig = cfg.figures_dir / f"{cfg.metric}_factorial_2x2.png"
+    if getattr(cfg, "factorial_grid", None):
+        factorial_fig = cfg.figures_dir / f"{cfg.metric}_factorial.png"
         plot_factorial_grid(results, cfg, factorial_fig)
         print(f"Saved {factorial_fig}")
     if cfg.stats_parquet.exists():

@@ -66,10 +66,10 @@ class ExperimentConfig:
     # rather than the fixed nominal-supercritical threshold (min(supercritical_radii)).
     # None -> fall back to that fixed threshold. Set per run from the substrate.
     supercritical_span: dict | None = None
-    # optional topology x weight-distribution 2x2 factorial layout for the
-    # factorial figure: {"grid": [[cond, cond], [cond, cond]], "row_labels": [..],
-    # "col_labels": [..]}. None -> the factorial figure is skipped.
-    factorial_2x2: dict | None = None
+    # optional factorial layout for the decomposition figure: a grid of condition
+    # keys with row/col labels, {"grid": [[cond, ...], ...], "row_labels": [..],
+    # "col_labels": [..]} (any RxC shape). None -> the factorial figure is skipped.
+    factorial_grid: dict | None = None
 
     @property
     def results_parquet(self) -> Path:
