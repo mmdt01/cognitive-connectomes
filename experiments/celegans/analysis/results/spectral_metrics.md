@@ -15,6 +15,18 @@ Scale-invariant ratios of the eigenvalue bulk to the dominant mode |λ₁|. Lowe
 | v2a | rung 3 (clustering) | 13 | 0.957 | 0.674 | 0.277 | 190.257 | 3 |
 | v2a | rung 4 (modularity) | 12 | 0.974 | 0.742 | 0.292 | 186.668 | 4 |
 
+## v2ae_randsign · undirected empirical ±
+
+| condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
+|---|---|---|---|---|---|---|---|
+| v2ae_randsign | connectome | 231 | 0.941 | 0.480 | 0.155 | 140.743 | 2 |
+| v2ae_randsign | control (perm. wts) | 158 | 0.959 | 0.682 | 0.250 | 170.088 | 3 |
+| v2ae_randsign | rung 0 (random) | 133 | 0.983 | 0.766 | 0.317 | 191.810 | 5 |
+| v2ae_randsign | rung 1 (ER) | 129 | 0.986 | 0.779 | 0.324 | 191.815 | 6 |
+| v2ae_randsign | rung 2 (degree) | 151 | 0.971 | 0.723 | 0.260 | 167.965 | 4 |
+| v2ae_randsign | rung 3 (clustering) | 161 | 0.963 | 0.654 | 0.245 | 171.803 | 3 |
+| v2ae_randsign | rung 4 (modularity) | 152 | 0.966 | 0.712 | 0.258 | 169.591 | 3 |
+
 ## v2ae · undirected empirical
 
 | condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
@@ -38,6 +50,18 @@ Scale-invariant ratios of the eigenvalue bulk to the dominant mode |λ₁|. Lowe
 | v2bg | rung 2 (degree) | 4 | 0.990 | 0.874 | 0.441 | 221.054 | 12 |
 | v2bg | rung 3 (clustering) | 4 | 0.982 | 0.859 | 0.424 | 214.899 | 9 |
 | v2bg | rung 4 (modularity) | 4 | 0.994 | 0.883 | 0.443 | 220.611 | 13 |
+
+## v2b_randsign · directed empirical ±
+
+| condition | variant | spectral_radius | lambda2_ratio | bulk95_ratio | mean_ratio | participation_ratio | n_critical |
+|---|---|---|---|---|---|---|---|
+| v2b_randsign | connectome | 55 | 0.872 | 0.550 | 0.198 | 174.130 | 2 |
+| v2b_randsign | control (perm. wts) | 42 | 0.974 | 0.789 | 0.350 | 200.357 | 6 |
+| v2b_randsign | rung 0 (random) | 37 | 0.980 | 0.871 | 0.500 | 243.141 | 14 |
+| v2b_randsign | rung 1 (ER) | 35 | 0.985 | 0.916 | 0.525 | 243.795 | 20 |
+| v2b_randsign | rung 2 (degree) | 40 | 1.000 | 0.842 | 0.372 | 197.995 | 10 |
+| v2b_randsign | rung 3 (clustering) | 42 | 0.970 | 0.800 | 0.352 | 194.636 | 6 |
+| v2b_randsign | rung 4 (modularity) | 40 | 0.999 | 0.848 | 0.369 | 196.391 | 11 |
 
 ## v2b · directed empirical
 
