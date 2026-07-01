@@ -1,11 +1,13 @@
 {
-  "generated_utc": "2026-06-30T14:05:21.620804+00:00",
-  "n_evaluations": 13650,
-  "elapsed_seconds": 3615.9,
+  "generated_utc": "2026-07-01T11:51:08.197457+00:00",
+  "n_evaluations": 19110,
+  "elapsed_seconds": 4486.7,
   "conditions": [
     "v2a",
+    "v2ae_randsign",
     "v2ae",
     "v2bg",
+    "v2b_randsign",
     "v2b",
     "v2d"
   ],
@@ -90,8 +92,10 @@
     "task_name": "Jaeger memory capacity",
     "conditions": [
       "v2a",
+      "v2ae_randsign",
       "v2ae",
       "v2bg",
+      "v2b_randsign",
       "v2b",
       "v2d"
     ],
@@ -120,6 +124,16 @@
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
         "label": "Directed \u00b7 empirical weights (signed)"
+      },
+      "v2ae_randsign": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical_randsign",
+        "label": "Undirected \u00b7 empirical weights (balanced \u00b1 sign)"
+      },
+      "v2b_randsign": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_randsign",
+        "label": "Directed \u00b7 empirical weights (balanced \u00b1 sign)"
       }
     },
     "variants": [
