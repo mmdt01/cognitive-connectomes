@@ -1,11 +1,13 @@
 {
-  "generated_utc": "2026-06-30T14:45:29.094829+00:00",
-  "n_evaluations": 13650,
-  "elapsed_seconds": 1692.6,
+  "generated_utc": "2026-07-01T13:13:28.667889+00:00",
+  "n_evaluations": 19110,
+  "elapsed_seconds": 4807.5,
   "conditions": [
     "v2a",
+    "v2ae_randsign",
     "v2ae",
     "v2bg",
+    "v2b_randsign",
     "v2b",
     "v2d"
   ],
@@ -90,8 +92,10 @@
     "task_name": "NARMA-10 emulation",
     "conditions": [
       "v2a",
+      "v2ae_randsign",
       "v2ae",
       "v2bg",
+      "v2b_randsign",
       "v2b",
       "v2d"
     ],
@@ -120,6 +124,16 @@
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
         "label": "Directed \u00b7 empirical weights (signed)"
+      },
+      "v2ae_randsign": {
+        "topology": "undirected",
+        "weight_scheme": "symmetric_empirical_randsign",
+        "label": "Undirected \u00b7 empirical weights (balanced \u00b1 sign)"
+      },
+      "v2b_randsign": {
+        "topology": "directed",
+        "weight_scheme": "asymmetric_empirical_randsign",
+        "label": "Directed \u00b7 empirical weights (balanced \u00b1 sign)"
       }
     },
     "variants": [
