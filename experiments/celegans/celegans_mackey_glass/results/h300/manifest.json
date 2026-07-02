@@ -3,13 +3,13 @@
   "n_evaluations": 19110,
   "elapsed_seconds": 2834.3,
   "conditions": [
-    "v2a",
-    "v2ae_randsign",
-    "v2ae",
-    "v2bg",
-    "v2b_randsign",
-    "v2b",
-    "v2d"
+    "undirected_gaussian",
+    "undirected_empirical_signed",
+    "undirected_empirical",
+    "directed_gaussian",
+    "directed_empirical_signed",
+    "directed_empirical",
+    "directed_empirical_dale"
   ],
   "variants": [
     "connectome",
@@ -91,46 +91,46 @@
     "experiment_name": "celegans_mackey_glass_h300",
     "task_name": "Mackey-Glass 300-step forecast",
     "conditions": [
-      "v2a",
-      "v2ae_randsign",
-      "v2ae",
-      "v2bg",
-      "v2b_randsign",
-      "v2b",
-      "v2d"
+      "undirected_gaussian",
+      "undirected_empirical_signed",
+      "undirected_empirical",
+      "directed_gaussian",
+      "directed_empirical_signed",
+      "directed_empirical",
+      "directed_empirical_dale"
     ],
     "condition_spec": {
-      "v2a": {
+      "undirected_gaussian": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
         "label": "Undirected \u00b7 gaussian weights"
       },
-      "v2ae": {
+      "undirected_empirical": {
         "topology": "undirected",
         "weight_scheme": "symmetric_empirical",
         "label": "Undirected \u00b7 empirical weights"
       },
-      "v2bg": {
+      "directed_gaussian": {
         "topology": "directed",
         "weight_scheme": "asymmetric_gaussian",
         "label": "Directed \u00b7 gaussian weights"
       },
-      "v2b": {
+      "directed_empirical": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
         "label": "Directed \u00b7 empirical weights"
       },
-      "v2d": {
+      "directed_empirical_dale": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
         "label": "Directed \u00b7 empirical weights (signed)"
       },
-      "v2ae_randsign": {
+      "undirected_empirical_signed": {
         "topology": "undirected",
         "weight_scheme": "symmetric_empirical_randsign",
         "label": "Undirected \u00b7 empirical weights (balanced \u00b1 sign)"
       },
-      "v2b_randsign": {
+      "directed_empirical_signed": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_randsign",
         "label": "Directed \u00b7 empirical weights (balanced \u00b1 sign)"
