@@ -61,12 +61,12 @@ run once per metric over the shared `results.parquet`:
 
 | Axis | Values |
 |---|---|
-| Conditions | **undirected_gaussian** undirected gaussian · **directed_empirical** directed empirical (non-negative) · **directed_empirical_dale** directed empirical (signed) |
+| Conditions | **7-condition sign × tail × topology factorial** (`undirected_gaussian`, `undirected_empirical_signed`, `undirected_empirical`, `directed_gaussian`, `directed_empirical_signed`, `directed_empirical`, `directed_empirical_dale`) |
 | Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
-| Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
+| Spectral radius | 39-point wide sweep, `linspace(0.0, 4.0, 39)` |
 | Seeds | 10 (each draws a different Lorenz trajectory; connectome & nulls paired per seed) |
 
-3 × 7 × 20 × 10 = **4200 evaluations** (each scored on both metrics).
+7 × 7 × 39 × 10 = **19,110 evaluations** (each scored on both metrics).
 
 The **weight-placement control** (`connectome_weight_permuted`) keeps the
 connectome's exact topology and exact weight multiset but permutes which edge
@@ -95,7 +95,7 @@ Deliberately thin — the reusable machinery is shared:
 
 ```bash
 # from the repo root
-python -m experiments.celegans.celegans_lorenz.run            # full run (~1–1.5 h)
+python -m experiments.celegans.celegans_lorenz.run            # full run (~5 h; checkpointed, resumes on interruption)
 python -m experiments.celegans.celegans_lorenz.run --smoke    # tiny check
 python -m experiments.celegans.celegans_lorenz.plot_demo      # intuition figure
 ```
@@ -122,17 +122,21 @@ python -m experiments.celegans.celegans_lorenz.plot_demo      # intuition figure
 - **Cohen's d** is defined so **d > 0 ⇒ the connectome beats the null**, on each
   metric's own direction.
 
-## The pre-registered prediction
+## Finding (the pre-registered prediction was falsified)
 
-From `PREDICTION_TASKS_INTERPRETATION.md` §4 (low confidence): the connectome
-should **trade fidelity for stability** — relatively divergence-resistant (decent
-`vpt`) but a **less faithful attractor** (poor `climate`), its compressed spectrum
-starving the dynamical richness needed to *sustain* chaos (collapse to a fixed
-point / limit cycle). The falsifiable hook: **the connectome's ranking should
-depend on the metric** (better on vpt, worse on climate). If both metrics agree,
-the two-mechanism picture is wrong. As in both prior tasks, the connectome is
-expected **not** to be best at the canonical operating point; any effect is a
-supercritical-regime phenomenon, and the placement control decomposes it into
-placement vs topology automatically.
+The pre-registered hook was a **fidelity-for-stability trade** — the connectome
+divergence-resistant (decent `vpt`) but a *less faithful* attractor (poor `climate`),
+with the metrics *disagreeing*. That **did not occur**: the metrics **agree**, and in
+the biological (all-positive) conditions the connectome is at **parity** with
+`degree_rewire` on *both* vpt and climate — sufficient and robust, not superior. Its
+unambiguous edge is **robustness**: the **lowest closed-loop divergence in every
+condition** (0% in the directed-empirical conditions vs 26–31% for random/ER). Two
+structural results specific to the autonomous task: **directedness strongly stabilises
+rollout** (undirected blows up ~50–77%, directed ~0–31%), and **non-negativity is
+*required* for the task to function at all** — signing the exact weights
+(`*_empirical_signed`) collapses vpt from ~4.5 to ~0.5. So Lorenz reinforces the
+sign-primary account (non-negativity is fundamental here) while showing the connectome's
+specific topology does not beat a degree-matched graph on autonomous generation. Full
+account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
 `results/*.parquet` are gitignored (regenerable); `figures/*.png` are tracked.

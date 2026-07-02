@@ -4,8 +4,8 @@ Does the connectome's topology help on **autonomous-system forecasting** — the
 complement to NARMA's input-driven emulation — and does that hold as biological
 realism is added? The reservoir is driven by the Mackey-Glass series `x(t)` and a
 linear readout predicts `x(t+h)` `h` steps ahead. The connectome is compared
-against its full five-rung null ladder across three realism conditions and a
-spectral-radius sweep, at two forecast horizons.
+against its full five-rung null ladder across the 7-condition weight-structure
+factorial and a wide spectral-radius sweep, at two forecast horizons.
 
 This is the second prediction task (after the NARMA-10 bridge). It is **driven
 (teacher-forced)**: the reservoir always sees the true `x(t)`, never its own
@@ -31,13 +31,13 @@ statistics only** before driving the reservoir.
 
 | Axis | Values |
 |---|---|
-| Conditions | **undirected_gaussian** undirected gaussian · **directed_empirical** directed empirical (non-negative) · **directed_empirical_dale** directed empirical (signed) |
+| Conditions | **7-condition sign × tail × topology factorial** (`undirected_gaussian`, `undirected_empirical_signed`, `undirected_empirical`, `directed_gaussian`, `directed_empirical_signed`, `directed_empirical`, `directed_empirical_dale`) |
 | Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
-| Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
+| Spectral radius | 39-point wide sweep, `linspace(0.0, 4.0, 39)` |
 | Seeds | 10 (each draws a different Mackey-Glass trajectory; connectome & nulls paired per seed) |
 | Horizons | **h = 84** (canonical benchmark, moderate) and **h = 300** (chaos-limited, hard) |
 
-3 × 7 × 20 × 10 = **4200 evaluations per horizon** (8400 total). The two horizons
+7 × 7 × 39 × 10 = **19,110 evaluations per horizon** (38,220 total). The two horizons
 reuse one `SubstrateBuilder`, so the directed null masks are generated once.
 
 The **weight-placement control** (`connectome_weight_permuted`) keeps the
@@ -91,13 +91,16 @@ python -m experiments.celegans.celegans_mackey_glass.plot_demo      # intuition 
 
 ## Caveats carried forward (from the NARMA bridge)
 
-- **Topology vs weights (directed_empirical/directed_empirical_dale) — addressed by the `connectome_weight_permuted`
-  control.** The connectome keeps its *real* weights while the rung nulls resample,
-  conflating directed topology with the connectome's real weight placement. The
-  control keeps the connectome's exact topology and weight multiset but permutes
-  placement, decomposing the two. Probe finding (h=84, n=50): the connectome's
-  supercritical deficit is **weight placement** (`connectome vs control` d ≈ −2 to
-  −3); the topology leg (`control vs degree_rewire`) is null — consistent with undirected_gaussian.
+- **Finding (sign-primary, horizon-dependent).** At **h = 84** the connectome holds a
+  low forecast (~0.03) supercritically where the all-positive nulls degrade — an
+  advantage that **lives in the empirical (non-negative) conditions and is a weight-sign
+  effect** (signing the weights, `*_empirical_signed`, removes it undirected; the large
+  directed-signed effect sizes are partly a "null-fails-harder" artefact, as the
+  disk-spectrum nulls go chaotic under drive). At **h = 300** (chaos-limited) the
+  advantage largely **washes out** (connectome ≈ degree everywhere): the connectome is
+  not a better chaotic forecaster in general, it just holds its *memory-bounded* skill
+  over a wider sr range. The `connectome_weight_permuted` control decomposes placement vs
+  topology, both secondary to sign. Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 - **Divergence-robustness.** Some supercritical reservoirs can blow up (huge or
   non-finite NRMSE → reported as no-skill); a median-based or NRMSE-capped
   statistic would harden the permutation tests against those outliers.

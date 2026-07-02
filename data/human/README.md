@@ -31,19 +31,26 @@ substrate.
 
 ## Notes for use in this project
 
-- **Symmetric / undirected.** dMRI structural connectomes are symmetric → **normal**
-  matrices (bulk ≈ top), unlike the *directed, non-normal* C. elegans connectome. By
-  this project's own falsifiable prediction (the operating-point / robustness effect
-  scales with directedness/non-normality), the human connectome should behave like the
-  **undirected_gaussian** undirected analogue — a *weaker* effect. This dataset is the natural test of
-  that prediction.
+- **Symmetric / undirected, but non-negative and heavy-tailed → predicted STRONG effect
+  (prediction reversed).** dMRI structural connectomes are symmetric → **normal**, unlike
+  the directed, non-normal C. elegans connectome. The project's *original* prediction (the
+  effect "scales with directedness/non-normality") said the human SC should behave like
+  the weak undirected-gaussian case — but the **7-condition factorial reversed this**: the
+  robustness is a **weight-SIGN (non-negativity / Perron) effect, essentially independent
+  of directedness**. The human SC is non-negative *and* heavy-tailed — i.e. the
+  `undirected_empirical` cell, which shows the **full** effect (MC connectome−degree d
+  ≈ +9). So it is predicted to show a **strong** robustness crossover. Scoping confirms
+  the spectral precondition (its bulk is compressed, `sr_crit` ≈ 2.1–4.0 across
+  scales/consensus — *not* undirected-gaussian-like). This dataset is the external test of that sharpened
+  prediction. See `PREDICTION_TASKS_INTERPRETATION.md` §6.
 - **Macro-scale, held out of the main scale row.** Per `PROJECT_PLAN.md`, the cellular
   scale row (C. elegans → fly → mouse) deliberately excludes the macro-scale human graph
   to avoid confounding organism with scale/resolution; the human connectome is admitted
   only as an **explicit, separate macro-scale generalisation probe**.
-- **Scale.** Up to 1000 nodes — ~3× C. elegans (N=300); null generation and dense
-  eigendecomposition (`sr_crit`, rescaling) need sparse/iterative handling at the larger
-  scales.
+- **Scale.** Up to 1000 nodes — ~3× C. elegans (N=300). Dense eigendecomposition is
+  actually fine even at N=1000 (~0.1 s), so `sr_crit`/rescaling are cheap; the real costs
+  are **null generation** (scales with edge count = density·N²) and **reservoir
+  simulation** (O(N²)/step), sharpest in the N=1000 × 70-subject corner.
 - **70 individuals, not a group consensus** ("Individual_Connectomes"): a choice to make
   — per-subject runs vs a consensus matrix — and an inference-scope question distinct
   from the single-fixed-connectome C. elegans setup.

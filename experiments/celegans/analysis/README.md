@@ -35,7 +35,7 @@ the spectral basis of the prediction-task findings (the placement→memory axis)
   variant/condition: connectome most compressed, control ≈ degree, random least.
 - `figures/magnitude_decay.png` — sorted `|λ|/|λ₁|` curves (steeper = more
   compressed).
-- `results/spectral_metrics.csv` — seed-averaged metrics (all 7 variants × 3
+- `results/spectral_metrics.csv` — seed-averaged metrics (all 7 variants × 7
   conditions, with sem). `results/spectral_metrics.md` — a compact table for slides.
 
 **Headline (directed_empirical/directed_empirical_dale):** the connectome's bulk is the most compressed
@@ -105,12 +105,12 @@ python -m experiments.celegans.analysis.realizations
 ```
 
 Why it matters: the null-ladder analysis above walks the *topology* axis; this
-one fixes the variant to the **connectome** and walks the *weight* axis — the
-three realism conditions (undirected_gaussian undirected gaussian → directed_empirical directed empirical → directed_empirical_dale
-directed signed/Dale). It makes the three concrete differences legible:
-**directionality** (undirected_gaussian symmetric vs directed_empirical/directed_empirical_dale asymmetric), **magnitude** (abstract
-gaussian vs heavy-tailed synapse counts), and **sign** (balanced ± vs all-positive
-vs sparse structured inhibition).
+one fixes the variant to the **connectome** and walks the *weight* axis across the
+7-condition factorial. It makes the concrete sub-factors legible — **directionality**
+(symmetric/normal vs asymmetric/non-normal), **tail** (homogeneous gaussian vs
+heavy-tailed synapse counts), and **sign** (balanced ± vs all-positive vs sparse Dale
+inhibition). The weight-distribution figure below is where the **sign × tail confound**
+in a naive gaussian-vs-empirical contrast becomes visible at a glance.
 
 **Tools:** `src/analysis/weight_structure.py` (weighted-matrix + distribution
 helpers) plus `src/analysis/spectral.py` reused for the eigenvalue view.
@@ -131,10 +131,14 @@ helpers) plus `src/analysis/spectral.py` reused for the eigenvalue view.
   summary (symmetry, `frac_negative`, mean/max `|w|`, `|λ₁|`, real-eigenvalue
   fraction).
 
-**Headline:** undirected_gaussian is a symmetric, balanced (52% −), real-spectrum matrix; directed_empirical/directed_empirical_dale
-are asymmetric, heavy-tailed (mean `|w|` 5.7, max 75) with a huge Perron radius
-(`|λ₁|≈105`); directed_empirical_dale differs from directed_empirical only by 3.6% structured inhibition (26 neurons),
-so the two are near-identical spectrally — the project's "directed_empirical_dale ≈ directed_empirical" point, shown.
+**Headline:** the gaussian conditions are balanced (~52% −), light-tailed, and (for
+undirected) real-spectrum; the empirical conditions are heavy-tailed (mean `|w|` 5.7,
+max 75) and **all-positive**, with a large Perron radius. Crucially, that **non-negativity
+— not the heavy tail — is what compresses the bulk**: the signed-empirical controls
+(`*_empirical_signed`, identical magnitudes with balanced random signs) de-compress it
+back toward the gaussian level. `directed_empirical_dale` differs from `directed_empirical`
+by only 3.6% inhibition (26 neurons), so the two are near-identical — the "Dale ≈
+all-positive for *C. elegans*" point. See `PREDICTION_TASKS_INTERPRETATION.md` §3.
 
 ## Conventions
 

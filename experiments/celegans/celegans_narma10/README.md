@@ -3,7 +3,7 @@
 Does the connectome's topology help on a task that demands **nonlinear temporal
 computation** (NARMA-10 emulation), and does that hold as biological realism is
 added? The connectome is compared against its full five-rung null ladder across
-three realism conditions and a spectral-radius sweep.
+the 7-condition sign × tail × topology factorial and a wide spectral-radius sweep.
 
 This is the Phase-0 bridge: the same input-driven, readout-only paradigm as
 memory capacity, but with the nonlinear computation MC lacked.
@@ -12,23 +12,25 @@ memory capacity, but with the nonlinear computation MC lacked.
 
 | Axis | Values |
 |---|---|
-| Conditions | **undirected_gaussian** undirected gaussian · **directed_empirical** directed empirical (non-negative) · **directed_empirical_dale** directed empirical (signed) |
+| Conditions | **7-condition sign × tail × topology factorial**: `undirected_gaussian`, `undirected_empirical_signed`, `undirected_empirical`, `directed_gaussian`, `directed_empirical_signed`, `directed_empirical`, `directed_empirical_dale` |
 | Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
-| Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
+| Spectral radius | 39-point wide sweep, `linspace(0.0, 4.0, 39)` |
 | Seeds | 10 |
 
-3 × 7 × 20 × 10 = **4200 evaluations**, each connectome vs its own five-rung
-(directed for directed_empirical/directed_empirical_dale) ladder plus the weight-placement control.
+7 × 7 × 39 × 10 = **19,110 evaluations**, each connectome vs its own five-rung ladder
+plus the weight-placement control.
 
-The **weight-placement control** (`connectome_weight_permuted`, shared via
-`matrix_config`) keeps the connectome's exact topology and weight multiset but
-permutes which edge carries which weight, decomposing the topology-vs-weights
-confound: `connectome vs control` = placement, `control vs degree_rewire` =
-topology. Finding: NARMA's supercritical advantage is **mostly topology**
-(control vs degree d ≈ +4.3–4.9, directed_empirical/directed_empirical_dale) with a smaller **weight-placement**
-bonus (connectome vs control d ≈ +1, Holm-significant in directed_empirical); undirected_gaussian is a null
-negative control. This is the mirror image of the Mackey-Glass forecasting task,
-where topology is null and placement is *harmful*.
+**Finding (sign-primary).** NARMA's supercritical robustness — the connectome holds
+NRMSE ~0.55 while every null climbs to ~0.80 — is driven **primarily by weight SIGN
+(non-negativity / the Perron structure of all-positive weights), not directedness**. It
+lives in the all-positive-empirical conditions (connectome−degree d **+8 to +10**) and
+**collapses when the exact weights are signed** (`*_empirical_signed`, balanced random
+±: undirected +10 → +0.5, directed +8 → +3.4). Directed structure adds a secondary
+*stability-under-drive* residual that survives signing in the directed case; the heavy
+tail alone (signed) does little. The **weight-placement control** decomposes `connectome
+vs control` = placement and `control vs degree_rewire` = topology — both secondary to
+sign. This supersedes the earlier "mostly topology" reading (the gaussian-vs-empirical
+contrast conflated sign with tail). Full account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
 ## Where the code lives
 
