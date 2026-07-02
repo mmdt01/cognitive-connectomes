@@ -13,7 +13,7 @@ weights, and direction.
 
 ## Neurotransmitter / sign table (`celegans_neurotransmitters.csv`)
 
-Per-neuron-class transmitter annotation used to build the v2d Dale-sign
+Per-neuron-class transmitter annotation used to build the directed_empirical_dale Dale-sign
 vector (the `asymmetric_empirical_signed` weight scheme). One row per
 explicitly-classified neuron class; columns: `neuron_class`,
 `neurotransmitter`, `category`, `sign`.

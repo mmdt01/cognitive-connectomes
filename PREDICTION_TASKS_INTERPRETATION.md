@@ -32,19 +32,19 @@ giving a per-topology **ladder** gaussian → signed-empirical → empirical:
 
 | key | topology | weights | sign | tail |
 |---|---|---|---|---|
-| `v2a`  | undirected (normal) | symmetric gaussian | balanced ± | homogeneous |
-| `v2ae_randsign` | undirected | symmetric empirical, random ± | balanced ± | heavy |
-| `v2ae` | undirected | symmetric empirical | **all-positive** | heavy |
-| `v2bg` | directed (non-normal) | asymmetric gaussian | balanced ± | homogeneous |
-| `v2b_randsign` | directed | asymmetric empirical, random ± | balanced ± | heavy |
-| `v2b`  | directed | asymmetric empirical | **all-positive** | heavy |
-| `v2d`  | directed | asymmetric empirical + Dale sign | ~all-positive (3.6% inhib.) | heavy |
+| `undirected_gaussian`  | undirected (normal) | symmetric gaussian | balanced ± | homogeneous |
+| `undirected_empirical_signed` | undirected | symmetric empirical, random ± | balanced ± | heavy |
+| `undirected_empirical` | undirected | symmetric empirical | **all-positive** | heavy |
+| `directed_gaussian` | directed (non-normal) | asymmetric gaussian | balanced ± | homogeneous |
+| `directed_empirical_signed` | directed | asymmetric empirical, random ± | balanced ± | heavy |
+| `directed_empirical`  | directed | asymmetric empirical | **all-positive** | heavy |
+| `directed_empirical_dale`  | directed | asymmetric empirical + Dale sign | ~all-positive (3.6% inhib.) | heavy |
 
 Reading the ladder isolates each sub-factor cleanly: **gaussian → signed-empirical** is
 the *tail* step (sign held balanced); **signed-empirical → empirical** is the *sign*
-step (tail held heavy). `v2ae_randsign`/`v2b_randsign` carry the connectome's **exact**
+step (tail held heavy). `undirected_empirical_signed`/`directed_empirical_signed` carry the connectome's **exact**
 heavy-tailed magnitudes with only the sign randomised, so they are one-variable sign
-controls in the spirit of the placement control. `v2d` (Dale) is the biological anchor.
+controls in the spirit of the placement control. `directed_empirical_dale` (Dale) is the biological anchor.
 
 **Why the sweep reaches sr = 4, and the operating points.** Top-eigenvalue rescaling
 pins `|λ₁| = sr`, but a variant's *bulk* becomes critical only at
@@ -61,9 +61,12 @@ the same magnitudes brings it most of the way back. So the sweep must reach sr �
 cover the positive conditions' operating regime, and comparisons are read
 **curve-vs-curve**, not at a single matched `sr`.
 
-*Naming note: these `v2x` keys are legacy labels slated for a descriptive-snake_case
-rename; in prose below they are referred to by their factor content (e.g.
-"directed-empirical" = `v2b`, "signed-empirical" = `*_randsign`).*
+*Naming: conditions use descriptive snake_case keys (renamed from the legacy `v2x`
+labels). Old→new: `v2a`=`undirected_gaussian`, `v2ae`=`undirected_empirical`,
+`v2ae_randsign`=`undirected_empirical_signed`, `v2bg`=`directed_gaussian`,
+`v2b`=`directed_empirical`, `v2b_randsign`=`directed_empirical_signed`,
+`v2d`=`directed_empirical_dale`. The project's experimental-history chain
+(`v1 → v2a → v2c → v2b → v2d`) keeps its original phase labels as provenance.*
 
 ---
 
@@ -159,8 +162,8 @@ non-negative random matrices**," not "connectome structure is a better computer.
 ### Memory capacity — cleanest instance of the sign mechanism
 Positive-empirical shows the large crossover (undirected *d* +9.0, directed +10.7, Dale
 +8.9); signing collapses it (directed → +0.2). The connectome's *peak* MC sits **below**
-its nulls' peaks (v2b 11.7 vs random 13.0) — the lower-ceiling half of the trade-off —
-while the signed conditions have *higher* peaks (v2b_randsign 13.8, random 16.2): E/I-
+its nulls' peaks (directed_empirical 11.7 vs random 13.0) — the lower-ceiling half of the trade-off —
+while the signed conditions have *higher* peaks (directed_empirical_signed 13.8, random 16.2): E/I-
 style balance restores dynamical richness but removes the collapse-and-crossover
 entirely. **Secondary tail residual is normal-gated** — it survives signing only in the
 *undirected* cell (+3.5; its placement leg still reverses −6.4 → +3.9), and dies
@@ -195,7 +198,7 @@ wider `sr` range (its late operating point = the sign/Perron effect).
 ### Lorenz — pure robustness, parity on fidelity, non-negativity *required*
 The primary axis is **closed-loop divergence**. The connectome has the **lowest blow-up
 rate in every condition** (0% in all directed, 1–7% undirected-empirical, 52% only
-undirected-gaussian), and the original v2b headline reproduces exactly (connectome **0%**
+undirected-gaussian), and the original directed_empirical headline reproduces exactly (connectome **0%**
 vs random **26%** / ER **31%**). Two structural effects: **directedness strongly
 stabilises rollout** (undirected blows up 52–77%, directed 0–31%), and the **all-positive
 disk nulls are the most blow-up-prone** (the Perron mode is amplified by the output
@@ -245,8 +248,8 @@ circuit** (real dynamics have inhibition). With that boundary:
   So the driver we identify is a real feature of the data, not an artefact — but its
   *dynamical* relevance is strongest when the effective matrix stays ~non-negative.
 - **It holds for *C. elegans* specifically.** The biologically-faithful Dale condition
-  (`v2d`) is only **3.6% inhibitory** (26 GABAergic neurons), so it is effectively
-  all-positive → keeps the Perron structure → keeps the effect (Dale ≈ v2b throughout).
+  (`directed_empirical_dale`) is only **3.6% inhibitory** (26 GABAergic neurons), so it is effectively
+  all-positive → keeps the Perron structure → keeps the effect (Dale ≈ directed_empirical throughout).
 - **Clean cross-species prediction.** A more inhibition-heavy brain (mammalian cortex
   ~20% inhibitory) would push the effective matrix toward balanced signs → toward the
   disk regime → **weaker robustness, higher raw capacity**. Falsifiable if E/I-resolved
@@ -254,10 +257,10 @@ circuit** (real dynamics have inhibition). With that boundary:
 - **Human structural connectome (Suárez 2021 dMRI SC) — prediction reversed and
   sharpened.** The original guess was "symmetric/normal → behaves like the weak
   undirected-gaussian case." That is **wrong**: the human SC is **non-negative and
-  heavy-tailed**, i.e. the `undirected_empirical` (`v2ae`) cell — which shows the **full**
+  heavy-tailed**, i.e. the `undirected_empirical` (`undirected_empirical`) cell — which shows the **full**
   robustness effect here (MC *d* +9). So the human SC is predicted to show a **strong**
   robustness crossover, driven by the Perron mechanism, **independent of tail or
-  directedness**. `v2ae` (and its sign control) is the internal proof-of-concept, and the
+  directedness**. `undirected_empirical` (and its sign control) is the internal proof-of-concept, and the
   human run is the external test.
 
 ---

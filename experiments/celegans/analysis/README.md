@@ -29,8 +29,8 @@ the spectral basis of the prediction-task findings (the placement→memory axis)
 **Outputs:**
 - `figures/eigenvalue_spectra.png` — normalized eigenvalues (`λ/|λ₁|`) in the
   complex plane, conditions × the four key variants. The connectome shows a
-  dominant mode plus a compressed bulk; nulls spread further out; v2a variants are
-  near-identical (explaining the v2a null).
+  dominant mode plus a compressed bulk; nulls spread further out; undirected_gaussian variants are
+  near-identical (explaining the undirected_gaussian null).
 - `figures/spectral_compression.png` — `bulk₉₅/|λ₁|` and `mean|λ|/|λ₁|` bars per
   variant/condition: connectome most compressed, control ≈ degree, random least.
 - `figures/magnitude_decay.png` — sorted `|λ|/|λ₁|` curves (steeper = more
@@ -38,10 +38,10 @@ the spectral basis of the prediction-task findings (the placement→memory axis)
 - `results/spectral_metrics.csv` — seed-averaged metrics (all 7 variants × 3
   conditions, with sem). `results/spectral_metrics.md` — a compact table for slides.
 
-**Headline (v2b/v2d):** the connectome's bulk is the most compressed
+**Headline (directed_empirical/directed_empirical_dale):** the connectome's bulk is the most compressed
 (`bulk₉₅/|λ₁| ≈ 0.30` vs control/degree ≈ 0.38 vs random ≈ 0.46) with the largest
 raw `|λ₁|`; it also carries a sizeable second mode (`λ₂/|λ₁| ≈ 0.77`, a 2-D
-dominant subspace) over a deeply compressed bulk. v2a variants are spectrally
+dominant subspace) over a deeply compressed bulk. undirected_gaussian variants are spectrally
 identical. See `PREDICTION_TASKS_INTERPRETATION.md` §3 for how this grounds the
 memory/placement mechanism.
 
@@ -58,7 +58,7 @@ classical graph descriptors, so you can read at a glance **what each rung
 preserves vs destroys** relative to the connectome.
 
 Scope: null masks depend only on topology, not the weight condition, so this uses
-the **directed** topology (the v2b/v2d family) alone. The placement control
+the **directed** topology (the directed_empirical/directed_empirical_dale family) alone. The placement control
 `connectome_weight_permuted` permutes weights only — its mask equals the
 connectome's, a no-op on graph structure — so it is omitted. That leaves the clean
 ladder: connectome + rungs 0–4.
@@ -106,9 +106,9 @@ python -m experiments.celegans.analysis.realizations
 
 Why it matters: the null-ladder analysis above walks the *topology* axis; this
 one fixes the variant to the **connectome** and walks the *weight* axis — the
-three realism conditions (v2a undirected gaussian → v2b directed empirical → v2d
+three realism conditions (undirected_gaussian undirected gaussian → directed_empirical directed empirical → directed_empirical_dale
 directed signed/Dale). It makes the three concrete differences legible:
-**directionality** (v2a symmetric vs v2b/v2d asymmetric), **magnitude** (abstract
+**directionality** (undirected_gaussian symmetric vs directed_empirical/directed_empirical_dale asymmetric), **magnitude** (abstract
 gaussian vs heavy-tailed synapse counts), and **sign** (balanced ± vs all-positive
 vs sparse structured inhibition).
 
@@ -117,8 +117,8 @@ helpers) plus `src/analysis/spectral.py` reused for the eigenvalue view.
 
 **Outputs:**
 - `figures/realization_weighted_matrices.png` — the **recommended headline**:
-  community-ordered weighted matrices coloured by sign (red = +, blue = −). v2a is
-  symmetric across the diagonal and balanced ±; v2b is asymmetric and all-red; v2d
+  community-ordered weighted matrices coloured by sign (red = +, blue = −). undirected_gaussian is
+  symmetric across the diagonal and balanced ±; directed_empirical is asymmetric and all-red; directed_empirical_dale
   adds visible blue inhibition. The weight-axis analog of the adjacency ladder.
 - `figures/realization_weight_distributions.png` — nonzero-weight histograms (log
   count): a symmetric gaussian bell → a one-sided heavy tail → the same tail with
@@ -131,10 +131,10 @@ helpers) plus `src/analysis/spectral.py` reused for the eigenvalue view.
   summary (symmetry, `frac_negative`, mean/max `|w|`, `|λ₁|`, real-eigenvalue
   fraction).
 
-**Headline:** v2a is a symmetric, balanced (52% −), real-spectrum matrix; v2b/v2d
+**Headline:** undirected_gaussian is a symmetric, balanced (52% −), real-spectrum matrix; directed_empirical/directed_empirical_dale
 are asymmetric, heavy-tailed (mean `|w|` 5.7, max 75) with a huge Perron radius
-(`|λ₁|≈105`); v2d differs from v2b only by 3.6% structured inhibition (26 neurons),
-so the two are near-identical spectrally — the project's "v2d ≈ v2b" point, shown.
+(`|λ₁|≈105`); directed_empirical_dale differs from directed_empirical only by 3.6% structured inhibition (26 neurons),
+so the two are near-identical spectrally — the project's "directed_empirical_dale ≈ directed_empirical" point, shown.
 
 ## Conventions
 

@@ -102,25 +102,25 @@ optic-flow JEPA itself.
   - *Scale row.* Vary the connectome (*C. elegans*, fly, optionally mouse)
     while holding a single canonical substrate condition fixed, and run the
     full five-rung null ladder. The canonical condition is directed empirical
-    weights (v2b): each connectome carries its own empirically measured
+    weights (directed_empirical): each connectome carries its own empirically measured
     weights, so every organism is evaluated at the same level of biological
     realism. Because empirical weights differ across organisms, the
     cross-organism comparison reflects both topology and weight statistics; the
     within-organism null ladder is what isolates the contribution of topology,
     and it remains the primary inferential comparison. The anchor cell is
-    therefore *C. elegans* at v2b, which is also the middle rung of the realism
+    therefore *C. elegans* at directed_empirical, which is also the middle rung of the realism
     column below.
   - *Realism column.* Hold the connectome fixed at *C. elegans* and walk up
     biological realism one step at a time on the prediction task, through
-    three named conditions: undirected signed-Gaussian (v2a), directed
-    empirical weights (v2b), and directed empirical plus E/I sign under Dale's
-    principle (v2d, Pereira 2015 atlas).
+    three named conditions: undirected signed-Gaussian (undirected_gaussian), directed
+    empirical weights (directed_empirical), and directed empirical plus E/I sign under Dale's
+    principle (directed_empirical_dale, Pereira 2015 atlas).
   - The column and row meet at *C. elegans* in the canonical condition, so the
     design is additive, not multiplicative.
 - **The realism column lives on *C. elegans*, not the fly.** The data already
-  exists and is validated through the v2a/b/c chain, so the column is mostly
+  exists and is validated through the v2a/b/c chain (historical phase labels), so the column is mostly
   re-running existing code paths with the prediction task swapped in (the only
-  genuinely new build is v2d sign, already on the roadmap); compute is trivial
+  genuinely new build is directed_empirical_dale sign, already on the roadmap); compute is trivial
   at N around 300; and the established regime-independence-across-weight-schemes
   result on memory capacity is precisely what licenses holding the expensive
   scale row at a single canonical condition without it being a weight-scheme
@@ -132,7 +132,7 @@ optic-flow JEPA itself.
   appears at rung 2. The column is cheap at N around 300, so completeness
   costs little and avoids prematurely concluding that a feature is inert.
 - **Cellular-only comparison set for (A).** *C. elegans*, *Drosophila* optic
-  lobe, and (if feasible) mouse visual cortex, all run at the canonical v2b
+  lobe, and (if feasible) mouse visual cortex, all run at the canonical directed_empirical
   (directed empirical) condition on the scale row. The macro-scale human graph is
   excluded from the main comparison to avoid confounding organism with scale
   and resolution; it may appear only as an explicit, separate macro-scale
@@ -213,9 +213,9 @@ built around their shared anchor cell.
   for forecasting). Build the cross-connectome loading pipeline. Get
   *C. elegans* fully through the new pipeline with the full five-rung ladder
   at the canonical condition (the anchor cell), then start the realism column:
-  v2a and v2b reuse existing weight-scheme code; implement and run v2d sign.
+  undirected_gaussian and directed_empirical reuse existing weight-scheme code; implement and run directed_empirical_dale sign.
   The column is cheap compute at N around 300, so its only real cost is the
-  v2d build. Begin solving null-ladder scaling for large connectomes (sparse
+  directed_empirical_dale build. Begin solving null-ladder scaling for large connectomes (sparse
   operations, swap-count and Louvain cost, seed and sweep budget).
 - **Week 3 (22 to 28 June): scale row.** Run the fly optic lobe through the
   prediction pipeline with the full null ladder, at the single canonical
@@ -314,7 +314,7 @@ results and discussion on an existing scaffold, not a cold start.
   results at end of Week 4; the paper claim is narrowed rather than the
   experiment window extended.
 - **Scope creep on the biological-realism ladder (v2e to v2j).** These are a
-  quarry, not a path. The realism column stops at v2d; gap junctions,
+  quarry, not a path. The realism column stops at directed_empirical_dale; gap junctions,
   multi-timescale dynamics, anatomical routing and pharyngeal decomposition
   are not admitted to a foundational prediction chapter. Only a feature that
   earns its place in the prediction or JEPA story is implemented.
@@ -343,7 +343,7 @@ results and discussion on an existing scaffold, not a cold start.
 - Will not cross biological realism with the full connectome set: Stage (A) is
   a cross, not a grid. The fly and mouse run at one canonical condition; the
   realism column is three named conditions on *C. elegans*.
-- Will not extend the realism column past v2d (sign); v2e to v2j stay in the
+- Will not extend the realism column past directed_empirical_dale (sign); v2e to v2j stay in the
   quarry.
 - Will not put cellular and macro-scale connectomes on a single comparison
   axis.

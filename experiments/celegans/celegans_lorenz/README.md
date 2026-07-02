@@ -61,7 +61,7 @@ run once per metric over the shared `results.parquet`:
 
 | Axis | Values |
 |---|---|
-| Conditions | **v2a** undirected gaussian · **v2b** directed empirical (non-negative) · **v2d** directed empirical (signed) |
+| Conditions | **undirected_gaussian** undirected gaussian · **directed_empirical** directed empirical (non-negative) · **directed_empirical_dale** directed empirical (signed) |
 | Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
 | Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
 | Seeds | 10 (each draws a different Lorenz trajectory; connectome & nulls paired per seed) |
@@ -71,7 +71,7 @@ run once per metric over the shared `results.parquet`:
 The **weight-placement control** (`connectome_weight_permuted`) keeps the
 connectome's exact topology and exact weight multiset but permutes which edge
 carries which weight (per seed): `connectome vs control` isolates **weight
-placement**, `control vs degree_rewire` isolates **topology**. In v2a it is a
+placement**, `control vs degree_rewire` isolates **topology**. In undirected_gaussian it is a
 negative control.
 
 ## Where the code lives
@@ -109,14 +109,14 @@ python -m experiments.celegans.celegans_lorenz.plot_demo      # intuition figure
 
 - **Weights:** raw integer synapse counts (`matrix_config.WEIGHT_TRANSFORM`),
   matching NARMA/MG (one variable at a time = the task). Connectome keeps its real
-  weights (v2b/v2d) or gets fresh gaussian (v2a); nulls resample from the
-  empirical pool (v2b/v2d) or get fresh gaussian (v2a).
-- **Dale sign (v2d):** GABA-synthesizing neurons inhibitory (−1), others (+1);
+  weights (directed_empirical/directed_empirical_dale) or gets fresh gaussian (undirected_gaussian); nulls resample from the
+  empirical pool (directed_empirical/directed_empirical_dale) or get fresh gaussian (undirected_gaussian).
+- **Dale sign (directed_empirical_dale):** GABA-synthesizing neurons inhibitory (−1), others (+1);
   applied identically to connectome and nulls.
 - **Seeds:** construction seed drives mask/weights/`Win`; the Lorenz trajectory
   uses `seed + 1000`, pairing connectome and each null on an identical trajectory.
 - **Frozen reservoir hyperparameters:** `input_scaling=0.1`, `leak_rate=1.0`,
-  `ridge_alpha=1e-7`, `n_train=10000` (tuned once on the v2a rung-0 baseline;
+  `ridge_alpha=1e-7`, `n_train=10000` (tuned once on the undirected_gaussian rung-0 baseline;
   closed-loop free-running wants a far lower input scaling than the driven tasks).
   Only the spectral radius is swept.
 - **Cohen's d** is defined so **d > 0 ⇒ the connectome beats the null**, on each

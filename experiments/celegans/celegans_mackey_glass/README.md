@@ -31,7 +31,7 @@ statistics only** before driving the reservoir.
 
 | Axis | Values |
 |---|---|
-| Conditions | **v2a** undirected gaussian · **v2b** directed empirical (non-negative) · **v2d** directed empirical (signed) |
+| Conditions | **undirected_gaussian** undirected gaussian · **directed_empirical** directed empirical (non-negative) · **directed_empirical_dale** directed empirical (signed) |
 | Variants | connectome · **weight-placement control** · rungs 0–4 (random, ER, degree, clustering, modularity) |
 | Spectral radius | 20-point sweep, `linspace(0.0, 2.0, 20)` |
 | Seeds | 10 (each draws a different Mackey-Glass trajectory; connectome & nulls paired per seed) |
@@ -44,7 +44,7 @@ The **weight-placement control** (`connectome_weight_permuted`) keeps the
 connectome's exact topology and exact weight multiset but permutes which edge
 carries which weight (per seed). It decomposes the topology-vs-weights confound:
 `connectome vs control` isolates **weight placement**, `control vs degree_rewire`
-isolates **topology**. In v2a (already random-weighted) it is a negative control.
+isolates **topology**. In undirected_gaussian (already random-weighted) it is a negative control.
 
 ## Where the code lives
 
@@ -77,27 +77,27 @@ python -m experiments.celegans.celegans_mackey_glass.plot_demo      # intuition 
 
 - **Weights:** raw integer synapse counts (`matrix_config.WEIGHT_TRANSFORM`),
   matching the NARMA bridge (one variable at a time = the task). The connectome
-  keeps its real weights (v2b/v2d) or gets fresh gaussian (v2a); nulls resample
-  magnitudes from the empirical pool (v2b/v2d) or get fresh gaussian (v2a).
-- **Dale sign (v2d):** GABA-synthesizing neurons inhibitory (−1), all others
+  keeps its real weights (directed_empirical/directed_empirical_dale) or gets fresh gaussian (undirected_gaussian); nulls resample
+  magnitudes from the empirical pool (directed_empirical/directed_empirical_dale) or get fresh gaussian (undirected_gaussian).
+- **Dale sign (directed_empirical_dale):** GABA-synthesizing neurons inhibitory (−1), all others
   excitatory (+1); applied identically to connectome and nulls.
 - **Seeds:** construction seed drives mask/weights/`Win`; the MG initial history
   uses `seed + 1000`, pairing connectome and each null on an identical trajectory.
 - **Frozen reservoir hyperparameters:** `input_scaling=0.5`, `leak_rate=0.3`
-  (tuned once on the v2a rung-0 baseline; the smooth MG series wants a far lower
+  (tuned once on the undirected_gaussian rung-0 baseline; the smooth MG series wants a far lower
   leak than NARMA's 1.0). Only the spectral radius is swept.
 - **Metric:** NRMSE (lower is better). Cohen's d is defined so that
   **d > 0 ⇒ the connectome beats the null**.
 
 ## Caveats carried forward (from the NARMA bridge)
 
-- **Topology vs weights (v2b/v2d) — addressed by the `connectome_weight_permuted`
+- **Topology vs weights (directed_empirical/directed_empirical_dale) — addressed by the `connectome_weight_permuted`
   control.** The connectome keeps its *real* weights while the rung nulls resample,
   conflating directed topology with the connectome's real weight placement. The
   control keeps the connectome's exact topology and weight multiset but permutes
   placement, decomposing the two. Probe finding (h=84, n=50): the connectome's
   supercritical deficit is **weight placement** (`connectome vs control` d ≈ −2 to
-  −3); the topology leg (`control vs degree_rewire`) is null — consistent with v2a.
+  −3); the topology leg (`control vs degree_rewire`) is null — consistent with undirected_gaussian.
 - **Divergence-robustness.** Some supercritical reservoirs can blow up (huge or
   non-finite NRMSE → reported as no-skill); a median-based or NRMSE-capped
   statistic would harden the permutation tests against those outliers.

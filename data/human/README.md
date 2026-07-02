@@ -35,7 +35,7 @@ substrate.
   matrices (bulk ≈ top), unlike the *directed, non-normal* C. elegans connectome. By
   this project's own falsifiable prediction (the operating-point / robustness effect
   scales with directedness/non-normality), the human connectome should behave like the
-  **v2a** undirected analogue — a *weaker* effect. This dataset is the natural test of
+  **undirected_gaussian** undirected analogue — a *weaker* effect. This dataset is the natural test of
   that prediction.
 - **Macro-scale, held out of the main scale row.** Per `PROJECT_PLAN.md`, the cellular
   scale row (C. elegans → fly → mouse) deliberately excludes the macro-scale human graph
