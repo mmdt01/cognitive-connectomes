@@ -7,10 +7,10 @@ double-edge swaps with incremental triangle counting.
 
 Two modes (selected by the ``directed`` kwarg, mirroring ``degree_rewire``):
 
-* ``directed=False`` (default, v2a): undirected double-edge swaps; preserves
+* ``directed=False`` (default): undirected double-edge swaps; preserves
   the undirected degree sequence and the global clustering coefficient
   (transitivity) within ``tolerance``.
-* ``directed=True`` (v2b/v2d): directed two-edge "head-swaps"
+* ``directed=True``: directed two-edge "head-swaps"
   ``a->b, c->d  =>  a->d, c->b`` that preserve every node's in- and
   out-degree, accepted only if the mean Fagiolo (2007) directed clustering
   coefficient stays within ``tolerance`` of the input's. Only nodes adjacent

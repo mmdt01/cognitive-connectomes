@@ -1,17 +1,17 @@
 """Density-matched random binary mask, no self-loops.
 
-Default (``directed=False``, v2a-compatible): symmetric.
+Default (``directed=False``): symmetric.
 Each off-diagonal upper-triangle pair is an independent Bernoulli draw
 at the input's undirected density; the result is mirrored to the lower
 triangle. Edge count is Binomial-distributed across seeds.
 
-Directed (``directed=True``, v2b): asymmetric. Each off-diagonal
+Directed (``directed=True``): asymmetric. Each off-diagonal
 directed entry ``(i, j)`` and ``(j, i)`` is an independent Bernoulli
 draw at the input's directed density (no mirroring).
 
 This corrects v1's incidental asymmetry: v1's ``random_gaussian``
 sampled all N*N entries independently, producing an asymmetric matrix.
-v2a uses symmetric masks for all four conditions (see plan Section 2).
+the undirected conditions use symmetric masks (see plan Section 2).
 """
 
 import numpy as np

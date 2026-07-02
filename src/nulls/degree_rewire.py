@@ -1,12 +1,12 @@
 """Degree-preserving rewire (configuration-model class).
 
-Default (``directed=False``, v2a-compatible): preserves N, undirected
+Default (``directed=False``): preserves N, undirected
 edge count, AND each node's exact undirected degree. Implemented via
 repeated double-edge swaps: pick two edges (u,v) and (x,y); if no
 collision, replace them with (u,y) and (x,v). Each swap rearranges
 *which* nodes connect while preserving every degree.
 
-Directed (``directed=True``, v2b): preserves N, directed edge count,
+Directed (``directed=True``): preserves N, directed edge count,
 AND each node's exact in-degree AND out-degree separately. Implemented
 via ``nx.directed_edge_swap``.
 

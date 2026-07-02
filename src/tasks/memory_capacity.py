@@ -96,7 +96,7 @@ def evaluate(
         If True, build a canonical density-matched symmetric-Gaussian
         reservoir at sr=0.95 first and assert its MC lands in
         ``(5, 50)``. Tighter [10, 30] is the published expectation;
-        v2a's symmetric-weight regime can land slightly outside [10, 30]
+        the undirected symmetric-weight regime can land slightly outside [10, 30]
         so the gate uses the v1-compatible [5, 50] window.
 
     Returns

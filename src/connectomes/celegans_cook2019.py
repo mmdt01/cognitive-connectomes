@@ -24,17 +24,17 @@ def load(processing: str = "binary_undirected_chemical") -> ConnectomeData:
     Parameters
     ----------
     processing
-        "binary_undirected_chemical" — v2a default. Hermaphrodite
+        "binary_undirected_chemical" — undirected default. Hermaphrodite
         chemical synapse sheet, binarised (A > 0) and symmetrised via
         (A + A.T > 0).
-        "directed_weighted_chemical" — v2b. Hermaphrodite chemical
+        "directed_weighted_chemical" — directed. Hermaphrodite chemical
         sheet, NOT binarised and NOT symmetrised. Stored in reservoir
         convention (``adjacency[i, j]`` = weight from node ``j`` to
         node ``i``); the raw Cook 2019 layout (rows = presynaptic,
         columns = postsynaptic) is transposed at load time so all
         downstream code can use the matrix directly. Diagonal zeroed
         (autaptic self-synapses excluded for consistency with the
-        v2a/v2c pipeline).
+        unified pipeline).
 
     Returns
     -------
@@ -64,7 +64,7 @@ def load(processing: str = "binary_undirected_chemical") -> ConnectomeData:
     # The hermaphrodite chemical sheet contains 38 self-synapses. v1 silently
     # kept them, producing inconsistent diagonal handling across its four
     # conditions (connectome + degree_rewire had self-loops; random_gaussian
-    # + erdos_renyi did not). v2a's unified pipeline requires zero diagonal
+    # + erdos_renyi did not). the unified pipeline requires zero diagonal
     # everywhere; we drop the 38 self-loops here so the connectome enters the
     # pipeline on the same footing as the nulls. v1's reported "3019 edges"
     # double-counted via sum/2 with the diagonal still in place; the true
@@ -118,7 +118,7 @@ def _load_directed_weighted_chemical() -> ConnectomeData:
 
     Diagonal is zeroed (autaptic self-synapses are a real biological
     feature in Cook 2019 but are excluded for consistency with the
-    v2a/v2c pipeline; the count of removed self-loops is reported in
+    unified pipeline; the count of removed self-loops is reported in
     the metadata).
     """
     df = pd.read_excel(
@@ -175,7 +175,7 @@ def _load_directed_weighted_chemical() -> ConnectomeData:
             "(adjacency[i, j] = weight from j to i); Cook 2019's native "
             "layout (rows = presynaptic, columns = postsynaptic) is "
             "transposed at load time. Diagonal zeroed: autaptic "
-            "self-synapses excluded for consistency with the v2a/v2c "
+            "self-synapses excluded for consistency with the unified "
             "pipeline (known deviation from raw Cook 2019 data)."
         ),
         "orientation_convention": "reservoir (adjacency[i, j] = weight from j to i)",

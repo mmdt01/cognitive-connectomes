@@ -152,7 +152,7 @@ def test_memory_capacity_downdate_matches_direct(connectome_adjacency):
 
 
 # ---------------------------------------------------------------------------
-# v2b: directed + weighted additions.
+# directed_empirical: directed + weighted additions.
 # ---------------------------------------------------------------------------
 
 
@@ -439,7 +439,7 @@ def test_lorenz_sanity_gate_passes():
 
 
 # ---------------------------------------------------------------------------
-# v2d: per-neuron Dale sign vector.
+# directed_empirical_dale (Dale): per-neuron Dale sign vector.
 # ---------------------------------------------------------------------------
 
 _CANONICAL_GABA = (

@@ -1,4 +1,4 @@
-"""Per-neuron Dale sign vector for the v2d ``asymmetric_empirical_signed`` scheme.
+"""Per-neuron Dale sign vector for the ``directed_empirical_dale`` (``asymmetric_empirical_signed``) scheme.
 
 Maps each *C. elegans* cell label to its neuron class, looks the class up in
 the curated neurotransmitter table (``data/celegans/celegans_neurotransmitters.csv``),
@@ -60,7 +60,7 @@ def load_neuron_signs(
         ``data/celegans/celegans_neurotransmitters.csv``.
     unknown_sign
         Sign for any cell whose class is not listed in the table (+1 by the
-        v2d excitatory-default policy).
+        Dale excitatory-default policy).
 
     Returns
     -------

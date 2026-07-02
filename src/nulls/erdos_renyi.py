@@ -1,10 +1,10 @@
 """Erdős–Rényi G(N, M) random graph: matched exact edge count.
 
-Default (``directed=False``, v2a-compatible): undirected.
+Default (``directed=False``): undirected.
 Preserves N and exact undirected edge count. Built by picking M of the
 C(N, 2) possible undirected edges uniformly at random.
 
-Directed (``directed=True``, v2b): preserves N and exact directed
+Directed (``directed=True``): preserves N and exact directed
 edge count. Built via ``nx.gnm_random_graph(..., directed=True)`` which
 picks M of the N * (N - 1) possible directed edges uniformly at random.
 """
@@ -29,7 +29,7 @@ def generate(
     seed
         Seed forwarded to ``networkx.gnm_random_graph``.
     directed
-        If False (default), undirected (matches v2a). If True, directed.
+        If False (default), undirected. If True, directed.
     """
     n = adjacency.shape[0]
     if not directed:

@@ -6,13 +6,13 @@ structure"). Implemented via block-constrained double-edge swaps.
 
 Two modes (selected by the ``directed`` kwarg, mirroring ``degree_rewire``):
 
-* ``directed=False`` (default, v2a): undirected double-edge swaps. A swap
+* ``directed=False`` (default): undirected double-edge swaps. A swap
   (u,v),(x,y) -> (u,y),(x,v) preserves the per-block-pair edge count iff
   ``block(v) == block(y)``. With random endpoint orientation per draw, all
   four single-equality matchings ({b(v)==b(y), b(u)==b(x), b(v)==b(x),
   b(u)==b(y)}) are sampled across draws — each is a valid swap orientation
   under its corresponding implicit relabelling.
-* ``directed=True`` (v2b/v2d): directed two-edge "head-swaps"
+* ``directed=True``: directed two-edge "head-swaps"
   ``a->b, c->d  =>  a->d, c->b`` that preserve every node's in- and
   out-degree. Such a swap preserves the *directed* block edge-count matrix
   exactly iff the two tails share a block (``block(a) == block(c)``) or the
