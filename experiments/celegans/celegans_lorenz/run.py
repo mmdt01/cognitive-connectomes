@@ -50,7 +50,12 @@ def main(smoke: bool = False) -> None:
     if smoke:
         runner.run_matrix(builder, run_cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2)
     else:
-        runner.run_matrix(builder, run_cfg)
+        # Lorenz is the slowest task (closed-loop rollout per cell); checkpoint by
+        # default so a hard interruption resumes rather than restarts.
+        runner.run_matrix(
+            builder, run_cfg,
+            checkpoint_path=str(run_cfg.results_dir / "lorenz_checkpoint.parquet"),
+        )
 
     # Stats + figures per metric, both reading the shared results.parquet.
     for metric in METRICS:

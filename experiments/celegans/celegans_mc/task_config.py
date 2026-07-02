@@ -3,7 +3,7 @@
 Memory capacity (MC) is the project's foundational task: feed white noise, train a
 ridge readout per lag to reconstruct ``u(t-k)`` from the state ``x(t)``, and sum the
 squared Pearson correlations across lags. It is where this project began
-(v1 -> v2a -> v2c -> v2b); re-running it on the shared 7-variant ladder x 3 realism
+(v1 -> v2a -> v2c -> v2b, historical phase labels); re-running it on the shared 7-variant ladder x 3 realism
 conditions x wide spectral-radius sweep puts it on the same footing as the three
 prediction tasks, so MC can be read through the same operating-point lens.
 

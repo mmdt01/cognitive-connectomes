@@ -18,37 +18,37 @@ def apply_weight_scheme(
         Must be symmetric for ``symmetric_gaussian``; may be asymmetric
         (directed) for ``asymmetric_empirical``.
     scheme
-        ``"symmetric_gaussian"`` (v2a): one N(0, 1) draw per undirected
+        ``"symmetric_gaussian"`` (undirected_gaussian): one N(0, 1) draw per undirected
         upper-triangle edge present in the mask; the same value is
         written to both ``W[i, j]`` and ``W[j, i]``. Diagonal stays
         zero.
 
-        ``"asymmetric_empirical"`` (v2b): one independent draw per
+        ``"asymmetric_empirical"`` (directed_empirical): one independent draw per
         nonzero entry of the mask, sampled with replacement from the
         empirical weight pool passed via the ``empirical_weights``
         kwarg. ``W[i, j]`` and ``W[j, i]`` are independent even when
         the mask is symmetric. Diagonal stays zero.
 
-        ``"symmetric_empirical"`` (v2ae): the undirected, *normal*
+        ``"symmetric_empirical"`` (undirected_empirical): the undirected, *normal*
         analogue of ``asymmetric_empirical``. One draw per undirected
         upper-triangle edge, sampled with replacement from
         ``empirical_weights``, written to both ``W[i, j]`` and
         ``W[j, i]`` so W is exactly symmetric (hence normal). Requires a
         symmetric mask. Same symmetric topology treatment as
-        ``symmetric_gaussian`` (v2a) but with real heavy-tailed
+        ``symmetric_gaussian`` (undirected_gaussian) but with real heavy-tailed
         empirical magnitudes instead of Gaussian draws -- it isolates
         weight heterogeneity from non-normality. Diagonal stays zero.
 
-        ``"asymmetric_gaussian"`` (v2bg): the directed, *non-normal*
+        ``"asymmetric_gaussian"`` (directed_gaussian): the directed, *non-normal*
         analogue of ``symmetric_gaussian``. One independent N(0, 1)
         draw per nonzero (directed) entry of the mask, so ``W[i, j]``
         and ``W[j, i]`` are independent (asymmetric, non-normal) but the
         magnitude distribution is homogeneous (Gaussian, no heavy tail).
-        Same directed topology as ``asymmetric_empirical`` (v2b) but
+        Same directed topology as ``asymmetric_empirical`` (directed_empirical) but
         homogeneous weights -- the fourth cell of the
         topology x weight-distribution 2x2. Diagonal stays zero.
 
-        ``"asymmetric_empirical_signed"`` (v2d): the v2b magnitude
+        ``"asymmetric_empirical_signed"`` (directed_empirical_dale): the directed_empirical magnitude
         pipeline followed by a per-neuron Dale sign. Magnitudes are
         sampled from ``abs(empirical_weights)``; the per-neuron sign
         vector ``neuron_signs`` (one entry per node, +1 excitatory / -1
@@ -176,7 +176,7 @@ def apply_weight_scheme(
         return weighted
 
     if scheme == "symmetric_empirical_randsign":
-        # Sign control for v2ae: same empirical (heavy-tailed) magnitudes as
+        # Sign control for undirected_empirical: same empirical (heavy-tailed) magnitudes as
         # symmetric_empirical, but each undirected edge gets a balanced random
         # sign (P(-)=P(+)=1/2), applied symmetrically so W stays symmetric
         # (normal). Removes the all-positive Perron structure while holding the
@@ -201,8 +201,8 @@ def apply_weight_scheme(
         return weighted
 
     if scheme == "asymmetric_empirical_randsign":
-        # Sign control for v2b: empirical magnitudes with a balanced random sign
-        # per directed edge (vs v2d's structured per-neuron Dale sign). Isolates
+        # Sign control for directed_empirical: empirical magnitudes with a balanced random sign
+        # per directed edge (vs directed_empirical_dale's structured per-neuron Dale sign). Isolates
         # the effect of removing all-positivity on the directed substrate.
         empirical_weights = kwargs.get("empirical_weights")
         if empirical_weights is None:

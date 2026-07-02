@@ -1,8 +1,8 @@
 """Weight-realization comparison of the C. elegans connectome.
 
 Characterises the *same connectome topology* under the three realism conditions
--- v2a (undirected, symmetric gaussian), v2b (directed, empirical non-negative),
-v2d (directed, empirical signed/Dale) -- on the **weight axis**. Companion to the
+-- undirected_gaussian (undirected, symmetric gaussian), directed_empirical (directed, empirical non-negative),
+directed_empirical_dale (directed, empirical signed/Dale) -- on the **weight axis**. Companion to the
 null-ladder driver (which walks the *topology* axis): this one fixes the variant
 to the connectome and walks the realism ladder of weight schemes, making the key
 differences -- directionality, weight magnitude, and sign structure -- legible.
@@ -39,26 +39,26 @@ _DIR = Path(__file__).resolve().parent
 FIGURES_DIR = _DIR / "figures"
 RESULTS_DIR = _DIR / "results"
 
-CONDITIONS = matrix_config.CONDITIONS  # v2a, v2ae, v2bg, v2b, v2d
+CONDITIONS = matrix_config.CONDITIONS  # undirected_gaussian, undirected_empirical, directed_gaussian, directed_empirical, directed_empirical_dale
 REPRESENTATIVE_SEED = 0  # gaussian-weight conditions are a draw; show one representative
 
 CONDITION_TITLE = {
-    "v2a": "Undirected Gaussian",
-    "v2ae_randsign": "Undirected Empirical ±",
-    "v2ae": "Undirected Empirical",
-    "v2bg": "Directed Gaussian",
-    "v2b_randsign": "Directed Empirical ±",
-    "v2b": "Directed Empirical",
-    "v2d": "Directed Signed (Dale)",
+    "undirected_gaussian": "Undirected Gaussian",
+    "undirected_empirical_signed": "Undirected Empirical ±",
+    "undirected_empirical": "Undirected Empirical",
+    "directed_gaussian": "Directed Gaussian",
+    "directed_empirical_signed": "Directed Empirical ±",
+    "directed_empirical": "Directed Empirical",
+    "directed_empirical_dale": "Directed Signed (Dale)",
 }
 CONDITION_COLOR = {
-    "v2a": "#4477aa",
-    "v2ae_randsign": "#88ccee",
-    "v2ae": "#66ccee",
-    "v2bg": "#ee8866",
-    "v2b_randsign": "#ee99aa",
-    "v2b": "#cc6677",
-    "v2d": "#9467bd",
+    "undirected_gaussian": "#4477aa",
+    "undirected_empirical_signed": "#88ccee",
+    "undirected_empirical": "#66ccee",
+    "directed_gaussian": "#ee8866",
+    "directed_empirical_signed": "#ee99aa",
+    "directed_empirical": "#cc6677",
+    "directed_empirical_dale": "#9467bd",
 }
 
 
@@ -87,7 +87,7 @@ def _distribution_caption(weighted: np.ndarray, sign_coverage: dict,
         sign = f"{frac_neg:.1%} negative (sparse)"
     lines = [f"{nonzero.size} edges", sign,
              f"|w|: mean {np.abs(nonzero).mean():.2f}, max {np.abs(nonzero).max():.1f}"]
-    if condition == "v2d":
+    if condition == "directed_empirical_dale":
         lines.append(f"{sign_coverage['n_inhibitory']} inhibitory neurons")
     return "\n".join(lines)
 

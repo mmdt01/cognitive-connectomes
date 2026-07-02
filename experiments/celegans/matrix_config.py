@@ -19,54 +19,54 @@ import numpy as np
 # signed-empirical->empirical is the SIGN step (tail held heavy). The MC sign
 # control showed the supercritical robustness is driven mainly by SIGN (the
 # non-negative Perron structure), heavy-tail secondary, directedness minimal.
-# v2d is the biological Dale-sign anchor on the directed-empirical cell.
+# directed_empirical_dale is the biological Dale-sign anchor on the directed-empirical cell.
 #
 #              | gaussian (signed) | empirical ± (signed) | empirical (positive)
 #   -----------+-------------------+----------------------+---------------------
-#   undirected | v2a               | v2ae_randsign        | v2ae
-#   directed   | v2bg              | v2b_randsign         | v2b   (+ Dale -> v2d)
+#   undirected | undirected_gaussian               | undirected_empirical_signed        | undirected_empirical
+#   directed   | directed_gaussian              | directed_empirical_signed         | directed_empirical   (+ Dale -> directed_empirical_dale)
 # ---------------------------------------------------------------------------
-CONDITIONS = ["v2a", "v2ae_randsign", "v2ae",
-              "v2bg", "v2b_randsign", "v2b", "v2d"]
+CONDITIONS = ["undirected_gaussian", "undirected_empirical_signed", "undirected_empirical",
+              "directed_gaussian", "directed_empirical_signed", "directed_empirical", "directed_empirical_dale"]
 
 CONDITION_SPEC = {
-    "v2a": {
+    "undirected_gaussian": {
         "topology": "undirected",
         "weight_scheme": "symmetric_gaussian",
         "label": "Undirected · gaussian weights",
     },
-    "v2ae": {
+    "undirected_empirical": {
         "topology": "undirected",
         "weight_scheme": "symmetric_empirical",
         "label": "Undirected · empirical weights",
     },
-    "v2bg": {
+    "directed_gaussian": {
         "topology": "directed",
         "weight_scheme": "asymmetric_gaussian",
         "label": "Directed · gaussian weights",
     },
-    "v2b": {
+    "directed_empirical": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical",
         "label": "Directed · empirical weights",
     },
-    "v2d": {
+    "directed_empirical_dale": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_signed",
         "label": "Directed · empirical weights (signed)",
     },
     # --- sign controls (middle rung of each weight ladder) --------------------
-    # The empirical (heavy-tailed) magnitudes of v2ae/v2b but with a BALANCED
+    # The empirical (heavy-tailed) magnitudes of undirected_empirical/directed_empirical but with a BALANCED
     # random sign per edge, so the all-positive Perron structure is removed while
-    # topology + magnitude distribution are held fixed. v2ae vs v2ae_randsign (and
-    # v2b vs v2b_randsign) isolate the contribution of weight SIGN, decoupling it
+    # topology + magnitude distribution are held fixed. undirected_empirical vs undirected_empirical_signed (and
+    # directed_empirical vs directed_empirical_signed) isolate the contribution of weight SIGN, decoupling it
     # from the heavy tail in the gaussian-vs-empirical comparison.
-    "v2ae_randsign": {
+    "undirected_empirical_signed": {
         "topology": "undirected",
         "weight_scheme": "symmetric_empirical_randsign",
         "label": "Undirected · empirical weights (balanced ± sign)",
     },
-    "v2b_randsign": {
+    "directed_empirical_signed": {
         "topology": "directed",
         "weight_scheme": "asymmetric_empirical_randsign",
         "label": "Directed · empirical weights (balanced ± sign)",
@@ -76,11 +76,11 @@ CONDITION_SPEC = {
 # The sign x tail decomposition grid: rows = topology, columns = the weight
 # ladder gaussian(signed) -> signed-empirical -> empirical(positive). Reading
 # left->middle isolates the heavy tail (sign held balanced); middle->right
-# isolates sign (tail held heavy). v2d (Dale) is the biological anchor, shown in
+# isolates sign (tail held heavy). directed_empirical_dale (Dale) is the biological anchor, shown in
 # the per-condition figure rather than this mechanism grid.
 FACTORIAL_GRID = {
-    "grid": [["v2a", "v2ae_randsign", "v2ae"],
-             ["v2bg", "v2b_randsign", "v2b"]],
+    "grid": [["undirected_gaussian", "undirected_empirical_signed", "undirected_empirical"],
+             ["directed_gaussian", "directed_empirical_signed", "directed_empirical"]],
     "row_labels": ["Undirected\n(normal)", "Directed\n(non-normal)"],
     "col_labels": ["Gaussian\n(signed, homog.)",
                    "Signed empirical\n(± heavy tail)",
@@ -92,7 +92,7 @@ FACTORIAL_GRID = {
 # exact weight multiset but permutes which edge carries which weight (per seed),
 # isolating weight PLACEMENT from topology -- it resolves the topology-vs-weights
 # confound (connectome keeps real weights while rung nulls resample). It is a
-# control, not a ladder rung (rung = -1); in v2a, whose weights are already a
+# control, not a ladder rung (rung = -1); in undirected_gaussian, whose weights are already a
 # random Gaussian draw, the permutation is distribution-preserving, so there it
 # is a negative control that should match the connectome.
 VARIANTS = [
@@ -132,7 +132,7 @@ N_SEEDS = 10
 # Substrate weighting / null construction
 # ---------------------------------------------------------------------------
 # "raw"  -> connectome's integer synapse counts directly; "sqrt" -> sqrt first.
-# Only affects v2b/v2d (v2a is always symmetric Gaussian).
+# Only affects directed_empirical/directed_empirical_dale (undirected_gaussian is always symmetric Gaussian).
 WEIGHT_TRANSFORM = "raw"
 CLUSTERING_TOLERANCE = 0.05  # rung 3 clustering band
 LOUVAIN_SEED = 0             # fixed partition for rung 4 (per topology family)

@@ -31,7 +31,7 @@ from experiments.celegans.celegans_mackey_glass.run import build_config
 from experiments.celegans.celegans_mackey_glass.task_config import HORIZONS
 
 # Which connectome reservoir to showcase (a single, honest experiment cell).
-CONDITION = "v2b"        # directed empirical -- the biologically realistic substrate
+CONDITION = "directed_empirical"        # directed empirical -- the biologically realistic substrate
 VARIANT = "connectome"
 SPECTRAL_RADIUS = 0.95   # canonical operating point
 SEED = 0                 # representative seed

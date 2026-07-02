@@ -9,7 +9,7 @@ the task fields for whichever metric we want to analyse. The matrix is run
 extra recorded field); ``stats``/``plots`` are then run once per metric, reading
 the same ``results.parquet`` and writing metric-tagged outputs.
 
-Frozen reservoir hyperparameters were tuned once on the v2a rung-0 baseline for
+Frozen reservoir hyperparameters were tuned once on the undirected_gaussian rung-0 baseline for
 this closed-loop task, then held fixed across every condition and variant -- only
 the spectral radius is swept. Closed-loop free-running is sensitive and lands at
 a different operating point than the driven tasks (a much lower input scaling).
@@ -21,7 +21,7 @@ from src.tasks.lorenz import evaluate as evaluate_lorenz, LAMBDA_MAX
 
 _DIR = Path(__file__).resolve().parent
 
-# Frozen reservoir hyperparameters (tuned on v2a rung-0; baseline vpt ~2.3
+# Frozen reservoir hyperparameters (tuned on undirected_gaussian rung-0; baseline vpt ~2.3
 # Lyapunov times / climate ~4). Closed-loop free-running wants a much lower input
 # scaling than the driven tasks -- a strong drive overwhelms the feedback.
 INPUT_SCALING = 0.1

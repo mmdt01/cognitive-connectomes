@@ -6,14 +6,14 @@ partitions, then turns any ``(condition, variant, seed)`` cell into a weighted
 recurrent matrix ``W``. It is shared across every C. elegans task (NARMA-10,
 Mackey-Glass, ...); the task only changes downstream of the weighted ``W``.
 
-Key efficiency point: v2b and v2d share the same *directed* topology, so their
+Key efficiency point: directed_empirical and directed_empirical_dale share the same *directed* topology, so their
 null masks are identical. Masks are cached on ``(topology, variant, seed)`` and
 reused across conditions — the expensive directed rung-3 clustering rewire is
 generated once, not twice.
 
-Conventions: the connectome variant keeps its *real* weights (v2b/v2d) or gets
-fresh symmetric-Gaussian weights (v2a); nulls sample magnitudes from the
-empirical pool (v2b/v2d) or get fresh Gaussian weights (v2a). Every null is
+Conventions: the connectome variant keeps its *real* weights (directed_empirical/directed_empirical_dale) or gets
+fresh symmetric-Gaussian weights (undirected_gaussian); nulls sample magnitudes from the
+empirical pool (directed_empirical/directed_empirical_dale) or get fresh Gaussian weights (undirected_gaussian). Every null is
 validated against the property it claims to preserve before use.
 """
 
@@ -39,14 +39,14 @@ from experiments.celegans import matrix_config as config
 
 class SubstrateBuilder:
     def __init__(self):
-        # Connectomes (undirected for v2a; directed for v2b/v2d).
+        # Connectomes (undirected for undirected_gaussian; directed for directed_empirical/directed_empirical_dale).
         self.undirected = load_connectome("binary_undirected_chemical")
         self.directed = load_connectome("directed_weighted_chemical")
         self.undirected_mask = self.undirected.adjacency  # binary symmetric
         self.directed_adjacency = self.directed.adjacency  # weighted directed
         self.directed_mask = (self.directed_adjacency != 0).astype(float)
 
-        # Empirical weight pool for v2b/v2d (raw or sqrt synapse counts).
+        # Empirical weight pool for directed_empirical/directed_empirical_dale (raw or sqrt synapse counts).
         if config.WEIGHT_TRANSFORM == "sqrt":
             weighted = np.where(
                 self.directed_adjacency > 0, np.sqrt(self.directed_adjacency), 0.0
@@ -58,13 +58,13 @@ class SubstrateBuilder:
         self.directed_weighted = weighted
         self.empirical_pool = weighted[weighted != 0].copy()
 
-        # Symmetric (undirected) empirical substrate for v2ae. The connectome's
+        # Symmetric (undirected) empirical substrate for undirected_empirical. The connectome's
         # REAL directed weights are reduced to an undirected, *normal* matrix by
         # summing reciprocal synapses (W_sym[i, j] = W[i, j] + W[j, i] = total
         # synaptic mass between the pair), restricted to the undirected mask.
-        # This is the v2ae connectome; its per-edge magnitudes are the v2ae
-        # empirical pool the nulls sample from. v2ae isolates weight heterogeneity
-        # (heavy-tailed magnitudes on hubs) from non-normality: it shares v2a's
+        # This is the undirected_empirical connectome; its per-edge magnitudes are the undirected_empirical
+        # empirical pool the nulls sample from. undirected_empirical isolates weight heterogeneity
+        # (heavy-tailed magnitudes on hubs) from non-normality: it shares undirected_gaussian's
         # symmetric topology but carries real heavy-tailed weights, not Gaussian.
         sym = (self.directed_weighted + self.directed_weighted.T) * self.undirected_mask
         assert np.array_equal(sym > 0, self.undirected_mask.astype(bool)), (
@@ -75,7 +75,7 @@ class SubstrateBuilder:
         self._undirected_upper = np.triu(self.undirected_mask, k=1).astype(bool)
         self.undirected_empirical_pool = sym[self._undirected_upper].copy()
 
-        # Dale sign vector for v2d (aligned to directed node order).
+        # Dale sign vector for directed_empirical_dale (aligned to directed node order).
         self.signs, self.sign_coverage = load_neuron_signs(self.directed.node_labels)
 
         # Fixed Louvain partitions for rung 4 (one per topology family).
@@ -161,17 +161,17 @@ class SubstrateBuilder:
         spec = config.CONDITION_SPEC[condition]
         mask = self.get_mask(spec["topology"], variant, seed)
 
-        if condition == "v2a":
+        if condition == "undirected_gaussian":
             return apply_weight_scheme(mask, "symmetric_gaussian", seed=seed)
 
-        if condition == "v2bg":
+        if condition == "directed_gaussian":
             # Directed topology + homogeneous gaussian weights (non-normal,
-            # no heavy tail). Like v2a, every variant gets fresh gaussian draws;
+            # no heavy tail). Like undirected_gaussian, every variant gets fresh gaussian draws;
             # the mask is what differs (connectome = real, nulls = rewired).
             return apply_weight_scheme(mask, "asymmetric_gaussian", seed=seed)
 
-        if condition == "v2ae":
-            # Undirected topology + real heavy-tailed weights. Like v2b, the
+        if condition == "undirected_empirical":
+            # Undirected topology + real heavy-tailed weights. Like directed_empirical, the
             # connectome keeps its real (summed-symmetric) weights; the nulls
             # sample the undirected empirical pool with replacement.
             if variant == "connectome":
@@ -181,8 +181,8 @@ class SubstrateBuilder:
                 empirical_weights=self.undirected_empirical_pool,
             )
 
-        if condition == "v2ae_randsign":
-            # v2ae with a balanced random sign per edge (sign control). Connectome
+        if condition == "undirected_empirical_signed":
+            # undirected_empirical with a balanced random sign per edge (sign control). Connectome
             # keeps its exact real magnitudes; only the sign is randomised.
             if variant == "connectome":
                 rng = np.random.default_rng(seed)
@@ -196,8 +196,8 @@ class SubstrateBuilder:
                 empirical_weights=self.undirected_empirical_pool,
             )
 
-        if condition == "v2b_randsign":
-            # v2b with a balanced random sign per directed edge (sign control).
+        if condition == "directed_empirical_signed":
+            # directed_empirical with a balanced random sign per directed edge (sign control).
             if variant == "connectome":
                 rng = np.random.default_rng(seed)
                 nonzero = self.directed_mask.astype(bool)
@@ -210,19 +210,19 @@ class SubstrateBuilder:
                 empirical_weights=self.empirical_pool,
             )
 
-        # v2b / v2d: connectome keeps its real weights; nulls sample the pool.
+        # directed_empirical / directed_empirical_dale: connectome keeps its real weights; nulls sample the pool.
         if variant == "connectome":
             weighted = self.directed_weighted.copy()
-            if condition == "v2d":
+            if condition == "directed_empirical_dale":
                 weighted = weighted * self.signs[np.newaxis, :]
             return weighted
 
-        if condition == "v2b":
+        if condition == "directed_empirical":
             return apply_weight_scheme(
                 mask, "asymmetric_empirical", seed=seed,
                 empirical_weights=self.empirical_pool,
             )
-        # v2d
+        # directed_empirical_dale
         return apply_weight_scheme(
             mask, "asymmetric_empirical_signed", seed=seed,
             empirical_weights=self.empirical_pool, neuron_signs=self.signs,
@@ -239,15 +239,15 @@ class SubstrateBuilder:
             connectome  vs this           -> weight PLACEMENT (topology + multiset fixed)
             this        vs degree_rewire   -> TOPOLOGY (placement randomised in both)
 
-        For v2d the per-neuron Dale sign is re-applied column-wise (as for the
-        v2d nulls), so only magnitudes are permuted, not signs. For v2a the
+        For directed_empirical_dale the per-neuron Dale sign is re-applied column-wise (as for the
+        directed_empirical_dale nulls), so only magnitudes are permuted, not signs. For undirected_gaussian the
         "real weights" are a symmetric-Gaussian draw, so permuting them is
         distribution-preserving -> a negative control that should match the
         connectome.
         """
         rng = np.random.default_rng(seed)
 
-        if condition == "v2a":
+        if condition == "undirected_gaussian":
             # Permute the connectome's symmetric-Gaussian weights among its real
             # (undirected) edges only -- topology preserved, placement scrambled.
             base_W = apply_weight_scheme(
@@ -258,20 +258,20 @@ class SubstrateBuilder:
             permuted[upper_edges] = rng.permutation(base_W[upper_edges])
             return permuted + permuted.T
 
-        if condition == "v2ae":
+        if condition == "undirected_empirical":
             # Permute the connectome's REAL (summed-symmetric) magnitudes across
             # its real undirected edges -- topology + multiset fixed, placement
-            # scrambled. The empirical analogue of the v2a control.
+            # scrambled. The empirical analogue of the undirected_gaussian control.
             permuted = np.zeros_like(self.undirected_weighted)
             permuted[self._undirected_upper] = rng.permutation(
                 self.undirected_empirical_pool
             )
             return permuted + permuted.T
 
-        if condition == "v2bg":
+        if condition == "directed_gaussian":
             # Directed gaussian: permuting already-random gaussian draws across
             # the real directed edges is distribution-preserving -> a negative
-            # control that should match the connectome (as v2a's is).
+            # control that should match the connectome (as undirected_gaussian's is).
             base_W = apply_weight_scheme(
                 self.directed_mask, "asymmetric_gaussian", seed=seed
             )
@@ -280,7 +280,7 @@ class SubstrateBuilder:
             permuted[nonzero] = rng.permutation(base_W[nonzero])
             return permuted
 
-        if condition == "v2ae_randsign":
+        if condition == "undirected_empirical_signed":
             # permuted real magnitudes + balanced random signs (symmetric)
             up = self._undirected_upper
             signs = rng.choice([-1.0, 1.0], size=int(up.sum()))
@@ -288,19 +288,19 @@ class SubstrateBuilder:
             permuted[up] = rng.permutation(self.undirected_empirical_pool) * signs
             return permuted + permuted.T
 
-        if condition == "v2b_randsign":
+        if condition == "directed_empirical_signed":
             nonzero = self.directed_mask.astype(bool)
             signs = rng.choice([-1.0, 1.0], size=int(nonzero.sum()))
             weighted = np.zeros_like(self.directed_weighted)
             weighted[nonzero] = rng.permutation(self.empirical_pool) * signs
             return weighted
 
-        # v2b / v2d: permute the connectome's real magnitudes across its real
+        # directed_empirical / directed_empirical_dale: permute the connectome's real magnitudes across its real
         # directed edges (empirical_pool is exactly those nonzero weights).
         nonzero = self.directed_mask.astype(bool)
         weighted = np.zeros_like(self.directed_weighted)
         weighted[nonzero] = rng.permutation(self.empirical_pool)
-        if condition == "v2d":
+        if condition == "directed_empirical_dale":
             weighted = weighted * self.signs[np.newaxis, :]
         return weighted
 
@@ -375,15 +375,18 @@ class SubstrateBuilder:
         ))
 
     # -- operating-point helper --------------------------------------------
-    def connectome_supercritical_radii(self, conditions, n_seeds: int = 5) -> dict:
+    def connectome_supercritical_radii(self, conditions, n_seeds: int = 10) -> dict:
         """Per-condition spectral radius at which the CONNECTOME's bulk goes
         supercritical: ``sr_crit = 1 / bulk95_ratio``, where the 95th-percentile
         ``|lambda|`` reaches the unit circle under top-eigenvalue rescaling. Used
         to shade each metric-vs-sr panel's "connectome supercritical" region.
 
-        Seed-averaged (matters only for v2a, whose connectome weights are a
-        per-seed Gaussian draw; v2b/v2d use the fixed real weights, so the average
-        is exact there). Lazy import of ``spectral`` keeps this module light.
+        Seed-averaged over ``n_seeds`` (default 10, matching N_SEEDS and the
+        spectral-analysis driver, so the shaded band agrees exactly with the
+        committed spectral_metrics table; matters only for the gaussian conditions,
+        whose connectome weights are a per-seed Gaussian draw -- the empirical
+        conditions use the fixed real weights, so the average is exact there).
+        Lazy import of ``spectral`` keeps this module light.
         """
         from src.analysis.spectral import spectral_metrics
 

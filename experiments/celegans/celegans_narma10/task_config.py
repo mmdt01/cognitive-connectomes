@@ -13,7 +13,7 @@ _DIR = Path(__file__).resolve().parent
 RESULTS_DIR = _DIR / "results"
 FIGURES_DIR = _DIR / "figures"
 
-# Frozen reservoir hyperparameters (tuned once on the v2a rung-0 baseline for
+# Frozen reservoir hyperparameters (tuned once on the undirected_gaussian rung-0 baseline for
 # NARMA-10, then held fixed across every condition and variant; only sr swept).
 INPUT_SCALING = 0.2
 LEAK_RATE = 1.0

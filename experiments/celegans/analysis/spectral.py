@@ -38,7 +38,7 @@ _DIR = Path(__file__).resolve().parent
 FIGURES_DIR = _DIR / "figures"
 RESULTS_DIR = _DIR / "results"
 
-CONDITIONS = matrix_config.CONDITIONS          # v2a, v2b, v2d
+CONDITIONS = matrix_config.CONDITIONS          # the 7 conditions (see matrix_config)
 VARIANTS = matrix_config.VARIANTS              # all 7
 # The scatter grid uses the four most informative variants (the decomposition:
 # connectome -> control isolates placement; control -> degree isolates topology;
@@ -49,24 +49,24 @@ N_SEEDS = 10
 REPRESENTATIVE_SEED = 0  # eigenvalue positions aren't averageable; show one graph
 
 CONDITION_TITLE = {
-    "v2a": "v2a · undirected gaussian",
-    "v2ae_randsign": "v2ae_randsign · undirected empirical ±",
-    "v2ae": "v2ae · undirected empirical",
-    "v2bg": "v2bg · directed gaussian",
-    "v2b_randsign": "v2b_randsign · directed empirical ±",
-    "v2b": "v2b · directed empirical",
-    "v2d": "v2d · directed signed",
+    "undirected_gaussian": "Undirected · gaussian",
+    "undirected_empirical_signed": "Undirected · empirical ±",
+    "undirected_empirical": "Undirected · empirical",
+    "directed_gaussian": "Directed · gaussian",
+    "directed_empirical_signed": "Directed · empirical ±",
+    "directed_empirical": "Directed · empirical",
+    "directed_empirical_dale": "Directed · empirical (Dale)",
 }
-# Slide-clean condition labels (no v2a/v2b/... prefix) used for the eigenvalue
-# spectra figure; the bars/decay figures and the table keep the prefixed labels.
+# Slide-clean condition labels (Title Case) used for the eigenvalue-spectra figure;
+# the bars/decay figures and the markdown table use CONDITION_TITLE above.
 CONDITION_TITLE_DISPLAY = {
-    "v2a": "Undirected Gaussian",
-    "v2ae_randsign": "Undirected Empirical ±",
-    "v2ae": "Undirected Empirical",
-    "v2bg": "Directed Gaussian",
-    "v2b_randsign": "Directed Empirical ±",
-    "v2b": "Directed Empirical",
-    "v2d": "Directed Signed (Dale)",
+    "undirected_gaussian": "Undirected Gaussian",
+    "undirected_empirical_signed": "Undirected Empirical ±",
+    "undirected_empirical": "Undirected Empirical",
+    "directed_gaussian": "Directed Gaussian",
+    "directed_empirical_signed": "Directed Empirical ±",
+    "directed_empirical": "Directed Empirical",
+    "directed_empirical_dale": "Directed Signed (Dale)",
 }
 VARIANT_TITLE = {
     "connectome": "connectome",

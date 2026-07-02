@@ -32,7 +32,7 @@ from experiments.celegans.substrates import SubstrateBuilder
 from experiments.celegans.celegans_narma10.run import build_config
 
 # Which connectome reservoir to showcase (a single, honest experiment cell).
-CONDITION = "v2b"        # directed empirical -- the biologically realistic substrate
+CONDITION = "directed_empirical"        # directed empirical -- the biologically realistic substrate
 VARIANT = "connectome"
 SPECTRAL_RADIUS = 0.95   # canonical operating point
 SEED = 6                 # representative seed (NRMSE 0.49, near the 0.55 mean)

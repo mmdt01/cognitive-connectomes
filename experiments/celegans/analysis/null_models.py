@@ -7,7 +7,7 @@ axis; this one makes the *topology* axis -- the null ladder itself -- legible,
 showing what each rung preserves vs destroys relative to the connectome.
 
 Scope. Null masks depend only on topology, not on the weight condition, so this
-analysis uses the **directed** topology (the v2b/v2d family -- the biologically
+analysis uses the **directed** topology (the directed_empirical/directed_empirical_dale family -- the biologically
 realistic substrate) and the binary masks alone. The weight-placement control
 ``connectome_weight_permuted`` permutes weights only; its mask is *identical* to
 the connectome, so it is a no-op here and is omitted. That leaves the clean
@@ -42,7 +42,7 @@ _DIR = Path(__file__).resolve().parent
 FIGURES_DIR = _DIR / "figures"
 RESULTS_DIR = _DIR / "results"
 
-TOPOLOGY = "directed"  # the biologically realistic substrate (v2b/v2d family)
+TOPOLOGY = "directed"  # the biologically realistic substrate (directed_empirical/directed_empirical_dale family)
 # The connectome plus the 5-rung ladder. The placement control is omitted (its
 # mask equals the connectome's -- a no-op on graph structure).
 VARIANTS = ["connectome", "random_gaussian", "erdos_renyi",

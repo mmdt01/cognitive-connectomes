@@ -28,7 +28,7 @@ HORIZONS = (MODERATE_HORIZON, HARD_HORIZON)
 _METRIC_YMAX = {MODERATE_HORIZON: 0.6, HARD_HORIZON: 1.2}
 _METRIC_NO_SKILL = {MODERATE_HORIZON: None, HARD_HORIZON: 1.0}
 
-# Frozen reservoir hyperparameters (tuned once on the v2a rung-0 baseline for
+# Frozen reservoir hyperparameters (tuned once on the undirected_gaussian rung-0 baseline for
 # Mackey-Glass; near-optimal at both horizons, then held fixed across every
 # condition and variant -- only the spectral radius is swept). The smooth MG
 # series wants a much lower leak than NARMA's 1.0.

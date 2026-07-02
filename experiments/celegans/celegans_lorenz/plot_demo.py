@@ -41,9 +41,9 @@ from experiments.celegans.celegans_lorenz.run import build_config
 #      attractor (near-zero climate). Scrambling the connectome's weight placement
 #      is exactly what unlocks this, so the pair visualises the placement effect.
 DEMOS = [
-    dict(condition="v2b", variant="connectome", spectral_radius=0.95, seed=0,
+    dict(condition="directed_empirical", variant="connectome", spectral_radius=0.95, seed=0,
          out="lorenz_dynamics_demo.png"),
-    dict(condition="v2d", variant="connectome_weight_permuted",
+    dict(condition="directed_empirical_dale", variant="connectome_weight_permuted",
          spectral_radius=1.8947, seed=0,
          out="lorenz_dynamics_demo_v2d_control_sr1.9.png"),
 ]
