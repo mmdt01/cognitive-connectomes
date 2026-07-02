@@ -1,297 +1,301 @@
-# Interpreting the C. elegans connectome-reservoir results: operating points, weight placement, and a robustness–performance trade-off
+# Interpreting the C. elegans connectome-reservoir results: a sign × tail × topology factorial and a non-negativity-driven robustness
 
-*Reference summary of four C. elegans connectome reservoir tasks — Jaeger **memory
-capacity** (the foundational passive-memory probe), then NARMA-10 (input-driven
-emulation), Mackey-Glass (driven forecasting), and Lorenz (closed-loop free-running) —
-evaluated across a wide spectral-radius sweep. The connectome and a five-rung null
-ladder are compared, plus a `connectome_weight_permuted` control that splits the effect
-into **placement** (connectome vs control) and **topology** (control vs degree_rewire).
-**Bottom line:** at the canonical operating point the connectome is worse-or-equal; in
-the supercritical regime — once the sweep is wide enough to reach each variant's
-operating point — the connectome is the **most robust** variant on every task: where the
-disk-like nulls peak **sharply** and then collapse, the connectome rises slowly to a
-**wide, flat plateau** that sits slightly below the nulls' peak but holds far into the
-supercritical regime. That is a **robustness–performance trade-off**: the connectome
-sacrifices peak height for a broad stable operating range. Three threads carry the
-story: **weight placement sets the operating point** (it shifts the connectome's optimal
-spectral radius higher — not a handicap); **directed topology is a separate,
-task-dependent advantage** (helps memory and input-driven emulation, emerges for
-forecasting, absent for autonomous generation); and the trade-off itself follows from
-the connectome's **spectral heterogeneity** — a likely signature of biological
-connectivity statistics (§5). Confidence flagged throughout.*
+*Core reference for the four C. elegans reservoir tasks — Jaeger **memory capacity**
+(passive memory), NARMA-10 (input-driven emulation), Mackey-Glass (driven
+forecasting), and Lorenz (closed-loop free-running) — evaluated across a wide
+spectral-radius sweep and a **7-condition factorial** that crosses weight **sign**
+(balanced ± vs all-positive), weight **tail** (homogeneous gaussian vs heavy-tailed
+empirical), and **topology** (undirected/normal vs directed/non-normal). **Bottom
+line:** the connectome's supercritical robustness — the property that distinguishes it
+from its null ladder — is driven **primarily by weight SIGN (the non-negative / Perron
+structure of real synaptic weights)**, with heavy-tailedness a **secondary, task- and
+topology-dependent** contributor and directedness **minimal** except for closed-loop
+stability. This **supersedes** the earlier reading that "the effect scales with
+directedness / non-normality": that contrast (gaussian vs empirical) silently
+**conflated sign with tail**, and a sign control shows sign is the larger lever.
+Confidence flagged throughout.*
 
 ---
 
-## 1. Design and why the sweep reaches sr = 4
+## 1. Design: the 7-condition factorial
 
-Four tasks — Jaeger memory capacity (MC) plus the three prediction tasks — × three
-realism conditions (v2a undirected-Gaussian, v2b directed-empirical, v2d
-directed-signed) × a 7-variant ladder (connectome + placement control + 5 null rungs) ×
-spectral-radius sweep `linspace(0, 4, 39)` × 10 seeds. The
-placement control holds the connectome's exact topology and exact weight multiset but
-permutes which edge carries which weight, so two comparisons decompose the effect:
+Every substrate is the same object — a weighted recurrent matrix `W` used as a fixed
+echo-state reservoir with a trained linear readout — rescaled to a common operating
+point by top-eigenvalue matching (`W → (sr/|λ₁|)·W`) and swept over
+`sr ∈ linspace(0, 4, 39)`. Each condition is compared against a 5-rung null ladder
+(rung 0 random → rung 4 modularity-preserving) plus a `connectome_weight_permuted`
+**placement control** (exact topology + exact weight multiset, permuted onto edges),
+n = 10 seeds.
 
-- **Placement** = connectome vs control (topology + multiset fixed; only placement differs).
-- **Topology** = control vs degree_rewire (placement randomised in both; only topology differs).
+The **weight axis decomposes into two orthogonal sub-factors**, crossed with topology,
+giving a per-topology **ladder** gaussian → signed-empirical → empirical:
 
-**Why sr = 4.** Every variant is normalised to a common operating point by scalar
-top-eigenvalue rescaling (`W → (sr/|λ₁|)·W`). The connectome's heavy, hub-concentrated
-weights compress its eigenvalue **bulk** the most — `bulk₉₅/|λ₁| ≈ 0.30`, vs `≈ 0.38`
-for the control/degree and `≈ 0.46` for random — so under a scalar rescale its bulk
-reaches the unit circle (criticality) only at a **higher nominal sr** than the
-disk-like nulls. Each variant's bulk-critical radius is `sr_crit = 1/bulk₉₅_ratio`
-(one over the committed spectral metric): connectome **≈ 3.3**, nulls **≈ 2.2–2.7**
-(v2b). A sweep stopping near sr ≈ 2 therefore compares the nulls *at* their operating
-point against the connectome *below* its own. Sweeping to sr = 4 lets every variant
-pass through its operating regime, so the comparison is read **curve-vs-curve** rather
-than at a single (misleading) matched sr.
+| key | topology | weights | sign | tail |
+|---|---|---|---|---|
+| `v2a`  | undirected (normal) | symmetric gaussian | balanced ± | homogeneous |
+| `v2ae_randsign` | undirected | symmetric empirical, random ± | balanced ± | heavy |
+| `v2ae` | undirected | symmetric empirical | **all-positive** | heavy |
+| `v2bg` | directed (non-normal) | asymmetric gaussian | balanced ± | homogeneous |
+| `v2b_randsign` | directed | asymmetric empirical, random ± | balanced ± | heavy |
+| `v2b`  | directed | asymmetric empirical | **all-positive** | heavy |
+| `v2d`  | directed | asymmetric empirical + Dale sign | ~all-positive (3.6% inhib.) | heavy |
 
-*v2a is a spectral negative control — its variants are near-identical spectrally, so
-placement and operating-point effects vanish there; the effects below are v2b/v2d
-(directed) phenomena, with v2d (Dale signs) tracking v2b closely. Numbers are quoted
-for v2b unless noted.*
+Reading the ladder isolates each sub-factor cleanly: **gaussian → signed-empirical** is
+the *tail* step (sign held balanced); **signed-empirical → empirical** is the *sign*
+step (tail held heavy). `v2ae_randsign`/`v2b_randsign` carry the connectome's **exact**
+heavy-tailed magnitudes with only the sign randomised, so they are one-variable sign
+controls in the spirit of the placement control. `v2d` (Dale) is the biological anchor.
 
----
+**Why the sweep reaches sr = 4, and the operating points.** Top-eigenvalue rescaling
+pins `|λ₁| = sr`, but a variant's *bulk* becomes critical only at
+`sr_crit = 1/bulk₉₅_ratio`. These differ sharply by **sign**, not directedness
+(connectome, seed-averaged):
 
-## 2. The unifying observation: placement is an operating-point shift, not a handicap
-
-Across all four tasks the **placement** leg (connectome vs control) traces the same
-arc — the connectome looks **deficient at low–mid sr** and **reverses to
-parity-or-advantage at high sr**, around its `sr_crit ≈ 3.3` (Cohen's d, + = connectome
-better, * = Holm-significant):
-
-| placement d (connectome vs control), v2b | sr ≈ 0.95 | sr ≈ 1.47 | sr ≈ 3.05 |
+| | gaussian (signed) | signed-empirical | empirical (positive) |
 |---|---|---|---|
-| Memory capacity   | −5.7* | −2.5* | **+3.5\*** |
-| NARMA-10        | −3.7* | +1.7* | **+3.0\*** |
-| Mackey-Glass h=84 | −1.8* | −2.5* | **+2.0\*** |
-| Mackey-Glass h=300 | −0.2 | −0.7 | +0.5 |
-| Lorenz VPT      | −1.2 | −2.0* | +0.7 |
-| Lorenz climate  | +0.1 | −1.5 | +0.2 |
+| undirected `sr_crit` | 1.37 | ~2.1 | **2.95** |
+| directed `sr_crit`   | 1.23 | ~1.8 | **3.32** (Dale 3.22) |
 
-This is the signature of an **operating-point shift**: the connectome's compressed
-bulk moves its memory/criticality optimum to a higher nominal sr, so at matched
-low–mid sr it sits *below* its optimum (apparent deficit) while at its own operating
-point the deficit vanishes or reverses. It is **not** a fixed performance handicap —
-and **memory capacity** (§3), the most direct measure of near-unit-circle memory modes,
-shows it most starkly: the connectome holds the **lowest** MC at canonical and the
-**highest** deep in the supercritical regime, the largest reversal of any task.
+All-positive weights push the operating point to a much higher nominal `sr`; signing
+the same magnitudes brings it most of the way back. So the sweep must reach sr ≈ 4 to
+cover the positive conditions' operating regime, and comparisons are read
+**curve-vs-curve**, not at a single matched `sr`.
+
+*Naming note: these `v2x` keys are legacy labels slated for a descriptive-snake_case
+rename; in prose below they are referred to by their factor content (e.g.
+"directed-empirical" = `v2b`, "signed-empirical" = `*_randsign`).*
 
 ---
 
-## 3. Per-task results (wide sweep)
+## 2. The central result: weight sign is the primary robustness driver
 
-### Memory capacity — the foundational passive-memory probe
-Feed white noise, train a ridge readout per lag to reconstruct `u(t−k)` from the state,
-sum the squared correlations (higher = better). MC is the *direct* measure of how many
-near-unit-circle modes carry memory, so the operating-point picture shows most cleanly
-here. The connectome is the **lowest** at canonical (v2b MC 9.1; d **−6.3** vs degree at
-sr 0.95) — its crushed bulk gives it the least memory at the point you would tune to. As
-sr rises it climbs to a **flat plateau (~11) that holds from sr 2 to 4**, while every
-disk-like null **peaks sharply (~12–13) near sr 1.2 and then collapses** (random
-13.0 → 4.9 by sr 4.0). So the connectome **dominates the supercritical regime**
-(connectome − degree d **+8.5** at sr 3) — not by a higher ceiling (its peak ~11.7 is
-*below* the nulls' peaks ~12.3–13.0; its effective dimensionality is structurally lower)
-but by **robustness**: a wide stable memory plateau where the nulls collapse. Both legs
-reverse/emerge supercritically: placement d **−5.7 → +3.5** (canonical → sr 3); topology
-(control vs degree) is ~0 at canonical and grows to d **+3.5** at sr 2.5 — a *large
-emergent* memory advantage for the connectome's directed wiring (control and degree
-share the same operating point, so this is genuine topology). In **v2a** (undirected,
-minimal operating-point shift) the topology effect appears at modest gain — connectome
-> degree d **+1.3** at sr 1.8 — **reproducing the project's foundational MC result**
-(v2a/v2c: connectome beats degree_rewire supercritically, attributable to
-clustering/modularity). MC thus recovers the original finding *and* reframes it as the
-cleanest instance of the operating-point + robustness story.
+Across the passive and driven tasks the connectome's supercritical advantage over its
+degree-preserving null (Cohen's *d*, + = connectome better) lives almost entirely in
+the **all-positive-empirical** column, and **signing the exact same weights removes
+most or all of it**:
 
-### NARMA-10 — input-driven emulation
-The connectome's NRMSE is **flat at ~0.55 across the entire [0, 4] sweep** — it is the
-only variant that never destabilises. Every null, **including the placement control**,
-climbs to ~0.80 supercritically. So supercritically the connectome **beats every
-null**, and the margin widens in the tail (sr 4.0: connectome 0.59 vs nulls ~0.80).
-Both axes favour it: placement reverses to a large advantage (d +3.0 at sr 3), and
-**topology is a large advantage** (control vs degree d +4.3 at sr 1.47, +1.0 in the
-tail). NARMA is noise-driven and prone to supercritical blow-up, and the connectome's
-compressed-bulk **stability** is exactly what the task rewards.
+**Memory capacity** (*d* at sr ≈ 4):
 
-### Mackey-Glass — driven forecasting (h = 84, h = 300)
-The connectome's NRMSE **improves monotonically with sr** to the best of all variants
-at its operating point — h=84: 0.15 → **0.03** by sr ≈ 3 (vs nulls degrading to
-0.07–0.24); h=300: 0.49 → **0.34** (vs nulls climbing to 0.43–0.48). The placement leg
-reverses from a clear deficit (d −2.5 at sr 1.47) to an advantage (d +2.0 at sr 3), and
-a **topology advantage emerges in the tail** (control vs degree d +1.7 at sr 3, h=84)
-that was invisible at low sr. MG is memory-limited; the connectome's memory peaks at
-its higher operating sr, so once the sweep reaches it the connectome is the best
-forecaster — and the most robust (nulls degrade past their own optima while it holds).
-*(At each variant's own optimum the variants are roughly tied — ~0.02–0.03 at h=84 —
-so the connectome's distinction is that its optimum sits at higher sr and it degrades
-the least beyond it.)*
+| | gaussian | signed-empirical | empirical (positive) |
+|---|---|---|---|
+| undirected | +1.0 | **+3.5** | **+9.0** |
+| directed | +1.7 | **+0.2** | **+10.7** |
+| Dale | | | **+8.9** |
 
-### Lorenz — closed-loop free-running (VPT, climate)
-The connectome **recovers at sr ≈ 3.0–3.3** to **parity with the best structured null**
-(degree_rewire): VPT 1.6 → ~4.6 (vs degree 4.6, control 3.1, random 2.6); climate
-6.5 → ~2 (vs degree ~2.9; random *diverged* to 20+). It is the **most
-divergence-robust** variant — **0 %** closed-loop blow-ups in v2b/v2d vs **26–31 %**
-for random/ER. But here the **topology leg does not favour the connectome** in the tail
-(control vs degree d ≈ −0.8 at sr 3 — degree-rewiring matches or beats the connectome's
-own topology), and the placement leg only reaches parity (d +0.2–0.7, NS). So on the
-autonomous task the connectome's structure is **sufficient and robust, but not
-superior**.
+**NARMA-10** (*d* at sr ≈ 3):
+
+| | gaussian | signed-empirical | empirical (positive) |
+|---|---|---|---|
+| undirected | −0.1 | +0.5 | **+10.0** |
+| directed | +2.0 | **+3.4** | **+8.1** |
+| Dale | | | **+10.3** |
+
+The pattern is consistent: the big effect is in the positive column; the sign step
+(positive → signed) collapses it — **entirely** in some cells (MC directed +10.7 → +0.2)
+and by ~60% in others (MC undirected +9.0 → +3.5); the gaussian column is ~flat.
+Directedness (gaussian undirected vs directed) is small everywhere (~+1). So the
+"gaussian vs empirical" contrast that the earlier framing read as "directedness /
+non-normality" is really **sign, then tail, then (barely) directedness**.
+
+### The mechanism: resisting a Perron collapse
+A **non-negative** matrix has a large, isolated **Perron eigenvalue** far above a
+compressed bulk. Under global-gain scaling its disk-like *nulls* (random/ER, also
+all-positive) synchronise into that one mode and **collapse off a knife-edge**
+supercritically — MC of the rung-0 null falls to **4.9** (directed) / **3.5**
+(undirected) by sr = 4, from a peak near 13. The connectome's heavy weights, placed on
+its real hubs, **spread its operating point** (higher `sr_crit`) so it rides through
+where its all-positive nulls collapse — a wide flat plateau (~11) vs a sharp
+peak-and-collapse. **Sign the weights** (balanced ±, mean → 0): the Perron mode
+vanishes, the nulls no longer collapse (rung-0 MC holds ~13.6 in directed-signed), and
+there is **nothing for the connectome to outlast** → the crossover disappears. The
+robustness is therefore, precisely, **collapse-resistance in an all-positive substrate**
+— which matters only because real structural weights *are* non-negative.
 
 ---
 
-## 4. What it means: the connectome's topology advantage, by task
+## 3. Spectral basis, and why the *nulls* peak highest in directed-signed
 
-Two separable axes:
+Two scale-invariant facts about the rescaled spectrum explain both the operating-point
+shift and an initially surprising observation (the disk-like nulls attain the **highest
+raw MC of any variant anywhere** in the directed-signed conditions):
 
-- **Weight placement → operating point.** The connectome's real (heavy,
-  hub-concentrated) weight placement maximally compresses its spectral bulk, which
-  **shifts its optimal operating sr higher** — a *relocation* of where it works best,
-  not a deficit. Grounded in the spectral metrics and the operating-point recovery on
-  all four tasks (memory capacity makes it most explicit).
-- **Directed topology → a separate, task-dependent computational advantage.** Holding
-  weights fixed (control vs degree), the connectome's directed organisation *beyond the
-  degree sequence* helps **where the task rewards memory or stability under drive**:
-  **large** for memory capacity (d ~+3.5 supercritically) and input-driven emulation
-  (NARMA, d ~+4.3), **emergent under strong drive** for forecasting (MG tail), but
-  **absent** for closed-loop generation (Lorenz), where degree-preserving rewiring is as
-  good. The pattern: topology helps the **retain-and-transform** tasks (MC, NARMA, MG)
-  and not **autonomous generation** (Lorenz) — and in every case it **emerges
-  supercritically**, invisible at the canonical point.
+- **Bulk compression tracks sign, ~2× the tail.** Holding magnitude fixed and flipping
+  only sign moves `bulk₉₅/|λ₁|` from 0.73 → 0.37 (undirected) / 0.82 → 0.31 (directed);
+  the heavy tail alone (signed) moves it far less. All-positive-homogeneous weights
+  alone reproduce ~100% of the directed connectome's compression.
+- **Girko's circular law sets the null MC peaks.** A random matrix whose entries are
+  (a) **independent across the two directions** (directed → non-normal → *complex*
+  eigenvalues filling a 2-D **disk**, not a 1-D real line) and (b) **zero-mean**
+  (signed → no Perron spike) has eigenvalues spread ~uniformly over the unit disk. That
+  packs the **most modes near the unit circle** — and near-critical modes are exactly
+  what store delayed inputs. Measured directly on the rung-0/1 nulls:
 
-The **robustness through-line** is the connectome's most consistent edge: on every task
-with a destabilising supercritical regime it has the widest stable operating range —
-a flat memory plateau where nulls collapse (MC), flat NRMSE where nulls climb (NARMA),
-best-and-holding where nulls degrade (MG), zero divergence where nulls blow up (Lorenz).
-The same spectral compression that delays its recovery is what keeps it stable far into
-the supercritical regime — developed as a trade-off in §5.
+  | condition | n_critical (modes near \|λ₁\|) | frac complex | eff. dim (PR) |
+  |---|---|---|---|
+  | directed gaussian | **22 / 29** | 0.92 (disk) | 260 |
+  | directed signed-empirical | **14 / 20** | 0.93 (disk) | 243 |
+  | undirected (any) | 5–10 | 0.00 (real line) | 190–210 |
+  | all-positive (empirical/Dale) | **1** | 0.93 but Perron-spiked | 239 |
 
-**For the tasks (and the JEPA north star).** The connectome is a **competitive, robust
-predictive substrate**, strongest where prediction is **input-driven** (NARMA best, MG
-best at its operating point) and **at parity** where it is **autonomous** (Lorenz ties
-the best structured null). Its directed topology is a genuine asset for driven
-prediction; for self-sustaining rollout — the world-model-relevant regime — it is
-*sufficient and exceptionally stable*, but its specific wiring is not superior to a
-degree-matched graph. The connectome-as-predictor story is therefore a
-**robustness-and-competitiveness** story, not a dominance story.
+  Every non-directed-signed condition loses the disk: **symmetric** → eigenvalues
+  collapse onto the **real line** (no rotational modes; the classic poor reservoir);
+  **all-positive** → a **Perron spike over a crushed bulk** (n_critical = 1). Directed +
+  signed dodges both → maximal near-critical modes → the highest MC. And the
+  **least-structured** nulls (random/ER) realise the *cleanest* disk, so they peak above
+  even rungs 2–4 and the connectome — the standard RC result that **unstructured random
+  reservoirs are near-optimal for raw linear memory; structure trades memory for
+  task-specific computation.**
 
----
-
-## 5. The universal pattern: a robustness–performance trade-off, and its biology
-
-All four tasks share one shape: **the disk-like nulls peak sharply and high over a
-narrow gain window, then collapse; the connectome rises slowly to a wide, flat plateau
-that is slightly below the nulls' peak but holds far into the supercritical regime.**
-This through-line has a clean mechanistic cause, a plausible biological reading, and a
-falsifiable prediction for other connectomes.
-
-### The mechanism — synchronised vs graded criticality
-The shape follows from spectral *heterogeneity*. A disk-like spectrum (the nulls) has
-all eigenvalues at a similar radius (bulk ≈ top), so as the global gain is scaled **all
-modes cross the unit circle together** — they reach the edge of chaos simultaneously (a
-sharp performance peak) and destabilise simultaneously (a sharp collapse). The
-connectome's spiked spectrum spreads eigenvalues across a wide range of radii (one large
-λ₁, λ₂ ≈ 0.77, then a long compressed tail), so modes cross criticality **gradually**:
-some subset always sits near the unit circle across a wide band of nominal sr → a wide
-plateau, with no single sr where *everything* is optimal (lower peak) but none where
-*everything* collapses (graceful degradation). Crucially the **same** structural feature
-— heavy weights concentrated on hub edges — causes *both* signatures: it concentrates
-dynamical "resources" into a few dominant modes (low effective dimensionality,
-participation ratio ~137 vs ~239 → **lower peak**) *and* spreads the eigenvalue radii
-(graded criticality → **wider range**). The lower ceiling and the robustness are two
-faces of one cause.
-
-So "robust" here means, precisely, **insensitive to the operating-point (gain)
-parameter**: the connectome computes well over a broad range of spectral radii and
-degrades gracefully, where the nulls need near-exact tuning to a knife-edge.
-
-### A robustness–performance trade-off
-Read as a trade-off: the nulls **specialise** — concentrate all eigenvalues at one
-criticality for a high peak, payable only in a narrow window — while the connectome
-**generalises** — spreads them, trading peak height for a broad stable operating range.
-It is a specialisation–generalisation / peak–robustness axis, with biological
-connectivity on the robust-generalist end. Which end is "better" is context dependent:
-at a tuned operating point the nulls win; across un-tuned, fluctuating conditions the
-connectome wins. *(Scope: we have shown robustness to **gain**; whether it extends to
-robustness against noise or lesions is untested, though a broad stable dynamical regime
-plausibly correlates.)*
-
-### Biological intuition (interpretation, not demonstration)
-The honest boundary first: this is a reservoir abstraction — the connectome is used as a
-recurrent matrix with *imposed* weights and a *synthetic* task, not a model of
-*C. elegans* computation. The claim is about what biological **connectivity statistics**
-confer dynamically. With that boundary:
-
-- **Real circuits have no global gain knob tuned to a sharp optimum.** They operate
-  under neuromodulation, fluctuating input statistics, plasticity, noise, and
-  development. A substrate sharply peaked at one precise gain would be fragile to all of
-  that; a wide flat plateau is robust to it — the "**criticality without fine-tuning**"
-  idea, where heterogeneous wiring keeps a network near-critical across a *range* of
-  states rather than at a single tuned point.
-- **The features that create the heterogeneity are canonical biology** — heavy-tailed
-  (log-normal) synaptic weights, hub neurons, rich-club organisation. And the effect is
-  **strongest in our most biologically faithful condition** (v2b/v2d, real directed
-  empirical weights) and weak in the artificial one (v2a, Gaussian): *more biological
-  substrate → more robust*, within our own data.
-- It reads as a very biological bargain — **give up peak optimisation for graceful,
-  generalising performance** across uncertain conditions, where the cost of catastrophic
-  collapse is high. Brains may carry broad weight/degree distributions *because* this
-  confers dynamical robustness, lower peak notwithstanding.
-
-### Will it generalise to other connectomes?
-The mechanism predicts **yes qualitatively, with magnitude set by directedness /
-non-normality**. The driver is spectral heterogeneity from heavy-tailed weights + hubs,
-which any biological connectome has — so the qualitative pattern (more robust than its
-nulls, lower peak) should recur. But the *strength* depends on how compressed the
-spectrum is, and we have an internal control for that: **our v2a (undirected) is the
-symmetric analog**, and it shows a much weaker effect than the directed v2b/v2d
-(connectome `sr_crit` ≈ 1.4 vs ≈ 3.3; topology d ~1.3 vs ~3.5). A **symmetric macro-scale
-human connectome** (dMRI — a *normal* matrix, bulk tracks top, little compression) should
-therefore behave like our v2a: the robustness effect present but **substantially
-weaker**. The **directed cellular connectomes the scale row targets** (fly optic lobe,
-mouse cortex), non-normal like *C. elegans*, should show the **strong** version. The
-falsifiable prediction: *the effect scales with directedness / non-normality — strong for
-directed cellular connectomes, weak for symmetric macro-scale ones* — which is partly why
-the macro-scale human graph is held out of the main scale-row comparison (it confounds
-scale with directedness/normality).
+**Consequence for interpretation.** The connectome is **never** the highest-performing
+substrate — a directed-signed random reservoir beats it on MC. Its interest is
+robustness *relative to a handicapped, all-positive null*. "The connectome is robust"
+means "**non-negative connectome weights resist the collapse/divergence that afflicts
+non-negative random matrices**," not "connectome structure is a better computer."
 
 ---
 
-## 6. Caveats (load-bearing)
+## 4. Per-task results (7 conditions)
 
-1. **Canonical point: worse-or-equal.** At a single fixed sr ≈ 0.95 the connectome is
-   worse-or-equal on all four tasks; every advantage is supercritical and requires
-   comparing variants at their operating points.
-2. **Parity, not dominance, on the autonomous task.** Lorenz is a tie with the best
-   structured null; the unambiguous win is robustness, not central-tendency
-   superiority.
-3. **The comparison axis is a commitment.** The picture rests on reading curve-vs-curve
-   (operating-point-matched) rather than matched-nominal-sr — appropriate because the
-   variants' spectra differ in shape, but a stated methodological choice, not a
-   neutral default.
-4. **Raw weights.** All tasks use raw synapse counts; a `sqrt` transform compresses the
-   tail less, raising `bulk₉₅_ratio` and so lowering `sr_crit` — the connectome would
-   recover at a lower nominal sr. Sign/structure expected to survive; the exact
-   operating points are a weight-transform choice.
-5. **Topology mechanism open.** *Why* the directed topology helps memory, NARMA and the
-   MG tail but not Lorenz is characterised but not mechanistically pinned.
-6. **Lower ceiling, not higher.** The connectome's *peak* performance is at or below the
-   best null's peak (clearest on MC: peak ~11.7 vs nulls ~12.3–13.0); its supercritical
-   advantage is a **crossover** — it holds while the nulls collapse — not a higher
-   ceiling. The win is robustness, not raw capability.
+### Memory capacity — cleanest instance of the sign mechanism
+Positive-empirical shows the large crossover (undirected *d* +9.0, directed +10.7, Dale
++8.9); signing collapses it (directed → +0.2). The connectome's *peak* MC sits **below**
+its nulls' peaks (v2b 11.7 vs random 13.0) — the lower-ceiling half of the trade-off —
+while the signed conditions have *higher* peaks (v2b_randsign 13.8, random 16.2): E/I-
+style balance restores dynamical richness but removes the collapse-and-crossover
+entirely. **Secondary tail residual is normal-gated** — it survives signing only in the
+*undirected* cell (+3.5; its placement leg still reverses −6.4 → +3.9), and dies
+directed (+0.2; placement stays negative).
+
+### NARMA-10 — sign primary, but directedness earns a role
+Same core: positive-empirical strong (+8 to +10), signing undirected → +0.5, directed →
++3.4. **The tail residual is directed-gated here — the mirror image of MC** (residual in
+the directed cell, gone undirected). The failure mode is **graceful de-skilling, not
+blow-up** (connectome divergence ~0%): nulls climb to NRMSE ~0.8–1.0 (= no better than
+predicting the mean), and the **signed/gaussian directed nulls degrade *worse* (~1.0)
+than the all-positive nulls (~0.8)** — the disk spectrum that maximised MC memory goes
+effectively chaotic under continuous drive. Directedness matters more than for MC
+(gaussian undirected −0.1 vs directed +2.0): NARMA rewards directed structure for
+**stability under drive**. Dale is strongest (+10.3).
+
+### Mackey-Glass — the weakest, most horizon-dependent signal
+At **h = 84** the undirected column is cleanly sign-driven (positive +8.2, signed −0.1).
+The directed picture is **messy and carries an honest metric caveat**: the *largest* *d*
+is directed-**signed** (+9.2), but that is a **"the null fails harder" artefact** — under
+teacher-forced drive the disk-spectrum directed nulls go chaotic (degree_rewire → 0.60–
+0.92) while all-positive nulls stay accurate (0.06–0.15), inflating the connectome's
+*relative* advantage. Reading the connectome's *own* curve is cleaner and recovers the
+story: it holds its forecast supercritically only when heavy-tailed — positive best
+(~0.03), signed-empirical holds (~0.1), **directed-gaussian fails outright (0.66 →
+0.79)**. At **h = 300** (chaos-limited) the advantage **largely washes out** (*d* ~+0.6
+everywhere): once the horizon exceeds the connectome's memory the edge evaporates. So MG
+robustness is real at the easy horizon and fades at the hard one — the connectome is not
+a better chaotic forecaster in general, it just holds its **memory-bounded** skill over a
+wider `sr` range (its late operating point = the sign/Perron effect).
+
+### Lorenz — pure robustness, parity on fidelity, non-negativity *required*
+The primary axis is **closed-loop divergence**. The connectome has the **lowest blow-up
+rate in every condition** (0% in all directed, 1–7% undirected-empirical, 52% only
+undirected-gaussian), and the original v2b headline reproduces exactly (connectome **0%**
+vs random **26%** / ER **31%**). Two structural effects: **directedness strongly
+stabilises rollout** (undirected blows up 52–77%, directed 0–31%), and the **all-positive
+disk nulls are the most blow-up-prone** (the Perron mode is amplified by the output
+feedback). But on **fidelity the connectome is at parity, not dominant** — VPT ~4.5 ≈
+degree ~4.5 (*d* ≈ 0), climate ~2.5 ≈ degree (*d* ≈ 0–0.5) in the positive/Dale
+conditions — reproducing the pre-existing "sufficient and robust, but not superior"
+finding, unchanged by the sign controls. Uniquely, **non-negativity here is required for
+the task to *function*, not merely for robustness**: signing collapses VPT from ~4.5 to
+~0.5. (The eye-catching signed-condition *d*'s — VPT +3.3, climate −5.0 for dir emp± —
+are comparisons *among poor performers* and VPT/climate disagree there; do not
+over-read.)
 
 ---
 
-## 7. One-line summary
+## 5. Synthesis: what drives what
 
-Across all four tasks — memory capacity, NARMA-10, Mackey-Glass, Lorenz — the
-connectome's heavy weight **placement** compresses its spectral bulk and **shifts its
-optimal operating point to a higher spectral radius**, so its apparent supercritical
-"deficits" are an artifact of comparing *below* that point. At its operating point it is
-the **most robust** variant on every task: where the disk-like nulls peak sharply and
-collapse, it holds a **wide flat plateau** — slightly below their peak but far more
-stable — a **robustness–performance trade-off** rooted in its spectral heterogeneity (a
-likely signature of biological connectivity). Its directed **topology** is a separate
-advantage for memory and input-driven prediction that emerges supercritically and is
-absent for autonomous generation. At the canonical point it remains worse-or-equal; its
-edge is supercritical, operating-point-matched, and robustness-led — it trades peak
-capability for a broad, biologically-plausible stable regime.
+- **Weight sign (non-negativity / Perron structure) — the primary driver.** Consistent
+  across all four tasks: it sets the operating-point shift, causes the disk-null
+  collapse (MC/NARMA/MG) and closed-loop blow-up (Lorenz) that the connectome resists,
+  and on the autonomous task is **required for the substrate to reconstruct the attractor
+  at all**. Confidence: high (a one-variable sign control, spectrally grounded).
+- **Heavy tail — secondary, and task-/topology-gated.** A real but smaller residual that
+  survives signing in *one* cell per task, and the cell flips: **normal-gated for MC**
+  (undirected), **directed-gated for NARMA/MG** (driven). Intuition (not pinned): passive
+  memory rewards the symmetric hub spread; driven tasks reward directed hub structure
+  that damps blow-up under drive.
+- **Directedness — minimal for passive/driven skill, decisive for closed-loop
+  stability.** ~+1 on MC/NARMA/MG, but on Lorenz it is the difference between ~50–77% and
+  ~0–31% divergence. Non-normality helps *only* where the reservoir must sustain its own
+  dynamics.
+- **The connectome vs its nulls — robustness, not raw superiority.** It is never the
+  best substrate at any task; its edge is collapse-/divergence-resistance in the
+  biologically-real all-positive regime, and on autonomous fidelity it is at **parity**
+  with a degree-matched graph. The apparent "wins" are the connectome outlasting a
+  handicapped null, not out-computing a good one.
+
+---
+
+## 6. Biology, and the human-connectome prediction
+
+The honest boundary first: this is a reservoir abstraction — imposed weights, synthetic
+tasks, and an **all-positive (all-excitatory) recurrent matrix is not a realistic neural
+circuit** (real dynamics have inhibition). With that boundary:
+
+- **Non-negativity is a genuine property of structural connectomes.** Measured synaptic
+  counts / streamline densities are non-negative; sign (E/I) is a separate Dale layer.
+  So the driver we identify is a real feature of the data, not an artefact — but its
+  *dynamical* relevance is strongest when the effective matrix stays ~non-negative.
+- **It holds for *C. elegans* specifically.** The biologically-faithful Dale condition
+  (`v2d`) is only **3.6% inhibitory** (26 GABAergic neurons), so it is effectively
+  all-positive → keeps the Perron structure → keeps the effect (Dale ≈ v2b throughout).
+- **Clean cross-species prediction.** A more inhibition-heavy brain (mammalian cortex
+  ~20% inhibitory) would push the effective matrix toward balanced signs → toward the
+  disk regime → **weaker robustness, higher raw capacity**. Falsifiable if E/I-resolved
+  connectomes are run.
+- **Human structural connectome (Suárez 2021 dMRI SC) — prediction reversed and
+  sharpened.** The original guess was "symmetric/normal → behaves like the weak
+  undirected-gaussian case." That is **wrong**: the human SC is **non-negative and
+  heavy-tailed**, i.e. the `undirected_empirical` (`v2ae`) cell — which shows the **full**
+  robustness effect here (MC *d* +9). So the human SC is predicted to show a **strong**
+  robustness crossover, driven by the Perron mechanism, **independent of tail or
+  directedness**. `v2ae` (and its sign control) is the internal proof-of-concept, and the
+  human run is the external test.
+
+---
+
+## 7. Caveats (load-bearing)
+
+1. **Robustness, not dominance.** The connectome never has the highest raw performance;
+   a directed-signed random reservoir beats it (Girko-optimal). Every advantage is a
+   crossover against a collapsing/diverging all-positive null.
+2. **Cohen's *d* confounds "connectome good" with "null bad."** Where the null fails
+   catastrophically (MG directed-signed, some Lorenz signed cells) the *d* inflates or
+   flips; read the connectome's own curve, and treat signed-cell effect sizes with care.
+3. **The comparison axis is a commitment.** Curve-vs-curve at operating points, not at a
+   single matched `sr` — appropriate because the conditions' spectra differ in shape, but
+   a stated choice.
+4. **All-positive is a modelling regime, not a realistic circuit.** The mechanism is
+   about what non-negative connectivity *statistics* confer dynamically; the biological
+   dynamical system has inhibition (partially captured only by the sparse Dale layer).
+5. **Raw weights; scale is rescaled away.** Magnitude range (gaussian ~±4 vs empirical
+   ~75) does not enter — top-eigenvalue rescaling divides it out; only sign and relative
+   tail shape survive. A `sqrt` transform would compress the tail and lower `sr_crit`;
+   sign/structure of the results should survive.
+6. **Tail mechanism open.** *Why* the secondary heavy-tail residual is normal-gated for
+   MC but directed-gated for NARMA/MG is characterised, not mechanistically pinned.
+
+---
+
+## 8. One-line summary
+
+Across memory capacity, NARMA-10, Mackey-Glass, and Lorenz, the connectome's
+supercritical robustness is driven **primarily by the non-negative (Perron) structure of
+its weights** — which makes all-positive random nulls collapse (or, in closed loop, blow
+up) at criticality while the connectome's heavy hub weights let it hold — with
+**heavy-tailedness a secondary, task-and-topology-gated** contributor and **directedness
+minimal except for closed-loop stability**. Signing the exact weights removes the effect;
+a directed-signed random reservoir (a Girko-optimal disk) out-performs the connectome
+outright. So the finding is **collapse-resistance conferred by non-negative connectivity
+statistics**, biologically real for near-all-excitatory *C. elegans* (Dale ≈ all-positive)
+— which reverses the earlier framing (it is sign, not directedness) and predicts the
+non-negative human structural connectome should show a **strong**, not weak, version of
+the effect.
