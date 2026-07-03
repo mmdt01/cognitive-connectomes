@@ -11,7 +11,42 @@ with both structural and functional connectivity.
 - **`Individual_Connectomes.mat`** — MATLAB v5/v7 `.mat`, ~669 MB. **Gitignored**
   (too large for the GitHub 100 MB limit; see the repo `.gitignore`). Download it
   separately from the Suárez et al. (2021) data release and place it here; the loaders
-  expect this path.
+  expect this path. **Cortical-only** parcellations (no subcortical nodes).
+
+## Supplementary release — `Suarez2021_Data/`
+
+The reproducibility bundle uploaded by Suárez et al. alongside the paper. **Gitignored**
+(kept locally; download-documented here). As downloaded it was 728 MB; **trimmed to
+~10 MB** — the 665 MB per-subject `connectivity/individual/` stacks and the 53 MB
+`spin_test/` spatial-null CSVs were deleted (the individual data is redundant with the
+`.mat`; spin tests are out of scope), leaving:
+
+| subdir | contents |
+|---|---|
+| `connectivity/consensus/` | **The published distance-dependent group consensus** (Betzel 2018), weighted + symmetric + zero-diagonal. `human_250.npy` (N=463, density 6.19%), `human_500.npy` (N=1015, density 2.47% ≈ the paper's 2.5%). |
+| `coords/` | Parcel-centroid MNI coordinates `(N, 3)` — edge length for `struct_consensus`. |
+| `hemispheres/` | `hemiid` (0/1) hemisphere label per node. |
+| `cortical/` | Cortical mask (`1`=cortical): 448 of 463 / 1000 of 1015. |
+| `rsn_mapping/` | Yeo resting-state-network label per node (+ `subctx`). |
+
+**Scale naming (important):** the release uses Cammoun **scale250 = 463 nodes** (448
+cortical **+ 15 subcortical**) and **scale500 = 1015** (1000 + 15) — *with* subcortical,
+unlike the cortical-only `.mat`. The release has **no N=219** (Cammoun scale125, a
+distinct coarser parcellation), so the matched-to-*C. elegans* scale is unavailable here.
+
+**Consensus substrate — self-built, published used only to validate.** We build our OWN
+distance-dependent consensus (Betzel 2018) from the **`.mat` individual SC** (the raw
+source) at **cortical N=448 and N=1000**, via `src/connectomes/consensus.py` +
+`src/connectomes/human_suarez.build_consensus` (driver:
+`experiments/human/build_consensus.py`), using this release's `coords`/`hemiid` for the
+geometry (cortical subset; node order verified against the `.mat`, r≥0.98). It reproduces
+the published consensus in **density** (5.3% vs 5.1% @448), **node-level hub structure**
+(r=0.99) and **edge weights** (r=0.999 on shared edges), with **~52–58% edge overlap** —
+the residual edge differences trace to the distance metric (Euclidean centroid distance vs
+the original's surface-based distance). The published `human_250.npy`/`human_500.npy`
+therefore serve as a **validation anchor**, not the substrate. Built consensus is cached
+(gitignored, regenerable) at `data/human/built_consensus/consensus_{448,1000}.npy`.
+**N=219 dropped** (no release geometry; the *C. elegans* node-count match is deprioritised).
 
 ## Structure
 

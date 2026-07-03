@@ -231,3 +231,9 @@ hyperopt_results/
 # Large downloaded datasets (provenance documented in each data/<species>/README.md;
 # small curated files such as the C. elegans xlsx/csv stay committed)
 data/**/*.mat
+# Suárez 2021 reproducibility release (geometry + published consensus .npy; trimmed
+# of the 665 MB individual stacks + spin tests). Kept locally, download-documented in
+# data/human/README.md.
+data/human/Suarez2021_Data/
+# Self-built group consensus cache (regenerable via experiments/human/build_consensus.py)
+data/human/built_consensus/
