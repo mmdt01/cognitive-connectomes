@@ -26,9 +26,14 @@ def build_config() -> ExperimentConfig:
     return ExperimentConfig(**matrix_config.shared(), **task_config.task())
 
 
-def main(smoke: bool = False, jobs: int = 1) -> None:
+def main(smoke: bool = False, jobs: int = 1, scale: int | None = None) -> None:
+    scale = matrix_config.SCALE if scale is None else scale
     cfg = build_config()
-    builder = HumanSubstrateBuilder()
+    # Scale-tag outputs so different parcellation scales (N=448, N=1000) write to
+    # separate dirs (results/scale_<N>/, figures/scale_<N>/) instead of clobbering.
+    cfg.results_dir = cfg.results_dir / f"scale_{scale}"
+    cfg.figures_dir = cfg.figures_dir / f"scale_{scale}"
+    builder = HumanSubstrateBuilder(scale=scale)
     if smoke:
         runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2,
                           jobs=jobs)
@@ -41,15 +46,17 @@ def main(smoke: bool = False, jobs: int = 1) -> None:
     print("\nPipeline complete.")
 
 
-def _parse_jobs(argv) -> int:
-    """--jobs N or --jobs=N (default 1 = sequential)."""
+def _int_flag(argv, flag, default):
+    """Parse ``--flag N`` or ``--flag=N`` from argv; return default if absent."""
     for i, arg in enumerate(argv):
-        if arg == "--jobs" and i + 1 < len(argv):
+        if arg == flag and i + 1 < len(argv):
             return int(argv[i + 1])
-        if arg.startswith("--jobs="):
+        if arg.startswith(flag + "="):
             return int(arg.split("=", 1)[1])
-    return 1
+    return default
 
 
 if __name__ == "__main__":
-    main(smoke="--smoke" in sys.argv, jobs=_parse_jobs(sys.argv))
+    main(smoke="--smoke" in sys.argv,
+         jobs=_int_flag(sys.argv, "--jobs", 1),
+         scale=_int_flag(sys.argv, "--scale", None))
