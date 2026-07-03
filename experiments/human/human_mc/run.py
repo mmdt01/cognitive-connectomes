@@ -26,13 +26,14 @@ def build_config() -> ExperimentConfig:
     return ExperimentConfig(**matrix_config.shared(), **task_config.task())
 
 
-def main(smoke: bool = False) -> None:
+def main(smoke: bool = False, jobs: int = 1) -> None:
     cfg = build_config()
     builder = HumanSubstrateBuilder()
     if smoke:
-        runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2)
+        runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2,
+                          jobs=jobs)
     else:
-        runner.run_matrix(builder, cfg)
+        runner.run_matrix(builder, cfg, jobs=jobs)
     # Shade each figure's panel from where the connectome's bulk goes supercritical.
     cfg.supercritical_span = builder.connectome_supercritical_radii(cfg.conditions)
     stats.run(cfg)
@@ -40,5 +41,15 @@ def main(smoke: bool = False) -> None:
     print("\nPipeline complete.")
 
 
+def _parse_jobs(argv) -> int:
+    """--jobs N or --jobs=N (default 1 = sequential)."""
+    for i, arg in enumerate(argv):
+        if arg == "--jobs" and i + 1 < len(argv):
+            return int(argv[i + 1])
+        if arg.startswith("--jobs="):
+            return int(arg.split("=", 1)[1])
+    return 1
+
+
 if __name__ == "__main__":
-    main(smoke="--smoke" in sys.argv)
+    main(smoke="--smoke" in sys.argv, jobs=_parse_jobs(sys.argv))
