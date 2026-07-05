@@ -82,8 +82,21 @@ VARIANT_RUNG = {
     "modularity_rewire": 4,
 }
 
-# Wide 39-point [0, 4] sweep (Suarez-width), identical to the C. elegans runs.
-SPECTRAL_RADII = [round(float(sr), 4) for sr in np.linspace(0.0, 4.0, 39)]
+# Spectral-radius sweep. Canonical grid = the Suarez-width 39-point [0, 4]
+# (0.10526 spacing, identical to the C. elegans runs). spectral_sweep(sr_max)
+# extends the RANGE at the SAME spacing, so any wider sweep is a strict SUPERSET
+# of [0, 4] (its first 39 points reproduce [0, 4] exactly). Needed because the
+# larger-N consensus is more bulk-compressed -> higher sr_crit (N=448 ~3.1,
+# N=1000 ~4.0), so [0, 4] truncates the N=1000 operating point.
+_SR_STEP = 4.0 / 38  # 0.10526...
+
+
+def spectral_sweep(sr_max: float = 4.0):
+    n = round(sr_max / _SR_STEP) + 1
+    return [round(float(sr), 4) for sr in np.linspace(0.0, sr_max, n)]
+
+
+SPECTRAL_RADII = spectral_sweep(4.0)
 SUPERCRITICAL_RADII = [sr for sr in SPECTRAL_RADII if sr >= 1.25]
 
 N_SEEDS = 10

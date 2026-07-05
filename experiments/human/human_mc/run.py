@@ -26,13 +26,19 @@ def build_config() -> ExperimentConfig:
     return ExperimentConfig(**matrix_config.shared(), **task_config.task())
 
 
-def main(smoke: bool = False, jobs: int = 1, scale: int | None = None) -> None:
+def main(smoke: bool = False, jobs: int = 1, scale: int | None = None,
+         sr_max: float | None = None) -> None:
     scale = matrix_config.SCALE if scale is None else scale
     cfg = build_config()
     # Scale-tag outputs so different parcellation scales (N=448, N=1000) write to
     # separate dirs (results/scale_<N>/, figures/scale_<N>/) instead of clobbering.
     cfg.results_dir = cfg.results_dir / f"scale_{scale}"
     cfg.figures_dir = cfg.figures_dir / f"scale_{scale}"
+    # Optionally widen the sweep (strict superset of [0, 4]) to reach the larger-N
+    # consensus's operating point (sr_crit rises with N: ~3.1 @448, ~4.0 @1000).
+    if sr_max is not None:
+        cfg.spectral_radii = matrix_config.spectral_sweep(sr_max)
+        cfg.supercritical_radii = [sr for sr in cfg.spectral_radii if sr >= 1.25]
     builder = HumanSubstrateBuilder(scale=scale)
     if smoke:
         runner.run_matrix(builder, cfg, spectral_radii=[0.0, 0.95, 1.5], n_seeds=2,
@@ -46,17 +52,18 @@ def main(smoke: bool = False, jobs: int = 1, scale: int | None = None) -> None:
     print("\nPipeline complete.")
 
 
-def _int_flag(argv, flag, default):
-    """Parse ``--flag N`` or ``--flag=N`` from argv; return default if absent."""
+def _flag(argv, flag, default, cast=int):
+    """Parse ``--flag V`` / ``--flag=V`` from argv (cast applied); default if absent."""
     for i, arg in enumerate(argv):
         if arg == flag and i + 1 < len(argv):
-            return int(argv[i + 1])
+            return cast(argv[i + 1])
         if arg.startswith(flag + "="):
-            return int(arg.split("=", 1)[1])
+            return cast(arg.split("=", 1)[1])
     return default
 
 
 if __name__ == "__main__":
     main(smoke="--smoke" in sys.argv,
-         jobs=_int_flag(sys.argv, "--jobs", 1),
-         scale=_int_flag(sys.argv, "--scale", None))
+         jobs=_flag(sys.argv, "--jobs", 1, int),
+         scale=_flag(sys.argv, "--scale", None, int),
+         sr_max=_flag(sys.argv, "--sr-max", None, float))
