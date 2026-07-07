@@ -24,6 +24,7 @@ def build_from_adjacency(
     input_scaling: float,
     seed: int,
     input_dim: int = 1,
+    input_nodes: np.ndarray | None = None,
 ) -> Reservoir:
     """Rescale a weighted adjacency to target spectral radius and build a Reservoir.
 
@@ -38,11 +39,23 @@ def build_from_adjacency(
     (Lorenz: 3-D state fed back in closed loop) pass ``input_dim=3``; each
     channel gets its own independent Bernoulli ±1 column from the *same* per-seed
     RNG stream, so the single-channel case is unchanged.
+
+    ``input_nodes`` routes the input to a **subset** of reservoir units (the
+    anatomical I/O-routing thread: input injected into e.g. the subcortical
+    nodes). ``None`` -> the default **dense** ``Win`` on all N units (every
+    existing task builds byte-identically). When given, the full dense ``Win`` is
+    still drawn from the same RNG stream and then **masked to zero off the input
+    nodes**, so the surviving entries are identical to the dense case and
+    ``input_nodes = all nodes`` reproduces the dense ``Win`` exactly.
     """
     rescaled_W = rescale_spectral_radius(weighted_adjacency, target_spectral_radius)
     n_units = rescaled_W.shape[0]
 
     rng = np.random.default_rng(seed)
     Win = rng.choice([-1.0, 1.0], size=(n_units, input_dim)) * input_scaling
+    if input_nodes is not None:
+        keep = np.zeros(n_units, dtype=bool)
+        keep[input_nodes] = True
+        Win[~keep] = 0.0
 
     return Reservoir(W=rescaled_W, Win=Win, lr=leak_rate, seed=seed)

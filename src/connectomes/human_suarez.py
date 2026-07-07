@@ -187,6 +187,110 @@ def load_published_consensus(scale: int) -> np.ndarray:
     return C
 
 
+# ---------------------------------------------------------------------------
+# With-subcortical geometry for anatomical I/O routing (published consensus)
+# ---------------------------------------------------------------------------
+
+# The 7 cortical Yeo intrinsic networks, in rsn_names.npy order (subctx excluded).
+# These are Suárez's readout apertures; subcortical (subctx) is the input aperture.
+YEO_NETWORKS = ("VIS", "SM", "DA", "VA", "LIM", "FP", "DMN")
+
+
+def load_published_consensus_full(scale: int = 448) -> np.ndarray:
+    """The Suárez published *with-subcortical* consensus (NOT cortical-restricted).
+
+    Unlike ``load_published_consensus`` (which slices to the cortical block for the
+    self-build validation), this returns the full N=463 (@scale 448) / N=1015
+    (@scale 1000) matrix -- the substrate for the anatomical I/O-routing thread,
+    where input must be injected into the 15 subcortical nodes (absent from the
+    cortical-only .mat, hence absent from our self-built consensus). Symmetric,
+    non-negative, zero-diagonal.
+    """
+    tag = _MAT_N_TO_RELEASE_TAG[scale]
+    C = np.load(
+        _RELEASE_DIR / f"connectivity/consensus/human_{tag}.npy"
+    ).astype(float).copy()
+    np.fill_diagonal(C, 0.0)
+    asym = float(np.max(np.abs(C - C.T)))
+    assert asym < 1e-9, f"published consensus not symmetric, max|C-C.T|={asym:.3e}"
+    assert C.min() >= 0.0, f"published consensus has negative weights, min={C.min():.3e}"
+    return C
+
+
+def load_routing_geometry(scale: int = 448) -> dict:
+    """Node-set geometry for anatomical I/O routing on the with-subcortical graph.
+
+    Every index is into the *full* published-consensus ordering (N=463 @scale 448 /
+    N=1015 @scale 1000), matched to ``load_published_consensus_full``. Returns the
+    15 subcortical input nodes, the cortical nodes, the per-Yeo-network cortical
+    readout groups, and coords/hemiid. Subcortical nodes are interspersed (not a
+    leading block), so groups are built from the cortical mask + RSN labels, never a
+    raw slice.
+    """
+    tag = _MAT_N_TO_RELEASE_TAG[scale]
+    coords = np.load(_RELEASE_DIR / f"coords/coords_human_{tag}.npy")
+    hemiid = np.load(_RELEASE_DIR / f"hemispheres/hemiid_human_{tag}.npy")
+    cortical = np.load(_RELEASE_DIR / f"cortical/cortical_human_{tag}.npy")
+    rsn = np.load(_RELEASE_DIR / f"rsn_mapping/rsn_human_{tag}.npy", allow_pickle=True)
+    rsn = np.asarray([str(x) for x in rsn])
+
+    cortical_idx = np.where(cortical != 0)[0]
+    subctx_idx = np.where(cortical == 0)[0]
+    if len(cortical_idx) != scale:
+        raise ValueError(f"cortical node count {len(cortical_idx)} != scale {scale}")
+
+    yeo_groups = {name: np.where(rsn == name)[0] for name in YEO_NETWORKS}
+    # The cortical nodes must partition exactly into the 7 Yeo networks, and the
+    # subcortical nodes must all be labelled subctx (else the release ordering has
+    # drifted from the consensus ordering -- a hard error, not a silent mislabel).
+    covered = sum(len(v) for v in yeo_groups.values())
+    assert covered == scale, f"Yeo groups cover {covered} nodes; {scale} cortical expected"
+    for name, idx in yeo_groups.items():
+        assert np.all(cortical[idx] != 0), f"Yeo network {name} includes non-cortical nodes"
+    assert np.all(rsn[subctx_idx] == "subctx"), "subcortical nodes not all labelled subctx"
+
+    return {
+        "scale": scale,
+        "n_full": int(len(cortical)),
+        "subcortical": subctx_idx,
+        "cortical": cortical_idx,
+        "rsn_labels": rsn,
+        "yeo_groups": yeo_groups,
+        "coords": coords,
+        "hemiid": hemiid,
+    }
+
+
+def load_published_full(scale: int = 448) -> ConnectomeData:
+    """The published with-subcortical consensus as a ``ConnectomeData`` substrate.
+
+    Thin wrapper over ``load_published_consensus_full`` so the with-subcortical
+    graph plugs into ``HumanSubstrateBuilder(source="published_full")`` for the
+    anatomical I/O-routing thread. The self-built consensus is cortical-only, so
+    subcortical INPUT routing uses this validated (r≈0.99 vs self-build on the
+    cortical block) published matrix -- a stated caveat of the routing thread.
+    """
+    C = load_published_consensus_full(scale)
+    N = C.shape[0]
+    n_edges = int((C != 0).sum() // 2)
+    metadata = {
+        "source": "Suárez et al. 2021 published distance-dependent consensus (Betzel 2018)",
+        "processing": "published_with_subcortical",
+        "scale": scale,
+        "n_full": N,
+        "n_edges": n_edges,
+        "density": n_edges / (N * (N - 1) / 2),
+        "processing_notes": (
+            "Published with-subcortical group consensus (N=463 @scale 448 / "
+            "N=1015 @scale 1000). Used as the routing substrate because subcortical "
+            "input nodes are absent from the cortical-only .mat (and our self-built "
+            "consensus). Symmetric, non-negative, zero-diagonal."
+        ),
+    }
+    node_labels = [f"published_full_scale{scale}_region{i:04d}" for i in range(N)]
+    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
+
+
 def build_consensus(scale: int = 448, weighted: bool = True) -> ConnectomeData:
     """Build our OWN distance-dependent group consensus from the .mat individual
     SC (the raw Lausanne source) + the release geometry, via the vendored

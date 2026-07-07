@@ -42,6 +42,16 @@ def _evaluate_cell(builder, cfg, condition, variant, seed, spectral_radii):
     the sequential and parallel paths so the two produce identical rows.
     """
     weighted = builder.weighted(condition, variant, seed)
+    # Optional routing hooks (the I/O-routing thread). A builder MAY route the
+    # input to a subset of units (``input_nodes``) and/or supply per-cell task
+    # kwargs (``cell_task_kwargs`` -- e.g. this cell's readout apertures). Both are
+    # (variant, seed)-dependent so they are resolved once per cell, outside the sr
+    # loop. Every other builder defines neither -> ``input_nodes=None`` (dense Win,
+    # byte-identical) and no extra task kwargs, so all committed tasks are unchanged.
+    input_nodes = (builder.input_nodes(variant, seed)
+                   if hasattr(builder, "input_nodes") else None)
+    cell_kwargs = (builder.cell_task_kwargs(condition, variant, seed)
+                   if hasattr(builder, "cell_task_kwargs") else {})
     rows = []
     for spectral_radius in spectral_radii:
         reservoir = build_from_adjacency(
@@ -51,11 +61,13 @@ def _evaluate_cell(builder, cfg, condition, variant, seed, spectral_radii):
             input_scaling=cfg.input_scaling,
             seed=seed,
             input_dim=cfg.input_dim,
+            input_nodes=input_nodes,
         )
         metrics = cfg.task_evaluate(
             reservoir,
             seed=seed + cfg.input_seed_offset,
             **cfg.task_params,
+            **cell_kwargs,
         )
         row = dict(
             condition=condition,

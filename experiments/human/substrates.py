@@ -24,7 +24,11 @@ import warnings
 import networkx as nx
 import numpy as np
 
-from src.connectomes.human_suarez import load as load_human, load_built_consensus
+from src.connectomes.human_suarez import (
+    load as load_human,
+    load_built_consensus,
+    load_published_full,
+)
 from src.nulls import (
     random_gaussian,
     erdos_renyi,
@@ -48,6 +52,11 @@ class HumanSubstrateBuilder:
             self.connectome = load_built_consensus(scale=self.scale)
         elif self.source == "single_subject":
             self.connectome = load_human(scale=self.scale, subject=self.subject)
+        elif self.source == "published_full":
+            # With-subcortical published consensus (N=463/1015) -- the substrate
+            # for the anatomical I/O-routing thread (subcortical input nodes are
+            # absent from the cortical-only self-built consensus).
+            self.connectome = load_published_full(scale=self.scale)
         else:
             raise ValueError(f"unknown substrate source {self.source!r}")
 
