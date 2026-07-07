@@ -56,6 +56,15 @@ with balanced random signs) showed sign is the larger lever and directedness is
 minimal. The wide-sweep / curve-vs-curve methodology and the `connectome_weight_permuted`
 placement control still stand — only the *attribution* changed (sign, not directedness).
 
+**External replication (human connectome).** The sign-primary account now holds on a
+**second, independent connectome**: the human structural connectome (Suárez 2021 dMRI SC —
+undirected/normal, macro-scale, N=448/1000) reproduces the supercritical robustness
+crossover on **memory capacity** (connectome−degree d **+13 to +15**, *strengthening* with
+parcellation resolution) and **sustains closed-loop Lorenz** as an undirected non-negative
+substrate (peak VPT ~4.5; edge = divergence resistance). This confirms the mechanism is a
+property of **non-negative connectivity statistics**, not of *C. elegans* specifics or
+directedness. Account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
+
 The three prediction tasks (NARMA-10 input-driven, Mackey-Glass driven-forecast, Lorenz
 closed-loop) were added to bridge passive memory toward the north-star
 connectome-as-JEPA world model; all four are evaluated across a wide sweep
@@ -120,10 +129,11 @@ cognitive-connectomes/
 │   ├── celegans/
 │   │   ├── cook2019_connectome.xlsx          (Cook 2019 SI, corrected July 2020)
 │   │   └── celegans_neurotransmitters.csv    (Dale E/I signs; eLife 95402)
-│   └── human/                                (Suárez 2021 Lausanne SC/FC; .mat gitignored)
-│       └── README.md                         (dataset provenance + structure)
+│   └── human/                                (Suárez 2021 Lausanne SC/FC; .mat + built_consensus/ gitignored)
+│       └── README.md                         (dataset provenance + consensus construction)
 ├── src/                                       (the library; editable-installed)
-│   ├── connectomes/  celegans_cook2019.py (load modes), neurotransmitters.py
+│   ├── connectomes/  celegans_cook2019.py (load modes), neurotransmitters.py (Dale);
+│   │                 human_suarez.py, consensus.py (Betzel/Suárez group consensus)
 │   ├── nulls/        random_gaussian, erdos_renyi, degree_rewire, clustering_rewire,
 │   │                 modularity_rewire, validation.py        (all directed-aware)
 │   ├── reservoir/    blas.py, weights.py, build.py
@@ -131,13 +141,17 @@ cognitive-connectomes/
 │   ├── experiment/   GENERIC runner.py / stats.py (divergence-robust) / plots.py / config.py
 │   └── analysis/     spectral.py  (substrate analysis, connectome-agnostic; first of a series)
 ├── experiments/
-│   └── celegans/                              (connectome-shared, task-agnostic)
-│       ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
-│       ├── celegans_mc/             task_config.py, run.py, results/, figures/  (Jaeger memory capacity)
-│       ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
-│       ├── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
-│       ├── celegans_lorenz/         task_config.py (2 metrics), run.py, plot_demo.py, results/, figures/
-│       └── analysis/                spectral.py driver (uses src/analysis); figures/, results/
+│   ├── celegans/                              (cellular scale; full directed factorial)
+│   │   ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
+│   │   ├── celegans_mc/             task_config.py, run.py, results/, figures/  (Jaeger memory capacity)
+│   │   ├── celegans_narma10/        task_config.py, run.py, plot_demo.py, results/, figures/
+│   │   ├── celegans_mackey_glass/   task_config.py (2 horizons), run.py, plot_demo.py, results/, figures/
+│   │   ├── celegans_lorenz/         task_config.py (2 metrics), run.py, plot_demo.py, results/, figures/
+│   │   └── analysis/                spectral.py driver (uses src/analysis); figures/, results/
+│   └── human/                                 (macro-scale probe; undirected-only sub-factorial)
+│       ├── substrates.py (HumanSubstrateBuilder), matrix_config.py, build_consensus.py
+│       ├── human_mc/ human_narma10/ human_mackey_glass/ human_lorenz/  (scale-tagged results/scale_<N>/)
+│       └── analysis/   spectral.py, brain_overlay.py, network_matrix.py, realizations.py; figures/, results/
 └── tests/test_smoke.py
 ```
 
@@ -150,7 +164,11 @@ task-agnostic code in `experiments/<connectome>/` (the `SubstrateBuilder` and
 `task_config.py`, a ~15-line `run.py`, an optional `plot_demo.py`, and outputs). A run
 assembles its config as `ExperimentConfig(**matrix_config.shared(),
 **task_config.task())` and is launched with e.g. `python -m
-experiments.celegans.celegans_narma10.run`.
+experiments.celegans.celegans_narma10.run`. The framework now spans **two connectomes**:
+the cellular *C. elegans* (the full directed factorial) and the macro-scale **human SC**
+(`experiments/human/`, an undirected-only sub-factorial reusing the same runner, null
+ladder, and symmetric weight schemes; its `run.py`s add `--scale {448,1000}` / `--sr-max`
+/ `--jobs` flags for the ada cluster).
 
 A parallel **substrate-analysis tier** characterises the recurrent matrices
 themselves (independent of any task): generic, connectome-agnostic tools in
@@ -288,6 +306,22 @@ Girko-circular-law eigenvalue disk) beats it on raw memory — its edge is
 structural weights are non-negative and *C. elegans* is 96% excitatory. Full per-task
 account in `PREDICTION_TASKS_INTERPRETATION.md`.
 
+**Human macro-scale probe (cross-connectome generalisation).** The account was then tested
+on a **second, independent connectome** — the human structural connectome (Suárez 2021 dMRI
+SC), an undirected/normal, macro-scale graph. Substrate = a **self-built distance-dependent
+group consensus** (Betzel 2018 / Suárez procedure) from the `.mat` individual SC, cortical
+**N=448 and N=1000** (validated against the published consensus, r≈0.99); design = the
+**undirected sub-factorial** (`human_gaussian` → `human_empirical_signed` →
+`human_empirical`) × the same 7-variant ladder × a wide `[0,6]` sweep × 10 seeds, run on
+ada. **MC reproduces the sign-primary crossover and it *strengthens* with parcellation
+resolution** (connectome−degree d +13.2@448 / +15.1@1000; the sign step is scale-invariant
+~+8, the tail step grows +2.9→+4.1). **Lorenz: an undirected non-negative substrate
+sustains closed-loop rollout** (peak VPT ~4.5, faithful climate; divergence 7%@448 →
+0%@1000; parity with degree on fidelity) — sharpening the directedness reading (closed-loop
+stability tracks weight SIGN, not directedness). NARMA-10 also run (results present);
+Mackey-Glass infrastructure in place (not yet run). Held out of the cellular scale row. Full
+account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
+
 ---
 
 ## 7. Key findings to date
@@ -318,7 +352,9 @@ account in `PREDICTION_TASKS_INTERPRETATION.md`.
    (~2× the tail spectrally).
 5. **Directedness — minimal for passive/driven skill, decisive for closed-loop
    stability.** ~+1 on MC/NARMA/MG; on Lorenz it is the difference between ~50–77% and
-   ~0–31% closed-loop divergence.
+   ~0–31% closed-loop divergence. (*Refined by finding 9:* the human probe shows an
+   **undirected** non-negative substrate also sustains Lorenz, so closed-loop stability
+   tracks weight **sign** — directedness proxied it in the *C. elegans* factorial.)
 6. **Lorenz — parity, not dominance.** On fidelity (VPT, climate) the connectome *ties*
    degree_rewire in the biological (all-positive) conditions; its unambiguous edge is
    **0% closed-loop divergence** (vs 26–31% for random/ER). And non-negativity is
@@ -334,6 +370,16 @@ account in `PREDICTION_TASKS_INTERPRETATION.md`.
    canonical* sr across both weight regimes; higher-order structure (clustering/
    modularity, from the v2c disambiguation) matters supercritically — now understood as
    part of the sign/collapse-resistance story rather than a standalone topology effect.
+9. **The sign-primary account replicates on a second connectome (human macro-scale).** The
+   human structural connectome (Suárez 2021 dMRI SC; undirected, N=448/1000) reproduces the
+   supercritical robustness on **MC** (connectome−degree d **+13→+15**, *strengthening* with
+   parcellation resolution; sign step scale-invariant ~+8) and on **closed-loop Lorenz** (an
+   undirected non-negative substrate sustains the attractor — peak VPT ~4.5, divergence
+   7%@448 → 0%@1000, parity with degree on fidelity). This is **external validation** on an
+   independent organism, imaging modality (dMRI), and scale, and it **sharpens the
+   directedness reading**: closed-loop stability tracks weight SIGN, not directedness (finding
+   5's "decisive for closed-loop stability" is really non-negativity, which directedness
+   proxied in *C. elegans*). Full account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
 
 ---
 
@@ -398,14 +444,16 @@ progression (memory capacity ✓ → NARMA-10 ✓ → Mackey-Glass ✓ → Loren
 wide `[0,4]` sweep, toward the connectome-as-JEPA world model). The four-task arc is
 **complete and unified** under the **sign-primary robustness account** (7-condition
 factorial; §6–7). Open threads:
-- **Human macro-scale probe (Suárez 2021 dMRI SC), near-term.** The factorial sharpened
-  and **reversed** the original prediction: the human structural connectome is
-  non-negative *and* heavy-tailed (= the `undirected_empirical` cell, which shows the
-  *full* effect), so it should show a **strong**, not weak, robustness crossover — driven
-  by the Perron mechanism, independent of directedness. A minimal loader + undirected
-  substrate builder (reusing the generic runner + null ladder) is the smallest first
-  probe. It is a separate macro-scale generalisation test, held out of the cellular
-  scale row (§`PROJECT_PLAN.md`).
+- **Human macro-scale probe (Suárez 2021 dMRI SC) — DONE for MC + Lorenz** (§6–7;
+  interpretation doc §7). The sharpened, reversed prediction was **confirmed**: the
+  non-negative, heavy-tailed human SC shows the **strong** robustness crossover (MC d
+  +13→+15, *strengthening* with resolution), and the undirected non-negative substrate
+  **sustains closed-loop Lorenz**. Held out of the cellular scale row. Remaining human
+  threads: the **full four-task interpretation pass** (NARMA-10 is run; Mackey-Glass not
+  yet run); anatomical **I/O routing** (subcortical input + intrinsic-network readout with
+  a placement null — see `HUMAN_IO_ROUTING_PLAN.md`); **per-subject variability** (70
+  subjects, a population inference distinct from the single-consensus one); and the finer
+  **within-connectome scale sweep** (N=68→1000).
 - **Cross-species E/I prediction.** A more inhibition-heavy connectome (mammalian ~20%)
   would push the effective matrix toward balanced signs → weaker robustness — testable
   with E/I-resolved connectomes.
@@ -433,7 +481,10 @@ factorial; §6–7). Open threads:
   linspace(0,4,39)`), with curve-vs-curve comparison; `sr_crit = 1/bulk₉₅_ratio` per
   variant. Top-matching is field-standard (Suárez et al. 2021) and the only cheap
   normaliser at scale (λ₁ via sparse eigs); just sweep wide enough to cover every
-  variant's operating point.
+  variant's operating point. **Corollary from the human probe:** `sr_crit` *rises with
+  parcellation resolution* (the bulk compresses further with N: ~3.1@448 → ~4.0@1000), so
+  `[0,4]` truncated N=1000 — the human runs widen to `[0,6]` via the `--sr-max` flag (a
+  strict superset whose first 39 points reproduce `[0,4]`).
 - **Divergence-robust statistics — DONE.** `src/experiment/stats.py` caps blow-ups
   (`cfg.metric_divergence_cap`), reports a per-variant divergence rate, and tests
   significance with a rank-based permutation test (Cliff's delta + median alongside the
@@ -482,6 +533,14 @@ factorial; §6–7). Open threads:
 - **Dale signs (`directed_empirical_dale`):** `data/celegans/celegans_neurotransmitters.csv`
   — GABA-synthesizing neurons (DD, VD, RME, AVL, DVB, RIS = 26) inhibitory (−1), all else
   +1; source eLife 95402. Only 3.6% of edges → the Dale matrix is effectively all-positive.
+- **Human macro-scale probe:** substrate = a **self-built distance-dependent group
+  consensus** (Betzel 2018 / Suárez 2021) from the `.mat` individual SC, cortical **N=448 /
+  N=1000** (cached at `data/human/built_consensus/`, gitignored); loaders
+  `src/connectomes/human_suarez.py` + `consensus.py`; provenance in `data/human/README.md`.
+  **3 undirected conditions** (`human_gaussian` → `human_empirical_signed` →
+  `human_empirical`) × the same 7-variant ladder × a **`[0,6]`** sweep (`--sr-max`; `sr_crit`
+  rises with N) × 10 seeds; runs on ada (`--jobs 128`). **MC + NARMA-10 + Lorenz run** (MC +
+  Lorenz interpreted, interpretation doc §7); Mackey-Glass infra in place (not yet run).
 - **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,
   ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
 - **Shared spectral-radius sweep (all four tasks):** 39-point `linspace(0,4,39)`
@@ -507,7 +566,9 @@ factorial; §6–7). Open threads:
 - **Substrate analysis tier:** `src/analysis/spectral.py` (connectome-agnostic
   spectral metrics + plots) + `experiments/celegans/analysis/spectral.py` driver
   (`python -m experiments.celegans.analysis.spectral`). Grounds the
-  placement→memory mechanism; first of the planned topological-analysis series.
+  placement→memory mechanism; first of the planned topological-analysis series. The human
+  probe adds `experiments/human/analysis/` drivers (spectral, brain-overlay, Yeo-network,
+  weight-realizations).
 - **Conditions (7-condition sign × tail × topology factorial):** `undirected_gaussian`,
   `undirected_empirical_signed`, `undirected_empirical`, `directed_gaussian`,
   `directed_empirical_signed`, `directed_empirical`, `directed_empirical_dale`. The
@@ -535,6 +596,9 @@ context per task:
   specifics.
 - **Running a substrate analysis:** `src/analysis/` + the
   `experiments/celegans/analysis/` drivers; see that dir's README.
+- **Continuing the human macro-scale probe:** also load `data/human/README.md` (dataset +
+  consensus construction) and `experiments/human/`; for the I/O-routing thread,
+  `HUMAN_IO_ROUTING_PLAN.md`.
 
 The progression v1 → v2a → v2c → v2b → v2d → prediction tasks is a controlled
 chain; breaking the one-variable-at-a-time discipline is the single failure mode
