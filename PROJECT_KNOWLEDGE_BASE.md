@@ -120,6 +120,8 @@ Load-bearing and non-negotiable.
 
 Repo: `~/imperial/thesis/cognitive-connectomes/`. Linux/WSL2; Python 3.12 venv
 at `.venv/`; editable-installed via `pyproject.toml` (only `src*` is packaged).
+**Two compute environments:** the **laptop** (WSL2) for development + `--smoke` checks,
+and the **ada cluster** (Imperial, 128 CPU cores) for full runs — details in §12.
 
 ```
 cognitive-connectomes/
@@ -541,6 +543,14 @@ factorial; §6–7). Open threads:
   `human_empirical`) × the same 7-variant ladder × a **`[0,6]`** sweep (`--sr-max`; `sr_crit`
   rises with N) × 10 seeds; runs on ada (`--jobs 128`). **MC + NARMA-10 + Lorenz run** (MC +
   Lorenz interpreted, interpretation doc §7); Mackey-Glass infra in place (not yet run).
+- **ada cluster (compute for full runs):** repo at
+  `/vol/bitbucket/mmd25/thesis/cognitive-connectomes`, venv `.venv`
+  (`source .venv/bin/activate`). **CPU-only** — pure numpy/scipy, so the node's 2× L40 GPUs
+  are unused; 128 cores → pass `--jobs 128` (fork-parallel grid, bit-identical to
+  sequential). Launch full runs in `tmux`, then **rsync results/figures back to the
+  laptop**. Treat ada as **run-only**: commit from the laptop after rsync (committing on ada
+  causes pull conflicts). The laptop does development + `--smoke`. Typical wall-clock:
+  human MC ~2 min, Lorenz N=448 ~7 min / N=1000 ~90 min.
 - **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,
   ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
 - **Shared spectral-radius sweep (all four tasks):** 39-point `linspace(0,4,39)`
