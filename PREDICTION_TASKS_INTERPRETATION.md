@@ -1,4 +1,4 @@
-# Interpreting the C. elegans connectome-reservoir results: a sign × tail × topology factorial and a non-negativity-driven robustness
+# Interpreting the connectome-reservoir results: a sign × tail × topology factorial, non-negativity-driven robustness, and its human-connectome replication
 
 *Core reference for the four C. elegans reservoir tasks — Jaeger **memory capacity**
 (passive memory), NARMA-10 (input-driven emulation), Mackey-Glass (driven
@@ -12,7 +12,10 @@ structure of real synaptic weights)**, with heavy-tailedness a **secondary, task
 topology-dependent** contributor and directedness **minimal** except for closed-loop
 stability. This **supersedes** the earlier reading that "the effect scales with
 directedness / non-normality": that contrast (gaussian vs empirical) silently
-**conflated sign with tail**, and a sign control shows sign is the larger lever.
+**conflated sign with tail**, and a sign control shows sign is the larger lever. The
+account is then **externally tested on the human structural connectome** (Suárez 2021
+dMRI SC — an independent organism, imaging modality, and macro scale N=448/1000, and
+undirected/normal): **§7** reports the memory-capacity and Lorenz replication.
 Confidence flagged throughout.*
 
 ---
@@ -261,11 +264,72 @@ circuit** (real dynamics have inhibition). With that boundary:
   robustness effect here (MC *d* +9). So the human SC is predicted to show a **strong**
   robustness crossover, driven by the Perron mechanism, **independent of tail or
   directedness**. `undirected_empirical` (and its sign control) is the internal proof-of-concept, and the
-  human run is the external test.
+  human run was the external test — **now run and CONFIRMED (§7):** the human consensus
+  reproduces the sign-primary crossover on both memory capacity and Lorenz.
 
 ---
 
-## 7. Caveats (load-bearing)
+## 7. Human macro-scale probe — results (MC + Lorenz)
+
+The human structural connectome (Suárez 2021 dMRI SC) is the **external test** of the
+sign-primary account: an independent organism, an independent imaging modality (dMRI
+streamlines vs EM synapses), a macro scale (N = 448/1000 cortical nodes), and **undirected
+/ normal** (symmetric → a real eigenvalue spectrum, no rotational modes). The substrate is
+a self-built distance-dependent group consensus; the design is the **undirected
+sub-factorial** of the C. elegans factorial — `human_gaussian` → `human_empirical_signed`
+→ `human_empirical` (the tail then sign ladder) × the same 7-variant null ladder × a wide
+`[0, 6]` sweep × 10 seeds — so it reads on the same footing. Two tasks run so far.
+
+### Memory capacity — the sign-primary crossover replicates and *strengthens with scale*
+`human_empirical` is worse-or-equal at canonical and holds a wide supercritical plateau
+while its all-positive nulls **Perron-collapse** — the C. elegans pattern, on an
+independent graph. Max supercritical connectome−degree Cohen's *d* = **+13.2 (N=448) /
++15.1 (N=1000)**, *above* the internal `undirected_empirical` proof-of-concept (+9). The
+sign × tail decomposition holds: the **sign step is scale-invariant (~+8.0** at both
+scales — the Perron core is a fixed-magnitude property of non-negativity), while the
+**tail step grows with resolution (+2.9 → +4.1**, finer parcellation sharpening
+hub/weight heterogeneity). Robustness, not a higher ceiling (connectome peak ≤ nulls').
+Method note: `sr_crit` rises with N (3.1 → 4.0 as the bulk compresses), so the standard
+`[0, 4]` sweep **truncated N=1000** — the effect only reads correctly on the widened
+`[0, 6]` sweep (the earlier apparent weakening was pure truncation). Confidence: **high**
+(a clean external replication).
+
+### Lorenz — an undirected, non-negative substrate *does* sustain closed-loop rollout
+The pre-registered worry — symmetric/real spectrum → no rotational modes → the substrate
+may fail to self-sustain the attractor — **does not materialise.** `human_empirical`
+reconstructs the attractor: **peak VPT ~4.5** (scale-invariant, 4.45/4.56 — and matching
+the C. elegans ~4.5), faithful **climate ~0.3**, with a low closed-loop blow-up rate
+(**7% at N=448 → 0% at N=1000**; divergence *drops* with scale). As in C. elegans,
+**non-negativity is required for the task to function**: signing the exact same weights
+collapses fidelity (VPT → ~2, climate → 3.5–7.5), and the balanced-sign `human_gaussian`
+case is the most blow-up-prone (55–79%). On fidelity the connectome is at **parity, not
+dominance**, with degree_rewire (VPT *d* ~+0.35, climate ~+0.65, both n.s.) — it holds the
+lowest, flattest climate curve across the plateau, but the degree null (also non-negative)
+resists collapse too, so the connectome's unambiguous edge is **divergence resistance**.
+The large signed-condition climate *d*'s (+2.7 / +7.1) are **null-fails-harder artefacts**
+(comparisons among poor performers where the null diverges 70–80% and the connectome
+merely stays bounded) — the same caveat as the C. elegans signed cells (§4); not over-read.
+
+### Cross-connectome refinement: closed-loop stability tracks *sign*, not directedness
+This sharpens the §4/§5 reading that "directedness stabilises closed-loop rollout." Even in
+C. elegans, `undirected_empirical` already blew up only **1–7%** (vs `undirected_gaussian`
+52%) — the high undirected blow-up rate lived in the *balanced-sign* cells. The human
+macro-scale probe, at **two scales**, confirms directly that an **undirected non-negative**
+substrate sustains Lorenz. So closed-loop stability is primarily a **weight-SIGN
+(non-negativity)** property; directedness helped in C. elegans mainly by keeping the
+balanced/gaussian cells from diverging, and is **not required** once the weights are
+non-negative — fully consistent with the sign-primary account.
+
+### Bottom line for the human probe
+On both tasks run, a genuinely independent, undirected, macro-scale, dMRI-derived
+connectome reproduces the sign-primary robustness — evidence the mechanism is a property
+of **non-negative connectivity statistics**, not of C. elegans specifics or of
+directedness. (NARMA-10 / Mackey-Glass infrastructure also runs on the human substrate;
+their interpretation is pending a fuller pass.)
+
+---
+
+## 8. Caveats (load-bearing)
 
 1. **Robustness, not dominance.** The connectome never has the highest raw performance;
    a directed-signed random reservoir beats it (Girko-optimal). Every advantage is a
@@ -288,7 +352,7 @@ circuit** (real dynamics have inhibition). With that boundary:
 
 ---
 
-## 8. One-line summary
+## 9. One-line summary
 
 Across memory capacity, NARMA-10, Mackey-Glass, and Lorenz, the connectome's
 supercritical robustness is driven **primarily by the non-negative (Perron) structure of
@@ -299,6 +363,8 @@ minimal except for closed-loop stability**. Signing the exact weights removes th
 a directed-signed random reservoir (a Girko-optimal disk) out-performs the connectome
 outright. So the finding is **collapse-resistance conferred by non-negative connectivity
 statistics**, biologically real for near-all-excitatory *C. elegans* (Dale ≈ all-positive)
-— which reverses the earlier framing (it is sign, not directedness) and predicts the
-non-negative human structural connectome should show a **strong**, not weak, version of
-the effect.
+— which reverses the earlier framing (it is sign, not directedness) and now **replicates
+externally** on the undirected, macro-scale human structural connectome: a **strong**
+memory-capacity crossover (*d* +13–15, strengthening with resolution) and a closed-loop
+Lorenz that an undirected non-negative substrate **sustains** (peak VPT ~4.5, divergence
+resistance) — confirming closed-loop stability tracks sign, not directedness (§7).
