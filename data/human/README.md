@@ -48,6 +48,46 @@ therefore serve as a **validation anchor**, not the substrate. Built consensus i
 (gitignored, regenerable) at `data/human/built_consensus/consensus_{448,1000}.npy`.
 **N=219 dropped** (no release geometry; the *C. elegans* node-count match is deprioritised).
 
+## Consensus construction (Betzel 2018 / Suárez 2021 procedure)
+
+The substrate is a **distance-dependent group consensus** (Betzel et al. 2018) built from
+the per-subject `.mat` SC — implemented in `src/connectomes/consensus.py`
+(`struct_consensus`, vendored from `netneurotools`), driven by
+`src/connectomes/human_suarez.build_consensus`. That module's docstring is the
+authoritative algorithm description; the provenance is summarised here.
+
+**Edge-weight definition (already in the data — not re-normalized).** Each individual SC
+edge weight is a **fibre density**: the streamline count between two regions, normalized by
+the **mean streamline length** and the **mean surface area of the two regions** (correcting
+the bias toward longer fibres and for region-size differences). This is why the raw weights
+are normalized fractions (median ~1e-3, max ~0.18), not integer counts.
+
+**Procedure.** Preserve (1) the mean binary density and (2) the edge-length distribution of
+the individuals: collate every edge present in ≥1 subject, bin by length (Euclidean
+centroid distance), and per bin keep the `k` edges expressed in the most subjects (`k` = the
+mean per-bin edge count across subjects); run intra- and inter-hemispheric edges separately
+and union them; weight each surviving edge by its **mean across all subjects** (absent = 0).
+Whole-brain binary density ≈ 2.5% (the paper's figure at N=1000). **Binning follows the
+code**, not the paper's ambiguous "√(mean binary density) bins" wording (see the module
+docstring).
+
+**Geometry dependencies** (not in `Individual_Connectomes.mat`): parcel-centroid
+coordinates (`coords/`) and hemisphere labels (`hemispheres/hemiid`) from the
+`Suarez2021_Data/` release. **Verify** any rebuild against: density ≈ the paper's,
+symmetric, non-negative, and an edge-length distribution tracking the group (our N=448/1000
+builds validate vs the published consensus at density/hubs/weights r ≈ 0.99).
+
+> *Suárez et al. 2021, verbatim:* "In constructing a consensus adjacency matrix, we sought
+> to preserve (1) the density and (2) the edge length distribution… We first collated the
+> extant edges… and binned them according to length. The number of bins was determined
+> heuristically as the square root of the mean binary density across participants. The most
+> frequently occurring edges were then selected for each bin. If the mean number of edges
+> across participants in a particular bin is equal to k, we selected the k-edges of that
+> length occurring most frequently across participants. We performed this procedure
+> separately for inter- and intrahemispheric edges… The binary density for the final
+> whole-brain matrix was 2.5% on average. The weight associated with each edge was then
+> computed as the mean weight across all participants."
+
 ## Structure
 
 `scipy.io.loadmat(..., struct_as_record=False, squeeze_me=True)` →

@@ -11,8 +11,9 @@ Reference: Betzel, R. F., Griffa, A., Hagmann, P., & Mišić, B. (2018).
 Distance-dependent consensus thresholds for generating group-representative
 structural brain networks. Network Neuroscience 2(1), 66-95.
 
-This is the reference implementation ``HUMAN_PROBE_PLAN.md`` Appendix A defers to
-for the Suárez 2021 group consensus. Two conventions to keep in mind:
+This is the reference implementation for the Suárez 2021 group consensus (see
+``data/human/README.md`` -> "Consensus construction" for the data provenance and
+the verbatim paper procedure). Two conventions to keep in mind:
   * Binning follows the CODE (one length bin per edge to be added; within each
     bin the edge expressed in the most subjects is chosen, ties broken by mean
     weight) -- NOT the paper's ambiguous "sqrt(mean binary density) bins" wording.
