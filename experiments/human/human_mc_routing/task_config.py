@@ -46,12 +46,13 @@ MC_PARAMS = dict(
 )
 
 # Substrate provenance -- pinned here as a single, swappable decision (Stage-0
-# config audit trail). "published_full" = Suárez published with-subctx consensus
-# (current: fast path to verify their MC). FUTURE: a self-built with-subctx
-# consensus ("consensus_full" once its loader exists); the routing logic is
-# substrate-agnostic, so this one value is the only thing that changes. Recorded
-# in the run manifest via the builder summary.
-SUBSTRATE_SOURCE = "published_full"
+# config audit trail). "consensus_full" = our SELF-BUILT with-subcortical consensus
+# (Betzel struct_consensus from the release individual stacks, N=463/1015; validated
+# r~0.99 vs published) -- the intended substrate. "published_full" = the Suárez
+# published with-subctx consensus (the earlier fast verification path). The routing
+# logic is substrate-agnostic, so this one value is the only thing that changes.
+# Recorded in the run manifest via the builder summary.
+SUBSTRATE_SOURCE = "consensus_full"
 
 # One condition (the real-W empirical cell); the connectome + weight-placement
 # control + 5-rung ladder all keep FIXED anatomical I/O, plus two leakage-free
