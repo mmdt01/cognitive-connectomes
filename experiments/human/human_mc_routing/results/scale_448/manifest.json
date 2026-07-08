@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-07-08T10:20:15.693173+00:00",
+  "generated_utc": "2026-07-08T13:57:47.446301+00:00",
   "n_evaluations": 5220,
-  "elapsed_seconds": 69.7,
+  "elapsed_seconds": 68.7,
   "jobs": 128,
   "conditions": [
     "human_empirical"
@@ -79,22 +79,22 @@
   ],
   "n_seeds": 10,
   "substrate_summary": {
-    "connectome": "human_suarez_published_full",
+    "connectome": "human_suarez_consensus_full",
     "scale_n_nodes": 463,
     "subject": 0,
-    "n_undirected_edges": 6618,
-    "empirical_pool_size": 6618,
-    "density": 0.06187764719082214,
+    "n_undirected_edges": 6612,
+    "empirical_pool_size": 6612,
+    "density": 0.06182154778267089,
     "weight_transform": "raw",
     "n_inhibitory": 0,
     "n_excitatory": 463,
     "partition_sizes": [
-      109,
-      86,
-      82,
-      75,
-      66,
-      45
+      92,
+      92,
+      91,
+      70,
+      60,
+      58
     ],
     "routing": "anatomical (subcortical input / Yeo-network + pooled-cortex readout)",
     "n_input_nodes": 15,
