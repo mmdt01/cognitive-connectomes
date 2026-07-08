@@ -8,22 +8,32 @@ with both structural and functional connectivity.
 
 ## File
 
-- **`Individual_Connectomes.mat`** — MATLAB v5/v7 `.mat`, ~669 MB. **Gitignored**
-  (too large for the GitHub 100 MB limit; see the repo `.gitignore`). Download it
-  separately from the Suárez et al. (2021) data release and place it here; the loaders
-  expect this path. **Cortical-only** parcellations (no subcortical nodes).
+- **`Individual_Connectomes.mat`** — MATLAB `.mat`, 700.9 MB (668 MiB). **Gitignored**
+  (exceeds GitHub's 100 MB limit). The **primary Lausanne dataset**: Griffa, Alemán-Gómez,
+  Hagmann, *Structural and functional connectome from 70 young healthy adults*, **Zenodo
+  record 2872624** (2019) — Suárez et al. 2021 built on it. Download the single file from
+  that record and place it here (our copy is byte-exact with the release). **Cortical-only:**
+  `connMatrices.SC`/`FC` hold scales N = 68/114/219/448/1000 with no subcortical nodes. (The
+  Zenodo *description* mentions an 83-region cortical+subcortical FreeSurfer parcellation —
+  that is the atlas, not the delivered matrices.) Subcortical individual SC is therefore
+  **unavailable from this primary file**; only the Suárez release's `connectivity/individual/`
+  has it (below).
 
 ## Supplementary release — `Suarez2021_Data/`
 
 The reproducibility bundle uploaded by Suárez et al. alongside the paper. **Gitignored**
-(kept locally; download-documented here). As downloaded it was 728 MB; **trimmed to
-~10 MB** — the 665 MB per-subject `connectivity/individual/` stacks and the 53 MB
-`spin_test/` spatial-null CSVs were deleted (the individual data is redundant with the
-`.mat`; spin tests are out of scope), leaving:
+(kept locally; download-documented here). As downloaded it was 728 MB. The 53 MB
+`spin_test/` spatial-null CSVs were deleted (out of scope). The 665 MB per-subject
+`connectivity/individual/` stacks were initially deleted (thought redundant with the `.mat`)
+but have since been **restored and kept** — they are **not** redundant: the `.mat` is
+cortical-only, whereas these stacks are **with-subcortical** (N=463/1015) and are the only
+source of subcortical individual SC (Suárez had a fuller version than the public Griffa
+`.mat`). Contents:
 
 | subdir | contents |
 |---|---|
-| `connectivity/consensus/` | **The published distance-dependent group consensus** (Betzel 2018), weighted + symmetric + zero-diagonal. `human_250.npy` (N=463, density 6.19%), `human_500.npy` (N=1015, density 2.47% ≈ the paper's 2.5%). |
+| `connectivity/consensus/` | **The published distance-dependent group consensus** (Betzel 2018), weighted + symmetric + zero-diagonal. `human_250.npy` (N=463, density 6.19%), `human_500.npy` (N=1015, density 2.47% ≈ the paper's 2.5%). Used only as a **validation anchor**. |
+| `connectivity/individual/` | **With-subcortical** per-subject SC stacks `(N, N, 70)`: `human_250.npy` (N=463, 120 MB), `human_500.npy` (N=1015, 577 MB). Raw source for the self-built **with-subcortical** consensus (`build_consensus_full`). Kept (gitignored); **transient** — only needed to (re)build the cached consensus, not at run time. |
 | `coords/` | Parcel-centroid MNI coordinates `(N, 3)` — edge length for `struct_consensus`. |
 | `hemispheres/` | `hemiid` (0/1) hemisphere label per node. |
 | `cortical/` | Cortical mask (`1`=cortical): 448 of 463 / 1000 of 1015. |
@@ -47,6 +57,20 @@ the original's surface-based distance). The published `human_250.npy`/`human_500
 therefore serve as a **validation anchor**, not the substrate. Built consensus is cached
 (gitignored, regenerable) at `data/human/built_consensus/consensus_{448,1000}.npy`.
 **N=219 dropped** (no release geometry; the *C. elegans* node-count match is deprioritised).
+
+**With-subcortical consensus (I/O-routing substrate).** The anatomical I/O-routing thread
+(`experiments/human/human_mc_routing/`) needs subcortical *input* nodes, absent from the
+cortical-only `.mat`. So a parallel **with-subcortical** self-built consensus (N=463/1015)
+is built by `human_suarez.build_consensus_full` (driver
+`experiments/human/build_consensus.py --full`) from the restored `connectivity/individual/`
+stacks + the **full** (all-node) release geometry — the same Betzel procedure, just not
+cortical-restricted. Validated vs the published with-subcortical consensus
+(`connectivity/consensus/human_{250,500}.npy`): node-strength r = 0.997/0.993, shared-edge
+weight r = 0.999, density matches, 0 isolated nodes — same quality as the cortical build.
+Cached at `built_consensus/consensus_full_{448,1000}.npy` (gitignored). **Provenance
+asymmetry:** the cortical substrate's SC is primary-source (the Griffa `.mat`); the
+with-subcortical substrate's SC is necessarily Suárez-derived, since `connectivity/individual/`
+is the only available with-subcortical individual source.
 
 ## Consensus construction (Betzel 2018 / Suárez 2021 procedure)
 
