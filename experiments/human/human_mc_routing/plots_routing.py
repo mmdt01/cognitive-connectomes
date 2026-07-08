@@ -1,15 +1,11 @@
 """Routing-specific figures.
 
 The generic ``src/experiment/plots.py`` is single-metric and KeyErrors on unknown
-variants, so the routing thread renders its own:
-
-  1. **Per-aperture MC-vs-sr grid** -- one panel per readout aperture (pooled cortex
-     + each Yeo network), connectome vs the key nulls + the random-placement
-     control, each curve's peak-sr marked. Shows whether the connectome-vs-null
-     crossover survives a restricted readout and where each aperture peaks.
-  2. **Peak-sr vs aperture size** -- the Suárez readout-aperture story: does the MC
-     peak walk from supercritical (full readout) down toward the edge of chaos
-     (sr~1) as the readout shrinks, and does anatomical placement change that.
+variants, so the routing thread renders its own **per-aperture MC-vs-sr grid** --
+one panel per readout aperture (pooled cortex + each Yeo network), connectome vs the
+key nulls + placement controls, each curve's peak-sr marked. Shows whether the
+connectome-vs-null crossover survives a restricted readout and where each aperture
+peaks. (The Suárez-style presentation figure lives in ``plot_routing_summary.py``.)
 """
 
 from pathlib import Path
@@ -98,52 +94,9 @@ def plot_aperture_curves(results, apertures, aperture_sizes, path,
     plt.close(fig)
 
 
-def plot_peak_shift(results, apertures, aperture_sizes, path,
-                    variants=("connectome", "connectome_dense_input",
-                              "degree_rewire")):
-    fig, (ax_sr, ax_mc) = plt.subplots(1, 2, figsize=(12, 5))
-    for variant in variants:
-        if variant not in results.variant.unique():
-            continue
-        sizes, peak_srs, peak_mcs = [], [], []
-        for aperture in apertures:
-            srs, vals = _mean_curve(results, variant, f"mc_{aperture}")
-            psr, pmc = _peak_sr(srs, vals)
-            sizes.append(aperture_sizes[aperture])
-            peak_srs.append(psr)
-            peak_mcs.append(pmc)
-        order = np.argsort(sizes)
-        sizes = np.asarray(sizes)[order]
-        peak_srs = np.asarray(peak_srs)[order]
-        peak_mcs = np.asarray(peak_mcs)[order]
-        style = _STYLE[variant]
-        ax_sr.plot(sizes, peak_srs, marker="o", label=_LABEL[variant],
-                   color=style["color"], lw=1.8)
-        ax_mc.plot(sizes, peak_mcs, marker="o", label=_LABEL[variant],
-                   color=style["color"], lw=1.8)
-    for ax in (ax_sr, ax_mc):
-        ax.set_xscale("log")
-        ax.set_xlabel("readout aperture size (# nodes, log)")
-        ax.grid(alpha=0.25)
-    ax_sr.axhline(1.0, color="grey", lw=0.9, ls="--")
-    ax_sr.set_ylabel("peak-MC spectral radius")
-    ax_sr.set_title("Where MC peaks vs readout aperture")
-    ax_mc.set_ylabel("peak memory capacity")
-    ax_mc.set_title("Peak MC vs readout aperture")
-    ax_sr.legend(fontsize=8)
-    fig.suptitle("Operating point (peak-MC spectral radius) per readout aperture: "
-                 "anatomical subcortical input vs dense-input reference", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
-    fig.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
-
 def run(cfg, apertures, aperture_sizes) -> None:
     cfg.figures_dir.mkdir(parents=True, exist_ok=True)
     results = pd.read_parquet(cfg.results_parquet)
     curves = cfg.figures_dir / "mc_vs_sr_per_aperture.png"
-    shift = cfg.figures_dir / "peak_sr_vs_aperture.png"
     plot_aperture_curves(results, apertures, aperture_sizes, curves)
-    plot_peak_shift(results, apertures, aperture_sizes, shift)
     print(f"Saved {curves}")
-    print(f"Saved {shift}")
