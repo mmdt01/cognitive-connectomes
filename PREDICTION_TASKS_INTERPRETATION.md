@@ -327,6 +327,46 @@ of **non-negative connectivity statistics**, not of C. elegans specifics or of
 directedness. (NARMA-10 / Mackey-Glass infrastructure also runs on the human substrate;
 their interpretation is pending a fuller pass.)
 
+### Anatomical I/O routing — a quick side-investigation (memory capacity)
+
+The main probe deliberately uses **dense input + full-state readout** to isolate the
+recurrence. Suárez 2021 instead route **input from subcortical regions and readout from
+intrinsic networks**, and report peak MC at the **edge of chaos (sr ≈ 0.95)** — whereas
+our full-state MC peaks *supercritically*. To reconcile these, anatomical routing was
+added as an explicit variable (subcortical input → per-Yeo-network readout, on the
+published **with-subcortical** consensus N=463/1015) with two leakage-free controls
+(random-cortical-patch readout; dense-input). Three findings, on memory capacity:
+
+1. **The collapse-resistance crossover survives routing.** Holding the anatomical I/O
+   fixed, the connectome still beats its degree-preserving null supercritically through
+   **7 of 8 readout apertures at both scales** (median Cliff's δ ≈ +0.9–1.0; worse-or-equal
+   at canonical) — so the sign/robustness result is **not an artefact of the full-state
+   readout**. (Lone exception: frontoparietal at N=448, which re-crosses *below* degree
+   deep-supercritically.)
+2. **Suárez's edge-of-chaos peak is an input-routing effect, not a different
+   criticality.** On the *identical* substrate, changing only the input — subcortical vs
+   dense — walks the MC peak from **sr ≈ 1** (concentrated subcortical input) to
+   **supercritical** (dense input, reproducing the main probe). Concentrated subcortical
+   input cannot exploit the supercritical bulk-memory regime; distributed input can. The
+   supercritical peak requires *both* distributed input and a full readout — restrict
+   either (Suárez do both) and the operating point drops to the edge of chaos.
+3. **Neither the input site nor the readout network is memory-special.** A leakage-free
+   control (subcortical input fixed, readout = a **size-matched random cortical patch**)
+   shows the real Yeo networks are **no better — slightly worse** — than random cortical
+   patches for memory at the operating point. Raw between-network MC differences are
+   **~65 % readout SIZE** (corr(size, peak MC) ≈ 0.8), not network identity; normalising
+   each network to its peak (Suárez's [0,1] convention) removes that confound and reveals
+   the dynamical ordering — **Visual is the most collapse-resistant** readout
+   supercritically.
+
+**Takeaway.** Under anatomical routing the connectome's contribution is the
+**recurrence** (collapse-resistance), *not* the anatomy of the I/O placement. This does
+not bear on Suárez's broader structure→function claims (which are not about raw memory),
+but it does show their edge-of-chaos operating point is a consequence of I/O
+*concentration*, and their intrinsic-network readouts carry no raw-memory advantage over
+random cortex. (Substrate = the published with-subcortical consensus, used as a fast
+verification path; a self-built version is the intended follow-up.)
+
 ---
 
 ## 8. Caveats (load-bearing)
