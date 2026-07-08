@@ -227,6 +227,8 @@ hyperopt_results/
 
 # Experiment result artefacts (regenerable from experiments)
 *.parquet
+# Interactive nilearn glass-brain HTML (large, regenerable; tracked figures are *.png)
+experiments/**/figures/*.html
 
 # Large downloaded datasets (provenance documented in each data/<species>/README.md;
 # small curated files such as the C. elegans xlsx/csv stay committed)
