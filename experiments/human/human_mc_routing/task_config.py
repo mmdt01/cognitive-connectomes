@@ -19,7 +19,10 @@ from pathlib import Path
 
 from src.tasks import memory_capacity_routing
 from src.connectomes.human_suarez import YEO_NETWORKS
-from experiments.human.routing_substrate import RANDOM_ROUTING_VARIANT
+from experiments.human.routing_substrate import (
+    RANDOM_READOUT_VARIANT,
+    DENSE_INPUT_VARIANT,
+)
 
 _DIR = Path(__file__).resolve().parent
 RESULTS_DIR = _DIR / "results"
@@ -51,8 +54,10 @@ MC_PARAMS = dict(
 SUBSTRATE_SOURCE = "published_full"
 
 # One condition (the real-W empirical cell); the connectome + weight-placement
-# control + 5-rung ladder all keep FIXED anatomical I/O, plus the random-placement
-# routing control. Variant names match the ladder so stats works unchanged.
+# control + 5-rung ladder all keep FIXED anatomical I/O, plus two leakage-free
+# placement controls: connectome_random_readout (readout-network identity) and
+# connectome_dense_input (input concentration vs substrate). Variant names match the
+# ladder so stats works unchanged.
 CONDITIONS = ["human_empirical"]
 CONDITION_SPEC = {
     "human_empirical": {
@@ -69,7 +74,8 @@ VARIANTS = [
     "degree_rewire",
     "clustering_rewire",
     "modularity_rewire",
-    RANDOM_ROUTING_VARIANT,        # placement control: real W, random I/O placement
+    RANDOM_READOUT_VARIANT,        # placement control: subctx input, random cortical readout
+    DENSE_INPUT_VARIANT,           # placement control: dense input, anatomical readout
 ]
 NULL_VARIANTS = [v for v in VARIANTS if v != "connectome"]
 VARIANT_RUNG = {
@@ -79,7 +85,8 @@ VARIANT_RUNG = {
     "degree_rewire": 2,
     "clustering_rewire": 3,
     "modularity_rewire": 4,
-    RANDOM_ROUTING_VARIANT: -1,
+    RANDOM_READOUT_VARIANT: -1,
+    DENSE_INPUT_VARIANT: -1,
 }
 
 

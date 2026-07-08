@@ -23,7 +23,11 @@ from src.reservoir import blas  # noqa: F401  (limit BLAS threads; import early)
 from src.experiment.config import ExperimentConfig
 from src.experiment import runner, stats
 from experiments.human import matrix_config
-from experiments.human.routing_substrate import RoutingSubstrateBuilder, RANDOM_ROUTING_VARIANT
+from experiments.human.routing_substrate import (
+    RoutingSubstrateBuilder,
+    RANDOM_READOUT_VARIANT,
+    DENSE_INPUT_VARIANT,
+)
 from experiments.human.human_mc_routing import task_config, plots_routing
 
 
@@ -49,8 +53,11 @@ def main(smoke: bool = False, jobs: int = 1, scale: int | None = None,
          sr_max: float | None = None) -> None:
     scale = matrix_config.SCALE if scale is None else scale
     cfg = build_config()
-    cfg.results_dir = cfg.results_dir / f"scale_{scale}"
-    cfg.figures_dir = cfg.figures_dir / f"scale_{scale}"
+    # Smoke writes to a separate ``*_smoke`` dir so a tiny check never clobbers the
+    # canonical full-run results/figures (a gotcha that bit us before).
+    tag = f"scale_{scale}" + ("_smoke" if smoke else "")
+    cfg.results_dir = cfg.results_dir / tag
+    cfg.figures_dir = cfg.figures_dir / tag
     if sr_max is not None:
         cfg.spectral_radii = matrix_config.spectral_sweep(sr_max)
         cfg.supercritical_radii = [sr for sr in cfg.spectral_radii if sr >= 1.25]
@@ -62,7 +69,7 @@ def main(smoke: bool = False, jobs: int = 1, scale: int | None = None,
         runner.run_matrix(
             builder, cfg,
             variants=["connectome", "degree_rewire", "random_gaussian",
-                      RANDOM_ROUTING_VARIANT],
+                      RANDOM_READOUT_VARIANT, DENSE_INPUT_VARIANT],
             spectral_radii=[0.0, 0.95, 1.5, 3.0], n_seeds=2, jobs=jobs,
         )
     else:

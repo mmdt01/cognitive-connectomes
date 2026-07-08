@@ -21,11 +21,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# Local styles (the generic dict lacks the routing control variant).
+# Local styles (the generic dict lacks the routing control variants).
 _STYLE = {
     "connectome": dict(color="black", lw=2.4, marker="o", ms=3, zorder=5),
-    "connectome_random_routing": dict(color="#d62728", lw=1.8, ls="-.",
+    "connectome_random_readout": dict(color="#d62728", lw=1.8, ls="-.",
                                       marker="^", ms=3, zorder=4),
+    "connectome_dense_input": dict(color="#17becf", lw=1.8, ls=":",
+                                   marker="D", ms=3, zorder=4),
     "connectome_weight_permuted": dict(color="#9467bd", lw=1.5, ls="-."),
     "degree_rewire": dict(color="#e377c2", lw=1.6),
     "random_gaussian": dict(color="#bbbbbb", lw=1.3, ls="--"),
@@ -35,7 +37,8 @@ _STYLE = {
 }
 _LABEL = {
     "connectome": "connectome (anatomical I/O)",
-    "connectome_random_routing": "connectome · random I/O placement",
+    "connectome_random_readout": "connectome · random cortical readout",
+    "connectome_dense_input": "connectome · dense input",
     "connectome_weight_permuted": "connectome · perm. weights",
     "degree_rewire": "rung 2 · degree",
     "random_gaussian": "rung 0 · random",
@@ -60,8 +63,9 @@ def _peak_sr(srs, vals):
 
 
 def plot_aperture_curves(results, apertures, aperture_sizes, path,
-                         variants=("connectome", "degree_rewire",
-                                   "random_gaussian", "connectome_random_routing")):
+                         variants=("connectome", "connectome_dense_input",
+                                   "connectome_random_readout", "degree_rewire",
+                                   "random_gaussian")):
     n = len(apertures)
     ncols = 4
     nrows = int(np.ceil(n / ncols))
@@ -95,8 +99,8 @@ def plot_aperture_curves(results, apertures, aperture_sizes, path,
 
 
 def plot_peak_shift(results, apertures, aperture_sizes, path,
-                    variants=("connectome", "degree_rewire",
-                              "connectome_random_routing")):
+                    variants=("connectome", "connectome_dense_input",
+                              "degree_rewire")):
     fig, (ax_sr, ax_mc) = plt.subplots(1, 2, figsize=(12, 5))
     for variant in variants:
         if variant not in results.variant.unique():
@@ -127,8 +131,8 @@ def plot_peak_shift(results, apertures, aperture_sizes, path,
     ax_mc.set_ylabel("peak memory capacity")
     ax_mc.set_title("Peak MC vs readout aperture")
     ax_sr.legend(fontsize=8)
-    fig.suptitle("Readout-aperture effect: peak walks toward the edge of chaos "
-                 "as the readout shrinks", fontsize=12)
+    fig.suptitle("Operating point (peak-MC spectral radius) per readout aperture: "
+                 "anatomical subcortical input vs dense-input reference", fontsize=12)
     fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
