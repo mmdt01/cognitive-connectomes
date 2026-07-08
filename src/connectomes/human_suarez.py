@@ -1,25 +1,28 @@
-"""Suárez et al. 2021 human multi-scale structural connectome loader.
+"""Human structural connectome loaders (Griffa 2019 primary + Suárez 2021 release).
 
-Source: Suárez, Richards, Lajoie, Mišić (2021), "Learning function from
-structure in neuromorphic networks", Nature Machine Intelligence 3:771-786.
-Group of 70 healthy subjects; Lausanne multi-scale parcellation (Cammoun 2012);
-dMRI streamline-derived structural connectivity (SC).
+Primary data: ``data/human/Individual_Connectomes.mat`` (Griffa, Alemán-Gómez, Hagmann,
+Zenodo 2872624; gitignored) -- ``connMatrices.SC`` is a length-5 object array over the
+CORTICAL Lausanne/Cammoun scales N = 68/114/219/448/1000, each ``(N, N, 70)`` (70
+subjects; symmetric, non-negative fibre densities). Geometry and the with-subcortical
+data come from the Suárez 2021 release (``data/human/Suarez2021_Data/``). Full provenance
+in ``data/human/README.md``.
 
-Data file: ``data/human/Individual_Connectomes.mat`` (gitignored; download
-separately). ``connMatrices.SC`` is a length-5 object array over Lausanne scales
-N = 68/114/219/448/1000, each entry ``(N, N, 70)``: a stack of 70 per-subject
-symmetric, non-negative, weighted SC matrices (fibre densities -- normalized
-fractions, not integer counts). See ``data/human/README.md``.
+Public surface, grouped:
+  * ``load`` -- one subject's SC (dependency-free substrate for the plumbing smoke).
+  * ``build_consensus`` / ``load_built_consensus`` -- self-built **cortical** (N=448/1000)
+    distance-dependent group consensus (SC from the primary .mat) and its cache.
+  * ``build_consensus_full`` / ``load_built_consensus_full`` -- self-built
+    **with-subcortical** (N=463/1015) consensus (SC from the release individual stacks,
+    the only with-subctx source) and its cache -- the anatomical I/O-routing substrate.
+  * ``load_published_consensus`` / ``load_published_consensus_full`` / ``load_published_full``
+    -- the published Suárez consensus (a validation anchor; the full one was the
+    pre-self-build routing substrate).
+  * ``load_routing_geometry`` + ``YEO_NETWORKS`` -- node sets for anatomical I/O routing.
 
-This loader returns ONE fixed graph -- a single subject's SC at a chosen scale --
-as the reservoir substrate ``W``. It is the dependency-free substrate for the
-pipeline-validation smoke; the Suárez distance-dependent group consensus is a
-separate, later addition (it needs external Cammoun atlas geometry, absent from
-the .mat).
-
-Convention note: the SC is symmetric (undirected), so the reservoir orientation
-``adjacency[i, j] = weight from j to i`` is moot here -- the matrix is its own
-transpose.
+Both self-builds run the vendored Betzel-2018 ``struct_consensus`` on the release geometry
+(parcel centroids, hemisphere labels); they differ only in the SC source and whether the
+geometry is cortical-restricted. Convention: SC is symmetric (undirected), so the reservoir
+orientation ``adjacency[i, j] = weight j->i`` is moot -- the matrix is its own transpose.
 """
 
 from pathlib import Path
@@ -36,37 +39,83 @@ _DATA_PATH = _REPO_ROOT / "data" / "human" / "Individual_Connectomes.mat"
 _RELEASE_DIR = _REPO_ROOT / "data" / "human" / "Suarez2021_Data"
 _BUILT_DIR = _REPO_ROOT / "data" / "human" / "built_consensus"
 
-# Lausanne/Cammoun scales, in .mat object-array order.
+# Lausanne/Cammoun cortical scales, in .mat object-array order.
 SCALES = (68, 114, 219, 448, 1000)
 
-# Map a .mat cortical scale (node count) to the release geometry tag. The release
-# stores geometry at the WITH-subcortical scales (463 = 448 cortical + 15 subctx;
-# 1015 = 1000 + 15); we restrict to the cortical subset via the cortical mask.
-# Verified node-order correspondence (.mat SC <-> release cortical subset): the
-# intra-hemispheric weight fraction, node-strength, and edge-weight all align
-# (r >= 0.98). No N=219 in the release.
+# Map a .mat cortical scale (node count) to the release geometry tag. The release stores
+# data at the WITH-subcortical scales (463 = 448 cortical + 15 subctx; 1015 = 1000 + 15);
+# the cortical loaders restrict to the cortical subset via the cortical mask. Verified
+# node-order correspondence (.mat SC <-> release cortical subset: node-strength +
+# edge-weight, r >= 0.98). No N=219 in the release.
 _MAT_N_TO_RELEASE_TAG = {448: "250", 1000: "500"}
 
+# The 7 cortical Yeo intrinsic networks, in rsn_names.npy order (subctx excluded). These
+# are Suárez's readout apertures; subcortical (subctx) is the input aperture.
+YEO_NETWORKS = ("VIS", "SM", "DA", "VA", "LIM", "FP", "DMN")
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+def _graph_stats(C: np.ndarray) -> tuple[int, float, int]:
+    """``(n_undirected_edges, density, n_isolated_nodes)`` for a symmetric weighted matrix."""
+    mask = C != 0
+    N = C.shape[0]
+    n_edges = int(mask.sum() // 2)
+    density = n_edges / (N * (N - 1) / 2)
+    n_isolated = int((mask.sum(axis=1) == 0).sum())
+    return n_edges, density, n_isolated
+
+
+def _assert_symmetric_nonneg(C: np.ndarray, name: str) -> None:
+    asym = float(np.max(np.abs(C - C.T)))
+    assert asym < 1e-9, f"{name} not symmetric, max|C-C.T|={asym:.3e}"
+    assert C.min() >= 0.0, f"{name} has negative weights, min={C.min():.3e}"
+
+
+def _node_labels(stem: str, N: int) -> list[str]:
+    """Placeholder region labels ``f"{stem}{N}_region0000"``... (the data has no labels)."""
+    return [f"{stem}{N}_region{i:04d}" for i in range(N)]
+
+
+def _release_tag(scale: int) -> str:
+    tag = _MAT_N_TO_RELEASE_TAG.get(scale)
+    if tag is None:
+        raise ValueError(f"no release data for scale {scale} "
+                         f"(available: {sorted(_MAT_N_TO_RELEASE_TAG)})")
+    return tag
+
+
+def _release_npy(kind: str, scale: int, *, allow_pickle: bool = False) -> np.ndarray:
+    """Load ``Suarez2021_Data/<kind>_<tag>.npy`` for a .mat cortical ``scale``.
+
+    ``kind`` is the path up to the ``_<tag>.npy`` suffix, e.g. ``coords/coords_human``,
+    ``cortical/cortical_human``, ``connectivity/consensus/human``.
+    """
+    return np.load(_RELEASE_DIR / f"{kind}_{_release_tag(scale)}.npy",
+                   allow_pickle=allow_pickle)
+
+
+# ---------------------------------------------------------------------------
+# Primary .mat -- single-subject SC (plumbing smoke)
+# ---------------------------------------------------------------------------
 
 def _load_sc_stack(scale: int) -> np.ndarray:
-    """Return the ``(N, N, n_subjects)`` SC stack for the requested scale.
+    """Return the ``(N, N, n_subjects)`` cortical SC stack for ``scale`` from the .mat.
 
-    Loads only the ``connMatrices`` variable and locates the requested scale by
-    node count (rather than trusting index order).
+    Loads only ``connMatrices`` and locates the scale by node count (not index order).
     """
     if scale not in SCALES:
         raise ValueError(f"Unknown scale {scale!r}; expected one of {SCALES}")
-    raw = loadmat(
-        _DATA_PATH, struct_as_record=False, squeeze_me=True,
-        variable_names=["connMatrices"],
-    )
+    raw = loadmat(_DATA_PATH, struct_as_record=False, squeeze_me=True,
+                  variable_names=["connMatrices"])
     sc = raw["connMatrices"].SC
     stacks = [np.asarray(sc[i]) for i in range(len(sc))]
     match = [s for s in stacks if s.shape[0] == scale]
     if not match:
         raise ValueError(
-            f"scale {scale} not found in .mat (shapes: {[s.shape for s in stacks]})"
-        )
+            f"scale {scale} not found in .mat (shapes: {[s.shape for s in stacks]})")
     return np.array(match[0], dtype=float)
 
 
@@ -76,18 +125,16 @@ def load(scale: int = 219, subject: int = 0) -> ConnectomeData:
     Parameters
     ----------
     scale
-        Lausanne parcellation scale (node count): 68/114/219/448/1000. Default
-        219 (closest to C. elegans N=300, for a node-count-matched comparison).
+        Lausanne parcellation scale (node count): 68/114/219/448/1000. Default 219
+        (closest to C. elegans N=300, for a node-count-matched comparison).
     subject
-        Subject index into the 0..69 stack. Default 0 (the fixed representative
-        graph for the smoke).
+        Subject index into the 0..69 stack. Default 0 (fixed representative graph).
 
     Returns
     -------
     ConnectomeData
-        ``adjacency`` = the subject's symmetric, non-negative, zero-diagonal SC
-        (weighted). No node labels/coordinates exist in the .mat, so placeholder
-        region indices are used and ``node_positions`` is left None.
+        ``adjacency`` = the subject's symmetric, non-negative, zero-diagonal SC. No node
+        labels/coordinates exist in the .mat, so placeholder region labels are used.
     """
     stack = _load_sc_stack(scale)
     n_subjects = stack.shape[2]
@@ -96,33 +143,20 @@ def load(scale: int = 219, subject: int = 0) -> ConnectomeData:
 
     W = np.array(stack[:, :, subject], dtype=float)
     N = W.shape[0]
+    _assert_symmetric_nonneg(W, "SC")  # dMRI SC is symmetric + non-negative by construction
 
-    # dMRI SC is symmetric + non-negative by construction; verify (recon on
-    # subject 0, N=219 confirmed exact symmetry and non-negativity).
-    asym = float(np.max(np.abs(W - W.T)))
-    assert asym < 1e-9, f"expected symmetric SC, max|W-W.T|={asym:.3e}"
-    assert W.min() >= 0.0, f"expected non-negative SC, min={W.min():.3e}"
-
-    # Strip the diagonal (recon: subject-0 N=219 carries 217 self-weights). The
-    # pipeline requires zero diagonal everywhere (weight-scheme asserts + null
-    # parity), mirroring the C. elegans self-loop removal.
+    # Strip the diagonal (self-weights present in the raw SC): the pipeline requires a
+    # zero diagonal everywhere (weight-scheme asserts + null parity), mirroring the
+    # C. elegans self-loop removal.
     self_loops_removed = int((np.diag(W) != 0).sum())
     self_loop_weight_removed = float(np.diag(W).sum())
     np.fill_diagonal(W, 0.0)
 
-    mask = W != 0
-    n_edges = int(mask.sum() // 2)
-    n_possible = N * (N - 1) // 2
-    density = n_edges / n_possible
-    degree = mask.sum(axis=1)
-    n_isolated = int((degree == 0).sum())
-
-    print(
-        f"Loaded Suárez 2021 human SC (single subject): scale N={N}, "
-        f"subject={subject}/{n_subjects - 1}, undirected edges={n_edges}, "
-        f"density={density:.3%}, self-loops removed={self_loops_removed}, "
-        f"isolated nodes={n_isolated}"
-    )
+    n_edges, density, n_isolated = _graph_stats(W)
+    print(f"Loaded Suárez 2021 human SC (single subject): scale N={N}, "
+          f"subject={subject}/{n_subjects - 1}, undirected edges={n_edges}, "
+          f"density={density:.3%}, self-loops removed={self_loops_removed}, "
+          f"isolated nodes={n_isolated}")
     if n_isolated:
         print(f"  WARNING: {n_isolated} isolated node(s) -> dead reservoir unit(s).")
 
@@ -135,10 +169,10 @@ def load(scale: int = 219, subject: int = 0) -> ConnectomeData:
         # The .mat carries 70 subjects; the paper reports 66 (logged, not reconciled).
         "n_subjects_in_file": n_subjects,
         "processing_notes": (
-            "Single subject's SC from connMatrices.SC. Symmetric (undirected, "
-            "normal), non-negative (fibre densities -- normalized fractions, not "
-            "integer counts). Diagonal zeroed for pipeline/null parity. No node "
-            "labels or coordinates in the .mat; placeholder region indices used."
+            "Single subject's SC from connMatrices.SC. Symmetric (undirected, normal), "
+            "non-negative (fibre densities -- normalized fractions, not integer counts). "
+            "Diagonal zeroed for pipeline/null parity. No node labels or coordinates in "
+            "the .mat; placeholder region indices used."
         ),
         "n_edges": n_edges,
         "density": density,
@@ -146,92 +180,49 @@ def load(scale: int = 219, subject: int = 0) -> ConnectomeData:
         "self_loop_weight_removed": self_loop_weight_removed,
         "n_isolated_nodes": n_isolated,
     }
-
-    node_labels = [f"scale{N}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=W, node_labels=node_labels, metadata=metadata)
+    return ConnectomeData(adjacency=W, node_labels=_node_labels("scale", N), metadata=metadata)
 
 
 # ---------------------------------------------------------------------------
-# Self-built group consensus (from the raw individual SC + release geometry)
+# Release geometry (parcel centroids, hemisphere labels, Yeo/RSN groups)
 # ---------------------------------------------------------------------------
 
 def _load_release_geometry(scale: int):
     """Cortical-restricted ``(coords, hemiid, cortical_index)`` for a .mat scale.
 
-    The release geometry lives at the with-subcortical scales; the cortical nodes
-    are interspersed (not a leading block), so select via the cortical mask. Node
-    order then matches the .mat SC (verified: hemisphere-organisation, node-
-    strength and edge-weight correspondence, r >= 0.98).
+    The release geometry lives at the with-subcortical scales; the cortical nodes are
+    interspersed (not a leading block), so select via the cortical mask. Node order then
+    matches the .mat SC (verified: node-strength + edge-weight correspondence, r >= 0.98).
     """
-    tag = _MAT_N_TO_RELEASE_TAG.get(scale)
-    if tag is None:
-        raise ValueError(f"no release geometry for scale {scale} "
-                         f"(available: {sorted(_MAT_N_TO_RELEASE_TAG)})")
-    coords = np.load(_RELEASE_DIR / f"coords/coords_human_{tag}.npy")
-    hemiid = np.load(_RELEASE_DIR / f"hemispheres/hemiid_human_{tag}.npy")
-    cortical = np.load(_RELEASE_DIR / f"cortical/cortical_human_{tag}.npy")
+    coords = _release_npy("coords/coords_human", scale)
+    hemiid = _release_npy("hemispheres/hemiid_human", scale)
+    cortical = _release_npy("cortical/cortical_human", scale)
     cidx = np.where(cortical != 0)[0]
     if len(cidx) != scale:
         raise ValueError(f"cortical node count {len(cidx)} != scale {scale}")
     return coords[cidx], hemiid[cidx], cidx
 
 
-def load_published_consensus(scale: int) -> np.ndarray:
-    """The Suárez published consensus restricted to the cortical nodes, symmetric
-    and zero-diagonal. Used ONLY to validate the self-built consensus."""
-    tag = _MAT_N_TO_RELEASE_TAG[scale]
-    _, _, cidx = _load_release_geometry(scale)
-    C = np.load(_RELEASE_DIR / f"connectivity/consensus/human_{tag}.npy")
-    C = C[np.ix_(cidx, cidx)].astype(float).copy()
-    np.fill_diagonal(C, 0.0)
-    return C
-
-
-# ---------------------------------------------------------------------------
-# With-subcortical geometry for anatomical I/O routing (published consensus)
-# ---------------------------------------------------------------------------
-
-# The 7 cortical Yeo intrinsic networks, in rsn_names.npy order (subctx excluded).
-# These are Suárez's readout apertures; subcortical (subctx) is the input aperture.
-YEO_NETWORKS = ("VIS", "SM", "DA", "VA", "LIM", "FP", "DMN")
-
-
-def load_published_consensus_full(scale: int = 448) -> np.ndarray:
-    """The Suárez published *with-subcortical* consensus (NOT cortical-restricted).
-
-    Unlike ``load_published_consensus`` (which slices to the cortical block for the
-    self-build validation), this returns the full N=463 (@scale 448) / N=1015
-    (@scale 1000) matrix -- the substrate for the anatomical I/O-routing thread,
-    where input must be injected into the 15 subcortical nodes (absent from the
-    cortical-only .mat, hence absent from our self-built consensus). Symmetric,
-    non-negative, zero-diagonal.
-    """
-    tag = _MAT_N_TO_RELEASE_TAG[scale]
-    C = np.load(
-        _RELEASE_DIR / f"connectivity/consensus/human_{tag}.npy"
-    ).astype(float).copy()
-    np.fill_diagonal(C, 0.0)
-    asym = float(np.max(np.abs(C - C.T)))
-    assert asym < 1e-9, f"published consensus not symmetric, max|C-C.T|={asym:.3e}"
-    assert C.min() >= 0.0, f"published consensus has negative weights, min={C.min():.3e}"
-    return C
+def _load_release_geometry_full(scale: int):
+    """Full (with-subcortical) ``(coords, hemiid)`` -- ALL N=463/1015 nodes, unlike the
+    cortical-restricted ``_load_release_geometry``."""
+    return (_release_npy("coords/coords_human", scale),
+            _release_npy("hemispheres/hemiid_human", scale))
 
 
 def load_routing_geometry(scale: int = 448) -> dict:
     """Node-set geometry for anatomical I/O routing on the with-subcortical graph.
 
-    Every index is into the *full* published-consensus ordering (N=463 @scale 448 /
-    N=1015 @scale 1000), matched to ``load_published_consensus_full``. Returns the
-    15 subcortical input nodes, the cortical nodes, the per-Yeo-network cortical
-    readout groups, and coords/hemiid. Subcortical nodes are interspersed (not a
-    leading block), so groups are built from the cortical mask + RSN labels, never a
-    raw slice.
+    Every index is into the *full* (N=463 @scale 448 / N=1015 @scale 1000) node ordering,
+    matched to ``load_published_consensus_full`` / ``load_built_consensus_full``. Returns
+    the 15 subcortical input nodes, the cortical nodes, the per-Yeo-network cortical
+    readout groups, and coords/hemiid. Subcortical nodes are interspersed, so groups are
+    built from the cortical mask + RSN labels, never a raw slice.
     """
-    tag = _MAT_N_TO_RELEASE_TAG[scale]
-    coords = np.load(_RELEASE_DIR / f"coords/coords_human_{tag}.npy")
-    hemiid = np.load(_RELEASE_DIR / f"hemispheres/hemiid_human_{tag}.npy")
-    cortical = np.load(_RELEASE_DIR / f"cortical/cortical_human_{tag}.npy")
-    rsn = np.load(_RELEASE_DIR / f"rsn_mapping/rsn_human_{tag}.npy", allow_pickle=True)
+    coords = _release_npy("coords/coords_human", scale)
+    hemiid = _release_npy("hemispheres/hemiid_human", scale)
+    cortical = _release_npy("cortical/cortical_human", scale)
+    rsn = _release_npy("rsn_mapping/rsn_human", scale, allow_pickle=True)
     rsn = np.asarray([str(x) for x in rsn])
 
     cortical_idx = np.where(cortical != 0)[0]
@@ -241,8 +232,8 @@ def load_routing_geometry(scale: int = 448) -> dict:
 
     yeo_groups = {name: np.where(rsn == name)[0] for name in YEO_NETWORKS}
     # The cortical nodes must partition exactly into the 7 Yeo networks, and the
-    # subcortical nodes must all be labelled subctx (else the release ordering has
-    # drifted from the consensus ordering -- a hard error, not a silent mislabel).
+    # subcortical nodes must all be labelled subctx (else the release ordering has drifted
+    # from the consensus ordering -- a hard error, not a silent mislabel).
     covered = sum(len(v) for v in yeo_groups.values())
     assert covered == scale, f"Yeo groups cover {covered} nodes; {scale} cortical expected"
     for name, idx in yeo_groups.items():
@@ -261,196 +252,104 @@ def load_routing_geometry(scale: int = 448) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Published Suárez consensus (validation anchor; the full one was the pre-self-build
+# routing substrate)
+# ---------------------------------------------------------------------------
+
+def load_published_consensus(scale: int) -> np.ndarray:
+    """The published consensus restricted to the cortical nodes, symmetric + zero-diagonal.
+    Used ONLY to validate the self-built cortical consensus."""
+    _, _, cidx = _load_release_geometry(scale)
+    C = _release_npy("connectivity/consensus/human", scale)
+    C = C[np.ix_(cidx, cidx)].astype(float).copy()
+    np.fill_diagonal(C, 0.0)
+    return C
+
+
+def load_published_consensus_full(scale: int = 448) -> np.ndarray:
+    """The published *with-subcortical* consensus (NOT cortical-restricted): full N=463
+    (@scale 448) / N=1015 (@scale 1000). Validates the self-built full consensus and was
+    the pre-self-build routing substrate. Symmetric, non-negative, zero-diagonal."""
+    C = _release_npy("connectivity/consensus/human", scale).astype(float).copy()
+    np.fill_diagonal(C, 0.0)
+    _assert_symmetric_nonneg(C, "published consensus")
+    return C
+
+
 def load_published_full(scale: int = 448) -> ConnectomeData:
     """The published with-subcortical consensus as a ``ConnectomeData`` substrate.
 
-    Thin wrapper over ``load_published_consensus_full`` so the with-subcortical
-    graph plugs into ``HumanSubstrateBuilder(source="published_full")`` for the
-    anatomical I/O-routing thread. The self-built consensus is cortical-only, so
-    subcortical INPUT routing uses this validated (r≈0.99 vs self-build on the
-    cortical block) published matrix -- a stated caveat of the routing thread.
+    Thin ``ConnectomeData`` wrapper over ``load_published_consensus_full`` so the graph
+    plugs into ``HumanSubstrateBuilder(source="published_full")`` -- the *fast verification
+    path* for the routing thread, since superseded by the self-built
+    ``load_built_consensus_full``.
     """
     C = load_published_consensus_full(scale)
     N = C.shape[0]
-    n_edges = int((C != 0).sum() // 2)
+    n_edges, density, _ = _graph_stats(C)
     metadata = {
         "source": "Suárez et al. 2021 published distance-dependent consensus (Betzel 2018)",
         "processing": "published_with_subcortical",
         "scale": scale,
         "n_full": N,
         "n_edges": n_edges,
-        "density": n_edges / (N * (N - 1) / 2),
-        "processing_notes": (
-            "Published with-subcortical group consensus (N=463 @scale 448 / "
-            "N=1015 @scale 1000). Used as the routing substrate because subcortical "
-            "input nodes are absent from the cortical-only .mat (and our self-built "
-            "consensus). Symmetric, non-negative, zero-diagonal."
-        ),
-    }
-    node_labels = [f"published_full_scale{scale}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
-
-
-def build_consensus(scale: int = 448, weighted: bool = True) -> ConnectomeData:
-    """Build our OWN distance-dependent group consensus from the .mat individual
-    SC (the raw Lausanne source) + the release geometry, via the vendored
-    Betzel-2018 ``struct_consensus``.
-
-    This is the reservoir substrate for the human consensus probe -- self-derived
-    end-to-end, NOT the published matrix (which is used only to validate this; see
-    ``experiments/human/build_consensus.py``). ``weighted=True`` returns the
-    mean-fibre-density-weighted consensus (heavy-tailed, non-negative).
-    """
-    stack = _load_sc_stack(scale)                        # (N, N, 70) cortical SC
-    coords_c, hemiid_c, _ = _load_release_geometry(scale)
-    distance = cdist(coords_c, coords_c)
-    C = np.asarray(
-        struct_consensus(stack, distance, hemiid_c.reshape(-1, 1), weighted=weighted),
-        dtype=float,
-    )
-    np.fill_diagonal(C, 0.0)
-
-    N = C.shape[0]
-    asym = float(np.max(np.abs(C - C.T)))
-    assert asym < 1e-9, f"consensus not symmetric, max|C-C.T|={asym:.3e}"
-    assert C.min() >= 0.0, f"consensus has negative weights, min={C.min():.3e}"
-    mask = C != 0
-    n_edges = int(mask.sum() // 2)
-    density = n_edges / (N * (N - 1) / 2)
-    n_isolated = int((mask.sum(axis=1) == 0).sum())
-
-    print(f"Built human consensus (self-derived): scale N={N}, "
-          f"undirected edges={n_edges}, density={density:.3%}, "
-          f"isolated nodes={n_isolated}")
-    if n_isolated:
-        print(f"  WARNING: {n_isolated} isolated node(s) -> dead reservoir unit(s).")
-
-    metadata = {
-        "source": "Suárez et al. 2021 individual Lausanne SC (Individual_Connectomes.mat)",
-        "construction": "distance-dependent group consensus (Betzel et al. 2018)",
-        "construction_notes": (
-            f"Self-built from the {stack.shape[2]}-subject cortical individual SC "
-            f"at scale N={N} via the vendored struct_consensus "
-            f"(src/connectomes/consensus.py), weighted={weighted} (mean fibre "
-            f"density over all subjects). Geometry (centroids -> Euclidean "
-            f"distance, hemisphere labels) from the Suárez 2021 release, cortical "
-            f"subset; node order verified against the .mat SC."
-        ),
-        "scale": scale,
-        "weighted": weighted,
-        "n_edges": n_edges,
         "density": density,
-        "n_isolated_nodes": n_isolated,
+        "processing_notes": (
+            "Published with-subcortical group consensus (N=463 @scale 448 / N=1015 @scale "
+            "1000). Symmetric, non-negative, zero-diagonal. The fast verification-path "
+            "routing substrate, superseded by the self-built with-subcortical consensus."
+        ),
     }
-    node_labels = [f"scale{N}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
-
-
-def load_built_consensus(scale: int = 448) -> ConnectomeData:
-    """Load the cached self-built group consensus (see build_consensus.py).
-
-    Fast path for the probe -- reads ``data/human/built_consensus/consensus_<scale>.npy``
-    instead of reloading the 701 MB .mat. Raises with a build hint if absent.
-    """
-    import json
-
-    path = _BUILT_DIR / f"consensus_{scale}.npy"
-    if not path.exists():
-        raise FileNotFoundError(
-            f"{path} not found; build it first with "
-            f"`python -m experiments.human.build_consensus`."
-        )
-    C = np.load(path).astype(float)
-    metadata = {"processing": "consensus_cached", "scale": scale, "cache_path": str(path)}
-    meta_path = _BUILT_DIR / f"consensus_{scale}.meta.json"
-    if meta_path.exists():
-        metadata.update(json.loads(meta_path.read_text()).get("metadata", {}))
-    N = C.shape[0]
-    n_edges = int((C != 0).sum() // 2)
-    print(f"Loaded self-built human consensus: scale N={N}, edges={n_edges}, "
-          f"density={n_edges / (N * (N - 1) / 2):.3%}")
-    node_labels = [f"scale{N}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
+    return ConnectomeData(adjacency=C, node_labels=_node_labels("published_full_scale", N),
+                          metadata=metadata)
 
 
 # ---------------------------------------------------------------------------
-# Self-built WITH-SUBCORTICAL group consensus (for the anatomical I/O-routing
-# thread; from the release's restored individual SC stacks + full geometry)
+# Self-built distance-dependent group consensus (Betzel 2018 struct_consensus)
 # ---------------------------------------------------------------------------
-
-def _load_release_geometry_full(scale: int):
-    """Full (with-subcortical) ``(coords, hemiid)`` for a .mat cortical scale --
-    ALL N=463/1015 nodes, unlike the cortical-restricted ``_load_release_geometry``."""
-    tag = _MAT_N_TO_RELEASE_TAG[scale]
-    coords = np.load(_RELEASE_DIR / f"coords/coords_human_{tag}.npy")
-    hemiid = np.load(_RELEASE_DIR / f"hemispheres/hemiid_human_{tag}.npy")
-    return coords, hemiid
-
 
 def _load_release_individual_stack(scale: int) -> np.ndarray:
     """The with-subcortical per-subject SC stack ``(N_full, N_full, 70)`` from the
-    release's ``connectivity/individual/`` (restored separately; ~665 MB). N_full =
-    463 (@scale 448) / 1015 (@scale 1000). Symmetric, non-negative fibre densities;
-    node order matches the release geometry (subcortical interspersed)."""
-    tag = _MAT_N_TO_RELEASE_TAG[scale]
-    path = _RELEASE_DIR / f"connectivity/individual/human_{tag}.npy"
+    release's ``connectivity/individual/`` (restored separately; ~665 MB). N_full = 463
+    (@scale 448) / 1015 (@scale 1000). Symmetric, non-negative fibre densities; node order
+    matches the release geometry (subcortical interspersed)."""
+    path = _RELEASE_DIR / f"connectivity/individual/human_{_release_tag(scale)}.npy"
     if not path.exists():
         raise FileNotFoundError(
             f"{path} not found; restore the release's connectivity/individual/ folder "
-            f"(the with-subcortical per-subject SC stacks) to build the full consensus."
-        )
+            f"(the with-subcortical per-subject SC stacks) to build the full consensus.")
     return np.load(path).astype(float)
 
 
-def build_consensus_full(scale: int = 448, weighted: bool = True) -> ConnectomeData:
-    """Build our OWN distance-dependent **with-subcortical** group consensus from
-    the release's restored individual SC stacks (N=463/1015) + the full release
-    geometry, via the vendored Betzel-2018 ``struct_consensus``.
+def _consensus_from(stack, coords, hemiid, weighted, *, scale, kind, label_stem,
+                    source, construction, notes) -> ConnectomeData:
+    """Shared build: Betzel ``struct_consensus`` -> zero diagonal -> validate -> package.
 
-    The with-subcortical analogue of ``build_consensus`` (which is cortical-only,
-    from the .mat) -- the **intended self-built substrate** for the anatomical
-    I/O-routing thread (subcortical input needs the subcortical nodes), replacing
-    the published consensus used as a fast verification path. Same procedure as the
-    cortical build; only the individual source (release .npy vs .mat) and the
-    geometry (full vs cortical-restricted) differ. Validated against the published
-    with-subcortical consensus by ``experiments/human/build_consensus.py --full``.
-    ``scale`` keys on the cortical node count (448/1000), matching the rest of the
-    pipeline; the returned matrix is N=463/1015.
+    Runs the same procedure for both the cortical and with-subcortical builds; only the
+    SC ``stack`` and ``coords``/``hemiid`` differ. ``kind`` labels the console line
+    (``""`` cortical / ``"with-subcortical "`` full), ``label_stem`` the node-label prefix,
+    and ``source``/``construction``/``notes`` the audit metadata.
     """
-    stack = _load_release_individual_stack(scale)          # (N_full, N_full, 70)
-    coords, hemiid = _load_release_geometry_full(scale)
     distance = cdist(coords, coords)
     C = np.asarray(
         struct_consensus(stack, distance, hemiid.reshape(-1, 1), weighted=weighted),
         dtype=float,
     )
     np.fill_diagonal(C, 0.0)
+    _assert_symmetric_nonneg(C, "consensus")
 
     N = C.shape[0]
-    asym = float(np.max(np.abs(C - C.T)))
-    assert asym < 1e-9, f"consensus not symmetric, max|C-C.T|={asym:.3e}"
-    assert C.min() >= 0.0, f"consensus has negative weights, min={C.min():.3e}"
-    mask = C != 0
-    n_edges = int(mask.sum() // 2)
-    density = n_edges / (N * (N - 1) / 2)
-    n_isolated = int((mask.sum(axis=1) == 0).sum())
-
-    print(f"Built human WITH-SUBCORTICAL consensus (self-derived): N={N} "
-          f"({scale} cortical + subctx), undirected edges={n_edges}, "
-          f"density={density:.3%}, isolated nodes={n_isolated}")
+    n_edges, density, n_isolated = _graph_stats(C)
+    print(f"Built human {kind}consensus (self-derived): N={N} (scale {scale}), "
+          f"undirected edges={n_edges}, density={density:.3%}, isolated nodes={n_isolated}")
     if n_isolated:
         print(f"  WARNING: {n_isolated} isolated node(s) -> dead reservoir unit(s).")
 
     metadata = {
-        "source": "Suárez et al. 2021 release individual SC (connectivity/individual/)",
-        "construction": "distance-dependent group consensus (Betzel et al. 2018), with subcortical",
-        "construction_notes": (
-            f"Self-built with-subcortical consensus from the {stack.shape[2]}-subject "
-            f"release individual SC at N={N} ({scale} cortical + 15 subcortical) via the "
-            f"vendored struct_consensus (weighted={weighted}). Full release geometry "
-            f"(all-node centroids -> Euclidean distance, hemisphere labels). The intended "
-            f"self-built routing substrate, replacing the published consensus."
-        ),
+        "source": source,
+        "construction": construction,
+        "construction_notes": notes,
         "scale": scale,
         "n_nodes": N,
         "weighted": weighted,
@@ -458,31 +357,101 @@ def build_consensus_full(scale: int = 448, weighted: bool = True) -> ConnectomeD
         "density": density,
         "n_isolated_nodes": n_isolated,
     }
-    node_labels = [f"full_scale{scale}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
+    return ConnectomeData(adjacency=C, node_labels=_node_labels(label_stem, N),
+                          metadata=metadata)
 
 
-def load_built_consensus_full(scale: int = 448) -> ConnectomeData:
-    """Load the cached self-built with-subcortical consensus (see
-    ``build_consensus.py --full``). Fast path for the routing probe -- reads
-    ``data/human/built_consensus/consensus_full_<scale>.npy`` (N=463/1015)."""
+def build_consensus(scale: int = 448, weighted: bool = True) -> ConnectomeData:
+    """Self-built distance-dependent **cortical** group consensus (N=448/1000) from the
+    .mat individual SC (the primary Lausanne source) + release geometry, via the vendored
+    Betzel-2018 ``struct_consensus``.
+
+    The substrate for the main human probe -- self-derived, NOT the published matrix (which
+    validates it; see ``experiments/human/build_consensus.py``). ``weighted=True`` returns
+    the mean-fibre-density-weighted consensus (heavy-tailed, non-negative).
+    """
+    stack = _load_sc_stack(scale)                         # (N, N, 70) cortical SC
+    coords, hemiid, _ = _load_release_geometry(scale)
+    return _consensus_from(
+        stack, coords, hemiid, weighted, scale=scale, kind="", label_stem="scale",
+        source="Suárez et al. 2021 individual Lausanne SC (Individual_Connectomes.mat)",
+        construction="distance-dependent group consensus (Betzel et al. 2018)",
+        notes=(
+            f"Self-built from the {stack.shape[2]}-subject cortical individual SC at scale "
+            f"N={scale} via the vendored struct_consensus (src/connectomes/consensus.py), "
+            f"weighted={weighted} (mean fibre density over all subjects). Geometry "
+            f"(centroids -> Euclidean distance, hemisphere labels) from the Suárez 2021 "
+            f"release, cortical subset; node order verified against the .mat SC."
+        ),
+    )
+
+
+def build_consensus_full(scale: int = 448, weighted: bool = True) -> ConnectomeData:
+    """Self-built distance-dependent **with-subcortical** group consensus (N=463/1015) from
+    the release's restored individual SC stacks + the full (all-node) geometry, via the
+    same Betzel-2018 ``struct_consensus`` as ``build_consensus``.
+
+    The intended anatomical I/O-routing substrate (subcortical input needs the subcortical
+    nodes); the .mat is cortical-only, so this build's SC is necessarily release-sourced.
+    Validated against the published with-subcortical consensus by
+    ``experiments/human/build_consensus.py --full``. ``scale`` keys on the cortical node
+    count (448/1000); the returned matrix is N=463/1015.
+    """
+    stack = _load_release_individual_stack(scale)         # (N_full, N_full, 70) with subctx
+    coords, hemiid = _load_release_geometry_full(scale)
+    return _consensus_from(
+        stack, coords, hemiid, weighted, scale=scale, kind="with-subcortical ",
+        label_stem="full_scale",
+        source="Suárez et al. 2021 release individual SC (connectivity/individual/)",
+        construction=("distance-dependent group consensus (Betzel et al. 2018), "
+                      "with subcortical"),
+        notes=(
+            f"Self-built with-subcortical consensus from the {stack.shape[2]}-subject "
+            f"release individual SC at scale N={scale} (+15 subcortical) via the vendored "
+            f"struct_consensus, weighted={weighted}. Full release geometry (all-node "
+            f"centroids -> Euclidean distance, hemisphere labels). Replaces the published "
+            f"consensus as the routing substrate."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Cached self-built consensus loaders (fast path -- avoid reloading the raw SC)
+# ---------------------------------------------------------------------------
+
+def _load_cached_consensus(scale: int, *, prefix: str, processing: str, kind: str,
+                           label_stem: str, build_cmd: str) -> ConnectomeData:
+    """Load a cached self-built consensus ``built_consensus/<prefix>_<scale>.npy`` (+ its
+    ``.meta.json``). Shared by ``load_built_consensus`` / ``load_built_consensus_full``."""
     import json
 
-    path = _BUILT_DIR / f"consensus_full_{scale}.npy"
+    path = _BUILT_DIR / f"{prefix}_{scale}.npy"
     if not path.exists():
-        raise FileNotFoundError(
-            f"{path} not found; build it with "
-            f"`python -m experiments.human.build_consensus --full`."
-        )
+        raise FileNotFoundError(f"{path} not found; build it with `{build_cmd}`.")
     C = np.load(path).astype(float)
-    metadata = {"processing": "consensus_full_cached", "scale": scale,
-                "cache_path": str(path)}
-    meta_path = _BUILT_DIR / f"consensus_full_{scale}.meta.json"
+    metadata = {"processing": processing, "scale": scale, "cache_path": str(path)}
+    meta_path = _BUILT_DIR / f"{prefix}_{scale}.meta.json"
     if meta_path.exists():
         metadata.update(json.loads(meta_path.read_text()).get("metadata", {}))
     N = C.shape[0]
-    n_edges = int((C != 0).sum() // 2)
-    print(f"Loaded self-built with-subcortical consensus: N={N}, edges={n_edges}, "
-          f"density={n_edges / (N * (N - 1) / 2):.3%}")
-    node_labels = [f"full_scale{scale}_region{i:04d}" for i in range(N)]
-    return ConnectomeData(adjacency=C, node_labels=node_labels, metadata=metadata)
+    n_edges, density, _ = _graph_stats(C)
+    print(f"Loaded self-built {kind}consensus: N={N}, edges={n_edges}, density={density:.3%}")
+    return ConnectomeData(adjacency=C, node_labels=_node_labels(label_stem, N),
+                          metadata=metadata)
+
+
+def load_built_consensus(scale: int = 448) -> ConnectomeData:
+    """Load the cached self-built **cortical** consensus (see ``build_consensus.py``). Fast
+    path -- reads ``built_consensus/consensus_<scale>.npy`` instead of the 701 MB .mat."""
+    return _load_cached_consensus(
+        scale, prefix="consensus", processing="consensus_cached", kind="",
+        label_stem="scale", build_cmd="python -m experiments.human.build_consensus")
+
+
+def load_built_consensus_full(scale: int = 448) -> ConnectomeData:
+    """Load the cached self-built **with-subcortical** consensus (N=463/1015; see
+    ``build_consensus.py --full``) -- the anatomical I/O-routing substrate."""
+    return _load_cached_consensus(
+        scale, prefix="consensus_full", processing="consensus_full_cached",
+        kind="with-subcortical ", label_stem="full_scale",
+        build_cmd="python -m experiments.human.build_consensus --full")
