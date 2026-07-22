@@ -141,6 +141,7 @@ def evaluate(
     divergence_bound: float = 10.0,
     max_input_tries: int = 50,
     validate: bool = False,
+    collect_states: bool = False,
     **kwargs,
 ) -> dict:
     """NARMA-10 evaluator. Mirrors ``memory_capacity.evaluate``'s interface.
@@ -173,11 +174,17 @@ def evaluate(
         If True, run a sanity gate first: a canonical density-matched
         symmetric-Gaussian reservoir at sr=0.95 must reach NRMSE below a loose
         bound (catches gross indexing/readout errors).
+    collect_states
+        If True, also return the post-washout driven state matrix (the full
+        train+test span, ``(T - washout, N)``) under the ``"states"`` key -- the
+        additive, opt-in manifold-probe capture path. Off by default, so the
+        committed task runs are byte-identical.
 
     Returns
     -------
     dict
-        ``{"nrmse", ...}`` plus the resolved task config for the audit trail.
+        ``{"nrmse", ...}`` plus the resolved task config for the audit trail;
+        plus ``"states"`` when ``collect_states``.
     """
     if not (washout + n_train + n_test <= T):
         raise ValueError(
@@ -191,11 +198,12 @@ def evaluate(
             u_low, u_high, divergence_bound, max_input_tries,
         )
 
-    nrmse, n_rejected = _measure(
+    nrmse, n_rejected, states = _measure(
         reservoir, seed, T, washout, n_train, n_test, ridge_alpha, readout_bias,
         u_low, u_high, divergence_bound, max_input_tries,
+        collect_states=collect_states,
     )
-    return {
+    result = {
         "nrmse": nrmse,
         "n_input": T,
         "n_washout": washout,
@@ -207,6 +215,9 @@ def evaluate(
         "u_low": u_low,
         "u_high": u_high,
     }
+    if collect_states:
+        result["states"] = states
+    return result
 
 
 def _measure(
@@ -222,8 +233,13 @@ def _measure(
     u_high: float,
     divergence_bound: float,
     max_input_tries: int,
-) -> tuple[float, int]:
-    """Run the NARMA-10 measurement loop. Returns ``(nrmse, n_rejected)``."""
+    collect_states: bool = False,
+) -> tuple[float, int, np.ndarray | None]:
+    """Run the NARMA-10 measurement loop. Returns ``(nrmse, n_rejected, states)``.
+
+    ``states`` is the post-washout driven state matrix (train+test span) when
+    ``collect_states``, else ``None``. The metric path is untouched.
+    """
     rng = np.random.default_rng(seed)
     u, y, n_rejected = _generate_input_and_target(
         rng, T, u_low, u_high, divergence_bound, max_input_tries
@@ -248,7 +264,8 @@ def _measure(
     mse = float(np.mean((predictions - test_targets) ** 2))
     target_var = float(np.var(test_targets))
     nrmse = float(np.sqrt(mse / target_var)) if target_var > 0 else float("inf")
-    return nrmse, n_rejected
+    captured = states if collect_states else None
+    return nrmse, n_rejected, captured
 
 
 def _run_sanity_gate(
@@ -284,7 +301,7 @@ def _run_sanity_gate(
         input_scaling=1.0,
         seed=seed,
     )
-    nrmse, _ = _measure(
+    nrmse, _, _ = _measure(
         sanity_reservoir, seed + 1000, T, washout, n_train, n_test, ridge_alpha,
         readout_bias, u_low, u_high, divergence_bound, max_input_tries,
     )

@@ -212,12 +212,15 @@ def build_trajectory(seed, n_transient, washout, n_train, sync_len, n_windows,
 def _measure(reservoir, seed, *, n_transient, washout, n_train, sync_len,
              n_windows, window_spacing, free_run_len, climate_len, climate_washout,
              epsilon, ridge_alpha, readout_bias, sigma, rho, beta, h, x0,
-             lambda_max):
-    """Run the full closed-loop protocol; return ``(vpt, climate_error)``.
+             lambda_max, collect_states=False):
+    """Run the full closed-loop protocol; return ``(vpt, climate_error, states)``.
 
     ``vpt`` is the mean valid-prediction time (Lyapunov time) over ``n_windows``
     free-runs from held-out synchronisation points; ``climate_error`` comes from
-    one long free-run.
+    one long free-run. ``states`` is the post-washout **teacher-forced** driven
+    state matrix the readout is fit on (``(n_train, N)``) when ``collect_states``,
+    else ``None`` -- the manifold-probe capture path (the driven manifold, not the
+    autonomous free-run). The metric path is untouched.
     """
     S, holdout_start, _, _ = build_trajectory(
         seed, n_transient, washout, n_train, sync_len, n_windows, window_spacing,
@@ -252,7 +255,8 @@ def _measure(reservoir, seed, *, n_transient, washout, n_train, sync_len,
     long_run = _free_run(x, weights, readout_bias, W, Win, lr, bias, climate_len)
     climate = _climate_error(long_run[climate_washout:], S[n_transient:])
 
-    return vpt, climate
+    captured = states if collect_states else None
+    return vpt, climate, captured
 
 
 def evaluate(
@@ -277,6 +281,7 @@ def evaluate(
     x0=X0,
     lambda_max: float = LAMBDA_MAX,
     validate: bool = False,
+    collect_states: bool = False,
     sanity_input_scaling: float = 0.1,
     sanity_leak_rate: float = 1.0,
     sanity_min_vpt: float = 0.5,
@@ -314,11 +319,17 @@ def evaluate(
     validate
         If True, run a sanity gate first (a canonical random reservoir must reach
         a non-trivial VPT; catches readout/indexing/feedback errors).
+    collect_states
+        If True, also return the post-washout **teacher-forced** driven state
+        matrix (``(n_train, N)``, the manifold the readout is fit on -- not the
+        autonomous free-run) under the ``"states"`` key. Off by default, so the
+        committed task runs are byte-identical.
 
     Returns
     -------
     dict
-        ``{"vpt", "climate_error", ...}`` plus the resolved task config.
+        ``{"vpt", "climate_error", ...}`` plus the resolved task config; plus
+        ``"states"`` when ``collect_states``.
     """
     if validate:
         _run_sanity_gate(
@@ -328,15 +339,16 @@ def evaluate(
             sanity_input_scaling, sanity_leak_rate, sanity_min_vpt,
         )
 
-    vpt, climate_error = _measure(
+    vpt, climate_error, states = _measure(
         reservoir, seed, n_transient=n_transient, washout=washout,
         n_train=n_train, sync_len=sync_len, n_windows=n_windows,
         window_spacing=window_spacing, free_run_len=free_run_len,
         climate_len=climate_len, climate_washout=climate_washout, epsilon=epsilon,
         ridge_alpha=ridge_alpha, readout_bias=readout_bias, sigma=sigma, rho=rho,
         beta=beta, h=h, x0=x0, lambda_max=lambda_max,
+        collect_states=collect_states,
     )
-    return {
+    result = {
         "vpt": vpt,
         "climate_error": climate_error,
         "n_transient": n_transient,
@@ -351,6 +363,9 @@ def evaluate(
         "ridge_alpha": ridge_alpha,
         "readout_bias": readout_bias,
     }
+    if collect_states:
+        result["states"] = states
+    return result
 
 
 def _run_sanity_gate(seed, n_transient, washout, n_train, sync_len, n_windows,
@@ -372,7 +387,7 @@ def _run_sanity_gate(seed, n_transient, washout, n_train, sync_len, n_windows,
         weighted_adjacency=weighted, target_spectral_radius=0.95,
         leak_rate=leak_rate, input_scaling=input_scaling, seed=seed, input_dim=3,
     )
-    vpt, climate_error = _measure(
+    vpt, climate_error, _ = _measure(
         sanity_reservoir, seed + 1000, n_transient=n_transient, washout=washout,
         n_train=n_train, sync_len=sync_len, n_windows=n_windows,
         window_spacing=window_spacing, free_run_len=free_run_len,

@@ -20,8 +20,14 @@ def _measure(
     max_lag: int,
     ridge_alpha: float,
     input_scaling: float,
-) -> tuple[float, np.ndarray]:
-    """Run the MC measurement loop. Returns ``(mc_total, mc_per_lag)``.
+    collect_states: bool = False,
+) -> tuple[float, np.ndarray, np.ndarray | None]:
+    """Run the MC measurement loop. Returns ``(mc_total, mc_per_lag, states)``.
+
+    ``states`` is the post-warmup driven state matrix ``(T - warmup, N)`` when
+    ``collect_states`` (the additive, opt-in manifold-probe capture path), else
+    ``None``. The metric computation is untouched, so the default path is
+    byte-identical.
 
     Per lag ``k`` the design matrix is ``X_k = states[k:]`` and the ridge readout
     needs the Gram ``X_k.T @ X_k`` (the dominant cost: ``O((n-k) N^2)`` per lag).
@@ -64,7 +70,8 @@ def _measure(
         if k < max_lag:
             row = states_after_warmup[k]
             gram = gram - np.outer(row, row)
-    return float(mc_per_lag.sum()), mc_per_lag
+    captured = states_after_warmup if collect_states else None
+    return float(mc_per_lag.sum()), mc_per_lag, captured
 
 
 def evaluate(
@@ -76,6 +83,7 @@ def evaluate(
     ridge_alpha: float,
     input_scaling: float,
     validate: bool = False,
+    collect_states: bool = False,
     **kwargs,
 ) -> dict:
     """Memory-capacity evaluator.
@@ -98,19 +106,28 @@ def evaluate(
         ``(5, 50)``. Tighter [10, 30] is the published expectation;
         the undirected symmetric-weight regime can land slightly outside [10, 30]
         so the gate uses the v1-compatible [5, 50] window.
+    collect_states
+        If True, also return the post-warmup driven state matrix under the
+        ``"states"`` key (the additive, opt-in manifold-probe capture path). Off
+        by default, so the committed task runs are byte-identical.
 
     Returns
     -------
     dict
-        ``{"mc": float, "mc_per_lag": np.ndarray of shape (max_lag,)}``.
+        ``{"mc": float, "mc_per_lag": np.ndarray of shape (max_lag,)}``, plus
+        ``"states"`` (``(T - warmup, N)``) when ``collect_states``.
     """
     if validate:
         _run_sanity_gate(seed, T, warmup, max_lag, ridge_alpha, input_scaling)
 
-    mc, mc_per_lag = _measure(
-        reservoir, seed, T, warmup, max_lag, ridge_alpha, input_scaling
+    mc, mc_per_lag, states = _measure(
+        reservoir, seed, T, warmup, max_lag, ridge_alpha, input_scaling,
+        collect_states=collect_states,
     )
-    return {"mc": mc, "mc_per_lag": mc_per_lag}
+    result = {"mc": mc, "mc_per_lag": mc_per_lag}
+    if collect_states:
+        result["states"] = states
+    return result
 
 
 def _run_sanity_gate(
@@ -139,7 +156,7 @@ def _run_sanity_gate(
         input_scaling=input_scaling,
         seed=seed,
     )
-    mc_sanity, _ = _measure(
+    mc_sanity, _, _ = _measure(
         sanity_reservoir,
         seed=seed + 1000,
         T=T,

@@ -148,6 +148,7 @@ def evaluate(
     x0: float = X0,
     h: float = 1.0,
     validate: bool = False,
+    collect_states: bool = False,
     sanity_horizon: int = 17,
     sanity_max_nrmse: float = 0.8,
     **kwargs,
@@ -185,11 +186,17 @@ def evaluate(
         If True, run a sanity gate first (a canonical random reservoir must beat
         a loose NRMSE bound at ``sanity_horizon``; catches indexing/readout
         errors).
+    collect_states
+        If True, also return the post-washout driven state matrix (the full
+        train+test span, ``(T - washout, N)``) under the ``"states"`` key -- the
+        additive, opt-in manifold-probe capture path. Off by default, so the
+        committed task runs are byte-identical.
 
     Returns
     -------
     dict
-        ``{"nrmse", ...}`` plus the resolved task config for the audit trail.
+        ``{"nrmse", ...}`` plus the resolved task config for the audit trail;
+        plus ``"states"`` when ``collect_states``.
     """
     if not (washout + n_train + n_test <= T):
         raise ValueError(
@@ -203,11 +210,12 @@ def evaluate(
             ridge_alpha, readout_bias, tau, a, b, n, x0, h, sanity_max_nrmse,
         )
 
-    nrmse = _measure(
+    nrmse, states = _measure(
         reservoir, seed, T, washout, n_train, n_test, horizon, n_transient,
         ridge_alpha, readout_bias, tau, a, b, n, x0, h,
+        collect_states=collect_states,
     )
-    return {
+    result = {
         "nrmse": nrmse,
         "n_input": T,
         "n_washout": washout,
@@ -218,6 +226,9 @@ def evaluate(
         "ridge_alpha": ridge_alpha,
         "readout_bias": readout_bias,
     }
+    if collect_states:
+        result["states"] = states
+    return result
 
 
 def build_driven_series(
@@ -287,8 +298,13 @@ def _measure(
     n: int,
     x0: float,
     h: float,
-) -> float:
-    """Run the Mackey-Glass measurement loop. Returns NRMSE."""
+    collect_states: bool = False,
+) -> tuple[float, np.ndarray | None]:
+    """Run the Mackey-Glass measurement loop. Returns ``(nrmse, states)``.
+
+    ``states`` is the post-washout driven state matrix (train+test span) when
+    ``collect_states``, else ``None``. The metric path is untouched.
+    """
     input_norm, target_norm, _, _ = build_driven_series(
         seed, T, washout, n_train, horizon, n_transient, tau, a, b, n, x0, h
     )
@@ -309,11 +325,13 @@ def _measure(
     )
     predictions = _predict(test_states, weights, readout_bias)
 
+    captured = states if collect_states else None
     if not np.all(np.isfinite(predictions)):
-        return float("inf")  # supercritical reservoir blew up; flag as no-skill+
+        return float("inf"), captured  # supercritical reservoir blew up; no-skill+
     mse = float(np.mean((predictions - test_targets) ** 2))
     target_var = float(np.var(test_targets))
-    return float(np.sqrt(mse / target_var)) if target_var > 0 else float("inf")
+    nrmse = float(np.sqrt(mse / target_var)) if target_var > 0 else float("inf")
+    return nrmse, captured
 
 
 def _run_sanity_gate(
@@ -360,7 +378,7 @@ def _run_sanity_gate(
         input_scaling=0.5,
         seed=seed,
     )
-    nrmse = _measure(
+    nrmse, _ = _measure(
         sanity_reservoir, seed + 1000, T, washout, n_train, n_test, sanity_horizon,
         n_transient, ridge_alpha, readout_bias, tau, a, b, n, x0, h,
     )

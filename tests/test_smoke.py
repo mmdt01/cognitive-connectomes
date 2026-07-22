@@ -129,7 +129,7 @@ def test_memory_capacity_downdate_matches_direct(connectome_adjacency):
         weighted, target_spectral_radius=1.5, leak_rate=1.0, input_scaling=1.0, seed=0
     )
     params = dict(T=600, warmup=100, max_lag=8, ridge_alpha=1e-6, input_scaling=1.0)
-    mc_downdate, _ = _mc_measure(reservoir, seed=1000, **params)
+    mc_downdate, _, _ = _mc_measure(reservoir, seed=1000, **params)
 
     # Reference: rebuild the Gram from scratch each lag (the pre-optimisation form).
     rng = np.random.default_rng(1000)
