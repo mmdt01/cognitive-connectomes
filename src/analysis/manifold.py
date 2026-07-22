@@ -30,7 +30,7 @@ negative eigenvalues (numerical noise) clipped to zero.
 """
 
 import numpy as np
-from scipy.linalg import eigvalsh
+from scipy.linalg import eigh, eigvalsh
 
 # Relative tolerance for counting a covariance eigenvalue as a non-zero mode (used
 # only to define the entropy normaliser's rank; excludes round-off "zeros").
@@ -211,6 +211,44 @@ def random_basis_band(states: np.ndarray, k_grid, n_random: int = 20,
     }
 
 
+def graph_laplacian_harmonics(adjacency: np.ndarray) -> np.ndarray:
+    """Orthonormal connectome harmonics: eigenvectors of the unnormalised graph
+    Laplacian ``L = D - A``, ordered by **ascending** eigenvalue (low spatial
+    frequency first).
+
+    ``A = |adjacency|`` with a zeroed diagonal, so ``L`` is a valid non-negative
+    graph Laplacian even for a signed weight scheme; for a non-negative substrate
+    ``|adjacency| == adjacency``, so this is the ordinary weighted Laplacian. Pass
+    the weighted symmetric connectivity that defines the reservoir (record the
+    choice); a binary-mask variant is obtained by passing the mask.
+    """
+    A = np.abs(np.asarray(adjacency, dtype=float))
+    np.fill_diagonal(A, 0.0)
+    if not np.allclose(A, A.T, atol=1e-9):
+        raise ValueError("adjacency must be symmetric for a Hermitian Laplacian")
+    L = np.diag(A.sum(axis=1)) - A
+    _, U = eigh(L)  # ascending eigenvalue == ascending spatial frequency
+    return U
+
+
+def symmetric_eigenbasis(W: np.ndarray, order: str = "abs_desc") -> np.ndarray:
+    """Orthonormal eigenvectors of a symmetric matrix.
+
+    ``order='abs_desc'`` (default) orders columns by **descending |eigenvalue|**
+    (dominant dynamical modes first) -- the natural ``W``-mode basis for the
+    alignment probe; ``'asc'`` keeps ``eigh``'s ascending-eigenvalue order.
+    """
+    W = np.asarray(W, dtype=float)
+    if not np.allclose(W, W.T, atol=1e-9):
+        raise ValueError("W must be symmetric to use eigh for an orthonormal basis")
+    eigenvalues, U = eigh(W)
+    if order == "abs_desc":
+        U = U[:, np.argsort(np.abs(eigenvalues))[::-1]]
+    elif order != "asc":
+        raise ValueError(f"unknown order {order!r}")
+    return U
+
+
 def default_k_grid(n: int) -> list:
     """A log-spaced-ish ``k`` grid capped at ``n`` (for the alignment sweep)."""
     candidates = [1, 2, 3, 5, 10, 20, 30, 50, 100, 150, 200, 300, 400, 500,
@@ -258,6 +296,19 @@ def _selftest() -> None:
     assert (cap >= band["mean"] - 1e-9).all(), "eigenbasis should dominate random"
     kmid = k_grid.index(20)
     assert abs(band["mean"][kmid] - 20 / N) < 0.1, "random band ~ k/N on isotropic data"
+
+    # Structural bases: harmonics orthonormal + lowest mode ~constant (Laplacian
+    # nullspace of a connected graph); W-mode basis orthonormal + abs-desc ordered.
+    A = np.abs(rng.standard_normal((N, N))); A = A + A.T; np.fill_diagonal(A, 0.0)
+    U_L = graph_laplacian_harmonics(A)
+    assert np.allclose(U_L.T @ U_L, np.eye(N), atol=1e-8), "harmonics not orthonormal"
+    assert np.std(np.abs(U_L[:, 0])) < 1e-6, "lowest harmonic should be ~constant"
+    Wsym = A - np.diag(A.sum(1))  # a symmetric matrix with spread eigenvalues
+    U_W = symmetric_eigenbasis(Wsym, order="abs_desc")
+    assert np.allclose(U_W.T @ U_W, np.eye(N), atol=1e-8), "W-basis not orthonormal"
+    evals = np.linalg.eigvalsh(Wsym)
+    assert abs(abs(U_W[:, 0] @ Wsym @ U_W[:, 0]) - np.abs(evals).max()) < 1e-6, \
+        "first W-mode should carry the largest |eigenvalue|"
 
     print("manifold self-test passed:")
     print(f"  rank-1 PR={pr1:.3f}  isotropic PR={pr_iso:.1f} (/N={pr_norm:.3f})")
