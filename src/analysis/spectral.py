@@ -49,6 +49,79 @@ def spectral_metrics(W: np.ndarray) -> dict:
     )
 
 
+def recurrent_spectrum(W: np.ndarray, n_leading_ipr: int = 10,
+                       near_degenerate_fracs: tuple = (0.10, 0.25),
+                       symmetry_atol: float = 1e-9) -> dict:
+    """Full eigen-spectrum of the **normalised** base matrix (spectral radius 1).
+
+    ``W`` is a weighted recurrent matrix *before* spectral rescaling. The reservoir
+    build rescales it to ``W(sr) = W * sr / |lambda_1|`` (dense ``np.linalg.eigvals``
+    for ``|lambda_1|``), so this reports the spectrum of the normalised base
+    ``W / |lambda_1|`` -- ``W(sr)``'s eigenvalues are exactly ``sr`` times these.
+
+    Returns (all scalars on the normalised spectrum, where ``|lambda_1| == 1``):
+
+    - ``eig_real`` / ``eig_imag`` -- eigenvalues, sorted by **descending modulus**
+      (float32). For a symmetric ``W`` the eigenvalues are real (``eigh``); the
+      general path (``eig``) keeps complex conjugate pairs.
+    - ``is_symmetric`` -- ``W`` symmetric within ``symmetry_atol``.
+    - ``perron_root`` -- largest real-part eigenvalue (the Perron-Frobenius root for
+      a non-negative ``W``; ``== 1`` there, since the Perron mode sets the radius).
+    - ``bulk95_radius`` -- ``pct95(|lambda|)`` (identical formula to
+      ``spectral_metrics``' ``bulk95_ratio``, here with ``|lambda_1| == 1``).
+    - ``spectral_gap`` -- ``|lambda_1| - |lambda_2|`` (normalised: ``1 - |lambda_2|``).
+    - ``n_near_degenerate_10pct`` / ``_25pct`` -- count of ``|lambda_i|`` within 10%
+      / 25% of ``|lambda_1|`` (``|lambda_i| >= 0.9`` / ``0.75``; includes the top).
+    - ``top10_eigvec_ipr`` -- inverse participation ratio
+      ``sum_i |v_i|^4 / (sum_i |v_i|^2)^2`` of the leading ``n_leading_ipr``
+      eigenvectors (modulus for complex): high = localised on few nodes.
+    - ``base_spectral_radius`` -- ``|lambda_1|`` of the un-normalised ``W`` (the
+      raw scale divided out).
+
+    Tests whether non-negative modular networks carry several near-degenerate
+    leading modes (one per weakly coupled pool), each localised (high IPR) and
+    supporting a slow mode -- the hypothesised basis of memory.
+    """
+    W = np.asarray(W, dtype=float)
+    is_symmetric = bool(np.allclose(W, W.T, atol=symmetry_atol))
+    if is_symmetric:
+        # eigh gives real eigenvalues and an orthonormal (real) eigenbasis.
+        eigenvalues, eigenvectors = np.linalg.eigh(W)
+        eigenvalues = eigenvalues.astype(complex)
+    else:
+        # Non-normal (e.g. directed) W: right eigenvectors, generally complex.
+        eigenvalues, eigenvectors = np.linalg.eig(W)
+
+    magnitudes = np.abs(eigenvalues)
+    l1 = float(magnitudes.max())
+    if l1 < 1e-12:
+        raise ValueError("spectral radius ~0; cannot normalise the base matrix.")
+
+    order = np.argsort(magnitudes)[::-1]          # descending modulus
+    eigenvalues = eigenvalues[order] / l1
+    eigenvectors = eigenvectors[:, order]
+    mods = magnitudes[order] / l1                 # |lambda| / |lambda_1|, desc
+
+    iprs = []
+    for j in range(min(n_leading_ipr, eigenvectors.shape[1])):
+        v = np.abs(eigenvectors[:, j])
+        s2 = float((v ** 2).sum())
+        iprs.append(float((v ** 4).sum() / (s2 ** 2)) if s2 > 0.0 else 0.0)
+
+    return dict(
+        eig_real=eigenvalues.real.astype(np.float32),
+        eig_imag=eigenvalues.imag.astype(np.float32),
+        is_symmetric=is_symmetric,
+        perron_root=float(eigenvalues.real.max()),
+        bulk95_radius=float(np.percentile(mods, 95)),
+        spectral_gap=float(mods[0] - (mods[1] if mods.size > 1 else 0.0)),
+        n_near_degenerate_10pct=int((mods >= 1.0 - near_degenerate_fracs[0]).sum()),
+        n_near_degenerate_25pct=int((mods >= 1.0 - near_degenerate_fracs[1]).sum()),
+        top10_eigvec_ipr=np.asarray(iprs, dtype=np.float32),
+        base_spectral_radius=l1,
+    )
+
+
 def normalized_eigenvalues(W: np.ndarray) -> np.ndarray:
     """Complex eigenvalues divided by ``|lambda_1|`` (dominant mode -> unit circle)."""
     eigenvalues = np.linalg.eigvals(W)

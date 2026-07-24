@@ -59,6 +59,39 @@ def covariance_eigenvalues(states: np.ndarray) -> np.ndarray:
     return np.clip(eig, 0.0, None)
 
 
+def covariance_spectrum(states: np.ndarray) -> tuple[np.ndarray, float]:
+    """Full time-centred covariance spectrum, **descending**, plus total variance.
+
+    Returns ``(eig_desc, total_variance)`` where ``eig_desc`` are the eigenvalues
+    of ``C = X^T X / (T - 1)`` (``X`` time-centred) in descending order and
+    ``total_variance = sum(eig) == trace(C)``. Shares ``covariance_eigenvalues``
+    (the exact spectrum Probes 1 and 2 use), so
+    ``participation_ratio`` recomputed from ``eig_desc`` reproduces the Probe 1
+    value to floating-point precision. The raw eigenvalues are the spatial
+    fingerprint the participation ratio compresses to a scalar.
+    """
+    eig = covariance_eigenvalues(states)          # ascending, >= 0
+    total_variance = float(eig.sum())
+    return eig[::-1].copy(), total_variance
+
+
+def gram_spectrum(design: np.ndarray) -> np.ndarray:
+    """Eigenvalues of the readout design-matrix Gram ``A^T A``, **descending**.
+
+    ``design`` is ``A`` exactly as the ridge solver forms it (any bias / input /
+    scaling columns already appended by the caller), so the returned spectrum is
+    the un-centred Gram the solve ``(A^T A + alpha I) w = A^T y`` inverts. Together
+    with ``alpha`` it gives the ridge effective rank ``sum_i g_i / (g_i + alpha)``,
+    the readout-relevant dimensionality. Length is ``A``'s column count (``N`` plus
+    any extra design columns). ``A^T A`` is symmetric PSD, so ``eigvalsh`` is used
+    and tiny negatives are clipped to zero.
+    """
+    design = np.asarray(design, dtype=float)
+    gram = design.T @ design
+    eig = np.clip(eigvalsh(gram), 0.0, None)
+    return eig[::-1].copy()
+
+
 def _pr_from_eigenvalues(eig: np.ndarray) -> float:
     s1 = float(eig.sum())
     s2 = float((eig ** 2).sum())
@@ -284,6 +317,21 @@ def _selftest() -> None:
     assert mean_curvature(straight) < 1e-3, "straight motion should have ~0 curvature"
     walk_curv = mean_curvature(np.cumsum(rng.standard_normal((T, N)), axis=0))
     assert 1.3 < walk_curv < 1.8, f"random-walk curvature should be ~pi/2, got {walk_curv:.3f}"
+
+    # covariance_spectrum: descending, reproduces PR, trace == sum of variances.
+    eig_desc, total_var = covariance_spectrum(iso)
+    assert (np.diff(eig_desc) <= 1e-9).all(), "covariance_spectrum must be descending"
+    assert abs(_pr_from_eigenvalues(eig_desc) - pr_iso) < 1e-6, \
+        "PR from covariance_spectrum must match participation_ratio"
+    assert abs(total_var - np.var(iso, axis=0, ddof=1).sum()) < 1e-6, \
+        "total_variance must equal trace(C) (sum of per-column variances)"
+
+    # gram_spectrum: descending, length = design columns; a bias column adds one
+    # eigenvalue (the near-constant column's mass), and A^T A is PSD.
+    g = gram_spectrum(iso)
+    assert g.size == N and (np.diff(g) <= 1e-6).all() and (g >= -1e-9).all()
+    g_bias = gram_spectrum(np.hstack([iso, np.ones((T, 1))]))
+    assert g_bias.size == N + 1, "bias column must add one design dimension"
 
     # basis_alignment: the exact covariance eigenbasis captures 100% by k=N, and
     # its top-k dominates a random basis; random band matches k/N on isotropic data.
