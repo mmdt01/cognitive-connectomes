@@ -1,0 +1,46 @@
+{
+  "description": "How each task's ridge readout design matrix is built, read from src/tasks/{memory_capacity,narma,lorenz}.py and the human experiments/human/*/task_config.py. Determines the correct effective-rank calculation on eig_gram: rank = sum_i g_i / (g_i + alpha).",
+  "leak_rate_note": "All three tasks use leak_rate=1.0, so the reservoir state x == tanh(pre-activation) exactly and (1 - x^2) is the tanh derivative used in saturation_diagnostics.parquet.",
+  "eig_cov_note": "eig_cov (covariance_spectra.parquet) is on the FULL captured post-warmup states (captured_state_rows), time-centred -- continuity with Probes 1/2. eig_gram is on the design matrix (T_effective rows x n_design_cols), un-centred, as the ridge solver sees it. These differ for NARMA (2800 captured vs 2000 design).",
+  "tasks": {
+    "mc": {
+      "alpha": 1e-06,
+      "T_effective": 2500,
+      "captured_state_rows": 2500,
+      "n_design_cols": 448,
+      "n_reservoir_nodes": 448,
+      "bias_column": false,
+      "input_concatenated": false,
+      "states_centred": false,
+      "states_scaled": false,
+      "solver": "per lag k=1..max_lag: numpy.linalg.solve(gram + alpha*I_N, X_k.T @ y_k), X_k = states[k:], gram = X_k.T @ X_k rank-1 down-dated across lags",
+      "notes": "No bias/intercept, no input concatenation, raw (un-centred, un-scaled) states; ridge identity alpha*I over all N columns. The design is per-lag and NESTED (X_k drops the first k rows of the post-warmup states); eig_gram is reported for the full post-warmup matrix (k=0), representative of all lags to within k/T_eff rows. eig_cov uses the same full post-warmup matrix, time-centred."
+    },
+    "narma10": {
+      "alpha": 1e-08,
+      "T_effective": 2000,
+      "captured_state_rows": 2800,
+      "n_design_cols": 449,
+      "n_reservoir_nodes": 448,
+      "bias_column": true,
+      "input_concatenated": false,
+      "states_centred": false,
+      "states_scaled": false,
+      "solver": "numpy.linalg.solve(design.T @ design + reg, design.T @ y); design = [train_states, 1]; reg = alpha*I with reg[-1,-1]=0 (intercept unregularised)",
+      "notes": "Readout is fit on the TRAIN split only (first n_train of the post-washout states) plus an unregularised bias column, so eig_gram is on n_train rows x (N+1) cols. eig_cov keeps Probe 1 continuity: it is the FULL post-washout span (T-washout rows, no bias), time-centred."
+    },
+    "lorenz": {
+      "alpha": 1e-07,
+      "T_effective": 10000,
+      "captured_state_rows": 10000,
+      "n_design_cols": 449,
+      "n_reservoir_nodes": 448,
+      "bias_column": true,
+      "input_concatenated": false,
+      "states_centred": false,
+      "states_scaled": false,
+      "solver": "numpy.linalg.solve(design.T @ design + reg, design.T @ Y); design = [states, 1]; Y = z-scored next-state (3-D); reg = alpha*I with reg[-1,-1]=0 (intercept unregularised)",
+      "notes": "States are the post-washout TEACHER-FORCED driven states the readout is fit on (n_train rows), not the autonomous free-run. The Lorenz TRAJECTORY (input and target) is z-scored on the teacher-forced region; the reservoir STATES themselves are not centred or scaled before the solve. eig_gram is on n_train rows x (N+1) cols; eig_cov on the same n_train states, time-centred."
+    }
+  }
+}
