@@ -128,6 +128,25 @@ def participation_ratio(states: np.ndarray, return_normalised: bool = False):
     return pr
 
 
+def ridge_effective_rank(gram_eigenvalues: np.ndarray, alpha: float) -> float:
+    """Ridge effective rank ``d_eff = sum_i g_i / (g_i + alpha)`` over the design-Gram
+    eigenvalues ``g_i > 0``.
+
+    This is the trace of the ridge hat matrix ``H = A (A^T A + alpha I)^-1 A^T`` --
+    the effective degrees of freedom of the ridge solution (Hastie & Tibshirani, ESL).
+    Each direction contributes ``g_i / (g_i + alpha)`` in ``[0, 1]``: ~1 when
+    ``g_i >> alpha`` (well above the regularisation floor) and ~0 when ``g_i << alpha``.
+    Unlike the variance-weighted participation ratio it counts the low-variance
+    directions that still clear the floor -- the directions the ridge readout can
+    actually use. Pass each task's own Gram spectrum and its own ridge ``alpha``.
+    """
+    g = np.asarray(gram_eigenvalues, dtype=float)
+    g = g[g > 0.0]
+    if g.size == 0 or alpha < 0.0:
+        return 0.0
+    return float((g / (g + alpha)).sum())
+
+
 def spectral_entropy(states: np.ndarray, normalise: bool = True) -> float:
     """Spectral entropy of the covariance eigenvalue distribution.
 
@@ -332,6 +351,14 @@ def _selftest() -> None:
     assert g.size == N and (np.diff(g) <= 1e-6).all() and (g >= -1e-9).all()
     g_bias = gram_spectrum(np.hstack([iso, np.ones((T, 1))]))
     assert g_bias.size == N + 1, "bias column must add one design dimension"
+
+    # ridge_effective_rank = trace of the ridge hat matrix: alpha -> 0 recovers the
+    # count of positive Gram eigenvalues, huge alpha -> ~0, monotone decreasing in alpha.
+    gr = np.array([10.0, 1.0, 0.1, 0.0, -1e-9])  # 3 positive eigenvalues
+    assert abs(ridge_effective_rank(gr, 1e-12) - 3.0) < 1e-6, "alpha~0 -> rank (3 pos g)"
+    assert ridge_effective_rank(gr, 1e12) < 1e-6, "huge alpha -> ~0 usable directions"
+    assert ridge_effective_rank(gr, 1.0) < ridge_effective_rank(gr, 0.01), \
+        "d_eff must decrease with alpha"
 
     # basis_alignment: the exact covariance eigenbasis captures 100% by k=N, and
     # its top-k dominates a random basis; random band matches k/N on isotropic data.
