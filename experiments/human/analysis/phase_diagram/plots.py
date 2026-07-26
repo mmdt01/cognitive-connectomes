@@ -142,25 +142,166 @@ def fig_panelB_heatmap(op, bnd, path, value_col="dStraight"):
     plt.close(fig)
 
 
-def fig_cross_panel(op, bnd, path):
-    """Both panels' observed boundaries on one (f, sr) plane -- the central result:
-    do topology's grip on memory and on generation occupy the same region?"""
-    fig, ax = plt.subplots(figsize=(6.6, 5.0))
-    _overlay(ax, bnd, [
-        ("fA_obs_mag", "Panel A (memory) collapse", dict(color="#c44e52", lw=2.4)),
-        ("fB_obs_mag", "Panel B (generative) onset", dict(color="#4c72b0", lw=2.4)),
-    ])
-    _biological_markers(ax)
-    ax.set_xlabel("spectral radius")
-    ax.set_ylabel("negative-weight fraction $f$")
-    ax.set_ylim(-0.02, 0.52)
-    ax.set_title("Cross-panel: memory vs generative topology-control boundaries",
-                 fontsize=11)
-    ax.legend(fontsize=8, loc="upper right", framealpha=0.9)
-    ax.grid(alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
+def _smooth_curve(sr, f):
+    """Monotone-cubic (PCHIP) smoothing of a boundary over its finite points;
+    (sr_fine, f_fine), or (None, None) if too few points. PCHIP is shape-preserving
+    so it will not overshoot near the crossover."""
+    m = np.isfinite(sr) & np.isfinite(f)
+    if m.sum() < 3:
+        return None, None
+    xs, ys = np.asarray(sr)[m], np.asarray(f)[m]
+    xu, idx = np.unique(xs, return_index=True)   # xu sorted; idx picks its y (one per sr)
+    yu = ys[idx]
+    if xu.size < 3:
+        return None, None
+    fine = np.linspace(xu[0], xu[-1], 300)
+    try:
+        from scipy.interpolate import PchipInterpolator
+        return fine, PchipInterpolator(xu, yu)(fine)
+    except Exception:
+        return fine, np.interp(fine, xu, yu)
+
+
+def _perseed_boundaries(cells, sign_mode="edge", targeting="stratified"):
+    """Per-seed memory-collapse and generative-onset f*(sr) for uncertainty bands:
+    for each seed, form the connectome-vs-ER order parameter (median over draws),
+    extract its boundary with the same collapse/onset operators the analysis uses,
+    and return the seed-wise median and the 25-75 inter-seed percentile band."""
+    from experiments.human.analysis.phase_diagram import analysis
+    c = cells[(cells.sign_mode == sign_mode) & (cells.targeting == targeting)]
+    fA, fB = {}, {}
+    for s in sorted(c.seed.unique()):
+        mem = c[(c.seed == s) & (c.task == "mc")]
+        if not mem.empty:
+            g = mem.groupby(["f", "spectral_radius", "variant"])["d_eff"].median().reset_index()
+            conn = g[g.variant == "connectome"].set_index(["f", "spectral_radius"])["d_eff"]
+            er = g[g.variant == common.CONTRAST_VARIANT].set_index(["f", "spectral_radius"])["d_eff"]
+            dd = (conn - er).reset_index(name="dD")
+            for sr, v in analysis.observed_boundary(dd, "dD").items():
+                fA.setdefault(float(sr), []).append(v)
+        lor = c[(c.seed == s) & (c.task == "lorenz")]
+        if not lor.empty:
+            g = lor.groupby(["f", "spectral_radius", "variant"])["mean_curvature"].median().reset_index()
+            cc = g[g.variant == "connectome"].set_index(["f", "spectral_radius"])["mean_curvature"]
+            ec = g[g.variant == common.CONTRAST_VARIANT].set_index(["f", "spectral_radius"])["mean_curvature"]
+            ds = (ec - cc).reset_index(name="dStraight")
+            for sr, v in analysis.onset_boundary(ds, "dStraight").items():
+                fB.setdefault(float(sr), []).append(v)
+    srs = np.array(sorted(set(fA) | set(fB)), float)
+
+    def agg(d):
+        M, L, H = [], [], []
+        for sr in srs:
+            vals = np.array([v for v in d.get(sr, []) if np.isfinite(v)], float)
+            if vals.size:
+                M.append(np.median(vals))
+                L.append(np.percentile(vals, 25))
+                H.append(np.percentile(vals, 75))
+            else:
+                M.append(np.nan); L.append(np.nan); H.append(np.nan)
+        return np.array(M), np.array(L), np.array(H)
+
+    return (srs, *agg(fA), *agg(fB))
+
+
+def fig_cross_panel(cells, path, sign_mode="edge", targeting="stratified"):
+    """The headline cross-panel figure: the memory-advantage and generation-advantage
+    boundaries carve the (sr, f) plane into named regimes that swap at a crossover.
+
+    Region fills + large in-plane labels carry regime identity (colour is a secondary
+    warm/cool hint, validated as a background wash); the two boundary lines are the
+    validated red/blue data series (CVD delta E 21.6) with inter-seed 25-75 bands; the
+    legend names each boundary's governing spectral quantity."""
+    MEM, GEN = "#e34948", "#2a78d6"      # memory / generation washes + boundary lines
+    INK, SUB, MUT, GRID, BASE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
+    SR_CRIT, F_BIO = 2.4, 0.5
+    ytop = 0.52
+
+    srs, fA_med, fA_lo, fA_hi, fB_med, fB_lo, fB_hi = _perseed_boundaries(
+        cells, sign_mode, targeting)
+    xsA, yA = _smooth_curve(srs, fA_med)
+    xsB, yB = _smooth_curve(srs, fB_med)
+    flab = "inhibitory-neuron fraction $f$" if sign_mode == "dale" else \
+           "negative-weight fraction $f$"
+
+    with plt.rc_context({"hatch.linewidth": 0.7}):
+        fig, ax = plt.subplots(figsize=(7.8, 5.8))
+        ax.set_facecolor("#fcfcfb")
+
+        # --- regime fills on a common fine sr grid --------------------------------
+        if xsA is not None and xsB is not None:
+            xf = np.linspace(srs[0], srs[-1], 400)
+            fAf = np.interp(xf, xsA, yA, left=np.nan, right=np.nan)
+            fBf = np.interp(xf, xsB, yB, left=np.nan, right=np.nan)
+            fA0 = np.where(np.isfinite(fAf), fAf, 0.0)
+            ax.fill_between(xf, 0, fA0, where=fA0 > 1e-6, color=MEM, alpha=0.15,
+                            linewidth=0)                      # MEMORY: f < fA
+            gm = np.isfinite(fBf)
+            ax.fill_between(xf, fBf, ytop, where=gm, color=GEN, alpha=0.15,
+                            linewidth=0)                      # GENERATION: f > fB
+
+        # --- uncertainty bands + smoothed boundary lines --------------------------
+        okA = np.isfinite(fA_lo) & np.isfinite(fA_hi)
+        ax.fill_between(srs[okA], fA_lo[okA], fA_hi[okA], color=MEM, alpha=0.22,
+                        linewidth=0)
+        okB = np.isfinite(fB_lo) & np.isfinite(fB_hi)
+        ax.fill_between(srs[okB], fB_lo[okB], fB_hi[okB], color=GEN, alpha=0.22,
+                        linewidth=0)
+        if xsA is not None:
+            ax.plot(xsA, yA, color=MEM, lw=2.6, solid_capstyle="round", zorder=5,
+                    label=r"memory-advantage boundary  (set by common mode $|\bar{x}|$)")
+        if xsB is not None:
+            ax.plot(xsB, yB, color=GEN, lw=2.6, solid_capstyle="round", zorder=5,
+                    label="generation-advantage boundary  (set by eff. radius $\\to$ 1)")
+
+        # --- crossover point ------------------------------------------------------
+        if xsA is not None and xsB is not None:
+            lo, hi = max(xsA[0], xsB[0]), min(xsA[-1], xsB[-1])
+            xc = np.linspace(lo, hi, 600)
+            d = np.interp(xc, xsA, yA) - np.interp(xc, xsB, yB)
+            sc = np.where(np.diff(np.sign(d)) != 0)[0]
+            if sc.size:
+                k = sc[0]
+                x0, x1, d0, d1 = xc[k], xc[k + 1], d[k], d[k + 1]
+                xcr = x0 - d0 * (x1 - x0) / (d1 - d0)
+                ycr = float(np.interp(xcr, xsA, yA))
+                ax.plot([xcr], [ycr], "o", ms=9, color=INK, mec="white", mew=1.6,
+                        zorder=7)
+                ax.annotate("boundaries cross\n"
+                            f"sr $\\approx$ {xcr:.1f}, $f \\approx$ {ycr:.2f}\n"
+                            "memory $\\rightleftharpoons$ generation",
+                            xy=(xcr, ycr), xytext=(xcr - 1.75, ycr + 0.17),
+                            fontsize=8.5, color=INK, ha="center", va="center",
+                            arrowprops=dict(arrowstyle="-", color=MUT, lw=1.0))
+
+        # --- critical sr + biological anchors -------------------------------------
+        ax.axvline(SR_CRIT, color=MUT, lw=1.0, ls=(0, (4, 3)), alpha=0.8, zorder=1)
+        ax.text(SR_CRIT, 0.40, "critical sr", color=MUT, fontsize=8, va="center",
+                ha="center", rotation=90,
+                bbox=dict(boxstyle="round,pad=0.15", fc="#fcfcfb", ec="none", alpha=0.7))
+        ax.axhline(F_BIO, color=MUT, lw=1.0, ls=(0, (1, 2)), alpha=0.75, zorder=1)
+        ax.text(srs[-1], F_BIO - 0.012, "balanced sign ($f=0.5$)", color=SUB,
+                fontsize=8, va="top", ha="right")
+        ax.text(0.1, 0.012, "real connectome ($f=0$)", color=SUB, fontsize=8,
+                va="bottom", ha="left")
+
+        ax.set_xlim(srs[0], srs[-1])
+        ax.set_ylim(-0.01, ytop)
+        ax.set_xlabel("spectral radius", color=INK, fontsize=10)
+        ax.set_ylabel(flab, color=INK, fontsize=10)
+        ax.set_title("Memory and generation occupy opposite, crossing regions of "
+                     "sign-space", fontsize=12, color=INK, pad=10)
+        ax.grid(True, color=GRID, lw=0.6, alpha=0.7)
+        ax.set_axisbelow(True)
+        for sp in ("top", "right"):
+            ax.spines[sp].set_visible(False)
+        for sp in ("left", "bottom"):
+            ax.spines[sp].set_color(BASE)
+        ax.tick_params(colors=MUT, labelsize=9)
+        ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=1,
+                  fontsize=8.5, framealpha=0.0, handlelength=1.6)
+        fig.savefig(path, dpi=300, bbox_inches="tight")
+        plt.close(fig)
 
 
 def fig_predictors(op, path):
@@ -351,6 +492,8 @@ def run(smoke: bool = False, scale: int | None = None) -> None:
         raise FileNotFoundError(f"{grid_path} not found -- run --analyse first.")
     op_all = pd.read_parquet(grid_path)
     bnd_all = pd.read_parquet(bnd_path)
+    cells_path = results_dir / f"phase_cells{sfx}.parquet"
+    cells = pd.read_parquet(cells_path) if cells_path.exists() else None
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     def fp(name):                        # figure path with the smoke suffix applied
@@ -375,8 +518,9 @@ def run(smoke: bool = False, scale: int | None = None) -> None:
     if "dVPT" in op.columns and op.dVPT.notna().any():
         fig_panelB_heatmap(op, bnd, fp("fig4_panelB_dVPT_heatmap"), "dVPT")
         made.append("fig4_panelB_dVPT_heatmap")
-    fig_cross_panel(op, bnd, fp("fig5_cross_panel_boundaries"))
-    made.append("fig5_cross_panel_boundaries")
+    if cells is not None:
+        fig_cross_panel(cells, fp("fig5_cross_panel_boundaries"), prim_sign, prim_tg)
+        made.append("fig5_cross_panel_boundaries")
     fig_predictors(op, fp("fig6a_predictors_vs_f"))
     fig_boundary_scatter(bnd, fp("fig6b_boundary_scatter"))
     made += ["fig6a_predictors_vs_f", "fig6b_boundary_scatter"]
