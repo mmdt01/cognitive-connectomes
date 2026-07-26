@@ -261,33 +261,43 @@ def fig_line_cuts(op, path):
     plt.close(fig)
 
 
-def fig_placement(op, bnd, path):
-    """Placement study: f*(sr) for the observed Panel A boundary across targeting
-    regimes (hub_first / stratified / periphery_first). Renders only when >1
-    targeting is present."""
-    targetings = sorted(op.targeting.unique())
-    if len(targetings) < 2:
+def fig_placement(bnd_all, path):
+    """Placement study: critical fraction f*(sr) across targeting regimes (hub_first
+    / stratified / periphery_first), for the memory-collapse (Panel A) and
+    generative-onset (Panel B) boundaries. One row per sign mode present -- the clean
+    hub < stratified < periphery ordering shows up on the biological Dale (node-wise)
+    axis, not the edge axis, so both are shown. Renders only when >1 targeting is
+    present."""
+    if "targeting" not in bnd_all.columns or bnd_all.targeting.nunique() < 2:
         return False
+    modes = [m for m in ("edge", "dale") if m in set(bnd_all.sign_mode)]
+    targetings = [t for t in ("hub_first", "stratified", "periphery_first")
+                  if t in set(bnd_all.targeting)]
     style = {"hub_first": dict(color="#c44e52", lw=2.2),
              "stratified": dict(color="black", lw=2.2),
              "periphery_first": dict(color="#4c72b0", lw=2.2)}
-    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), squeeze=False)
-    for ax, (col, title) in zip(axes[0], [("fA_obs_mag", "Panel A (memory)"),
-                                          ("fB_obs_mag", "Panel B (generative)")]):
-        for tg in targetings:
-            b = bnd[bnd.targeting == tg].sort_values("spectral_radius")
-            if col in b.columns and np.isfinite(b[col]).any():
-                ax.plot(b.spectral_radius, b[col], label=tg,
-                        **style.get(tg, dict(lw=1.8)))
-        ax.set_xlabel("spectral radius")
-        ax.set_ylabel("critical fraction $f^*$")
-        ax.set_ylim(-0.02, 0.52)
-        ax.set_title(title, fontsize=10)
-        ax.grid(alpha=0.25)
-        ax.legend(fontsize=8, framealpha=0.9)
-    fig.suptitle("Placement study: how few hub-targeted negative edges collapse the "
-                 "regime", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    cols = [("fA_obs_mag", "Panel A (memory) collapse"),
+            ("fB_obs_mag", "Panel B (generative) onset")]
+    fig, axes = plt.subplots(len(modes), 2, figsize=(11.0, 4.6 * len(modes)),
+                             squeeze=False)
+    for i, sm in enumerate(modes):
+        bsm = bnd_all[bnd_all.sign_mode == sm]
+        flab = "inhibitory-neuron fraction" if sm == "dale" else "negative-weight fraction"
+        for ax, (col, title) in zip(axes[i], cols):
+            for tg in targetings:
+                b = bsm[bsm.targeting == tg].sort_values("spectral_radius")
+                if col in b.columns and np.isfinite(b[col]).any():
+                    ax.plot(b.spectral_radius, b[col], label=tg,
+                            **style.get(tg, dict(lw=1.8)))
+            ax.set_xlabel("spectral radius")
+            ax.set_ylabel(f"critical $f^*$ ({flab})")
+            ax.set_ylim(-0.02, 0.52)
+            ax.set_title(f"{sm}: {title}", fontsize=10)
+            ax.grid(alpha=0.25)
+            ax.legend(fontsize=8, framealpha=0.9)
+    fig.suptitle("Placement study: how few hub-targeted inhibitory nodes/edges "
+                 "collapse the regime", fontsize=12)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     return True
@@ -352,8 +362,6 @@ def run(smoke: bool = False, scale: int | None = None) -> None:
     prim_tg = "stratified" if "stratified" in set(op_all.targeting) else op_all.targeting.iloc[0]
     op = op_all[(op_all.sign_mode == prim_sign) & (op_all.targeting == prim_tg)]
     bnd = bnd_all[(bnd_all.sign_mode == prim_sign) & (bnd_all.targeting == prim_tg)]
-    op_prim_sign = op_all[op_all.sign_mode == prim_sign]
-    bnd_prim_sign = bnd_all[bnd_all.sign_mode == prim_sign]
 
     made = []
     fig_panelA_heatmap(op, bnd, fp("fig1_panelA_dD_heatmap"), "dD")
@@ -374,7 +382,7 @@ def run(smoke: bool = False, scale: int | None = None) -> None:
     made += ["fig6a_predictors_vs_f", "fig6b_boundary_scatter"]
     fig_line_cuts(op, fp("fig7_line_cuts"))
     made.append("fig7_line_cuts")
-    if fig_placement(op_prim_sign, bnd_prim_sign, fp("fig8_placement")):
+    if fig_placement(bnd_all, fp("fig8_placement")):
         made.append("fig8_placement")
     if fig_dale_comparison(op_all, fp("fig9_dale_comparison")):
         made.append("fig9_dale_comparison")
