@@ -12,7 +12,9 @@ Reads ``phase_cells.parquet`` (from ``capture``) and computes, for the
 - the connectome-vs-ER Cliff's delta per cell (rank stats from
   ``src/experiment/stats.py``);
 - observed boundaries (the 25%-of-global-max contour, and the Cliff's-delta
-  contour) and predicted boundaries (each panel's own driven-state ``|mean_state|``
+  contour) -- for Panel A the *collapse* contour (advantage destroyed by sign) and
+  for the emergent Panel B its mirror, the *onset* contour (advantage created by
+  sign) -- and predicted boundaries (each panel's own driven-state ``|mean_state|``
   collapse and ``effective_radius`` crossing 1, plus the task-independent
   ``bulk95``), and the correlation of each order parameter with each candidate
   spectral predictor across all cells;
@@ -156,6 +158,23 @@ def _cross(fvals: np.ndarray, col: np.ndarray, level: float) -> float:
     return np.nan
 
 
+def _cross_up(fvals: np.ndarray, col: np.ndarray, level: float) -> float:
+    """First f (interpolated) where a low-at-low-f column rises above ``level``.
+    f[0] if already above at the smallest f; NaN if it never rises above. The
+    mirror of ``_cross`` for an emergent (rather than collapsing) quantity."""
+    ok = np.isfinite(col)
+    if ok.sum() < 2:
+        return np.nan
+    f, c = fvals[ok], col[ok]
+    if c[0] > level:
+        return float(f[0])
+    for k in range(1, len(c)):
+        if c[k] > level:
+            t = (level - c[k - 1]) / (c[k] - c[k - 1])
+            return float(f[k - 1] + t * (f[k] - f[k - 1]))
+    return np.nan
+
+
 def observed_boundary(op: pd.DataFrame, value_col: str,
                       level_frac: float = _LEVEL_FRAC) -> dict:
     """f*(sr) where the order parameter falls to ``level_frac`` of its global max."""
@@ -176,6 +195,34 @@ def significance_boundary(cliff: pd.DataFrame, threshold: float = _CLIFF_SIG) ->
         return {}
     fvals = piv.index.to_numpy(float)
     return {float(sr): _cross(fvals, piv[sr].to_numpy(float), threshold)
+            for sr in piv.columns}
+
+
+def onset_boundary(op: pd.DataFrame, value_col: str,
+                   level_frac: float = _LEVEL_FRAC) -> dict:
+    """f*(sr) where an EMERGENT order parameter first rises to ``level_frac`` of its
+    global max. The mirror of ``observed_boundary`` for Panel B, whose connectome
+    advantage is *created* by sign (it is ~0 at f=0 and grows) rather than destroyed
+    by it, so the collapse contour would spuriously pin the boundary at f=0."""
+    if value_col not in op.columns:
+        return {}
+    piv = _pivot(op, value_col)
+    if piv.empty or not np.isfinite(piv.to_numpy()).any():
+        return {}
+    level = level_frac * float(np.nanmax(piv.to_numpy()))
+    fvals = piv.index.to_numpy(float)
+    return {float(sr): _cross_up(fvals, piv[sr].to_numpy(float), level)
+            for sr in piv.columns}
+
+
+def significance_onset(cliff: pd.DataFrame, threshold: float = _CLIFF_SIG) -> dict:
+    """f* where the connectome-vs-ER Cliff's delta first rises above ``threshold``
+    (the emergent-advantage mirror of ``significance_boundary``)."""
+    piv = _pivot(cliff, "cliffs")
+    if piv.empty:
+        return {}
+    fvals = piv.index.to_numpy(float)
+    return {float(sr): _cross_up(fvals, piv[sr].to_numpy(float), threshold)
             for sr in piv.columns}
 
 
@@ -275,10 +322,13 @@ def _rep(op: pd.DataFrame, col: str, f: float, sr: float) -> float:
 
 
 def _boundaries_frame(op, cliff_dD, cliff_dS, targeting):
+    # Panel A memory collapses with f (advantage destroyed by sign); Panel B
+    # generative is emergent (advantage created by sign), so its boundary is the
+    # ONSET contour, not the collapse contour -- see onset_boundary.
     obs_A = observed_boundary(op, "dD")
     sig_A = significance_boundary(cliff_dD)
-    obs_B = observed_boundary(op, "dStraight")
-    sig_B = significance_boundary(cliff_dS)
+    obs_B = onset_boundary(op, "dStraight")
+    sig_B = significance_onset(cliff_dS)
     predA_ms = predictor_boundary_collapse(op, "A_abs_mean_state")
     predB_ms = predictor_boundary_collapse(op, "B_abs_mean_state")
     predB_er = predictor_boundary_threshold(op, "B_effective_radius", 1.0)

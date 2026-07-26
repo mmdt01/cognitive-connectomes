@@ -125,8 +125,9 @@ def fig_panelB_heatmap(op, bnd, path, value_col="dStraight"):
     if im is not None:
         fig.colorbar(im, ax=ax, label=_OP_LABEL.get(value_col, value_col))
     _overlay(ax, bnd, [
-        ("fB_obs_mag", "observed (25% max)", dict(color="black", lw=2.2)),
-        ("fB_obs_sig", "observed (Cliff $\\delta$)", dict(color="black", lw=1.6, ls="--")),
+        ("fB_obs_mag", "observed onset (25% max)", dict(color="black", lw=2.2)),
+        ("fB_obs_sig", "observed onset (Cliff $\\delta$)",
+         dict(color="black", lw=1.6, ls="--")),
         ("fB_pred_effradius", "predicted (eff. radius = 1)",
          dict(color="#d95f02", lw=1.8, ls=":")),
         ("fB_pred_meanstate", "predicted (|mean state|)",
@@ -146,8 +147,8 @@ def fig_cross_panel(op, bnd, path):
     do topology's grip on memory and on generation occupy the same region?"""
     fig, ax = plt.subplots(figsize=(6.6, 5.0))
     _overlay(ax, bnd, [
-        ("fA_obs_mag", "Panel A (memory) boundary", dict(color="#c44e52", lw=2.4)),
-        ("fB_obs_mag", "Panel B (generative) boundary", dict(color="#4c72b0", lw=2.4)),
+        ("fA_obs_mag", "Panel A (memory) collapse", dict(color="#c44e52", lw=2.4)),
+        ("fB_obs_mag", "Panel B (generative) onset", dict(color="#4c72b0", lw=2.4)),
     ])
     _biological_markers(ax)
     ax.set_xlabel("spectral radius")
@@ -210,7 +211,7 @@ def fig_boundary_scatter(bnd, path):
         ax.set_xlim(-0.02, 0.52)
         ax.set_ylim(-0.02, 0.52)
         ax.set_xlabel(f"predicted $f^*$ ({plabel})")
-        ax.set_ylabel("observed $f^*$ (25% max)")
+        ax.set_ylabel("observed $f^*$ (25% max contour)")
         ax.set_title(title, fontsize=10)
         ax.grid(alpha=0.25)
     fig.suptitle("Observed vs predicted collapse fraction $f^*$", fontsize=12)
