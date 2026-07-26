@@ -293,47 +293,93 @@ def fig_placement(op, bnd, path):
     return True
 
 
+def fig_dale_comparison(op_all, path):
+    """Dale (node-wise E/I) vs edge sign composition: the memory (dD) and generative
+    (dStraight) order-parameter heatmaps side by side for each sign mode (stratified).
+    Renders only when the Dale sign mode is present."""
+    modes = [m for m in ("edge", "dale") if m in set(op_all.sign_mode)]
+    if "dale" not in modes:
+        return False
+    rows_op = [(c, lbl) for c, lbl in
+               [("dD", "memory $\\Delta d_{eff}$"),
+                ("dStraight", "generative $\\Delta$straightness")]
+               if c in op_all.columns and op_all[c].notna().any()]
+    if not rows_op:
+        return False
+    fig, axes = plt.subplots(len(rows_op), len(modes),
+                             figsize=(5.6 * len(modes), 4.6 * len(rows_op)),
+                             squeeze=False)
+    for i, (col, lbl) in enumerate(rows_op):
+        for j, m in enumerate(modes):
+            ax = axes[i][j]
+            sub = op_all[(op_all.sign_mode == m) & (op_all.targeting == "stratified")]
+            im = _heatmap(ax, sub, col, diverging=True)
+            if im is not None:
+                fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+            _biological_markers(ax)
+            xlab = "inhibitory-neuron fraction $f$" if m == "dale" else \
+                   "negative-weight fraction $f$"
+            ax.set_ylabel(xlab)
+            ax.set_title(f"{m}: {lbl}", fontsize=10)
+    fig.suptitle("Dale (node-wise E/I) vs edge-wise sign composition", fontsize=12)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
 def run(smoke: bool = False, scale: int | None = None) -> None:
     scale = matrix_config.SCALE if scale is None else scale
     results_dir, figures_dir = common.scale_dirs(scale)
-    grid_path = results_dir / "phase_grid.parquet"
-    bnd_path = results_dir / "phase_boundaries.parquet"
+    sfx = "_smoke" if smoke else ""      # keep smoke figures off the canonical ones
+    grid_path = results_dir / f"phase_grid{sfx}.parquet"
+    bnd_path = results_dir / f"phase_boundaries{sfx}.parquet"
     if not grid_path.exists():
         raise FileNotFoundError(f"{grid_path} not found -- run --analyse first.")
     op_all = pd.read_parquet(grid_path)
     bnd_all = pd.read_parquet(bnd_path)
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    # Panels + boundaries are computed on the stratified primary.
-    prim = "stratified" if "stratified" in set(op_all.targeting) else op_all.targeting.iloc[0]
-    op = op_all[op_all.targeting == prim]
-    bnd = bnd_all[bnd_all.targeting == prim]
+    def fp(name):                        # figure path with the smoke suffix applied
+        return figures_dir / f"{name}{sfx}.png"
+
+    # Headline panels + boundaries are the edge / stratified primary; a Dale
+    # comparison figure is added when the Dale sign mode is present.
+    prim_sign = "edge" if "edge" in set(op_all.sign_mode) else sorted(op_all.sign_mode.unique())[0]
+    prim_tg = "stratified" if "stratified" in set(op_all.targeting) else op_all.targeting.iloc[0]
+    op = op_all[(op_all.sign_mode == prim_sign) & (op_all.targeting == prim_tg)]
+    bnd = bnd_all[(bnd_all.sign_mode == prim_sign) & (bnd_all.targeting == prim_tg)]
+    op_prim_sign = op_all[op_all.sign_mode == prim_sign]
+    bnd_prim_sign = bnd_all[bnd_all.sign_mode == prim_sign]
 
     made = []
-    fig_panelA_heatmap(op, bnd, figures_dir / "fig1_panelA_dD_heatmap.png", "dD")
+    fig_panelA_heatmap(op, bnd, fp("fig1_panelA_dD_heatmap"), "dD")
     made.append("fig1_panelA_dD_heatmap")
     if "dMC" in op.columns and op.dMC.notna().any():
-        fig_panelA_heatmap(op, bnd, figures_dir / "fig2_panelA_dMC_heatmap.png", "dMC")
+        fig_panelA_heatmap(op, bnd, fp("fig2_panelA_dMC_heatmap"), "dMC")
         made.append("fig2_panelA_dMC_heatmap")
     if "dStraight" in op.columns and op.dStraight.notna().any():
-        fig_panelB_heatmap(op, bnd, figures_dir / "fig3_panelB_dStraight_heatmap.png")
+        fig_panelB_heatmap(op, bnd, fp("fig3_panelB_dStraight_heatmap"))
         made.append("fig3_panelB_dStraight_heatmap")
     if "dVPT" in op.columns and op.dVPT.notna().any():
-        fig_panelB_heatmap(op, bnd, figures_dir / "fig4_panelB_dVPT_heatmap.png", "dVPT")
+        fig_panelB_heatmap(op, bnd, fp("fig4_panelB_dVPT_heatmap"), "dVPT")
         made.append("fig4_panelB_dVPT_heatmap")
-    fig_cross_panel(op, bnd, figures_dir / "fig5_cross_panel_boundaries.png")
+    fig_cross_panel(op, bnd, fp("fig5_cross_panel_boundaries"))
     made.append("fig5_cross_panel_boundaries")
-    fig_predictors(op, figures_dir / "fig6a_predictors_vs_f.png")
-    fig_boundary_scatter(bnd, figures_dir / "fig6b_boundary_scatter.png")
+    fig_predictors(op, fp("fig6a_predictors_vs_f"))
+    fig_boundary_scatter(bnd, fp("fig6b_boundary_scatter"))
     made += ["fig6a_predictors_vs_f", "fig6b_boundary_scatter"]
-    fig_line_cuts(op, figures_dir / "fig7_line_cuts.png")
+    fig_line_cuts(op, fp("fig7_line_cuts"))
     made.append("fig7_line_cuts")
-    if fig_placement(op_all, bnd_all, figures_dir / "fig8_placement.png"):
+    if fig_placement(op_prim_sign, bnd_prim_sign, fp("fig8_placement")):
         made.append("fig8_placement")
+    if fig_dale_comparison(op_all, fp("fig9_dale_comparison")):
+        made.append("fig9_dale_comparison")
 
     for name in made:
-        print(f"Saved {figures_dir / (name + '.png')}")
-    print(f"\nPhase-diagram plots complete ({len(made)} figures, targeting={prim}).")
+        print(f"Saved {fp(name)}")
+    print(f"\nPhase-diagram plots complete ({len(made)} figures, "
+          f"sign_mode={prim_sign}, targeting={prim_tg}).")

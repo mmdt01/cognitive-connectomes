@@ -70,13 +70,14 @@ _LEVEL_FRAC = 0.25
 # Cell medians + order parameters (task-resolved)
 # ---------------------------------------------------------------------------
 def cell_medians(df: pd.DataFrame) -> pd.DataFrame:
-    """seed x draw median of every measurement per (targeting, f, sr, variant, task)."""
+    """seed x draw median of every measurement per
+    (sign_mode, targeting, f, sr, variant, task)."""
     df = df.copy()
     df["abs_mean_state"] = df["mean_state"].abs()
     value_cols = ([c for c in _MEASURE_COLS if c in df.columns]
                   + [c for c in _PERF_COLS if c in df.columns] + ["abs_mean_state"])
-    return (df.groupby(["targeting", "f", "spectral_radius", "variant", "task"],
-                       as_index=False)[value_cols].median())
+    return (df.groupby(["sign_mode", "targeting", "f", "spectral_radius", "variant",
+                        "task"], as_index=False)[value_cols].median())
 
 
 def order_parameters(med: pd.DataFrame) -> pd.DataFrame:
@@ -88,8 +89,9 @@ def order_parameters(med: pd.DataFrame) -> pd.DataFrame:
     whichever task is present."""
     tasks_present = set(med.task.unique())
     rows = []
-    for (tg, f, sr), g in med.groupby(["targeting", "f", "spectral_radius"]):
-        rec = dict(targeting=tg, f=float(f), spectral_radius=float(sr))
+    for (sm, tg, f, sr), g in med.groupby(["sign_mode", "targeting", "f",
+                                           "spectral_radius"]):
+        rec = dict(sign_mode=sm, targeting=tg, f=float(f), spectral_radius=float(sr))
 
         def val(task, variant, col):
             r = g[(g.task == task) & (g.variant == variant)]
@@ -114,23 +116,27 @@ def order_parameters(med: pd.DataFrame) -> pd.DataFrame:
         rec["perron_root"] = val(any_task, CONN, "perron_root")
         rec["leading_gap"] = val(any_task, CONN, "leading_gap")
         rows.append(rec)
-    return pd.DataFrame(rows).sort_values(["targeting", "f", "spectral_radius"])
+    return pd.DataFrame(rows).sort_values(["sign_mode", "targeting", "f",
+                                           "spectral_radius"])
 
 
 def cliffs_grid(df: pd.DataFrame, task: str, value_col: str,
                 lower_is_better: bool) -> pd.DataFrame:
-    """Connectome-vs-ER Cliff's delta per (targeting, f, sr) for one task, over the
-    seed x draw replicates (>0 == connectome better on the performance direction)."""
-    cols = ["targeting", "f", "spectral_radius", "cliffs"]
+    """Connectome-vs-ER Cliff's delta per (sign_mode, targeting, f, sr) for one task,
+    over the seed x draw replicates (>0 == connectome better on the performance
+    direction)."""
+    cols = ["sign_mode", "targeting", "f", "spectral_radius", "cliffs"]
     sub = df[df.task == task] if value_col in df.columns else df.iloc[0:0]
     rows = []
-    for (tg, f, sr), g in sub.groupby(["targeting", "f", "spectral_radius"]):
+    for (sm, tg, f, sr), g in sub.groupby(["sign_mode", "targeting", "f",
+                                           "spectral_radius"]):
         a = g[g.variant == CONN][value_col].to_numpy(float)
         b = g[g.variant == CTR][value_col].to_numpy(float)
         a, b = a[np.isfinite(a)], b[np.isfinite(b)]
         d = (expstats.cliffs_delta(a, b, lower_is_better)
              if a.size and b.size else np.nan)
-        rows.append(dict(targeting=tg, f=float(f), spectral_radius=float(sr),
+        rows.append(dict(sign_mode=sm, targeting=tg, f=float(f),
+                         spectral_radius=float(sr),
                          cliffs=float(d) if np.isfinite(d) else np.nan))
     return pd.DataFrame(rows, columns=cols)
 
@@ -289,25 +295,27 @@ def predictor_correlations(op: pd.DataFrame) -> pd.DataFrame:
     spec.update({op_name: (["B_abs_mean_state", "B_effective_radius", "B_mean_gain"] + shared)
                  for op_name in _PANEL_B_OPS})
     rows = []
-    for op_name, preds in spec.items():
-        if op_name not in op.columns or op[op_name].isna().all():
-            continue
-        panel = "A_memory" if op_name in _PANEL_A_OPS else "B_generative"
-        for region, mask in [("all_sr", op.spectral_radius >= 0),
-                             ("supercritical", op.spectral_radius >= 1.0)]:
-            sub = op[mask]
-            y = sub[op_name].to_numpy(float)
-            for pred in preds:
-                if pred not in sub.columns:
-                    continue
-                x = sub[pred].to_numpy(float)
-                good = np.isfinite(x) & np.isfinite(y)
-                if good.sum() < 6:
-                    continue
-                r, p = spearmanr(x[good], y[good])
-                rows.append(dict(panel=panel, order_parameter=op_name, predictor=pred,
-                                 region=region, spearman_r=float(r),
-                                 p_value=float(p), n=int(good.sum())))
+    for sm, op_sm in op.groupby("sign_mode"):
+        for op_name, preds in spec.items():
+            if op_name not in op_sm.columns or op_sm[op_name].isna().all():
+                continue
+            panel = "A_memory" if op_name in _PANEL_A_OPS else "B_generative"
+            for region, mask in [("all_sr", op_sm.spectral_radius >= 0),
+                                 ("supercritical", op_sm.spectral_radius >= 1.0)]:
+                sub = op_sm[mask]
+                y = sub[op_name].to_numpy(float)
+                for pred in preds:
+                    if pred not in sub.columns:
+                        continue
+                    x = sub[pred].to_numpy(float)
+                    good = np.isfinite(x) & np.isfinite(y)
+                    if good.sum() < 6:
+                        continue
+                    r, p = spearmanr(x[good], y[good])
+                    rows.append(dict(sign_mode=sm, panel=panel,
+                                     order_parameter=op_name, predictor=pred,
+                                     region=region, spearman_r=float(r),
+                                     p_value=float(p), n=int(good.sum())))
     return pd.DataFrame(rows)
 
 
@@ -321,7 +329,7 @@ def _rep(op: pd.DataFrame, col: str, f: float, sr: float) -> float:
     return float(m[col].iloc[0]) if not m.empty else np.nan
 
 
-def _boundaries_frame(op, cliff_dD, cliff_dS, targeting):
+def _boundaries_frame(op, cliff_dD, cliff_dS, sign_mode, targeting):
     # Panel A memory collapses with f (advantage destroyed by sign); Panel B
     # generative is emergent (advantage created by sign), so its boundary is the
     # ONSET contour, not the collapse contour -- see onset_boundary.
@@ -335,7 +343,7 @@ def _boundaries_frame(op, cliff_dD, cliff_dS, targeting):
     rows = []
     for sr in sorted(set(op.spectral_radius)):
         rows.append(dict(
-            targeting=targeting, spectral_radius=float(sr),
+            sign_mode=sign_mode, targeting=targeting, spectral_radius=float(sr),
             fA_obs_mag=obs_A.get(sr, np.nan), fA_obs_sig=sig_A.get(sr, np.nan),
             fB_obs_mag=obs_B.get(sr, np.nan), fB_obs_sig=sig_B.get(sr, np.nan),
             fA_pred_meanstate=predA_ms.get(sr, np.nan),
@@ -351,44 +359,47 @@ def _boundaries_frame(op, cliff_dD, cliff_dS, targeting):
 def run(smoke: bool = False, scale: int | None = None) -> None:
     scale = matrix_config.SCALE if scale is None else scale
     results_dir, _ = common.scale_dirs(scale)
-    cells_path = results_dir / ("phase_cells_smoke.parquet" if smoke
-                                else "phase_cells.parquet")
+    sfx = "_smoke" if smoke else ""      # keep smoke outputs off the canonical files
+    cells_path = results_dir / f"phase_cells{sfx}.parquet"
     if not cells_path.exists():
         raise FileNotFoundError(f"{cells_path} not found -- run --capture first.")
     df = pd.read_parquet(cells_path)
     print(f"Phase analysis: loaded {len(df)} rows from {cells_path}")
-    print(f"  targetings={sorted(df.targeting.unique())}  "
+    print(f"  sign_modes={sorted(df.sign_mode.unique())}  "
+          f"targetings={sorted(df.targeting.unique())}  "
           f"tasks={sorted(df.task.unique())}")
 
     med = cell_medians(df)
     op = order_parameters(med)
     cliff_dD = cliffs_grid(df, _CLIFF_A[1], _CLIFF_A[2], _CLIFF_A[3])
     cliff_dS = cliffs_grid(df, _CLIFF_B[1], _CLIFF_B[2], _CLIFF_B[3])
+    _keys = ["sign_mode", "targeting", "f", "spectral_radius"]
     op = op.merge(cliff_dD.rename(columns={"cliffs": "cliffs_dD"}),
-                  on=["targeting", "f", "spectral_radius"], how="left")
+                  on=_keys, how="left")
     op = op.merge(cliff_dS.rename(columns={"cliffs": "cliffs_dStraight"}),
-                  on=["targeting", "f", "spectral_radius"], how="left")
+                  on=_keys, how="left")
 
     results_dir.mkdir(parents=True, exist_ok=True)
-    op.to_parquet(results_dir / "phase_grid.parquet")
-    print(f"Saved {results_dir / 'phase_grid.parquet'}  ({len(op)} cells)")
+    op.to_parquet(results_dir / f"phase_grid{sfx}.parquet")
+    print(f"Saved {results_dir / f'phase_grid{sfx}.parquet'}  ({len(op)} cells)")
 
     corr = predictor_correlations(op)
     if not corr.empty:
-        corr.to_parquet(results_dir / "phase_predictor_corr.parquet")
+        corr.to_parquet(results_dir / f"phase_predictor_corr{sfx}.parquet")
 
     bframes, agreements = [], {}
-    for tg, op_tg in op.groupby("targeting"):
-        bf, ag = _boundaries_frame(op_tg,
-                                   cliff_dD[cliff_dD.targeting == tg],
-                                   cliff_dS[cliff_dS.targeting == tg], tg)
+    for (sm, tg), op_g in op.groupby(["sign_mode", "targeting"]):
+        cdd = cliff_dD[(cliff_dD.sign_mode == sm) & (cliff_dD.targeting == tg)]
+        cds = cliff_dS[(cliff_dS.sign_mode == sm) & (cliff_dS.targeting == tg)]
+        bf, ag = _boundaries_frame(op_g, cdd, cds, sm, tg)
         bframes.append(bf)
-        agreements[tg] = ag
+        agreements[(sm, tg)] = ag
     boundaries = pd.concat(bframes, ignore_index=True)
-    boundaries.to_parquet(results_dir / "phase_boundaries.parquet")
-    print(f"Saved {results_dir / 'phase_boundaries.parquet'}  ({len(boundaries)} rows)")
+    boundaries.to_parquet(results_dir / f"phase_boundaries{sfx}.parquet")
+    print(f"Saved {results_dir / f'phase_boundaries{sfx}.parquet'}  "
+          f"({len(boundaries)} rows)")
 
-    _write_summary(op, corr, agreements, results_dir / "phase_summary.md", smoke)
+    _write_summary(op, corr, agreements, results_dir / f"phase_summary{sfx}.md", smoke)
     print("\nPhase-diagram analysis complete.")
 
 
@@ -406,50 +417,72 @@ def _snap(targets, present) -> list:
     return out
 
 
+def _op_tables(sub, rep_f, rep_sr, lines) -> None:
+    """Append the Panel A / Panel B order-parameter tables for one sub-frame."""
+    for label, cols in [("Panel A -- memory", _PANEL_A_OPS),
+                        ("Panel B -- generative", _PANEL_B_OPS)]:
+        present = [c for c in cols if c in sub.columns and sub[c].notna().any()]
+        if not present:
+            continue
+        lines.append(f"### {label}\n")
+        for c in present:
+            lines.append(f"**{c}** (f x sr)\n")
+            lines.append("| f \\ sr | " + " | ".join(f"{s:g}" for s in rep_sr) + " |")
+            lines.append("|---|" + "---|" * len(rep_sr))
+            for f in rep_f:
+                cells = " | ".join(f"{_rep(sub, c, f, s):+.2f}" for s in rep_sr)
+                lines.append(f"| {f:g} | {cells} |")
+            lines.append("")
+
+
 def _write_summary(op, corr, agreements, path, smoke) -> None:
-    prim = op[op.targeting == "stratified"] if "stratified" in set(op.targeting) else op
+    sign_modes = sorted(op.sign_mode.unique()) if "sign_mode" in op else ["edge"]
+    prim_sign = "edge" if "edge" in sign_modes else sign_modes[0]
+
+    def _select(sm):
+        sub = op[op.sign_mode == sm]
+        return sub[sub.targeting == "stratified"] if "stratified" in set(sub.targeting) else sub
+
+    prim = _select(prim_sign)
     rep_f = _snap(_REP_F, prim.f.unique())
     rep_sr = _snap(_REP_SR, prim.spectral_radius.unique())
     lines = [f"# Phase diagram -- sign fraction x spectral radius (human N=448"
              f"{', SMOKE' if smoke else ''})\n",
              "Order parameters oriented so **higher = connectome advantage**; "
-             "primary = `edge` / `stratified`. Panel A reads the MC task, Panel B "
-             "the Lorenz task.\n"]
+             f"primary = `{prim_sign}` / `stratified`. Panel A reads the MC task, "
+             "Panel B the Lorenz task.\n"]
 
-    for label, cols in [("Panel A -- memory", _PANEL_A_OPS),
-                        ("Panel B -- generative", _PANEL_B_OPS)]:
-        present = [c for c in cols if c in prim.columns and prim[c].notna().any()]
-        if not present:
-            continue
-        lines.append(f"## {label}\n")
-        for c in present:
-            lines.append(f"### {c} (f x sr)\n")
-            lines.append("| f \\ sr | " + " | ".join(f"{s:g}" for s in rep_sr) + " |")
-            lines.append("|---|" + "---|" * len(rep_sr))
-            for f in rep_f:
-                cells = " | ".join(f"{_rep(prim, c, f, s):+.2f}" for s in rep_sr)
-                lines.append(f"| {f:g} | {cells} |")
-            lines.append("")
+    lines.append(f"## Primary: `{prim_sign}` / stratified\n")
+    _op_tables(prim, rep_f, rep_sr, lines)
+
+    # Secondary sign modes (e.g. Dale) reported beside the primary.
+    for sm in [s for s in sign_modes if s != prim_sign]:
+        lines.append(f"## Secondary sign mode: `{sm}` / stratified\n")
+        _op_tables(_select(sm), rep_f, rep_sr, lines)
 
     if not corr.empty:
-        lines.append("## Order parameter vs spectral predictor (Spearman, "
-                     "stratified, supercritical)\n")
-        lines.append("| panel | order param | predictor | r_s | n |")
-        lines.append("|---|---|---|---|---|")
-        sup = corr[corr.region == "supercritical"].copy()
-        sup["absr"] = sup.spearman_r.abs()
-        for r in sup.sort_values(["order_parameter", "absr"], ascending=[True, False]).itertuples():
-            lines.append(f"| {r.panel} | {r.order_parameter} | {r.predictor} | "
-                         f"{r.spearman_r:+.2f} | {r.n} |")
-        lines.append("")
+        for sm in sign_modes:
+            sub = corr[(corr.region == "supercritical") & (corr.sign_mode == sm)].copy()
+            if sub.empty:
+                continue
+            lines.append(f"## Order parameter vs spectral predictor "
+                         f"(Spearman, `{sm}`, stratified, supercritical)\n")
+            lines.append("| panel | order param | predictor | r_s | n |")
+            lines.append("|---|---|---|---|---|")
+            sub["absr"] = sub.spearman_r.abs()
+            for r in sub.sort_values(["order_parameter", "absr"],
+                                     ascending=[True, False]).itertuples():
+                lines.append(f"| {r.panel} | {r.order_parameter} | {r.predictor} | "
+                             f"{r.spearman_r:+.2f} | {r.n} |")
+            lines.append("")
 
     lines.append("## Boundary agreement (mean |f*_observed - f*_predicted|)\n")
-    lines.append("| targeting | comparison | mean abs df* | n sr |")
-    lines.append("|---|---|---|---|")
-    for tg, ag in agreements.items():
+    lines.append("| sign_mode | targeting | comparison | mean abs df* | n sr |")
+    lines.append("|---|---|---|---|---|")
+    for (sm, tg), ag in agreements.items():
         for name, (mad, n) in ag.items():
             mad_s = f"{mad:.3f}" if np.isfinite(mad) else "--"
-            lines.append(f"| {tg} | {name} | {mad_s} | {n} |")
+            lines.append(f"| {sm} | {tg} | {name} | {mad_s} | {n} |")
     lines.append("")
 
     path.write_text("\n".join(lines) + "\n")

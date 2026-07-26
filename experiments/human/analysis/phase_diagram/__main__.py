@@ -2,6 +2,7 @@
 
     python -m experiments.human.analysis.phase_diagram --capture [--scale N] [--jobs N]
         [--smoke] [--targeting stratified[,hub_first,periphery_first]]
+        [--sign-mode edge[,dale]]
         [--tasks mc[,narma10,lorenz]] [--n-draws N] [--score degree|eigenvector]
     python -m experiments.human.analysis.phase_diagram --analyse [--scale N]
     python -m experiments.human.analysis.phase_diagram --plots   [--scale N]
@@ -38,6 +39,7 @@ if __name__ == "__main__":
         capture.run(
             smoke=smoke, jobs=jobs, scale=scale,
             targetings=_list_flag(argv, "--targeting", None),
+            sign_modes=_list_flag(argv, "--sign-mode", None),
             tasks=_list_flag(argv, "--tasks", None),
             n_draws=common.flag(argv, "--n-draws", None, int),
             score_mode=common.flag(argv, "--score", None, str),

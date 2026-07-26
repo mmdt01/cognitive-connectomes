@@ -31,12 +31,21 @@ base topology, so "hub edges" are a stable set for a given base:
 The transform is applied to the base matrix BEFORE spectral-radius rescaling and
 the flip pattern is held fixed across the sr sweep (the caller rescales), so ``f``
 and sr are orthogonal axes of the phase diagram.
+
+**Two sign modes.** ``edge`` (``sign_fraction_matrix``, the primary) flips individual
+undirected edges and preserves symmetry. ``dale`` (``sign_fraction_matrix_dale``, the
+biological arm) instead makes a fraction ``f`` of *neurons* inhibitory and negates all
+of their outgoing weights, which deliberately breaks symmetry (Dale's law); there
+``f`` is the inhibitory-neuron fraction (cortex ~0.2). Both reuse the same placement
+policy (``stratified`` / ``hub_first`` / ``periphery_first``), applied to edge scores
+for ``edge`` and to node scores for ``dale``.
 """
 
 import numpy as np
 
 TARGETING_MODES = ("stratified", "hub_first", "periphery_first")
 SCORE_MODES = ("degree", "eigenvector")
+SIGN_MODES = ("edge", "dale")
 
 
 # ---------------------------------------------------------------------------
@@ -84,11 +93,13 @@ def edge_importance(W: np.ndarray, node_score: np.ndarray):
 # ---------------------------------------------------------------------------
 def _select_flips(escore: np.ndarray, f: float, targeting: str,
                   rng: np.random.Generator, n_strata: int) -> np.ndarray:
-    """Boolean mask over edges: which flip, at fraction ``f`` under ``targeting``.
+    """Boolean mask over scored items: which are selected, at fraction ``f`` under
+    ``targeting``. Generic over the score array, so it drives both edge selection
+    (``escore`` = edge importance) and Dale node selection (``escore`` = node score).
 
-    ``hub_first`` / ``periphery_first`` flip the ``round(f * n_edges)`` highest- /
-    lowest-scored edges (random tiebreak among equal scores). ``stratified`` flips
-    ``round(f * stratum_size)`` edges chosen uniformly within each of ``n_strata``
+    ``hub_first`` / ``periphery_first`` pick the ``round(f * n)`` highest- /
+    lowest-scored items (random tiebreak among equal scores). ``stratified`` picks
+    ``round(f * stratum_size)`` items uniformly within each of ``n_strata``
     equal-count score bins, holding hub-to-periphery composition constant across f.
     """
     n = escore.size
@@ -161,6 +172,46 @@ def sign_fraction_matrix(W: np.ndarray, f: float, targeting: str,
     return out
 
 
+def sign_fraction_matrix_dale(W: np.ndarray, f: float, targeting: str,
+                              rng: np.random.Generator, n_strata: int = 10,
+                              score_mode: str = "degree",
+                              node_score: np.ndarray | None = None) -> np.ndarray:
+    """Dale's-law node-wise sign: make a fraction ``f`` of NEURONS inhibitory.
+
+    Selects ``round(f * N)`` neurons (by ``targeting`` on the node importance score)
+    and negates all of their OUTGOING weights -- the **columns** of ``W``, since the
+    reservoir update is ``x <- tanh(W @ x + ...)`` so ``W[i, j]`` is the weight from
+    neuron ``j`` to neuron ``i`` and neuron ``j``'s outputs are column ``j``. Unlike
+    the edge transform this deliberately **breaks symmetry** (an inhibitory neuron's
+    inputs are left as its presynaptic partners set them), which is the biological
+    Dale structure: ``f`` is the inhibitory-neuron fraction (cortex ~0.2; ``f = 0.5``
+    is balanced). ``f = 0`` returns a copy unchanged.
+
+    ``W`` must be symmetric and non-negative, as for the edge transform. The node
+    selection reuses the same placement policy applied to node scores rather than
+    edge scores, so ``hub_first`` makes the highest-degree neurons inhibitory first.
+    Pass a precomputed ``node_score`` to reuse it across an ``f`` sweep.
+    """
+    W = np.asarray(W, dtype=float)
+    if not np.allclose(W, W.T, atol=1e-9):
+        raise ValueError("base W must be symmetric (undirected substrate)")
+    off = W.copy()
+    np.fill_diagonal(off, 0.0)
+    if (off < -1e-12).any():
+        raise ValueError("base W must be non-negative (all-positive edges) so that "
+                         "f is the inhibitory-neuron fraction")
+    if f <= 0.0:
+        return W.copy()
+
+    if node_score is None:
+        node_score = node_importance(W, mode=score_mode)
+    inhibitory = _select_flips(np.asarray(node_score, dtype=float), f, targeting,
+                               rng, n_strata)
+    out = W.copy()
+    out[:, inhibitory] *= -1.0        # negate each inhibitory neuron's outgoing column
+    return out
+
+
 def negative_fraction(W: np.ndarray) -> float:
     """Realised fraction of upper-triangle edges with negative weight (the achieved
     ``f`` after within-stratum rounding), for honest per-matrix reporting."""
@@ -170,6 +221,23 @@ def negative_fraction(W: np.ndarray) -> float:
     present = edges != 0.0
     n = int(present.sum())
     return float((edges[present] < 0.0).sum() / n) if n else 0.0
+
+
+def realised_inhibitory_fraction(W: np.ndarray) -> float:
+    """Fraction of neurons whose outgoing weights are negative (the achieved
+    inhibitory fraction after rounding), for the Dale transform. The Dale transform
+    negates a neuron's whole outgoing column, so a column is either all-negative
+    (inhibitory) or all-non-negative (excitatory); a neuron counts as inhibitory iff
+    its outgoing column carries at least one negative entry."""
+    W = np.asarray(W, dtype=float)
+    off = W.copy()
+    np.fill_diagonal(off, 0.0)
+    has_out = (off != 0.0).any(axis=0)          # neurons with >=1 outgoing edge
+    n = int(has_out.sum())
+    if n == 0:
+        return 0.0
+    inhibitory = (off < 0.0).any(axis=0) & has_out
+    return float(inhibitory.sum() / n)
 
 
 # ---------------------------------------------------------------------------
@@ -251,12 +319,48 @@ def _selftest() -> None:
     ec = node_importance(W, "eigenvector")
     assert ec.shape == (N,) and (ec >= 0).all()
 
+    # --- Dale node-wise arm --------------------------------------------------
+    assert np.array_equal(sign_fraction_matrix_dale(W, 0.0, "stratified", rng), W), \
+        "dale f=0 must be the identity"
+    dale = sign_fraction_matrix_dale(W, 0.3, "stratified", np.random.default_rng(6))
+    assert not np.allclose(dale, dale.T), "dale must break symmetry (Dale's law)"
+    assert np.allclose(np.abs(dale), np.abs(W)), \
+        "dale changes sign only, not magnitude / topology"
+    fi = realised_inhibitory_fraction(dale)
+    assert abs(fi - 0.3) < 0.03, f"dale inhibitory fraction {fi:.3f} should be ~0.3"
+    # Dale purity: each neuron is wholly inhibitory or wholly excitatory.
+    off_d = dale.copy()
+    np.fill_diagonal(off_d, 0.0)
+    mixed = (off_d < 0.0).any(axis=0) & (off_d > 0.0).any(axis=0)
+    assert not mixed.any(), "each neuron must be purely inhibitory or excitatory (Dale)"
+    # Placement carries over to nodes: hub_first makes higher-degree neurons
+    # inhibitory than periphery_first.
+    def _inhib_mean(t, seed):
+        sel = _select_flips(score, 0.3, t, np.random.default_rng(seed), 10)
+        return score[sel].mean()
+    assert _inhib_mean("hub_first", 7) > _inhib_mean("periphery_first", 7), \
+        "dale hub_first should select higher-degree neurons than periphery_first"
+
+    # Common-mode collapse also holds for Dale: balanced (f=0.5) drives the mean
+    # off-diagonal entry (the |mean_state| driver) toward 0.
+    def _mean_off(M):
+        A = M.copy()
+        np.fill_diagonal(A, 0.0)
+        e = A[A != 0.0]
+        return float(e.mean()) if e.size else 0.0
+    dale_bal = sign_fraction_matrix_dale(W, 0.5, "stratified", np.random.default_rng(8))
+    assert abs(_mean_off(dale_bal)) < 0.4 * _mean_off(W), (
+        f"balanced Dale should collapse the common mode "
+        f"(got {_mean_off(dale_bal):.3f} vs {_mean_off(W):.3f})")
+
     print("sign_composition self-test passed:")
     print(f"  N={N} edges={n_edges}  neg_frac(f=0.3): "
           f"strat={negative_fraction(sign_fraction_matrix(W, 0.3, 'stratified', np.random.default_rng(5))):.3f}")
     print(f"  flipped-set mean score  hub={hub:.1f} > strat={strat:.1f} "
           f"(~mean {mean_all:.1f}) > peri={peri:.1f}")
     print(f"  common mode (mean edge)  f=0: {m0:.3f}  ->  f=0.5: {mb:.3f}")
+    print(f"  dale(f=0.3): inhib_frac={fi:.3f}  asymmetric={not np.allclose(dale, dale.T)}  "
+          f"mean-off f=0.5: {_mean_off(dale_bal):.3f}")
 
 
 if __name__ == "__main__":

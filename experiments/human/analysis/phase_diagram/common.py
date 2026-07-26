@@ -45,10 +45,15 @@ VARIANTS = ["connectome", "degree_rewire", "erdos_renyi"]
 CONTRAST_VARIANT = "erdos_renyi"        # order parameter is connectome - ER
 
 # Sequencing: the stratified (placement-neutral) primary is the headline; hub_first
-# / periphery_first are the secondary placement study. Dale is deferred (it breaks
-# the undirected/normal substrate -- see PHASE_DIAGRAM_EXPERIMENT.md flagged notes).
+# / periphery_first are the secondary placement study.
 DEFAULT_TARGETINGS = ["stratified"]
 ALL_TARGETINGS = ["stratified", "hub_first", "periphery_first"]
+
+# Sign mode: edge-wise flipping (primary, symmetric) vs Dale node-wise inhibition
+# (secondary biological arm, asymmetric). The headline phase diagram is edge; dale is
+# run explicitly via --sign-mode and analysed as a secondary comparison.
+DEFAULT_SIGN_MODES = ["edge"]
+ALL_SIGN_MODES = ["edge", "dale"]
 
 N_SEEDS = matrix_config.N_SEEDS         # 10
 N_DRAWS = 3                             # a few stratified draws per cell, averaged
@@ -59,6 +64,9 @@ SCORE_MODE = "degree"                   # endpoint-degree product (primary)
 # flip pattern is a deterministic function of (seed, f, draw, targeting, variant)
 # and is independent of Python hash randomisation.
 TARGETING_CODE = {"stratified": 0, "hub_first": 1, "periphery_first": 2}
+# Salt appended to the flip-RNG entropy for the Dale arm only, so `edge` keeps its
+# exact committed stream (no extra entry) while `dale` gets an independent one.
+SIGN_MODE_CODE = {"edge": 0, "dale": 1}
 VARIANT_CODE = {"connectome": 0, "degree_rewire": 1, "erdos_renyi": 2,
                 "connectome_weight_permuted": 3, "random_gaussian": 4,
                 "clustering_rewire": 5, "modularity_rewire": 6}

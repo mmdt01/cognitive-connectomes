@@ -37,9 +37,10 @@ from experiments.human.analysis.phase_diagram import common
 # Capture
 # ---------------------------------------------------------------------------
 def capture_cell(cell, state) -> list:
-    """One cell = (task, targeting, variant, f_idx, seed, draw); returns one row per
-    spectral radius. Flips the base once, then rebuilds + evaluates across sr."""
-    task_name, targeting, variant, f_idx, seed, draw = cell
+    """One cell = (task, sign_mode, targeting, variant, f_idx, seed, draw); returns
+    one row per spectral radius. Signs the base once, then rebuilds + evaluates
+    across sr."""
+    task_name, sign_mode, targeting, variant, f_idx, seed, draw = cell
     builder, spec = state["builder"], state["specs"][task_name]
     f = state["f_grid"][f_idx]
     params = spec["params"]
@@ -48,30 +49,44 @@ def capture_cell(cell, state) -> list:
 
     # All-positive symmetric base (the human_empirical substrate for this variant).
     W_base = builder.weighted(common.BASE_CONDITION, variant, seed)
-    # Importance score on the FIXED base topology (held across f, sr, draw).
+    # Importance score on the FIXED base topology (held across f, sr, draw); scores
+    # edges for the edge arm and nodes for the Dale arm (same per-node vector).
     node_score = sign_composition.node_importance(W_base, mode=state["score_mode"])
 
-    # Reproducible flip pattern: a deterministic function of the cell identity.
-    flip_rng = np.random.default_rng([
+    # Reproducible flip pattern: a deterministic function of the cell identity. The
+    # Dale arm appends a salt so it gets an independent stream while the edge arm
+    # keeps its exact committed entropy (no extra entry).
+    seed_key = [
         int(seed), int(f_idx), int(draw),
         common.TARGETING_CODE[targeting], common.VARIANT_CODE[variant],
-    ])
-    W = sign_composition.sign_fraction_matrix(
-        W_base, f, targeting, flip_rng, n_strata=state["n_strata"],
-        node_score=node_score,
-    )
-    neg_frac = sign_composition.negative_fraction(W)
+    ]
+    if sign_mode == "dale":
+        seed_key.append(common.SIGN_MODE_CODE["dale"])
+    flip_rng = np.random.default_rng(seed_key)
+    if sign_mode == "dale":
+        W = sign_composition.sign_fraction_matrix_dale(
+            W_base, f, targeting, flip_rng, n_strata=state["n_strata"],
+            node_score=node_score,
+        )
+        neg_frac = sign_composition.realised_inhibitory_fraction(W)
+    else:
+        W = sign_composition.sign_fraction_matrix(
+            W_base, f, targeting, flip_rng, n_strata=state["n_strata"],
+            node_score=node_score,
+        )
+        neg_frac = sign_composition.negative_fraction(W)
 
-    # sr-independent W-spectrum scalars of the flipped base (sr only rescales).
+    # sr-independent W-spectrum scalars of the signed base (sr only rescales).
     rs = recurrent_spectrum(W)
     bulk95 = float(rs["bulk95_radius"])
     leading_gap = float(rs["spectral_gap"])
     perron_root = float(rs["perron_root"])
-    # NOTE: the edge-wise flip is symmetric, so W stays symmetric and every
-    # eigenvalue is real -- lead_is_real is True at all f (the directed-matrix
-    # "Perron disappears" phrasing does not bite here; |mean_state| / perron_root
-    # carry the common-mode collapse instead). Recorded per spec.
-    lead_is_real = bool(rs["is_symmetric"])
+    # Whether the leading (max-modulus) eigenvalue is real -- the Perron signature.
+    # eig_imag is sorted by descending modulus, so eig_imag[0] is the leading one.
+    # The edge flip stays symmetric (all real -> True at every f); the Dale flip
+    # breaks symmetry, so this genuinely tracks the Perron mode going complex as the
+    # inhibitory fraction rises.
+    lead_is_real = bool(abs(float(rs["eig_imag"][0])) < 1e-9)
 
     rows = []
     for spectral_radius in spec["sweep"]:
@@ -94,7 +109,7 @@ def capture_cell(cell, state) -> list:
         gain = 1.0 - x * x
         mean_gain = float(gain.mean())
         row = dict(
-            sign_mode="edge", targeting=targeting, f=float(f), variant=variant,
+            sign_mode=sign_mode, targeting=targeting, f=float(f), variant=variant,
             rung=rung, spectral_radius=float(spectral_radius), seed=int(seed),
             draw=int(draw), task=task_name,
             d_eff=float(d_eff), mean_curvature=float(curv), pr=float(pr),
@@ -113,8 +128,9 @@ def capture_cell(cell, state) -> list:
 def capture(builder, specs, grid, score_mode, n_strata, jobs) -> pd.DataFrame:
     """Capture the phase-diagram grid over (task, targeting, variant, f, seed, draw)."""
     cells = [
-        (task, targeting, variant, f_idx, seed, draw)
+        (task, sign_mode, targeting, variant, f_idx, seed, draw)
         for task in specs
+        for sign_mode in grid["sign_modes"]
         for targeting in grid["targetings"]
         for variant in grid["variants"]
         for f_idx in range(len(grid["f_grid"]))
@@ -192,7 +208,7 @@ def validate_f0(df: pd.DataFrame, specs: dict) -> None:
 # Entry point
 # ---------------------------------------------------------------------------
 def run(smoke: bool = False, jobs: int = 1, scale: int | None = None,
-        targetings=None, tasks=None, n_draws: int | None = None,
+        targetings=None, sign_modes=None, tasks=None, n_draws: int | None = None,
         score_mode: str | None = None) -> None:
     scale = matrix_config.SCALE if scale is None else scale
     score_mode = common.SCORE_MODE if score_mode is None else score_mode
@@ -201,6 +217,8 @@ def run(smoke: bool = False, jobs: int = 1, scale: int | None = None,
         grid["targetings"] = targetings
     else:
         grid["targetings"] = common.DEFAULT_TARGETINGS
+    grid["sign_modes"] = (sign_modes if sign_modes is not None
+                          else common.DEFAULT_SIGN_MODES)
     if tasks is not None:
         grid["tasks"] = tasks
     if n_draws is not None:
@@ -220,9 +238,11 @@ def run(smoke: bool = False, jobs: int = 1, scale: int | None = None,
     for name in specs:
         specs[name]["sweep"] = grid["sweep"]
 
-    n_cells = (len(specs) * len(grid["targetings"]) * len(grid["variants"])
-               * len(grid["f_grid"]) * grid["n_seeds"] * grid["n_draws"])
-    print(f"\nPhase-diagram capture (sign_mode=edge, score={score_mode}):")
+    n_cells = (len(specs) * len(grid["sign_modes"]) * len(grid["targetings"])
+               * len(grid["variants"]) * len(grid["f_grid"]) * grid["n_seeds"]
+               * grid["n_draws"])
+    print(f"\nPhase-diagram capture (sign_modes={grid['sign_modes']}, "
+          f"score={score_mode}):")
     print(f"  scale={scale} tasks={list(specs)} targetings={grid['targetings']}")
     print(f"  f_grid={grid['f_grid']}")
     print(f"  sr sweep={len(grid['sweep'])} pts in [{grid['sweep'][0]}, "
