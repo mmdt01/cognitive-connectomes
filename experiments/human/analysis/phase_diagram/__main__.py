@@ -6,13 +6,17 @@
         [--tasks mc[,narma10,lorenz]] [--n-draws N] [--score degree|eigenvector]
     python -m experiments.human.analysis.phase_diagram --analyse [--scale N]
     python -m experiments.human.analysis.phase_diagram --plots   [--scale N]
+    python -m experiments.human.analysis.phase_diagram --eigcheck [--scale N]
 
 --capture (default): run the grid, write results/scale_<N>/phase_cells.parquet.
 --analyse: order parameters, boundaries, predictors, cross-panel, placement f*.
 --plots: the phase-diagram figures.
+--eigcheck: degree-vs-eigenvector placement robustness comparison (needs both
+    phase_cells.parquet and phase_cells_eigenvector.parquet from
+    --capture --score eigenvector); writes fig10 + phase_eigcheck_summary.md.
 
-Multiple modes may be combined (e.g. --capture --analyse --plots). --analyse and
---plots are imported lazily so capture works before they are implemented.
+Multiple modes may be combined (e.g. --capture --analyse --plots). Analysis modes
+are imported lazily so capture works before they are implemented.
 """
 
 import sys
@@ -31,7 +35,8 @@ if __name__ == "__main__":
     jobs = common.flag(argv, "--jobs", 1, int)
     smoke = "--smoke" in argv
 
-    modes = [m for m in ("--capture", "--analyse", "--plots") if m in argv]
+    modes = [m for m in ("--capture", "--analyse", "--plots", "--eigcheck")
+             if m in argv]
     if not modes:
         modes = ["--capture"]
 
@@ -50,3 +55,6 @@ if __name__ == "__main__":
     if "--plots" in modes:
         from experiments.human.analysis.phase_diagram import plots
         plots.run(smoke=smoke, scale=scale)
+    if "--eigcheck" in modes:
+        from experiments.human.analysis.phase_diagram import eigcheck
+        eigcheck.run(smoke=smoke, scale=scale)

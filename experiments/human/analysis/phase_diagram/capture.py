@@ -54,14 +54,17 @@ def capture_cell(cell, state) -> list:
     node_score = sign_composition.node_importance(W_base, mode=state["score_mode"])
 
     # Reproducible flip pattern: a deterministic function of the cell identity. The
-    # Dale arm appends a salt so it gets an independent stream while the edge arm
-    # keeps its exact committed entropy (no extra entry).
+    # Dale arm and any non-degree score each append a salt so they get independent
+    # streams while the edge / degree headline keeps its exact committed entropy (no
+    # extra entry).
     seed_key = [
         int(seed), int(f_idx), int(draw),
         common.TARGETING_CODE[targeting], common.VARIANT_CODE[variant],
     ]
     if sign_mode == "dale":
         seed_key.append(common.SIGN_MODE_CODE["dale"])
+    if state["score_mode"] != common.SCORE_MODE:
+        seed_key.append(common.SCORE_CODE[state["score_mode"]])
     flip_rng = np.random.default_rng(seed_key)
     if sign_mode == "dale":
         W = sign_composition.sign_fraction_matrix_dale(
@@ -109,7 +112,8 @@ def capture_cell(cell, state) -> list:
         gain = 1.0 - x * x
         mean_gain = float(gain.mean())
         row = dict(
-            sign_mode=sign_mode, targeting=targeting, f=float(f), variant=variant,
+            sign_mode=sign_mode, score=state["score_mode"], targeting=targeting,
+            f=float(f), variant=variant,
             rung=rung, spectral_radius=float(spectral_radius), seed=int(seed),
             draw=int(draw), task=task_name,
             d_eff=float(d_eff), mean_curvature=float(curv), pr=float(pr),
@@ -266,8 +270,11 @@ def run(smoke: bool = False, jobs: int = 1, scale: int | None = None,
               f"eff_radius [{s.effective_radius.min():.2f}, "
               f"{s.effective_radius.max():.2f}]")
 
-    out_path = results_dir / ("phase_cells_smoke.parquet" if smoke
-                              else "phase_cells.parquet")
+    # Non-degree scores (the eigenvector robustness run) write a score-tagged file so
+    # the degree headline parquet is never touched.
+    score_tag = "" if score_mode == common.SCORE_MODE else f"_{score_mode}"
+    out_path = results_dir / (f"phase_cells{score_tag}"
+                              f"{'_smoke' if smoke else ''}.parquet")
     df.to_parquet(out_path)
     print(f"\nSaved {out_path}  ({len(df)} rows)")
 

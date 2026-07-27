@@ -67,6 +67,9 @@ TARGETING_CODE = {"stratified": 0, "hub_first": 1, "periphery_first": 2}
 # Salt appended to the flip-RNG entropy for the Dale arm only, so `edge` keeps its
 # exact committed stream (no extra entry) while `dale` gets an independent one.
 SIGN_MODE_CODE = {"edge": 0, "dale": 1}
+# Same idea for the importance score: `degree` (the headline, == SCORE_MODE) adds no
+# salt; `eigenvector` (the robustness run) gets an independent stream.
+SCORE_CODE = {"degree": 0, "eigenvector": 1}
 VARIANT_CODE = {"connectome": 0, "degree_rewire": 1, "erdos_renyi": 2,
                 "connectome_weight_permuted": 3, "random_gaussian": 4,
                 "clustering_rewire": 5, "modularity_rewire": 6}
