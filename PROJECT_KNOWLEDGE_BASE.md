@@ -426,6 +426,45 @@ not generation quality; climate-error magnitudes are unreliable (ER divergence) 
 bounded curvature. The connectome is *subcritically worse* than ER. Why the connectome's
 bulk is anomalously compact (the topology → spectrum link) is not yet derived.
 
+**Biological interpretation — the sign axis lives at different levels at different
+scales (structural / dynamics / functional).** What a "negative weight" *means* is
+scale-dependent, and getting this crisp both answers the obvious sceptic's question and
+strengthens the framing.
+
+- **Micro (C. elegans): signs are literal.** A negative weight is a real inhibitory
+  (e.g. GABAergic) synapse; the Dale assignment from neurotransmitter identity is
+  biophysically grounded.
+- **Macro (human dMRI SC): the structural matrix is NON-NEGATIVE by construction.**
+  Entries are streamline counts/densities of white-matter tracts — a tract exists with
+  some strength or not; there is no "negative bundle", and dMRI cannot recover the E/I
+  character of the synapses at a tract's endpoints. So **the real human connectome sits
+  at f = 0 (pure Perron regime)**. The negative-weight sweep on it is therefore an
+  *abstract counterfactual*, not a fact about the anatomy — state this explicitly. Macro
+  inhibition lives in the *neural populations at the nodes* (local ~80/20 E/I circuitry),
+  not in the tracts between them, so the **node-wise Dale sweep is the biologically
+  interpretable manipulation** ("region acts net-inhibitory on its targets") and the
+  edge-wise sweep is a pure mechanistic control.
+- **The real connectome does have a genuine Perron mode** (Perron–Frobenius guarantees a
+  dominant real positive eigenvalue whose eigenvector loads on the structural
+  hubs / rich club) and a measurable bulk — `bulk95` is a property of the *real* matrix,
+  not a counterfactual. (Caveat: the numerical eigenvalue distribution should be plotted
+  from the `w_spectra` `eig_w_real` data rather than asserted; qualitatively expect one
+  large real Perron eigenvalue well separated from a compact bulk, the gap widened by the
+  heavy-tailed degree distribution.)
+- **The three-way distinction to carry forward:** *structural* connectome ↔ the
+  non-negative matrix `W` (the wiring, has the Perron mode); *dynamics* ↔ activity that
+  can carry *effective* anticorrelations even from an all-positive `W` (signs emerge from
+  the nonlinear dynamics, not the wiring); *functional* connectome ↔ the **state
+  covariance** (anticorrelations are real here, e.g. default-mode vs task-positive) —
+  which is the very object `d_eff` and the manifold measures already sit on. So
+  macro-scale "negativity" is real at the *functional* level and emerges from dynamics on
+  a non-negative *structural* substrate. The Perron story even predicts this: the common
+  mode is the global co-activation (the fMRI "global signal"), and functional-network
+  structure lives in the *residual* after it is removed — the exact analogue of the
+  Probe 2 time-centring step ("regress out the global signal" ≈ "centre out the Perron
+  common mode"). Framed this way, "your macro signs aren't biological" becomes a precise
+  claim about *which level each sign lives at*, not a weakness.
+
 ---
 
 ## 8. Methodological lessons learned
