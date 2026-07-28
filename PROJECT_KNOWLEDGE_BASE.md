@@ -2,73 +2,72 @@
 
 A research project on connectome-constrained reservoir computing. Uses
 empirically measured connectomes as the recurrent matrix of an echo-state
-network and asks what biological connectivity contributes beyond random or
-degree-matched baselines.
+network and asks what biological connectivity contributes — through the geometry
+of the activity manifold — beyond random or degree-matched baselines.
 
-This document is the single canonical reference for the project. It is intended
-to be loaded into fresh Claude conversations as the starting context. Companion
-docs: `PROJECT_PLAN.md` (the forward plan) and
-`PREDICTION_TASKS_INTERPRETATION.md` (the reference summary + mechanism
-interpretation of all four tasks, evaluated on the wide spectral-radius sweep).
+This document is the single canonical reference for *what is implemented and what
+has been found*. Load it into fresh Claude conversations as starting context; the
+forward plan and open direction live in `PROJECT_PLAN.md`. Detail companions:
+`PREDICTION_TASKS_INTERPRETATION.md` (the four-task substrate floor),
+`MANIFOLD_PROBES_IMPLEMENTATION.md` and `PHASE_DIAGRAM_EXPERIMENT.md` (the
+manifold-geometry and sign-composition experiments).
 
 ---
 
 ## 1. TL;DR
 
-The central question: does the topology of biological connectomes — beyond
-degree sequence — confer computational properties that random or degree-matched
-null graphs do not?
+Connectome-constrained reservoir computing: use an empirically measured connectome
+as the fixed recurrent matrix of an echo-state network, train only a linear readout,
+and ask what biological connectivity contributes beyond random or degree-matched
+baselines. The current question: **which structural and weight properties of
+biological connectomes shape the geometry of the reservoir's activity manifold, and
+how does that geometry set computational capacity?** Primary substrate for the
+manifold work: the human structural connectome, N=448 (Suárez 2021 Lausanne).
+Companion detail docs: `MANIFOLD_PROBES_IMPLEMENTATION.md` and
+`PHASE_DIAGRAM_EXPERIMENT.md` (this term's experiments);
+`PREDICTION_TASKS_INTERPRETATION.md` (the four-task substrate floor).
 
-**Headline (all four tasks).** At the canonical operating point (sr ≈ 0.95) the
-connectome is **worse-or-equal** on every task. In the supercritical regime it is the
-**most robust** variant: where the disk-like nulls peak sharply and **collapse** (or,
-in closed loop, blow up), the connectome holds a wide flat plateau. The load-bearing
-result — established by a **7-condition factorial** that crosses weight **sign**
-(balanced ± vs all-positive), weight **tail** (homogeneous gaussian vs heavy-tailed
-empirical), and **topology** (undirected/normal vs directed/non-normal) — is that this
-robustness is driven **primarily by weight SIGN: the non-negative (Perron) structure of
-real synaptic weights**, with heavy-tailedness a **secondary, task- and
-topology-gated** contributor and **directedness minimal** (its one decisive role is
-stabilising closed-loop Lorenz rollout). Full account in
+**The floor — a sign-primary robustness account.** A 7-condition sign × tail ×
+topology factorial (four tasks, replicated on two connectomes) established that the
+connectome's one robust edge is supercritical and driven **primarily by weight
+SIGN**: a non-negative (Perron) matrix has a large isolated eigenvalue over a
+compressed bulk; its all-positive random nulls synchronise into that mode and
+collapse at criticality, while the connectome's compact bulk (`sr_crit = 1/bulk₉₅`)
+lets it ride through. Sign the same weights and the effect vanishes; heavy tail is a
+secondary residual, directedness minimal. The connectome is never the *best*
+substrate — its edge is **collapse-resistance in an all-positive substrate**,
+biologically relevant because structural weights are non-negative. Full account in
 `PREDICTION_TASKS_INTERPRETATION.md`.
 
-**Mechanism — collapse-resistance in an all-positive substrate.** A non-negative matrix
-has a large, isolated Perron eigenvalue over a compressed bulk; under global-gain
-scaling its all-positive random nulls synchronise into that mode and **collapse off a
-knife-edge** supercritically (MC of the rung-0 null falls from ~13 to ~4–5 by sr = 4),
-while the connectome's heavy hub weights spread its operating point (`sr_crit =
-1/bulk₉₅_ratio ≈ 3.3` vs nulls ≈ 2.2–2.7) so it rides through. **Sign the exact same
-weights** (balanced ±, mean → 0): the Perron mode vanishes, the nulls stop collapsing,
-and the connectome's advantage disappears (MC connectome−degree d +10.7 → +0.2
-directed). The connectome is therefore *never the best substrate* — a directed-signed
-random reservoir (a Girko-circular-law eigenvalue disk) beats it on raw memory — its
-edge is **robustness against the collapse that non-negative random matrices suffer**,
-which is biologically relevant because structural connectome weights *are* non-negative
-(and *C. elegans* is 96% excitatory, so its Dale-signed matrix stays effectively
-all-positive).
+**Manifold geometry (Probes 1–3).** Recasting the floor geometrically: weight sign
+gates a supercritical **manifold** transition — non-negativity freezes a
+low-dimensional, temporally coherent, spatially low-frequency manifold; balanced sign
+collapses it into a saturated period-2 state. Within the non-negative regime,
+**topology sets memory through readout dimensionality**, measured by the **ridge
+effective rank** `d_eff = Σᵢ gᵢ/(gᵢ+α)` — *not* participation ratio, which misses it.
+`d_eff` orders the memory-capacity null ladder perfectly (Spearman +1.00) and predicts
+MC within-regime (+0.998); its spectral origin is the connectome's anomalously
+**compact eigenvalue bulk** (bulk₉₅ 0.325 vs 0.48–0.55 for nulls). Two computational
+axes emerge: **memory reads out effective rank; generative (Lorenz) prediction reads
+out trajectory straightness (curvature).**
 
-**This supersedes the earlier framing.** The pre-factorial account read the effect as
-an **operating-point shift** with **directed topology a separate task-dependent
-advantage**. That rested on a `gaussian-vs-empirical` contrast which **silently
-conflated sign with tail** (gaussian weights are balanced ±, empirical weights are
-all-positive); a one-variable **sign control** (`*_signed`: exact empirical magnitudes
-with balanced random signs) showed sign is the larger lever and directedness is
-minimal. The wide-sweep / curve-vs-curve methodology and the `connectome_weight_permuted`
-placement control still stand — only the *attribution* changed (sign, not directedness).
+**Sign-composition phase diagram.** Grading the negative-weight fraction *f* from 0
+(all-positive) to 0.5 (balanced) × spectral radius maps where topology controls the
+manifold geometry computation reads out. Headline: a **memory ↔ generation
+dissociation** — the two advantages occupy opposite regions of (*f*, σ) space,
+governed by **different spectral controllers** (memory ← the hub-localised common
+mode; generation ← the global effective radius `σ_eff = bulk₉₅·σ·⟨1−x²⟩` crossing 1).
+Sign composition is thus a single knob trading memory capacity against generative
+robustness. Under a biological **Dale** sweep the connectome sustains a faithful
+straight Lorenz attractor up to **~20% inhibition** then collapses — a tolerance
+ceiling (not a tuned optimum) sitting at the biological E/I ratio. A **placement**
+study shows the memory effect is **hub-gated**: making hub neurons inhibitory collapses
+it ~2× faster than peripheral, robust to whether "hub" means degree or eigenvector
+centrality — confirming the memory controller is the Perron/common mode carried by the
+hubs. Full account in `PHASE_DIAGRAM_EXPERIMENT.md`.
 
-**External replication (human connectome).** The sign-primary account now holds on a
-**second, independent connectome**: the human structural connectome (Suárez 2021 dMRI SC —
-undirected/normal, macro-scale, N=448/1000) reproduces the supercritical robustness
-crossover on **memory capacity** (connectome−degree d **+13 to +15**, *strengthening* with
-parcellation resolution) and **sustains closed-loop Lorenz** as an undirected non-negative
-substrate (peak VPT ~4.5; edge = divergence resistance). This confirms the mechanism is a
-property of **non-negative connectivity statistics**, not of *C. elegans* specifics or
-directedness. Account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
-
-The three prediction tasks (NARMA-10 input-driven, Mackey-Glass driven-forecast, Lorenz
-closed-loop) were added to bridge passive memory toward the north-star
-connectome-as-JEPA world model; all four are evaluated across a wide sweep
-`linspace(0, 4, 39)` (`sr_crit = 1/bulk₉₅_ratio` per variant), read curve-vs-curve.
+Direction — which of these results to build into the paper — is open and lives in
+`PROJECT_PLAN.md`.
 
 ---
 
@@ -90,6 +89,12 @@ connectome-constrained RC beating random RC, primarily through anatomical I/O
 routing. This project takes a more granular route: establish the controlled
 topology comparison first (does the recurrence itself matter?), then add
 biological features one at a time.
+
+The programme has since moved from *whether* the connectome scores better to *why* —
+from performance comparisons toward the **geometry of the reservoir's activity
+manifold**: how connectivity structure and weight sign shape the manifold's
+dimensionality and temporal predictability, and how that geometry sets computational
+capacity (§6–7).
 
 ---
 
@@ -139,9 +144,13 @@ cognitive-connectomes/
 │   ├── nulls/        random_gaussian, erdos_renyi, degree_rewire, clustering_rewire,
 │   │                 modularity_rewire, validation.py        (all directed-aware)
 │   ├── reservoir/    blas.py, weights.py, build.py
-│   ├── tasks/        memory_capacity.py, narma.py, mackey_glass.py, lorenz.py
+│   ├── tasks/        memory_capacity.py (+ _routing), narma.py, mackey_glass.py, lorenz.py
+│   │                 (evaluators take an opt-in `collect_states` → driven-state capture)
 │   ├── experiment/   GENERIC runner.py / stats.py (divergence-robust) / plots.py / config.py
-│   └── analysis/     spectral.py  (substrate analysis, connectome-agnostic; first of a series)
+│   └── analysis/     connectome-agnostic substrate + driven-state analysis:
+│                     spectral.py, null_models.py, weight_structure.py (substrate structure);
+│                     manifold.py (state geometry: d_eff, curvature, PR);
+│                     sign_composition.py (graded edge/Dale sign transform)
 ├── experiments/
 │   ├── celegans/                              (cellular scale; full directed factorial)
 │   │   ├── substrates.py   (SubstrateBuilder + weight-placement control), matrix_config.py
@@ -153,7 +162,10 @@ cognitive-connectomes/
 │   └── human/                                 (macro-scale probe; undirected-only sub-factorial)
 │       ├── substrates.py (HumanSubstrateBuilder), matrix_config.py, build_consensus.py
 │       ├── human_mc/ human_narma10/ human_mackey_glass/ human_lorenz/  (scale-tagged results/scale_<N>/)
-│       └── analysis/   spectral.py, brain_overlay.py, network_matrix.py, realizations.py; figures/, results/
+│       └── analysis/   spectral.py, brain_overlay.py, network_matrix.py, realizations.py,
+│                       connectogram.py, brain_glass_interactive.py; figures/, results/;
+│                       manifold/       (driven-state geometry Probes 1-3; __main__ CLI)
+│                       phase_diagram/  (sign-fraction × spectral-radius phase-diagram experiment)
 └── tests/test_smoke.py
 ```
 
@@ -172,13 +184,29 @@ the cellular *C. elegans* (the full directed factorial) and the macro-scale **hu
 ladder, and symmetric weight schemes; its `run.py`s add `--scale {448,1000}` / `--sr-max`
 / `--jobs` flags for the ada cluster).
 
-A parallel **substrate-analysis tier** characterises the recurrent matrices
-themselves (independent of any task): generic, connectome-agnostic tools in
-`src/analysis/` (first module: `spectral.py`) with connectome-specific drivers
-in `experiments/<connectome>/analysis/`. `spectral.py` grounds the
-placement→memory mechanism (the connectome's eigenvalue bulk is the most
-compressed); it is the template for the planned deeper topological analyses
-(degree, clustering, motifs, modularity, reciprocity).
+A parallel **substrate-and-state analysis tier** characterises both the recurrent
+matrices and the activity they drive, independent of the task runner: generic,
+connectome-agnostic tools in `src/analysis/` with connectome-specific drivers in
+`experiments/<connectome>/analysis/`. Three module groups: **substrate structure**
+(`spectral.py` — eigenvalue bulk, the `bulk₉₅`/`sr_crit` mechanism; `null_models.py`
+— graph-structural measures over the null ladder; `weight_structure.py` — value/sign
+structure across weight realisations); **driven-state geometry** (`manifold.py` —
+ridge effective rank `d_eff`, trajectory curvature, participation ratio, on the
+reservoir states captured via the evaluators' opt-in `collect_states` hook); and the
+**`sign_composition.py`** transform (a graded edge-wise / node-wise-Dale sign flip on
+a non-negative substrate, with degree / eigenvector-centrality placement scores).
+
+Two substantial human-scale analysis **programs** build on these (both under
+`experiments/human/analysis/`, each a self-contained package with its own `__main__`
+CLI): the **manifold probes** (`manifold/`, Probes 1–3, linking state geometry to
+memory and generation) and the **sign-composition × spectral-radius phase diagram**
+(`phase_diagram/`, a `capture → analyse → plots → eigcheck` package mapping where
+topology controls the manifold geometry that computation reads out, over the
+negative-weight-fraction × spectral-radius plane; edge + Dale sign modes, stratified /
+hub / periphery placement, degree + eigenvector scores). Detailed working notes live
+in `MANIFOLD_PROBES_IMPLEMENTATION.md` and `PHASE_DIAGRAM_EXPERIMENT.md` (untracked).
+This tier remains the template for the planned deeper topological analyses (motifs,
+reciprocity, richer modularity).
 
 All `*.parquet` outputs are gitignored as regenerable; `figures/*.png` are tracked.
 
@@ -200,7 +228,17 @@ All `*.parquet` outputs are gitignored as regenerable; `figures/*.png` are track
 - `load_neuron_signs(node_labels)` → per-neuron ±1 Dale vector + coverage.
 - Task evaluators `evaluate(reservoir, seed, **cfg) -> dict`: `memory_capacity`
   (returns `mc`), `narma` (`nrmse`), `mackey_glass` (`nrmse`), `lorenz` (`vpt` +
-  `climate_error`).
+  `climate_error`). Each also accepts `collect_states=True` to return the driven
+  post-warmup state matrix under `states` (the additive manifold-probe capture path;
+  off by default, so committed task runs are byte-identical).
+- Manifold geometry `src/analysis/manifold.py` (on a driven state matrix `x`):
+  `gram_spectrum(design)` → `ridge_effective_rank(gram, alpha)` (the `d_eff` memory
+  order parameter), `mean_curvature(x)` (trajectory straightness), `participation_ratio`.
+- Sign transform `src/analysis/sign_composition.py`: `sign_fraction_matrix` (edge-wise,
+  symmetry-preserving) / `sign_fraction_matrix_dale` (node-wise Dale — negates an
+  inhibitory neuron's outgoing **column**, breaking symmetry), selected by
+  `node_importance(W, mode="degree"|"eigenvector")` with `stratified` / `hub_first` /
+  `periphery_first` placement; `f=0` is the identity.
 
 ---
 
@@ -228,160 +266,165 @@ preservation. Self-loops are forced to zero everywhere.
 
 ## 6. Experimental history
 
-*The v1→v2b entries below are the framework's methodological provenance (confound
-cleanup, the null ladder, directed weights) — historical phase labels, kept as
-provenance (old↔new condition-name map in §12). Their narrow-sweep numbers were
-reproduced by the wide-sweep prediction-task runs, whose **first-pass**
-operating-point / directedness reading was then **superseded** by the sign-primary
-account of the **7-condition factorial** (final entry) — which holds the current
-results.*
+*The v1→v2 entries are the framework's methodological provenance — confound cleanup,
+the null ladder, directed weights — kept terse (old↔new condition map in §10). The
+four-task sign factorial and its human replication are the **substrate floor**; the
+manifold-geometry and phase-diagram programmes are the current work, recasting that
+floor in terms of activity-manifold geometry.*
 
-**v1 (pre-framework).** Connectome ≈ degree_rewire on MC at sr=0.95, both far
-below random_Gaussian. Caught post-hoc to be a confound stack (binary-vs-
-continuous weights, symmetry, self-loops, miscounted edges). Prompted the entire
-v2 framework: controlled comparisons, unified pipeline, validation hooks.
+**Framework provenance (v1 → v2).** v1 found connectome ≈ degree_rewire on MC, both
+below random — caught post-hoc as a confound stack (binary-vs-continuous weights,
+symmetry, self-loops, miscounted edges), which prompted the whole v2 controlled
+pipeline. v2a reproduced the four conditions within ~0.6 MC at sr=0.95 (v1's gap was
+*entirely* the confound), and a supercritical probe found the first real signal
+(connectome > degree_rewire, Cohen's d 0.64→1.47). v2c added clustering/modularity
+rewires (both close the rung-2 gap → degree-only ruled out); v2b added directed +
+empirical weights (the supercritical MC effect is regime-independent). A strict
+one-variable-at-a-time chain; breaking it is the project's main failure mode.
 
-**v2a (controlled foundation).** Same design through the unified pipeline (binary
-symmetric mask → symmetric Gaussian weights → rescale sr). All four conditions
-cluster within ~0.6 MC at sr=0.95 — v1's gap was *entirely* the confound stack.
-Extended sweep revealed the **spectral-shift effect** (broad-degree topologies
-peak at higher nominal sr; hub-driven outlier eigenvalues depress the bulk). A
-supercritical probe (n=50, sr∈{1.25,1.5,1.75}) found the first real signal:
-connectome > degree_rewire, **Cohen's d = 0.64→1.02→1.47**.
+**The four-task sign factorial (the substrate floor).** Three prediction tasks
+(NARMA-10, Mackey-Glass, Lorenz) were added and MC re-run, each over a 7-variant null
+ladder × wide `[0,4]` sweep × 10 seeds, read curve-vs-curve at each variant's operating
+point (`sr_crit = 1/bulk₉₅`). A first-pass reading (operating-point shift +
+directed-topology advantage) was **superseded** on finding that the `gaussian-vs-empirical`
+realism contrast **silently conflated weight sign with weight tail**. A one-variable
+sign control (`*_empirical_signed`: exact empirical magnitudes, balanced random signs)
+plus a directed-gaussian cell completed a **sign × tail × topology factorial (7 core
+conditions)**, localising the connectome's supercritical robustness **primarily to
+weight SIGN (non-negativity / Perron)**: it lives in the all-positive-empirical column
+(MC/NARMA connectome−degree d +8 to +11 at sr≈3–4) and signing the same weights
+collapses it; heavy tail is a secondary task-gated residual, directedness minimal (its
+one role: stabilising closed-loop Lorenz). The `connectome_weight_permuted` placement
+control decomposes the effect (connectome vs control = placement; control vs degree =
+topology). Full account: `PREDICTION_TASKS_INTERPRETATION.md`.
 
-**v2c (rung-3/4 disambiguation).** Added clustering/modularity rewires. Rung-2
-shows the supercritical gap; rungs 3 and 4 both **close it** → the degree-only
-mechanism is ruled out, clustering and/or modularity is sufficient (the two are
-confounded on this connectome).
+**Human macro-scale replication.** The sign-primary account holds on a second,
+independent connectome — the human structural connectome (Suárez 2021 dMRI SC;
+undirected, self-built distance-dependent group consensus, N=448/1000). MC reproduces
+the supercritical crossover and it *strengthens* with parcellation resolution
+(connectome−degree d +13.2@448 → +15.1@1000); an undirected non-negative substrate
+sustains closed-loop Lorenz (peak VPT ~4.5), sharpening the directedness reading —
+closed-loop stability tracks weight **sign**, not directedness. External validation
+across organism, imaging modality, and scale. Account:
+`PREDICTION_TASKS_INTERPRETATION.md` §7. **The human N=448 consensus is the substrate
+for all manifold-geometry work below.**
 
-**v2b (directed + empirical weights, MC).** Directed topology, weights sampled
-from Cook 2019's distribution (sqrt and raw). ~20% MC reduction at canonical sr
-(Perron–Frobenius compression of all-positive matrices). The supercritical
-connectome–degree_rewire d crosses zero and reaches **d≈+1.04 at sr=1.50**,
-matching v2c despite a structurally different reservoir → **the supercritical
-effect is regime-independent on MC**. Transform choice (sqrt vs raw) shifts
-*where* the crossover sits, not *whether* it appears.
+**Manifold probes 1–3 (activity-manifold geometry).** Characterise the *geometry of
+the driven activity manifold* across the null ladder and sign conditions, on states
+captured via the evaluators' opt-in `collect_states` hook (bit-for-bit identical to the
+committed task runs). Full working notes: `MANIFOLD_PROBES_IMPLEMENTATION.md`.
+- **Probe 1 (shape).** Weight sign gates a supercritical *manifold* transition:
+  balanced-sign nets transition; all-positive nets stay frozen across the whole sweep.
+  Curvature is trimodal — ~0.25 rad (straight Lorenz), ~2.09 = 2π/3 (a quasi-static map
+  of white noise; the σ=0 no-recurrence row lands here too), ~π (a saturated period-2
+  flip-flop, *ordered*, not a random walk).
+- **Probe 2 (basis).** Sign selects where activity lives: balanced sign → dominant
+  W-eigenmodes; all-positive → low-frequency connectome harmonics. Mechanism: the
+  Perron/DC common mode carries the mean and is removed by time-centring (top-mode
+  fluctuation variance ≈0.000), leaving a smooth low-frequency residual. The inversion
+  also appears in the all-positive degree null — a sign effect, not connectome-specific.
+- **Probe 3 (geometry → performance).** The readout-relevant dimensionality is the
+  **ridge effective rank** `d_eff = Σᵢ gᵢ/(gᵢ+α)` (effective d.o.f. of the ridge
+  solution), not participation ratio. `d_eff` orders the MC null ladder perfectly
+  (Spearman +1.00) and predicts MC within-regime (+0.998); PR fails (+0.11 / +0.31).
+  Spectral origin: the connectome's anomalously compact eigenvalue bulk (bulk₉₅ 0.325 vs
+  0.48–0.55 for nulls; orders the MC ladder at −0.96; bulk₉₅ = 1/sr_crit). Two axes:
+  **memory ← effective rank; generation (Lorenz) ← trajectory straightness (curvature)**.
+  (Caveat: `d_eff`'s advantage over PR is MC-specific — PR also orders NARMA.)
 
-**Prediction tasks + wide sweep (first pass).** Added three prediction tasks on the
-shared infrastructure, each run over the 7-variant null ladder × 39-point `[0,4]` sweep
-× 10 seeds: **NARMA-10** (input-driven emulation; frozen `input_scaling=0.2, leak=1.0`);
-**Mackey-Glass** (driven teacher-forced forecast of the β=0.2, γ=0.1, n=10, τ=17 delay
-system at h=84/h=300; `input_scaling=0.5, leak=0.3`; local generator bit-exact vs
-`reservoirpy`); **Lorenz** (closed-loop free-running of σ=10, ρ=28, β=8/3; direct
-next-state readout, 3-channel `Win`, `input_scaling=0.1, leak=1.0, ridge=1e-7`; metrics
-**VPT** + **climate** marginal-Wasserstein). MC was re-run on the same footing. The
-methodological win was sweeping wide enough to reach each variant's operating point
-(`sr_crit = 1/bulk₉₅_ratio`): read curve-vs-curve the connectome is worse-or-equal at
-canonical and the **most robust** supercritically on every task (flat plateau where
-disk-like nulls peak sharply and collapse; 0% closed-loop blow-ups on Lorenz vs 26–31%
-for random/ER). **First-pass attribution — an operating-point *placement* shift plus a
-separate *directed-topology* advantage — was later superseded** (next entry): the
-realism contrast (undirected-gaussian vs directed-empirical) conflated sign with tail.
-
-**Weight-placement control (`connectome_weight_permuted`).** A shared control variant:
-the connectome's *exact* topology and *exact* weight multiset, but a per-seed
-**permutation** of which edge carries which weight (Dale signs re-applied for the Dale
-condition; the gaussian conditions are distribution-preserving negative controls).
-Because the connectome, the control, and the rung nulls all share the weight
-distribution, two comparisons decompose the effect: **connectome vs control = weight
-placement**; **control vs degree_rewire = topology**. Still valid and used throughout.
-
-**Sign confound + 7-condition factorial (current results).** The realism contrast
-bundled two differences: weight **sign** (gaussian weights are balanced ±; empirical
-weights are all-positive) and weight **tail** (homogeneous vs heavy-tailed). A
-one-variable **sign control** — the connectome's *exact* empirical magnitudes with
-balanced random signs (`*_empirical_signed`) — plus a **directed-gaussian** cell
-completed a **sign × tail × topology 2×3 factorial**, giving the **7 core conditions**
-(`undirected_gaussian`, `undirected_empirical_signed`, `undirected_empirical`,
-`directed_gaussian`, `directed_empirical_signed`, `directed_empirical`, +
-`directed_empirical_dale` as the Dale anchor). Re-running all four tasks on the full
-factorial shows the supercritical robustness is **primarily a weight-SIGN
-(non-negativity / Perron) effect**: it lives in the all-positive-empirical column
-(MC/NARMA connectome−degree d **+8 to +11** at sr≈3–4), and **signing the exact same
-weights collapses it** (entirely in the directed case, ~60% undirected). Heavy tail is a
-**secondary, task-gated residual** (normal-gated for MC, directed-gated for NARMA/MG);
-**directedness is minimal** except that it strongly stabilises closed-loop Lorenz
-rollout (Lorenz is *parity* with degree on fidelity, its edge is 0% divergence). The
-connectome is never the top substrate — a directed-signed random reservoir (a
-Girko-circular-law eigenvalue disk) beats it on raw memory — its edge is
-**collapse-resistance in an all-positive substrate**, biologically relevant because
-structural weights are non-negative and *C. elegans* is 96% excitatory. Full per-task
-account in `PREDICTION_TASKS_INTERPRETATION.md`.
-
-**Human macro-scale probe (cross-connectome generalisation).** The account was then tested
-on a **second, independent connectome** — the human structural connectome (Suárez 2021 dMRI
-SC), an undirected/normal, macro-scale graph. Substrate = a **self-built distance-dependent
-group consensus** (Betzel 2018 / Suárez procedure) from the `.mat` individual SC, cortical
-**N=448 and N=1000** (validated against the published consensus, r≈0.99); design = the
-**undirected sub-factorial** (`human_gaussian` → `human_empirical_signed` →
-`human_empirical`) × the same 7-variant ladder × a wide `[0,6]` sweep × 10 seeds, run on
-ada. **MC reproduces the sign-primary crossover and it *strengthens* with parcellation
-resolution** (connectome−degree d +13.2@448 / +15.1@1000; the sign step is scale-invariant
-~+8, the tail step grows +2.9→+4.1). **Lorenz: an undirected non-negative substrate
-sustains closed-loop rollout** (peak VPT ~4.5, faithful climate; divergence 7%@448 →
-0%@1000; parity with degree on fidelity) — sharpening the directedness reading (closed-loop
-stability tracks weight SIGN, not directedness). NARMA-10 also run (results present);
-Mackey-Glass infrastructure in place (not yet run). Held out of the cellular scale row. Full
-account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
+**Sign-composition × spectral-radius phase diagram.** Grade the negative-weight
+fraction *f* ∈ [0, 0.5] (edge-wise and node-wise **Dale**) × σ, and map where topology
+controls the manifold geometry computation reads out. Two mirrored panels: memory order
+parameter ΔD = `d_eff`(conn) − `d_eff`(ER); generative ΔS = curvature(ER) −
+curvature(conn). Sign flips are **stratified** by an edge-importance score (hub
+composition held fixed across *f*) to decouple *how much* sign from *where*; placement
+is then its own axis (hub-first / periphery-first). Grid: 11 *f* × 16 σ × {connectome,
+degree, ER} × 10 seeds × 3 draws × {MC, NARMA, Lorenz}; edge + Dale sign modes; degree +
+eigenvector-centrality placement scores. All arms complete. Full working notes:
+`PHASE_DIAGRAM_EXPERIMENT.md`.
+- **Memory panel.** ΔD is a low-*f*, supercritical wedge, extinguished by *f* ~0.15–0.20;
+  below σ~2.4 the connectome is *worse* than ER. The collapse is ER rising to the N=448
+  rank ceiling (partly finite-size), not the connectome degrading.
+- **Generative panel.** Curvature *un-freezes*: ΔS = 0 at *f*=0 and emerges once *f*>0
+  (an onset). The advantage is a *resistance margin* (the connectome stays straight while
+  ER collapses to period-2), not an operating optimum (best generation is at *f*=0). The
+  effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩ crossing 1 predicts the onset.
+- **Cross-panel dissociation (headline).** The two boundaries run opposite in σ and
+  cross near (σ≈4, *f*≈0.12): **memory and generation dissociate**, governed by different
+  controllers (memory ← common mode; generation ← σ_eff→1). Sign composition trades
+  memory capacity against generative robustness.
+- **Dale (biological) arm.** Memory identical to edge (robustness); generation
+  broader/stronger. The connectome sustains a faithful straight-attractor Lorenz up to
+  **~20% inhibition** then collapses — a **tolerance ceiling, not a tuned optimum** (best
+  at *f*=0; collapse σ-dependent) — placing the biological E/I ratio at the upper edge of
+  faithful generation.
+- **Placement (mechanistic capstone).** Memory is **hub-gated**: on the Dale axis
+  hub-first < stratified < periphery-first (degree 0.087/0.124/0.164; eigenvector-centrality
+  0.103/0.118/0.219 — effect *larger* under the direct Perron score), ~2× more efficient,
+  placement-driven not count-driven. Generation placement is noisy (its controller is
+  global), independently corroborating the two-controller dissociation. The edge arm is
+  muddy (ER has no hubs to target — the d_eff-ceiling confound), so the clean test is the
+  biological node-wise axis.
 
 ---
 
 ## 7. Key findings to date
 
-1. **Canonical: worse-or-equal; supercritical: most robust.** At sr ≈ 0.95 the
-   connectome is worse-or-equal on all four tasks; read curve-vs-curve on the wide
-   `[0,4]` sweep it is the **most robust** variant — a wide flat plateau where disk-like
-   nulls peak sharply and collapse (or, on closed-loop Lorenz, blow up). Robustness, not
-   a higher ceiling (its peak sits at or below the best null's).
-2. **That robustness is primarily a weight-SIGN (non-negativity / Perron) effect** —
-   the load-bearing current finding. Established by the **7-condition sign × tail ×
-   topology factorial** plus a one-variable **sign control**: the effect lives in the
-   all-positive-empirical column (MC/NARMA connectome−degree d **+8 to +11** at sr≈3–4),
-   and **signing the exact same weights collapses it** (entirely directed, ~60%
-   undirected; gaussian ≈ flat). This **supersedes** the earlier "operating-point shift +
-   directed-topology advantage" reading, which was a **sign×tail confound** (the
-   gaussian-vs-empirical realism contrast bundled sign with tail).
-3. **Mechanism — collapse-resistance.** All-positive random matrices have a Perron mode
-   that synchronises and collapses at criticality (rung-0 MC ~13 → ~4–5 by sr 4); the
-   connectome's heavy hub weights spread its operating point (`sr_crit ≈ 3.3` vs nulls
-   ≈ 2.2–2.7) so it holds while they collapse. By **Girko's circular law** a
-   directed-signed random reservoir is the raw-memory-optimal eigenvalue *disk*, so the
-   connectome is **never the best substrate** — its edge is resisting a collapse that
-   only non-negative random matrices suffer.
-4. **Heavy tail — secondary, task-and-topology-gated.** A real but smaller residual that
-   survives signing in one cell per task, and the cell flips: **normal-gated for MC**
-   (undirected), **directed-gated for NARMA/MG** (driven). Sign is the larger lever
-   (~2× the tail spectrally).
-5. **Directedness — minimal for passive/driven skill, decisive for closed-loop
-   stability.** ~+1 on MC/NARMA/MG; on Lorenz it is the difference between ~50–77% and
-   ~0–31% closed-loop divergence. (*Refined by finding 9:* the human probe shows an
-   **undirected** non-negative substrate also sustains Lorenz, so closed-loop stability
-   tracks weight **sign** — directedness proxied it in the *C. elegans* factorial.)
-6. **Lorenz — parity, not dominance.** On fidelity (VPT, climate) the connectome *ties*
-   degree_rewire in the biological (all-positive) conditions; its unambiguous edge is
-   **0% closed-loop divergence** (vs 26–31% for random/ER). And non-negativity is
-   *required* for the autonomous task to function at all (signing collapses VPT ~4.5 →
-   ~0.5).
-7. **Methodology holds; only the attribution moved.** Spectral-radius matching ≠
-   effective-criticality matching when degree/weight distributions differ (`sr_crit =
-   1/bulk₉₅_ratio`); sweep wide and compare curve-vs-curve. The wide sweep, the
-   `connectome_weight_permuted` placement control, and the divergence-robust stats all
-   stand — the change from the prior framing is mechanistic attribution (**sign, not
-   directedness**), grounded in `src/analysis/spectral.py` + the sign control.
-8. **Historical (still valid):** degree sequence is sufficient to explain MC *at
-   canonical* sr across both weight regimes; higher-order structure (clustering/
-   modularity, from the v2c disambiguation) matters supercritically — now understood as
-   part of the sign/collapse-resistance story rather than a standalone topology effect.
-9. **The sign-primary account replicates on a second connectome (human macro-scale).** The
-   human structural connectome (Suárez 2021 dMRI SC; undirected, N=448/1000) reproduces the
-   supercritical robustness on **MC** (connectome−degree d **+13→+15**, *strengthening* with
-   parcellation resolution; sign step scale-invariant ~+8) and on **closed-loop Lorenz** (an
-   undirected non-negative substrate sustains the attractor — peak VPT ~4.5, divergence
-   7%@448 → 0%@1000, parity with degree on fidelity). This is **external validation** on an
-   independent organism, imaging modality (dMRI), and scale, and it **sharpens the
-   directedness reading**: closed-loop stability tracks weight SIGN, not directedness (finding
-   5's "decisive for closed-loop stability" is really non-negativity, which directedness
-   proxied in *C. elegans*). Full account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
+**The substrate floor (four-task factorial + human replication).**
+
+1. **Canonical: worse-or-equal; supercritical: most robust.** At sr≈0.95 the connectome
+   is worse-or-equal on all four tasks; read curve-vs-curve on the wide sweep it is the
+   *most robust* variant (a flat plateau where disk-like nulls peak and collapse).
+   Robustness, not a higher ceiling.
+2. **That robustness is primarily a weight-SIGN (non-negativity / Perron) effect** — the
+   7-condition factorial + one-variable sign control localise it to the
+   all-positive-empirical column (MC/NARMA connectome−degree d +8 to +11); signing the
+   same weights collapses it. Heavy tail is a secondary task-gated residual; directedness
+   minimal, except that non-negativity (which directedness proxied in *C. elegans*) is
+   required for closed-loop Lorenz stability. The connectome is never the *best* substrate
+   — a directed-signed random disk (Girko) beats it on raw memory — its edge is
+   collapse-resistance in an all-positive substrate.
+3. **Replicated on a second connectome (human macro-scale).** The human dMRI SC reproduces
+   the supercritical MC crossover (d +13→+15, strengthening with resolution) and sustains
+   closed-loop Lorenz — external validation across organism, modality, and scale.
+
+**Manifold geometry (Probes 1–3).**
+
+4. **Weight sign gates a supercritical manifold transition:** non-negativity freezes a
+   low-dimensional, temporally coherent (Probe 1), spatially low-frequency (Probe 2)
+   manifold; balanced sign collapses it to a saturated period-2 state. This is the
+   geometric face of the floor's collapse-resistance.
+5. **Memory is readout dimensionality, measured by ridge effective rank** (Probe 3):
+   `d_eff` orders the MC ladder perfectly (+1.00) and predicts MC within-regime (+0.998);
+   PR fails. Spectral origin: the connectome's compact eigenvalue bulk (bulk₉₅ 0.325 vs
+   0.48–0.55; = 1/sr_crit). This makes the floor's memory advantage a specific, quantified
+   geometric mechanism. (Caveat: the d_eff-over-PR advantage is MC-specific.)
+6. **Two computational axes:** memory reads out effective rank; generative (Lorenz)
+   prediction reads out trajectory straightness (curvature). `d_eff` ≈ 0 for Lorenz VPT.
+
+**Sign composition (phase diagram).**
+
+7. **Memory ↔ generation dissociation** (the headline): grading sign, the memory and
+   generative advantages occupy opposite regions of (*f*, σ) space with opposite
+   σ-dependence, governed by different spectral controllers (memory ← hub-localised common
+   mode; generation ← global effective radius σ_eff→1). Sign composition is a single knob
+   trading memory capacity against generative robustness.
+8. **Biological E/I sits at a tolerance ceiling** (Dale arm): the connectome sustains
+   faithful straight-attractor Lorenz generation up to ~20% inhibition then collapses — a
+   tolerance ceiling, *not* a tuned optimum (best generation at *f*=0; collapse
+   σ-dependent).
+9. **Memory is hub-gated** (placement): making hub neurons inhibitory collapses the memory
+   advantage ~2× faster than peripheral (placement-driven, not count-driven), robust to
+   degree vs eigenvector-centrality hub definition — the memory controller is the
+   Perron/common mode carried by the hubs. Generation placement is noisy (global
+   controller), independently corroborating the dissociation.
+
+**Standing caveats (do not overclaim).** The memory boundary is partly a finite-size
+(N=448) rank ceiling (ER catching up) — pending N=1000. The ~20% Dale result is a
+*tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
+not generation quality; climate-error magnitudes are unreliable (ER divergence) — use
+bounded curvature. The connectome is *subcritically worse* than ER. Why the connectome's
+bulk is anomalously compact (the topology → spectrum link) is not yet derived.
 
 ---
 
@@ -390,123 +433,53 @@ account in `PREDICTION_TASKS_INTERPRETATION.md` §7.
 Caught at specific stages; recorded so future iterations don't repeat them.
 
 - **Binary-vs-continuous weights, symmetric-vs-asymmetric W, and drifting
-  self-loops are silent confounds at fixed sr.** Standardise all three across
-  conditions; force zero diagonal. (v1 → v2a.)
+  self-loops are silent confounds at fixed sr.** Standardise all three; force zero
+  diagonal. (v1 → v2a.)
 - **Spectral-radius matching ≠ effective-criticality matching** when degree/weight
-  distributions differ (the connectome's heavy hub weights depress its bulk vs λ_max).
-  A variant's bulk becomes critical at `sr_crit = 1/bulk₉₅_ratio` — connectome ≈ 3.3 vs
-  nulls ≈ 2.2–2.7 — so sweep **wide** (`[0,4]`) and compare at operating points. (v2a →
-  operating-point analysis.)
-- **Perron–Frobenius compression** in all-positive matrices concentrates a large
-  isolated eigenvalue over a compressed bulk — now understood as the **primary driver**
-  of the connectome's supercritical robustness (it makes all-positive *random* nulls
-  collapse at criticality; the connectome's hub weights let it hold). Balanced signs
-  remove the Perron mode and the effect. (v2b phase → the sign control.)
-- **A "gaussian vs empirical" weight contrast conflates SIGN with TAIL.** Gaussian
-  schemes are balanced ±; empirical (synapse-count) schemes are all-positive — so a
-  contrast that varies "weight realism" silently varies both sign and heavy-tailedness.
-  Add an explicit **sign control** (empirical magnitudes + balanced random signs) to
-  decouple them; here it revealed sign, not tail or directedness, as the primary lever.
-  (The lesson that reframed the whole four-task account.)
-- **Heavy-tailed raw weights kneecap reservoirs** (a few large edges dominate the
-  spectral radius). sqrt/log transform mitigates; the tasks use raw synapse counts, so
-  the empirical conditions carry this caveat.
-- **Compare curve-vs-curve at operating points, not at a single nominal sr.** Each
-  variant's optimum lives at a different sr (the connectome's is higher — its bulk
-  reaches criticality later), so *both* naive readings mislead: best-over-sweep-per-
-  variant inverts the story, and a single "matched nominal sr" compares variants at
-  *different effective criticalities* (this is what manufactured the connectome's
-  apparent MG/Lorenz deficits on the old `[0,2]` sweep). Sweep wide and read whole
-  curves. (NARMA bridge → operating-point analysis.)
-- **NMSE vs NRMSE.** Report NRMSE = √(MSE/Var); many RC papers report NMSE (no
-  root), so a literature "NARMA-10 ≈ 0.3" is NRMSE ≈ 0.55.
-- **n=10 sweeps predict n=50 probe direction and zero-crossings** to within
-  |Δd|≤0.5; reserve n=50 for magnitude/significance. (v2b.)
-- **BLAS thread limiting must be called *after* numpy import**, or it silently
-  no-ops.
-- **The connectome is one fixed graph; nulls are sampled.** Inference is "is
-  *this* connectome anomalous vs the null distribution?", not connectomes in
-  general. In the empirical conditions the connectome also keeps real weights while
-  nulls resample — the topology-vs-weights confound, decomposed by the
-  `connectome_weight_permuted` placement control (§6).
-- **To isolate weight *placement*, permute — don't resample.** The rung nulls draw
-  weights *with replacement* (a bootstrap, so the distribution is preserved only in
-  expectation). The placement control instead **permutes the connectome's exact
-  weights** onto its exact topology, holding the multiset fixed so the comparison
-  isolates placement alone. As the highest-variance null (heavy weights on
-  high-leverage edges), it warrants more seeds; n=50 confirmed the n=10 read.
+  distributions differ. A variant's bulk becomes critical at `sr_crit = 1/bulk₉₅`
+  (connectome ≈ 3.3 vs nulls ≈ 2.2–2.7), so sweep **wide** and compare curve-vs-curve
+  at operating points, never at a single nominal sr. (v2a; the human probe widened to
+  `[0,6]` as `sr_crit` rises with N.)
+- **Perron–Frobenius compression is the mechanism, not a nuisance.** A non-negative
+  matrix concentrates a large isolated eigenvalue over a compressed bulk; all-positive
+  *random* nulls collapse into it at criticality, the connectome's compact bulk holds.
+  Balanced signs remove the Perron mode and the effect. (v2b → the sign control; recast
+  geometrically in Probes 1–3.)
+- **A "gaussian vs empirical" weight contrast conflates SIGN with TAIL** (gaussian
+  balanced ±, empirical all-positive). Add an explicit sign control (empirical
+  magnitudes + balanced random signs) to decouple them — it revealed sign, not tail or
+  directedness, as the primary lever.
+- **Heavy-tailed raw weights kneecap reservoirs** (a few large edges dominate λ_max);
+  sqrt/log mitigates. The tasks use raw synapse counts, so empirical conditions carry
+  this caveat.
+- **Participation ratio is the wrong dimensionality measure for memory.** It is
+  variance-weighted and misses the low-variance directions the ridge readout uses; the
+  **ridge effective rank** `d_eff = Σᵢ gᵢ/(gᵢ+α)` is the memory-relevant measure
+  (Probe 3). PR remains a valid *shape* descriptor. (Manifold probes.)
+- **Random sign-flipping confounds *amount* of sign with *placement*.** Because the
+  common mode lives on hubs, a uniform flip lets hub coverage vary with the draw.
+  **Stratify** the flip by edge-importance to hold placement fixed, then make placement
+  its own axis. (Phase diagram.)
+- **Mirror the order-parameter to the phenomenon.** The memory advantage *collapses*
+  with *f* (a boundary from above); the generative advantage *emerges* (an onset from
+  zero). The boundary operator must match, or the generative panel reads as null.
+  (Phase diagram.)
+- **Climate-error magnitudes are unreliable when a null diverges** (differences inflate
+  as ER blows up); use bounded curvature/straightness as the trustworthy generative
+  order parameter.
+- **n=10 sweeps predict n=50 direction and zero-crossings** (|Δd|≤0.5); reserve n=50
+  for magnitude/significance.
+- **BLAS thread limiting must be called *after* numpy import**, or it silently no-ops.
+- **The connectome is one fixed graph; nulls are sampled** — inference is "is *this*
+  connectome anomalous vs the null distribution?". To isolate weight *placement*,
+  **permute** the connectome's exact weights onto its exact topology
+  (`connectome_weight_permuted`), don't resample.
+- **NMSE vs NRMSE.** Report NRMSE = √(MSE/Var); many RC papers report NMSE, so a
+  literature "NARMA-10 ≈ 0.3" is NRMSE ≈ 0.55.
 
 ---
 
-## 9. Next iteration roadmap
-
-`PROJECT_PLAN.md` is canonical: the thirteen-week schedule, the Stage-A
-scale-row/realism-cross design, decision gates, conference targets, and the task
-progression (memory capacity ✓ → NARMA-10 ✓ → Mackey-Glass ✓ → Lorenz ✓, all on the
-wide `[0,4]` sweep, toward the connectome-as-JEPA world model). The four-task arc is
-**complete and unified** under the **sign-primary robustness account** (7-condition
-factorial; §6–7). Open threads:
-- **Human macro-scale probe (Suárez 2021 dMRI SC) — DONE for MC + Lorenz** (§6–7;
-  interpretation doc §7). The sharpened, reversed prediction was **confirmed**: the
-  non-negative, heavy-tailed human SC shows the **strong** robustness crossover (MC d
-  +13→+15, *strengthening* with resolution), and the undirected non-negative substrate
-  **sustains closed-loop Lorenz**. Held out of the cellular scale row. Remaining human
-  threads: the **full four-task interpretation pass** (NARMA-10 is run; Mackey-Glass not
-  yet run); anatomical **I/O routing** (subcortical input + intrinsic-network readout with
-  a placement null — see `HUMAN_IO_ROUTING_PLAN.md`); **per-subject variability** (70
-  subjects, a population inference distinct from the single-consensus one); and the finer
-  **within-connectome scale sweep** (N=68→1000).
-- **Cross-species E/I prediction.** A more inhibition-heavy connectome (mammalian ~20%)
-  would push the effective matrix toward balanced signs → weaker robustness — testable
-  with E/I-resolved connectomes.
-- The `sqrt`-vs-`raw` weight-transform sensitivity (§10); the MC evaluator speedup (it
-  refits a Gram per lag, ~50× the other tasks' linear algebra); and the **scale row**
-  (fly optic lobe, mouse) per `PROJECT_PLAN.md`.
-
----
-
-## 10. Open methodological questions
-
-- **What drives the robustness — REFRAMED to weight SIGN (§6–7).** The 7-condition
-  factorial + one-variable sign control show the supercritical robustness is **primarily
-  a non-negativity (Perron) effect**, with heavy-tail a secondary task-gated residual and
-  directedness minimal (its one role: stabilising closed-loop Lorenz). This **supersedes**
-  the earlier reading — an operating-point *placement* shift plus a separate
-  *directed-topology* advantage — which rested on a **sign×tail confound** in the
-  gaussian-vs-empirical realism contrast. The `connectome_weight_permuted` placement leg
-  still decomposes placement vs topology, but the headline attribution is now sign.
-- **Tail-gating mechanism — OPEN.** *Why* the secondary heavy-tail residual is
-  normal-gated for MC (undirected) but directed-gated for NARMA/MG (driven) is
-  characterised, not mechanistically pinned.
-- **Operating-point normalisation — ADOPTED.** Shared normaliser = top-eigenvalue
-  matching with a **Suárez-width `[0,4]` sweep** (`matrix_config.SPECTRAL_RADII =
-  linspace(0,4,39)`), with curve-vs-curve comparison; `sr_crit = 1/bulk₉₅_ratio` per
-  variant. Top-matching is field-standard (Suárez et al. 2021) and the only cheap
-  normaliser at scale (λ₁ via sparse eigs); just sweep wide enough to cover every
-  variant's operating point. **Corollary from the human probe:** `sr_crit` *rises with
-  parcellation resolution* (the bulk compresses further with N: ~3.1@448 → ~4.0@1000), so
-  `[0,4]` truncated N=1000 — the human runs widen to `[0,6]` via the `--sr-max` flag (a
-  strict superset whose first 39 points reproduce `[0,4]`).
-- **Divergence-robust statistics — DONE.** `src/experiment/stats.py` caps blow-ups
-  (`cfg.metric_divergence_cap`), reports a per-variant divergence rate, and tests
-  significance with a rank-based permutation test (Cliff's delta + median alongside the
-  capped Cohen's d). Used across all four tasks; it earns its keep on Lorenz, where
-  closed-loop divergence is the primary failure mode (MC's bounded metric rarely
-  diverges).
-- **Weight transform.** All four tasks use raw synapse counts; `sqrt` is a one-line
-  switch (`matrix_config.WEIGHT_TRANSFORM`) and the documented heavy-tail mitigation. It
-  compresses the spectrum less, *raising* `bulk₉₅_ratio` and so *lowering* `sr_crit` —
-  the connectome would recover at a lower nominal sr. Sign/structure of the results
-  should survive; the exact operating points are a weight-transform choice. (Untested on
-  the wide sweep.)
-- **Clustering vs modularity disambiguation** (from v2c) — still confounded on
-  this connectome; needs a dual-constraint null or decoupled block model.
-- **Asymmetric mask sampling** between the fixed connectome and the sampled nulls
-  (inference scope).
-
----
-
-## 11. Working conventions
+## 9. Working conventions
 
 - **Experiments live under `experiments/<connectome>/<task>/`**; generic
   infrastructure under `src/experiment/`; launch with `python -m
@@ -514,6 +487,9 @@ factorial; §6–7). Open threads:
 - **A new task = a `src/tasks/<task>.py` evaluator + a thin task dir.** Do not
   duplicate the runner/stats/plots/substrates; if you think you must edit them,
   reconsider.
+- **Analysis tier is additive.** Driven-state capture is opt-in (`collect_states`,
+  off by default → committed task runs byte-identical); generic geometry lives in
+  `src/analysis/`, connectome-specific drivers in `experiments/<connectome>/analysis/`.
 - **Variable names full and readable** (`spectral_radius`, not `sr`, in code).
 - **Seed convention:** the construction seed drives mask/weights/`Win`; the task
   input/series uses `seed + INPUT_SEED_OFFSET` (1000), pairing connectome and
@@ -526,90 +502,82 @@ factorial; §6–7). Open threads:
 
 ---
 
-## 12. Quick reference
+## 10. Quick reference
 
-- **Connectome data:** `data/celegans/cook2019_connectome.xlsx`, sheet "hermaphrodite
+- **C. elegans data:** `data/celegans/cook2019_connectome.xlsx`, sheet "hermaphrodite
   chemical" (SI corrected July 2020). N=300; 3000 undirected / 3669 directed
-  off-diagonal edges; 38 autaptic self-loops dropped. Reservoir convention
-  `W[i,j]` = weight j→i (the directed loader transposes Cook's native layout).
-- **Dale signs (`directed_empirical_dale`):** `data/celegans/celegans_neurotransmitters.csv`
-  — GABA-synthesizing neurons (DD, VD, RME, AVL, DVB, RIS = 26) inhibitory (−1), all else
-  +1; source eLife 95402. Only 3.6% of edges → the Dale matrix is effectively all-positive.
-- **Human macro-scale probe:** substrate = a **self-built distance-dependent group
-  consensus** (Betzel 2018 / Suárez 2021) from the `.mat` individual SC, cortical **N=448 /
-  N=1000** (cached at `data/human/built_consensus/`, gitignored); loaders
-  `src/connectomes/human_suarez.py` + `consensus.py`; provenance in `data/human/README.md`.
-  **3 undirected conditions** (`human_gaussian` → `human_empirical_signed` →
-  `human_empirical`) × the same 7-variant ladder × a **`[0,6]`** sweep (`--sr-max`; `sr_crit`
-  rises with N) × 10 seeds; runs on ada (`--jobs 128`). **MC + NARMA-10 + Lorenz run** (MC +
-  Lorenz interpreted, interpretation doc §7); Mackey-Glass infra in place (not yet run).
-- **ada cluster (compute for full runs):** repo at
-  `/vol/bitbucket/mmd25/thesis/cognitive-connectomes`, venv `.venv`
-  (`source .venv/bin/activate`). **CPU-only** — pure numpy/scipy, so the node's 2× L40 GPUs
-  are unused; 128 cores → pass `--jobs 128` (fork-parallel grid, bit-identical to
-  sequential). Launch full runs in `tmux`, then **rsync results/figures back to the
-  laptop**. Treat ada as **run-only**: commit from the laptop after rsync (committing on ada
-  causes pull conflicts). The laptop does development + `--smoke`. Typical wall-clock:
-  human MC ~2 min, Lorenz N=448 ~7 min / N=1000 ~90 min.
-- **MC hyperparameters (v1-pinned):** `T=3000, warmup=500, max_lag=50,
-  ridge_alpha=1e-6, leak=1.0, input_scaling=1.0, n_seeds=10`, BLAS threads 2.
-- **Shared spectral-radius sweep (all four tasks):** 39-point `linspace(0,4,39)`
-  (Suárez-width, strict superset of the old `[0,2]` 20-point grid);
-  `experiments/celegans/matrix_config.SPECTRAL_RADII`. `sr_crit = 1/bulk₉₅_ratio` locates
-  each variant's operating point (connectome ≈ 3.3, nulls ≈ 2.2–2.7).
-- **Task matrix (all four tasks):** **7 conditions** × **7 variants** (connectome +
-  `connectome_weight_permuted` placement control + 5-rung ladder) × the 39-point sweep ×
-  n=10 seeds. Frozen reservoir hyperparameters: MC (v1-pinned) `input_scaling=1.0,
-  leak=1.0, ridge=1e-6`; NARMA `input_scaling=0.2, leak=1.0`; Mackey-Glass
-  `input_scaling=0.5, leak=0.3` (h=84/h=300, driven teacher-forced, local generator
-  bit-exact vs `reservoirpy`); Lorenz `input_scaling=0.1, leak=1.0, ridge=1e-7`
-  (closed-loop free-running, 3-channel `Win`, direct next-state readout, metrics
-  VPT + climate, local RK4 short-horizon cross-check only).
-- **Weight-placement control:** `connectome_weight_permuted` — connectome's exact
-  topology + a per-seed permutation of its exact weights (Dale signs kept; the gaussian
-  conditions are distribution-preserving negative controls). `connectome vs control` =
-  placement, `control vs degree` = topology.
-- **Statistics:** divergence-robust — rank-based permutation test (Holm-corrected) for
-  significance, with Cliff's delta, capped Cohen's d, median, and a per-variant
-  divergence rate; `metric_divergence_cap` = 2.0 (NRMSE), 10.0 (Lorenz climate), none for
-  VPT/MC (bounded).
-- **Substrate analysis tier:** `src/analysis/spectral.py` (connectome-agnostic
-  spectral metrics + plots) + `experiments/celegans/analysis/spectral.py` driver
-  (`python -m experiments.celegans.analysis.spectral`). Grounds the
-  placement→memory mechanism; first of the planned topological-analysis series. The human
-  probe adds `experiments/human/analysis/` drivers (spectral, brain-overlay, Yeo-network,
-  weight-realizations).
-- **Conditions (7-condition sign × tail × topology factorial):** `undirected_gaussian`,
-  `undirected_empirical_signed`, `undirected_empirical`, `directed_gaussian`,
-  `directed_empirical_signed`, `directed_empirical`, `directed_empirical_dale`. The
-  per-topology weight ladder gaussian → signed-empirical → empirical isolates the **tail**
-  (gaussian→signed) and **sign** (signed→empirical) sub-factors; `*_signed` are balanced
-  random-sign controls, `directed_empirical_dale` the biological Dale anchor.
-- **Old↔new condition-name map** (legacy `v2x` labels retired): `v2a`=`undirected_gaussian`,
-  `v2ae`=`undirected_empirical`, `v2ae_randsign`=`undirected_empirical_signed`,
-  `v2bg`=`directed_gaussian`, `v2b`=`directed_empirical`,
-  `v2b_randsign`=`directed_empirical_signed`, `v2d`=`directed_empirical_dale`. The
-  experimental-history phase labels (`v1 → v2a → v2c → v2b → v2d`) are kept in §6 as
-  provenance.
+  off-diagonal edges; 38 self-loops dropped. Reservoir convention `W[i,j]` = j→i. Dale
+  signs (`directed_empirical_dale`): `celegans_neurotransmitters.csv` (GABA neurons
+  inhibitory; source eLife 95402); only 3.6% of edges → effectively all-positive.
+- **Human macro-scale substrate (current primary):** self-built distance-dependent
+  group consensus (Betzel 2018 / Suárez 2021) from the `.mat` individual SC, cortical
+  **N=448 / N=1000** (cached `data/human/built_consensus/`, gitignored); loaders
+  `src/connectomes/human_suarez.py` + `consensus.py`; provenance `data/human/README.md`.
+  3 undirected conditions (`human_gaussian` → `human_empirical_signed` →
+  `human_empirical`) × the 7-variant ladder × a `[0,6]` sweep × 10 seeds.
+- **ada cluster (full runs):** repo `/vol/bitbucket/mmd25/thesis/cognitive-connectomes`,
+  venv `.venv`. **CPU-only** (pure numpy/scipy; the node's 2× L40 GPUs are unused);
+  128 cores → `--jobs 128` (fork-parallel, bit-identical to sequential). Run in `tmux`,
+  rsync results/figures to the laptop, commit from the laptop (committing on ada causes
+  pull conflicts). Wall-clock: human MC ~2 min, Lorenz N=448 ~7 min / N=1000 ~90 min.
+- **Task matrix (four tasks):** 7 conditions × 7 variants (connectome +
+  `connectome_weight_permuted` placement control + 5-rung ladder) × the sweep × n=10.
+  Frozen hyperparameters: MC (v1-pinned) `T=3000, warmup=500, max_lag=50, ridge=1e-6,
+  input_scaling=1.0, leak=1.0`; NARMA `input_scaling=0.2, leak=1.0`; Mackey-Glass
+  `input_scaling=0.5, leak=0.3` (h=84/300); Lorenz `input_scaling=0.1, leak=1.0,
+  ridge=1e-7` (closed-loop, 3-channel `Win`, metrics VPT + climate). `sr_crit =
+  1/bulk₉₅` locates operating points.
+- **Weight-placement control:** `connectome_weight_permuted` — exact topology +
+  per-seed permutation of exact weights. `connectome vs control` = placement;
+  `control vs degree` = topology.
+- **Statistics:** divergence-robust — rank-based permutation test (Holm-corrected) +
+  Cliff's delta, capped Cohen's d, median, per-variant divergence rate;
+  `metric_divergence_cap` = 2.0 (NRMSE), 10.0 (Lorenz climate), none for VPT/MC.
+- **7-condition factorial (C. elegans):** `undirected_{gaussian, empirical_signed,
+  empirical}`, `directed_{gaussian, empirical_signed, empirical}`,
+  `directed_empirical_dale`. The ladder gaussian → signed-empirical → empirical isolates
+  **tail** (gaussian→signed) and **sign** (signed→empirical). Legacy `v2x` labels
+  retired (`v2a`=undirected_gaussian, `v2ae`=undirected_empirical,
+  `v2ae_randsign`=undirected_empirical_signed, `v2bg`=directed_gaussian,
+  `v2b`=directed_empirical, `v2b_randsign`=directed_empirical_signed,
+  `v2d`=directed_empirical_dale).
+- **Manifold probes (human N=448):** `experiments/human/analysis/manifold/` (`__main__`
+  CLI). Metrics in `src/analysis/manifold.py` — `ridge_effective_rank(gram, alpha)` (the
+  `d_eff` memory order parameter), `mean_curvature(x)` (straightness),
+  `participation_ratio`. States captured via the evaluators' opt-in `collect_states`
+  (off by default → committed runs byte-identical). 36,540 state matrices (3 tasks × 3
+  conditions × 7 variants × 58 σ × 10 seeds); bit-for-bit validated against the
+  committed runs.
+- **Phase diagram (human N=448):** `experiments/human/analysis/phase_diagram/`
+  (`capture → analyse → plots → eigcheck`). Transform `src/analysis/sign_composition.py`
+  — `sign_fraction_matrix` (edge) / `_dale` (node-wise Dale),
+  `node_importance(mode="degree"|"eigenvector")`, `stratified`/`hub_first`/
+  `periphery_first`, `f=0` = identity. Grid: 11 `f` ∈ [0,0.5] × 16 σ ∈ [0,6] ×
+  {connectome, degree, ER} × 10 seeds × 3 draws × {MC, NARMA, Lorenz}; edge + Dale
+  modes; degree + eigenvector scores. Order parameters ΔD = `d_eff`(conn)−`d_eff`(ER),
+  ΔS = curvature(ER)−curvature(conn); generative predictor `σ_eff = bulk₉₅·σ·⟨1−x²⟩`.
 
 ---
 
-## 13. How to use this document in a new conversation
+## 11. How to use this document in a new conversation
 
-Paste this document as the first message, then state the task. Recommended extra
-context per task:
-- **Continuing/analysing a prediction experiment:** also load `PROJECT_PLAN.md`
-  and the task's `task_config.py` + `results/`.
-- **Reviewing the task results:** `PREDICTION_TASKS_INTERPRETATION.md` is the
-  reference summary across all four tasks (the operating-point + robustness picture and
-  per-task results); each task's `task_config.py` + `results/` + `figures/` hold the
-  specifics.
-- **Running a substrate analysis:** `src/analysis/` + the
-  `experiments/celegans/analysis/` drivers; see that dir's README.
-- **Continuing the human macro-scale probe:** also load `data/human/README.md` (dataset +
-  consensus construction) and `experiments/human/`; for the I/O-routing thread,
-  `HUMAN_IO_ROUTING_PLAN.md`.
+Load this document as the starting context, then state the task. It is the canonical
+record of *what is implemented and what has been found*; the **forward plan and open
+direction live in `PROJECT_PLAN.md`**. Recommended extra context per task:
 
-The progression v1 → v2a → v2c → v2b → v2d → prediction tasks is a controlled
-chain; breaking the one-variable-at-a-time discipline is the single failure mode
-most likely to cost weeks. Hold the line.
+- **The substrate floor (four-task factorial):** `PREDICTION_TASKS_INTERPRETATION.md`
+  (the reference summary + mechanism across all four tasks); each task's
+  `task_config.py` + `results/` + `figures/`.
+- **Manifold geometry:** `MANIFOLD_PROBES_IMPLEMENTATION.md` (Probes 1–3 working notes +
+  Findings); code in `src/analysis/manifold.py` and `experiments/human/analysis/manifold/`.
+- **Sign-composition phase diagram:** `PHASE_DIAGRAM_EXPERIMENT.md` (design + Findings);
+  code in `src/analysis/sign_composition.py` and
+  `experiments/human/analysis/phase_diagram/`.
+- **A substrate/state analysis:** `src/analysis/` + the
+  `experiments/<connectome>/analysis/` drivers.
+- **The human macro-scale substrate:** `data/human/README.md` (dataset + consensus
+  construction) and `experiments/human/`.
+
+The controlled one-variable-at-a-time chain (v1 → v2 → four-task factorial → manifold
+probes → phase diagram) is the project's spine; breaking that discipline is the single
+failure mode most likely to cost weeks. Hold the line.
