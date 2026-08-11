@@ -391,3 +391,94 @@ def fig_sigma_eff(traj: pd.DataFrame, path_stem) -> None:
                      fontsize=9.5, y=1.03)
         fig.tight_layout()
         _save(fig, path_stem)
+
+
+def fig_cross_scale(frames: dict, ladder: pd.DataFrame, path_stem) -> None:
+    """N=448 vs N=1000, the three things the finite-size question turns on.
+
+    ``frames`` maps scale -> (matched-axis frame from ``analysis.paired_difference``,
+    n_nodes). ``ladder`` is the supercritical per-variant MC table.
+
+    (a) the matched memory advantage at both N -- does the peak stay interior and does
+    the advantage hold; (b) ``d_eff/N`` against the hard ceiling -- the point being that
+    it is *not* escaped at either N, which is why the decay region rather than the peak
+    is what gets read; (c) the supercritical MC ladder, which carries both the margin
+    that held (4.40 -> 4.42) and the degree/ER pair that did not swap.
+    """
+    scales = sorted(frames)
+    style = {448: dict(ls="-", lw=1.7), 1000: dict(ls=(0, (4, 2)), lw=1.7)}
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 3, figsize=(7.6, 2.8), squeeze=False)
+
+        # (a) matched memory advantage, normalised by N so the scales are comparable
+        ax = axes[0][0]
+        for scale in scales:
+            frame, n = frames[scale]
+            y = frame.dD_median.to_numpy(float) / n
+            x = frame.x.to_numpy(float)
+            ax.plot(x, y, color=_INK, **style[scale], label=f"N = {n}")
+            i = int(np.nanargmax(y))
+            ax.plot([x[i]], [y[i]], marker="o", ms=4, color=_INK, ls="none", zorder=5)
+        ax.axhline(0.0, color=_MUT, lw=0.9)
+        ax.set_xlabel(r"effective criticality  $\sigma\cdot\mathrm{bulk}_{95}$", labelpad=1)
+        ax.set_ylabel(r"$\Delta d_{eff}\,/\,N$ (connectome $-$ ER)", labelpad=2)
+        ax.legend(loc="upper left", frameon=False, handlelength=1.8)
+        ax.set_title("matched advantage, both scales", pad=4)
+        _style(ax); _label(ax, "a")
+
+        # (b) distance from the ceiling -- the reason the peak is not the place to read
+        ax = axes[0][1]
+        for scale in scales:
+            frame, n = frames[scale]
+            for variant in common.VARIANTS:
+                col = f"d_eff_{variant}"
+                if col not in frame:
+                    continue
+                ax.plot(frame.x, frame[col] / n, color=common.VARIANT_COLOR[variant],
+                        **style[scale])
+        ax.axhline(1.0, color=_NEG, lw=1.1, ls="--")
+        ax.text(0.02, 1.0, r" ceiling $d_{eff}=N$", transform=ax.get_yaxis_transform(),
+                fontsize=6.2, color=_NEG, va="bottom", ha="left")
+        ax.set_ylim(0, 1.15)
+        ax.set_xlabel(r"$\sigma\cdot\mathrm{bulk}_{95}$", labelpad=1)
+        ax.set_ylabel(r"$d_{eff}\,/\,N$", labelpad=2)
+        ax.set_title("the ceiling is not escaped", pad=4)
+        _style(ax); _label(ax, "b")
+
+        # (c) supercritical MC ladder at both scales
+        ax = axes[0][2]
+        variants = [v for v in common.VARIANTS if v in set(ladder.variant)]
+        offs = np.linspace(-0.16, 0.16, len(scales))
+        for scale, off in zip(scales, offs):
+            sub = ladder[ladder.scale == scale].set_index("variant")
+            for i, variant in enumerate(variants):
+                if variant not in sub.index:
+                    continue
+                ax.plot([i + off], [sub.loc[variant, "mc"]], marker="o" if scale == 448
+                        else "s", ms=5, color=common.VARIANT_COLOR[variant],
+                        ls="none", mec="black", mew=0.5)
+        for i, variant in enumerate(variants):
+            vals = [ladder[(ladder.scale == s) & (ladder.variant == variant)].mc
+                    for s in scales]
+            vals = [float(v.iloc[0]) for v in vals if len(v)]
+            if len(vals) == 2:
+                ax.plot([i + offs[0], i + offs[1]], vals, color=_MUT, lw=0.8, zorder=0)
+        ax.set_xticks(range(len(variants)))
+        ax.set_xticklabels([common.VARIANT_TITLE[v].replace("-", "-\n")
+                            for v in variants], fontsize=6.2)
+        ax.set_ylabel("supercritical MC (median)", labelpad=2)
+        ax.set_title("MC ladder: margin holds", pad=4)
+        handles = [Line2D([0], [0], marker="o" if s == 448 else "s", ls="none",
+                          color=_MUT, ms=4, label=f"N = {s}") for s in scales]
+        ax.legend(handles=handles, loc="upper right", frameon=False, handlelength=1.0)
+        _style(ax); _label(ax, "c")
+
+        fig.text(0.5, -0.10,
+                 "Solid = N 448, dashed/squares = N 1000. The supercritical margin "
+                 "(connectome/ER) is 4.40 at N=448 and 4.42 at N=1000; degree and ER do "
+                 "NOT swap, contrary to what bulk95 predicts.",
+                 ha="center", va="top", fontsize=6.2, color=_MUT)
+        fig.suptitle("Does the memory advantage survive the finite-size question?",
+                     fontsize=9.5, y=1.04)
+        fig.tight_layout()
+        _save(fig, path_stem)

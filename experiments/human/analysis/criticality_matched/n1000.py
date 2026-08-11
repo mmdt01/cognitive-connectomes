@@ -212,3 +212,39 @@ def control_gate(scale: int = 448) -> dict:
     print(f"  [control-gate] supercritical MC margin (connectome/ER): "
           f"{margin_old:.2f} frozen -> {margin_new:.2f} under the new rule")
     return out
+
+
+SR_CRIT = {448: 3.078, 1000: 3.985}      # each scale's own 1/median(bulk95)
+
+
+def figures(scales=(448, 1000)) -> None:
+    """The cross-scale figure. Reads the run parquets; recomputes nothing expensive.
+
+    Kept out of ``run()`` so the figure can be iterated during writing without
+    re-simulating, and so it can be built once both scales exist.
+    """
+    from experiments.human.analysis.criticality_matched import analysis, panels
+
+    frames, ladder_rows = {}, []
+    for scale in scales:
+        path = common.RESULTS_DIR / f"n1000_memory_scale_{scale}.parquet"
+        if not path.exists():
+            print(f"  [figures] {path.name} absent -- N={scale} omitted.")
+            continue
+        d = pd.read_parquet(path)
+        n_nodes = int(d.n_nodes.iloc[0])
+        cells = d.rename(columns={"x_effective": "_x_effective"})
+        lo, hi = analysis.overlap_range(cells, "_x_effective",
+                                        [common.CONN, common.CONTRAST])
+        grid = np.linspace(lo, hi, common.N_GRID)
+        frames[scale] = (analysis.paired_difference(
+            analysis.reindex(cells, "_x_effective", grid, "linear"), grid), n_nodes)
+        sup = d[d.spectral_radius >= SR_CRIT[scale]]
+        for variant, mc in sup.groupby("variant").mc.median().items():
+            ladder_rows.append(dict(scale=scale, variant=variant, mc=float(mc)))
+
+    if not frames:
+        raise FileNotFoundError("no N=1000 run parquets found; run --n1000 first.")
+    common.FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+    panels.fig_cross_scale(frames, pd.DataFrame(ladder_rows),
+                           common.FIGURES_DIR / "fig_cross_scale_n1000")
