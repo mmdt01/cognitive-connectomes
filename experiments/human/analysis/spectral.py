@@ -8,7 +8,16 @@ bulk, n_critical ~ 1) and ``human_empirical_signed`` should de-compress it (sign
 removes the Perron structure) -- the spectral basis of the predicted sign-primary
 robustness crossover.
 
-    python -m experiments.human.analysis.spectral
+    python -m experiments.human.analysis.spectral [--scale N] [--jobs N]
+
+``--scale`` (default ``matrix_config.SCALE`` = 448) selects the parcellation;
+``--jobs`` fork-parallelises the per-(condition, variant, seed) eigendecompositions.
+Both are **additive**: the no-flag invocation keeps the original sequential code path
+and the original output paths, so its artifacts reproduce bit-identically. Any other
+scale writes to ``results/scale_<N>/`` + ``figures/scale_<N>/`` instead, leaving the
+N=448 files untouched. (``--jobs > 1`` pins one BLAS thread per worker rather than
+the module default of two, so seed-averaged values may differ in the last ulp; the
+default path is the reference.)
 
 Outputs (here):
   figures/eigenvalue_spectra.png    normalized eigenvalues (lambda/|lambda_1|) in the complex plane
@@ -32,6 +41,7 @@ from src.reservoir import blas  # noqa: F401  (limit BLAS threads; import early)
 from src.analysis import spectral
 from experiments.human.substrates import HumanSubstrateBuilder
 from experiments.human import matrix_config
+from experiments.human.analysis.manifold.common import flag, run_cells
 
 _DIR = Path(__file__).resolve().parent
 FIGURES_DIR = _DIR / "figures"
@@ -99,17 +109,58 @@ def _write_markdown_table(metrics_mean: dict, path: Path) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
-def main() -> None:
-    builder = HumanSubstrateBuilder()
-    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+def _dirs(scale: int) -> tuple[Path, Path]:
+    """(results, figures) for ``scale``. The default scale keeps the original
+    un-tagged paths so the no-flag run reproduces its committed artifacts exactly."""
+    if scale == matrix_config.SCALE:
+        return RESULTS_DIR, FIGURES_DIR
+    return RESULTS_DIR / f"scale_{scale}", FIGURES_DIR / f"scale_{scale}"
+
+
+def _metrics_cell(cell, state) -> list:
+    """One (condition, variant, seed) -> its ``spectral_metrics`` dict (fork path)."""
+    condition, variant, seed = cell
+    metrics = spectral.spectral_metrics(
+        state["builder"].weighted(condition, variant, seed))
+    return [dict(cell=cell, metrics=metrics)]
+
+
+def _parallel_metrics(builder, jobs: int) -> dict:
+    """Pre-compute every cell's metrics across ``jobs`` fork workers, keyed by
+    (condition, variant, seed). The mask cache is warmed in the parent first so the
+    children inherit it copy-on-write instead of re-running each rewire."""
+    for variant in VARIANTS:
+        if variant == "connectome_weight_permuted":
+            continue                      # bypasses the mask ladder
+        for seed in range(N_SEEDS):
+            builder.get_mask(variant, seed)
+    cells = [(c, v, s) for c in CONDITIONS for v in VARIANTS for s in range(N_SEEDS)]
+    frame = run_cells(cells, _metrics_cell, {"builder": builder}, jobs, "spectral")
+    return {row.cell: row.metrics for row in frame.itertuples()}
+
+
+def main(scale: int | None = None, jobs: int = 1) -> None:
+    scale = matrix_config.SCALE if scale is None else scale
+    results_dir, figures_dir = _dirs(scale)
+    builder = HumanSubstrateBuilder(scale=scale)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Human spectral analysis: scale={scale} N={builder.mask.shape[0]} "
+          f"jobs={jobs}")
+
+    # Parallel pre-pass only; the jobs=1 path stays the original sequential loop so
+    # the default invocation is numerically unchanged.
+    cache = _parallel_metrics(builder, jobs) if jobs > 1 else None
 
     # --- seed-averaged scalar metrics for every (condition, variant) ----------
     rows, metrics_mean = [], {}
     for cond in CONDITIONS:
         for v in VARIANTS:
-            per_seed = [spectral.spectral_metrics(builder.weighted(cond, v, s))
-                        for s in range(N_SEEDS)]
+            per_seed = [
+                cache[(cond, v, s)] if cache is not None
+                else spectral.spectral_metrics(builder.weighted(cond, v, s))
+                for s in range(N_SEEDS)
+            ]
             keys = list(per_seed[0])
             mean = {k: float(np.mean([m[k] for m in per_seed])) for k in keys}
             sem = {k: float(np.std([m[k] for m in per_seed]) / np.sqrt(N_SEEDS))
@@ -120,10 +171,10 @@ def main() -> None:
                 row[k], row[f"{k}_sem"] = mean[k], sem[k]
             rows.append(row)
 
-    pd.DataFrame(rows).to_csv(RESULTS_DIR / "spectral_metrics.csv", index=False)
-    _write_markdown_table(metrics_mean, RESULTS_DIR / "spectral_metrics.md")
-    print(f"Saved {RESULTS_DIR / 'spectral_metrics.csv'}")
-    print(f"Saved {RESULTS_DIR / 'spectral_metrics.md'}")
+    pd.DataFrame(rows).to_csv(results_dir / "spectral_metrics.csv", index=False)
+    _write_markdown_table(metrics_mean, results_dir / "spectral_metrics.md")
+    print(f"Saved {results_dir / 'spectral_metrics.csv'}")
+    print(f"Saved {results_dir / 'spectral_metrics.md'}")
 
     # --- representative spectra + decay curves (one seed) ---------------------
     spectra, decays = {}, {}
@@ -137,25 +188,25 @@ def main() -> None:
     # --- figures --------------------------------------------------------------
     spectral.plot_eigenvalue_grid(
         spectra, CONDITIONS, KEY_VARIANTS, CONDITION_TITLE_DISPLAY, VARIANT_TITLE,
-        VARIANT_COLOR, FIGURES_DIR / "eigenvalue_spectra.png",
+        VARIANT_COLOR, figures_dir / "eigenvalue_spectra.png",
         suptitle="Human SC normalized eigenvalue spectra (λ / |λ₁|): connectome vs nulls",
     )
-    print(f"Saved {FIGURES_DIR / 'eigenvalue_spectra.png'}")
+    print(f"Saved {figures_dir / 'eigenvalue_spectra.png'}")
 
     spectral.plot_metric_bars(
         metrics_mean, METRIC_KEYS, METRIC_TITLES, CONDITIONS, CONDITION_TITLE,
         VARIANTS, VARIANT_TITLE, VARIANT_COLOR,
-        FIGURES_DIR / "spectral_compression.png",
+        figures_dir / "spectral_compression.png",
         suptitle="Human SC spectral bulk compression by variant (lower = milder effective dynamics)",
     )
-    print(f"Saved {FIGURES_DIR / 'spectral_compression.png'}")
+    print(f"Saved {figures_dir / 'spectral_compression.png'}")
 
     spectral.plot_magnitude_decay(
         decays, CONDITIONS, CONDITION_TITLE, VARIANTS, VARIANT_TITLE,
-        VARIANT_COLOR, FIGURES_DIR / "magnitude_decay.png",
+        VARIANT_COLOR, figures_dir / "magnitude_decay.png",
         suptitle="Human SC eigenvalue-magnitude decay: |λ| / |λ₁| (steeper = more compressed)",
     )
-    print(f"Saved {FIGURES_DIR / 'magnitude_decay.png'}")
+    print(f"Saved {figures_dir / 'magnitude_decay.png'}")
 
     # --- headline glance to stdout -------------------------------------------
     print("\nbulk95/|λ₁| (lower = more compressed bulk):")
@@ -168,4 +219,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(scale=flag(sys.argv, "--scale", None, int),
+         jobs=flag(sys.argv, "--jobs", 1, int))
