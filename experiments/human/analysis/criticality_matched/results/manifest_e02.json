@@ -1,0 +1,82 @@
+{
+  "experiment": "E0.2 criticality-matched panel",
+  "generated_utc": "2026-08-11T09:37:27.074760+00:00",
+  "scale": 448,
+  "code_version": {
+    "git_commit": "b8ba26da0765db96b0f022ded62aab756ba1f2be",
+    "git_branch": "main",
+    "git_dirty": true,
+    "git_dirty_files": [
+      "ACTION_PLAN_JOURNAL_ROADMAP.md",
+      "BRAIN_VIZ_PLAN.md",
+      "CLAUDE_CODE_PROMPT_E04_E02.md",
+      "N1000_RUN_SPEC.md",
+      "PHASE_DIAGRAM_EXPERIMENT.md",
+      "PROJECT_KNOWLEDGE_BASE.md",
+      "PROJECT_PLAN.md",
+      "TIER0_STATE_OF_PLAY.md",
+      "experiments/human/analysis/criticality_matched/",
+      "experiments/human/analysis/eigenspectrum/",
+      "experiments/human/analysis/spectral.py",
+      "gitignore"
+    ]
+  },
+  "bulk95_definition": "bulk95 = percentile(|lambda|, 95) / |lambda_1|, over the FULL spectrum of the un-rescaled recurrent matrix W (the Perron outlier is included in the percentile population). Computed by src.analysis.spectral.recurrent_spectrum as `bulk95_radius` on the normalised base W / |lambda_1|; identical formula to spectral_metrics' `bulk95_ratio`.",
+  "config": {
+    "f_cut": 0.0,
+    "task": "mc",
+    "variants": [
+      "connectome",
+      "connectome_weight_permuted",
+      "degree_rewire",
+      "erdos_renyi"
+    ],
+    "contrast": "erdos_renyi",
+    "axes": [
+      "nominal",
+      "effective",
+      "sigma_eff"
+    ],
+    "primary_axis": "effective",
+    "interpolation": [
+      "linear",
+      "cubic"
+    ],
+    "primary_interpolation": "linear",
+    "n_grid": 121,
+    "n_seeds": 10,
+    "gates": {
+      "source_agreement": {
+        "status": "passed",
+        "reference": "/home/matthys/imperial/thesis/cognitive-connectomes/experiments/human/analysis/results/scale_448/probe3_deff.parquet",
+        "n_cells": 120,
+        "shared_sr": [
+          0.0,
+          2.0,
+          6.0
+        ],
+        "alpha": 1e-06,
+        "max_abs_diff": 0.00032608626271013463,
+        "max_rel_diff": 1.826316597657463e-05,
+        "sigma0_max_abs_diff": 0.0019456892787872437
+      }
+    },
+    "cell_source": {
+      "source": "taskB_extended",
+      "path": "/home/matthys/imperial/thesis/cognitive-connectomes/experiments/human/analysis/criticality_matched/results/taskB_extended_sweep_scale_448.parquet",
+      "sr_max": 8.0,
+      "n_sr": 21,
+      "variants": [
+        "connectome",
+        "connectome_weight_permuted",
+        "degree_rewire",
+        "erdos_renyi"
+      ]
+    },
+    "overlap": [
+      0.0,
+      2.5991986450697935
+    ],
+    "source": "/home/matthys/imperial/thesis/cognitive-connectomes/experiments/human/analysis/criticality_matched/results/taskB_extended_sweep_scale_448.parquet"
+  }
+}

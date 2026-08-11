@@ -1,0 +1,393 @@
+"""E0.2 figures: the memory panel on both axes, the ceiling, and the sigma_eff fold.
+
+Three figures, vector PDF + 300 dpi PNG, Okabe-Ito palette (matching E0.4's Figure 1):
+
+``fig_panelA_matched``
+    Panel A recomputed on effective criticality, **side by side with the original
+    nominal-sr version**, so the change is legible. Median across seeds with the
+    inter-quartile band; the region outside the overlap is not drawn at all, and the
+    effective panel carries an explicit marker where the analysis is censored by the
+    end of the swept range.
+
+``fig_absolute_deff``
+    Absolute ``d_eff`` per variant on both axes -- not only the difference -- with
+    ``d_eff / N`` on the right-hand axis and **the hard ceiling at N drawn**. Every
+    memory figure has to show distance-from-ceiling, because all three variants run
+    close to it and a shrinking difference can mean the null is saturating rather
+    than the connectome degrading.
+
+``fig_sigma_eff``
+    The secondary axis, kept honest: (left) ``sigma_eff`` against ``sr`` per variant,
+    which shows the fold directly -- it rises, turns over and falls as the tanh gain
+    collapses faster than ``sr`` grows; (right) ``d_eff`` against ``sigma_eff`` as a
+    *parametric* trajectory traced by ``sr``, with the turning point marked. No
+    matched differencing is done on this axis: it is not invertible, so a matched
+    grid would be ill-posed.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+
+from experiments.human.analysis.criticality_matched import common
+
+_INK, _MUT, _GRID = "#111111", "#8a8a8a", "#dddddd"
+_POS, _NEG = "#0072B2", "#D55E00"
+_RC = {
+    "font.size": 8, "axes.labelsize": 8, "axes.titlesize": 8.5,
+    "xtick.labelsize": 7, "ytick.labelsize": 7, "legend.fontsize": 7,
+    "axes.linewidth": 0.7, "xtick.major.width": 0.7, "ytick.major.width": 0.7,
+    "axes.edgecolor": _INK, "axes.labelcolor": _INK, "text.color": _INK,
+    "xtick.color": _INK, "ytick.color": _INK,
+    "pdf.fonttype": 42, "ps.fonttype": 42, "savefig.bbox": "tight",
+}
+
+
+def _save(fig, path_stem) -> None:
+    for suffix, kwargs in ((".pdf", {}), (".png", {"dpi": 300})):
+        path = path_stem.with_suffix(suffix)
+        fig.savefig(path, **kwargs)
+        print(f"Saved {path}")
+    plt.close(fig)
+
+
+def _style(ax) -> None:
+    ax.grid(True, color=_GRID, lw=0.5, alpha=0.8)
+    ax.set_axisbelow(True)
+    for spine in ("top", "right"):
+        ax.spines[spine].set_visible(False)
+
+
+def _label(ax, letter) -> None:
+    ax.text(-0.16, 1.10, letter, transform=ax.transAxes, fontsize=10,
+            fontweight="bold", va="top", ha="left", color=_INK)
+
+
+# ---------------------------------------------------------------------------
+def fig_panel_a(frames: dict, summaries: dict, path_stem) -> None:
+    """Nominal vs effective-criticality Panel A, side by side."""
+    order = ["nominal", "effective"]
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.1), squeeze=False)
+        ymax = max(float(np.nanmax(frames[a].dD_q75)) for a in order)
+        ymin = min(float(np.nanmin(frames[a].dD_q25)) for a in order)
+        pad = 0.08 * (ymax - ymin)
+        for ax, axis, letter in zip(axes[0], order, "ab"):
+            frame, summary = frames[axis], summaries[axis]
+            x = frame.x.to_numpy(float)
+            med = frame.dD_median.to_numpy(float)
+            ax.axhline(0.0, color=_MUT, lw=0.9, ls="-")
+            ax.fill_between(x, frame.dD_q25, frame.dD_q75, color=_INK, alpha=0.15, lw=0)
+            ax.fill_between(x, 0, np.clip(med, 0, None), color=_POS, alpha=0.20, lw=0)
+            ax.fill_between(x, np.clip(med, None, 0), 0, color=_NEG, alpha=0.20, lw=0)
+            ax.plot(x, med, color=_INK, lw=1.6, solid_capstyle="round")
+            ax.set_xlabel(common.AXES[axis]["label"], labelpad=1)
+            ax.set_ylim(ymin - pad, ymax + pad)
+            ax.set_xlim(x[0], x[-1])
+            _style(ax)
+            _label(ax, letter)
+            peak = summary["peak_dD"]
+            ax.plot([summary["peak_x"]], [peak], marker="o", ms=4, color=_INK,
+                    zorder=5, ls="none")
+            if summary.get("peak_at_upper_edge"):
+                # The analysis stops before the effect does -- say so on the figure.
+                ax.annotate("peak is at the edge of\nthe overlap — still rising",
+                            xy=(summary["peak_x"], peak),
+                            xytext=(0.40, 0.90), textcoords="axes fraction",
+                            fontsize=6.4, color=_NEG, ha="left", va="top",
+                            arrowprops=dict(arrowstyle="->", lw=0.7, color=_NEG))
+                ax.axvspan(x[-1], x[-1] + 0.02 * (x[-1] - x[0]), color=_NEG,
+                           alpha=0.30, lw=0)
+            else:
+                ax.annotate(f"peak {peak:+.0f}", xy=(summary["peak_x"], peak),
+                            xytext=(6, -2), textcoords="offset points", fontsize=6.4,
+                            color=_INK)
+            title = ("original: matched on nominal $\\sigma$" if axis == "nominal"
+                     else "corrected: matched on effective criticality")
+            ax.set_title(title, pad=4)
+        axes[0][0].set_ylabel(r"$\Delta d_{eff}$ (connectome $-$ ER)", labelpad=2)
+        note = (f"Overlap {summaries['effective']['overlap_lo']:.2f}–"
+                f"{summaries['effective']['overlap_hi']:.2f} "
+                f"({summaries['effective']['fraction_of_full_range']:.0%} of the swept "
+                "range); nothing extrapolated. Median of per-seed paired differences, "
+                "IQR shaded.")
+        fig.text(0.5, -0.10, note, ha="center", va="top", fontsize=6.4, color=_MUT)
+        fig.suptitle("Does the memory advantage survive effective-criticality "
+                     "matching?", fontsize=9.5, y=1.04)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+# ---------------------------------------------------------------------------
+def fig_absolute(frames: dict, n_nodes: int, path_stem) -> None:
+    """Absolute d_eff per variant on both axes, with the hard ceiling at N."""
+    order = ["nominal", "effective"]
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.1), squeeze=False, sharey=True)
+        for ax, axis, letter in zip(axes[0], order, "ab"):
+            frame = frames[axis]
+            x = frame.x.to_numpy(float)
+            for variant in common.VARIANTS:
+                col = f"d_eff_{variant}"
+                if col not in frame:
+                    continue
+                ax.plot(x, frame[col], color=common.VARIANT_COLOR[variant], lw=1.5,
+                        label=common.VARIANT_TITLE[variant], solid_capstyle="round")
+            ax.axhline(n_nodes, color=_NEG, lw=1.1, ls="--")
+            ax.text(0.02, n_nodes, f" hard ceiling $d_{{eff}} = N = {n_nodes}$",
+                    transform=ax.get_yaxis_transform(), fontsize=6.4, color=_NEG,
+                    va="bottom", ha="left")
+            ax.set_xlabel(common.AXES[axis]["label"], labelpad=1)
+            ax.set_xlim(x[0], x[-1])
+            ax.set_ylim(0, n_nodes * 1.12)
+            _style(ax)
+            _label(ax, letter)
+        axes[0][0].set_ylabel(r"$d_{eff}$ (seed median)", labelpad=2)
+        secondary = axes[0][1].secondary_yaxis(
+            "right", functions=(lambda v: v / n_nodes, lambda v: v * n_nodes))
+        secondary.set_ylabel(r"$d_{eff} / N$", labelpad=2)
+        secondary.spines["right"].set_visible(True)
+        axes[0][0].legend(loc="lower right", frameon=False, handlelength=1.3)
+        fig.suptitle("Absolute readout dimensionality and distance from the ceiling",
+                     fontsize=9.5, y=1.03)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+# ---------------------------------------------------------------------------
+def fig_heatmaps(results: dict, path_stem) -> None:
+    """The (f, sigma) panels on both axes, with the cross-panel overlay.
+
+    Rows are axes (nominal control on top, effective correction below); columns are
+    Panel A (memory), Panel B (generation) and the boundary overlay. The nominal row
+    exists to show the pipeline reproduces the published crossing, so that the
+    corrected row can be read as a change in the result rather than a change in the
+    method. Regions without coverage for every compared variant are left unpainted,
+    and the coverage edge -- which for f > 0 is also the sigma = 6 censoring edge -- is
+    drawn explicitly.
+    """
+    from matplotlib.colors import TwoSlopeNorm
+    from experiments.human.analysis.criticality_matched import heatmaps as H
+
+    axes_order = [a for a in ("nominal", "effective") if a in results]
+    panel_order = ["dD", "dStraight"]
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(len(axes_order), 3, figsize=(7.4, 2.7 * len(axes_order)),
+                                 squeeze=False)
+        for row, axis_name in enumerate(axes_order):
+            res = results[axis_name]
+            xlabel = (r"nominal $\sigma$" if axis_name == "nominal"
+                      else r"effective criticality  $\sigma\cdot\mathrm{bulk}_{95}$")
+            for col, panel in enumerate(panel_order):
+                ax = axes[row][col]
+                op = res["ops"].get(panel)
+                if op is None:
+                    ax.set_visible(False)
+                    continue
+                piv = op.pivot_table(index="f", columns="spectral_radius", values=panel)
+                Z = piv.to_numpy(float)
+                fv, xv = piv.index.to_numpy(float), piv.columns.to_numpy(float)
+                vmax = float(np.nanmax(np.abs(Z))) or 1e-9
+                dx = (xv[1] - xv[0]) if xv.size > 1 else 1.0
+                df_ = (fv[1] - fv[0]) if fv.size > 1 else 0.05
+                im = ax.imshow(
+                    np.ma.masked_invalid(Z), origin="lower", aspect="auto",
+                    cmap="RdBu_r", norm=TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax),
+                    extent=[xv[0] - dx / 2, xv[-1] + dx / 2,
+                            fv[0] - df_ / 2, fv[-1] + df_ / 2])
+                fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+                bound = res["bounds"].get(panel, {})
+                bx = np.array(sorted(bound), float)
+                by = np.array([bound[x] for x in sorted(bound)], float)
+                ax.plot(bx, by, color=_INK, lw=1.8, solid_capstyle="round")
+                if axis_name == "effective":
+                    cov = res["coverage"]
+                    ax.plot(cov.x_hi, cov.f, color=_NEG, lw=1.2, ls="--")
+                ax.set_xlabel(xlabel, labelpad=1)
+                if col == 0:
+                    ax.set_ylabel("negative-weight fraction $f$", labelpad=2)
+                ax.set_title(("Panel A — memory" if panel == "dD"
+                              else "Panel B — generation"), pad=4)
+                _style(ax)
+                _label(ax, "abcdef"[row * 3 + col])
+
+            ax = axes[row][2]
+            for panel, colour, name in (("dD", _POS, "memory $f^*$"),
+                                        ("dStraight", _NEG, "generation $f^*$")):
+                bound = res["bounds"].get(panel, {})
+                bx = np.array(sorted(bound), float)
+                by = np.array([bound[x] for x in sorted(bound)], float)
+                ok = np.isfinite(by)
+                ax.plot(bx[ok], by[ok], color=colour, lw=1.9, label=name,
+                        solid_capstyle="round")
+            cross = res["crossing"]
+            if cross.get("crosses"):
+                ax.plot([cross["x"]], [cross["f"]], marker="o", ms=6, color=_INK,
+                        ls="none", zorder=5)
+                ax.annotate(f"cross\n({cross['x']:.2f}, {cross['f']:.3f})",
+                            xy=(cross["x"], cross["f"]), xytext=(6, 8),
+                            textcoords="offset points", fontsize=6.4, color=_INK)
+            else:
+                ax.text(0.5, 0.94, "no crossing within coverage", transform=ax.transAxes,
+                        ha="center", va="top", fontsize=6.8, color=_NEG)
+            ax.set_xlabel(xlabel, labelpad=1)
+            ax.set_ylabel("critical $f^*$", labelpad=2)
+            ax.set_ylim(-0.02, 0.52)
+            ax.legend(loc="lower right", frameon=False, handlelength=1.3, fontsize=6.4)
+            ax.set_title("cross-panel overlay", pad=4)
+            _style(ax)
+            _label(ax, "abcdef"[row * 3 + 2])
+
+        fig.text(0.5, -0.04,
+                 "Top row: nominal σ (control — reproduces the published crossing). "
+                 "Bottom row: effective criticality. Dashed red = coverage edge, which "
+                 "for f > 0 is the σ = 6 censoring edge (the σ = 8 extension was f = 0 "
+                 "only). Unpainted = no coverage for every compared variant.",
+                 ha="center", va="top", fontsize=6.2, color=_MUT)
+        fig.suptitle("Does the memory/generation dissociation survive "
+                     "effective-criticality matching?", fontsize=9.5, y=1.02)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+def fig_alpha_sweep(peak: pd.DataFrame, ladder: pd.DataFrame, source: pd.DataFrame,
+                    frozen_alpha: float, n_nodes: int, path_stem) -> None:
+    """Task A: is `d_eff` saturated at the frozen ridge, and where does the ladder live?
+
+    (a) peak ``d_eff/N`` against ``alpha`` with the ceiling drawn -- the saturation
+    question; (b) ladder ordering against ``alpha`` per sigma region -- whether the
+    ordering is a ridge artifact; (c) ladder ordering along sigma at the frozen alpha
+    -- which part of the axis actually carries it.
+    """
+    region_colour = {"subcritical": "#CC79A7", "near_peak": "#E69F00",
+                     "supercritical": "#0072B2", "all_sigma": _INK}
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 3, figsize=(7.4, 2.7), squeeze=False)
+
+        ax = axes[0][0]
+        for variant in common.VARIANTS + ["connectome_weight_permuted"]:
+            sub = peak[peak.variant == variant].sort_values("alpha")
+            if sub.empty:
+                continue
+            colour = common.VARIANT_COLOR.get(variant, "#D55E00")
+            ax.plot(sub.alpha, sub.d_eff_norm, color=colour, lw=1.5,
+                    label=common.VARIANT_TITLE.get(variant, "Weight-permuted"))
+        ax.axhline(1.0, color=_NEG, lw=1.0, ls="--")
+        ax.text(0.02, 1.0, " ceiling $d_{eff}=N$", transform=ax.get_yaxis_transform(),
+                fontsize=6.2, color=_NEG, va="bottom", ha="left")
+        ax.axvline(frozen_alpha, color=_MUT, lw=1.0, ls=":")
+        ax.text(frozen_alpha, 0.03, r" frozen $\alpha$", fontsize=6.2, color=_MUT,
+                rotation=90, va="bottom", ha="left")
+        ax.set_xscale("log")
+        ax.set_xlabel(r"ridge $\alpha$", labelpad=1)
+        ax.set_ylabel(r"peak $d_{eff}/N$", labelpad=2)
+        ax.set_ylim(0, 1.12)
+        ax.legend(loc="lower left", frameon=False, handlelength=1.2, fontsize=6.2)
+        ax.set_title("saturation at the peak", pad=4)
+        _style(ax)
+        _label(ax, "a")
+
+        ax = axes[0][1]
+        for region in ["subcritical", "near_peak", "supercritical"]:
+            sub = ladder[ladder.region == region].sort_values("alpha")
+            if sub.empty:
+                continue
+            ax.plot(sub.alpha, -sub.spearman_vs_rank, lw=1.5,
+                    color=region_colour[region], label=region.replace("_", " "))
+        ax.axhline(0.0, color=_MUT, lw=0.9)
+        ax.axvline(frozen_alpha, color=_MUT, lw=1.0, ls=":")
+        ax.set_xscale("log")
+        ax.set_xlabel(r"ridge $\alpha$", labelpad=1)
+        ax.set_ylabel("ladder ordering\n(+1 = connectome highest)", labelpad=2)
+        ax.set_ylim(-1.1, 1.1)
+        ax.legend(loc="lower left", frameon=False, handlelength=1.2, fontsize=6.2)
+        ax.set_title(r"ordering vs $\alpha$", pad=4)
+        _style(ax)
+        _label(ax, "b")
+
+        ax = axes[0][2]
+        ax.plot(source.spectral_radius, -source.spearman_vs_rank, color=_INK, lw=1.6,
+                marker="o", ms=2.8)
+        ax.axhline(0.0, color=_MUT, lw=0.9)
+        ax.axvline(3.08, color=_POS, lw=1.0, ls="--")
+        ax.text(3.08, -1.02, r" $sr_{crit}$", fontsize=6.2, color=_POS, ha="left")
+        ax.set_xlabel(r"spectral radius $\sigma$", labelpad=1)
+        ax.set_ylabel("ladder ordering\n(+1 = connectome highest)", labelpad=2)
+        ax.set_ylim(-1.1, 1.1)
+        ax.set_title(r"ordering vs $\sigma$ (frozen $\alpha$)", pad=4)
+        _style(ax)
+        _label(ax, "c")
+
+        fig.text(0.5, -0.10,
+                 "The published ladder ordering lives only in the supercritical decay "
+                 "region: at the peak every variant is at the ceiling and the ordering "
+                 "is absent; subcritically it is inverted.",
+                 ha="center", va="top", fontsize=6.4, color=_MUT)
+        fig.suptitle(r"Task A: $d_{eff}(\alpha)$ — the ceiling is $N$ relative to "
+                     r"$\alpha$", fontsize=9.5, y=1.05)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+def fig_sigma_eff(traj: pd.DataFrame, path_stem) -> None:
+    """The secondary axis: the fold, and d_eff as a parametric trajectory."""
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.1), squeeze=False)
+        ax = axes[0][0]
+        for variant, group in traj.groupby("variant"):
+            group = group.sort_values("spectral_radius")
+            colour = common.VARIANT_COLOR.get(variant, _INK)
+            ax.plot(group.spectral_radius, group.sigma_eff, color=colour, lw=1.5,
+                    marker="o", ms=2.6, label=common.VARIANT_TITLE.get(variant, variant))
+            peak = group[group.is_sigma_eff_peak]
+            ax.plot(peak.spectral_radius, peak.sigma_eff, marker="v", ms=5,
+                    color=colour, ls="none", zorder=5)
+        ax.axhline(1.0, color=_NEG, lw=1.0, ls="--")
+        ax.text(0.02, 1.0, r" $\sigma_{eff} = 1$ (never reached on MC states)",
+                transform=ax.get_yaxis_transform(), fontsize=6.4, color=_NEG,
+                va="bottom", ha="left")
+        ax.set_xlabel(r"nominal spectral radius $\sigma$", labelpad=1)
+        ax.set_ylabel(r"$\sigma_{eff}$", labelpad=2)
+        ax.set_ylim(0, 1.18)
+        ax.legend(loc="lower right", frameon=False, handlelength=1.3)
+        ax.set_title(r"$\sigma_{eff}$ folds: it is not monotone in $\sigma$", pad=4)
+        _style(ax)
+        _label(ax, "a")
+
+        ax = axes[0][1]
+        for variant, group in traj.groupby("variant"):
+            group = group.sort_values("spectral_radius")
+            colour = common.VARIANT_COLOR.get(variant, _INK)
+            rising = group[group.branch == "rising"]
+            folded = group[group.branch == "folded"]
+            ax.plot(rising.sigma_eff, rising.d_eff, color=colour, lw=1.6,
+                    solid_capstyle="round")
+            ax.plot(folded.sigma_eff, folded.d_eff, color=colour, lw=1.4,
+                    ls=(0, (4, 2)), solid_capstyle="round")
+            peak = group[group.is_sigma_eff_peak]
+            ax.plot(peak.sigma_eff, peak.d_eff, marker="v", ms=5, color=colour,
+                    ls="none", zorder=5)
+        ax.set_xlabel(common.AXES["sigma_eff"]["label"], labelpad=1)
+        ax.set_ylabel(r"$d_{eff}$ (seed median)", labelpad=2)
+        ax.set_title(r"parametric in $\sigma$: two branches per variant", pad=4)
+        _style(ax)
+        _label(ax, "b")
+        handles = [Line2D([0], [0], color=_MUT, lw=1.6, label="rising branch"),
+                   Line2D([0], [0], color=_MUT, lw=1.4, ls=(0, (4, 2)),
+                          label="folded branch"),
+                   Line2D([0], [0], color=_MUT, marker="v", ms=5, ls="none",
+                          label=r"$\sigma_{eff}$ turning point")]
+        ax.legend(handles=handles, loc="upper left", frameon=False, handlelength=1.5)
+        fig.text(0.5, -0.08,
+                 r"$\sigma_{eff}$ is non-monotone in $\sigma$, so it cannot index a "
+                 "matched grid: each value is reached twice per variant. Shown "
+                 "parametrically, with the fold retained.",
+                 ha="center", va="top", fontsize=6.4, color=_MUT)
+        fig.suptitle(r"Secondary axis: the nonlinearity-corrected radius $\sigma_{eff}$",
+                     fontsize=9.5, y=1.03)
+        fig.tight_layout()
+        _save(fig, path_stem)
