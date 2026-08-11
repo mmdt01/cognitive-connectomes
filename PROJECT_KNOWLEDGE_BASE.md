@@ -7,8 +7,12 @@ of the activity manifold — beyond random or degree-matched baselines.
 
 This document is the single canonical reference for *what is implemented and what
 has been found*. Load it into fresh Claude conversations as starting context; the
-forward plan and open direction live in `PROJECT_PLAN.md`. Detail companions:
-`PREDICTION_TASKS_INTERPRETATION.md` (the four-task substrate floor),
+forward plan lives in `ACTION_PLAN_JOURNAL_ROADMAP.md`.
+
+> **Tier 0 corrections (Aug 2026) live in `TIER0_STATE_OF_PLAY.md`**, which supersedes
+> the individual E0.4 / E0.2 / Task A / Task B summaries. Several claims in §6–7 below
+> were withdrawn or reframed by it — those are marked inline. Read it alongside this
+> document. Detail companions: `PREDICTION_TASKS_INTERPRETATION.md` (the four-task substrate floor),
 `MANIFOLD_PROBES_IMPLEMENTATION.md` and `PHASE_DIAGRAM_EXPERIMENT.md` (the
 manifold-geometry and sign-composition experiments).
 
@@ -423,8 +427,58 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 (N=448) rank ceiling (ER catching up) — pending N=1000. The ~20% Dale result is a
 *tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
 not generation quality; climate-error magnitudes are unreliable (ER divergence) — use
-bounded curvature. The connectome is *subcritically worse* than ER. Why the connectome's
-bulk is anomalously compact (the topology → spectrum link) is not yet derived.
+bounded curvature. Why the connectome's bulk is anomalously compact (the topology →
+spectrum link) is not yet derived. **On the Dale axis, sign fraction and non-normality
+co-vary** (edge mode is exactly normal at every *f*; Dale is not, and the connectome
+becomes ~2× as non-normal as its nulls at matched *f*), so Dale-arm claims are about
+node-wise inhibition, not sign fraction alone (E0.4 §4).
+
+**RESTATED — "the connectome is subcritically worse than ER".** The deficit is
+**axis-dependent**, not an artifact. The simulated operator `σ·W/|λ₁|` has spectral
+radius exactly σ for every variant, so nominal-σ matching **is** matched spectral
+radius (textbook ESN criticality); `σ·bulk₉₅` matching is matched *bulk* radius, which
+leaves the Perron root unmatched (at the matched peak the connectome sits at σ=6.0 vs
+ER's 3.54, a 1.7× larger Perron root). Since the memory mechanism under test is the
+hub-localised Perron mode, **that axis is not neutral toward its own hypothesis — and
+neither is the nominal one.** Correct statement: the deficit is **present at matched
+spectral radius (−217) and absent at matched bulk radius (−24)**; report both axes,
+say what each holds fixed, and rest the claim on surviving both. Summary wording:
+**parity below criticality, advantage above.**
+
+**REFRAMED — the memory result is robustness, not capacity.** Matched on effective
+criticality, all variants peak within a few percent of the hard ceiling `d_eff = N`,
+so peak capacity is *unresolvable at N=448* and the matched advantage is a **decay-rate
+difference**. Lead with the crossing: the connectome peaks **lowest** (432.4) yet
+retains the most at the top of the overlap (322.3 = 75%), against degree 179.8 (40%)
+and ER 124.4 (28%). A ceiling can clip curves but cannot manufacture a crossing, so the
+decay result is robust to finite size in a way the peak result is not. Independently
+confirmed by the `d_eff(α)` sweep (E0.2 Task A): the published +1.00 ladder ordering
+lives **entirely in the supercritical decay region** (ρ = −0.93 for σ ≥ 3.05), is
+**absent at the peak** (ρ = −0.11, everything at the ceiling) and is **inverted
+subcritically** (ρ = +1.00) — and the supercritical ordering is flat across α from
+1e−10 to 1e2, so it is not a ridge artifact.
+
+**RESTATED — what the N=1000 run is for.** It is **not** the ceiling question. Peak MC
+is ~15 against N=448, so MC was never ceiling-limited; the finite-size problem was
+always a `d_eff` problem, and the `d_eff(α)` sweep shows that saturation is confined to
+the *peak*, which is not where the result lives. The N=1000 question is: **does the
+supercritical margin (MC 12.28 vs 2.82 at α=1e-6) scale with N, or is it an N=448
+accident?**
+
+**REFRAMED — the compact bulk is a large Perron root, not a small bulk.** The
+*absolute* bulk radius is near-identical across variants (spread 4.4%) while `bulk₉₅`
+spreads 47.3%: the entire difference is in `|λ₁|` (connectome 0.189 vs ER 0.106,
+1.78×). Act I should say the connectome's placement produces an **anomalously large
+spectral gap** over a bulk that is essentially everyone's — the same fact stated in the
+direction the data supports. **Headline statistic: the gap ratio `|λ₁|/abs_bulk` =
+3.08 (connectome) vs 1.81–1.92 (nulls)** — which is identically `1/bulk₉₅` = `sr_crit`,
+so it renames rather than replaces the existing quantity.
+
+**Convention — `sr_crit = 1 / median_over_seeds(bulk₉₅)`.** The median, not the mean:
+`1/x` is convex, so `mean(1/bulk₉₅) > 1/mean(bulk₉₅)` (Jensen) and a per-seed mean of
+`1/bulk₉₅` is **biased upward** — by up to 0.087 at N=1000. Under the median the two
+computation orders agree to ≤0.0014, so `sr_crit` can be reproduced by inverting the
+reported central `bulk₉₅`.
 
 **Biological interpretation — the sign axis lives at different levels at different
 scales (structural / dynamics / functional).** What a "negative weight" *means* is

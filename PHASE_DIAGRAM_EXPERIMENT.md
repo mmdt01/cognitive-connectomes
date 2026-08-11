@@ -580,9 +580,18 @@ identically when different predictors were hypothesised. Data over expectation.)
    phase diagram with a directionally-correct but loose predictor is the honest
    result; the boundary is not perfectly spectral.
 
-5. **Connectome subcritically worse.** Below sr ~ 2.4 the connectome has *lower*
-   d_eff / MC than ER (dD < 0). The topology advantage is strictly a supercritical
-   phenomenon; there is no connectome benefit in the sub-critical regime.
+5. ~~**Connectome subcritically worse.**~~ **WITHDRAWN by E0.2.** The original reading
+   — below sr ~ 2.4 the connectome has *lower* d_eff / MC than ER (dD < 0) — was an
+   artifact of comparing at matched **nominal** sr. Because each `W` is normalised by
+   its own `|λ₁|` and the substrates have very different bulk-to-outlier gaps, at any
+   nominal sr the connectome sits far below its own critical point while ER is already
+   past its own. Re-indexed on effective criticality (`σ·bulk₉₅`), **89% of the deficit
+   disappears** (min dD −217 → −24) and the connectome is marginally *better* at low
+   effective criticality. Correct statement: **parity below criticality, advantage
+   above.** The supercritical advantage itself survives matching (peak dD +344 → +197,
+   57% retained) but is a **decay-rate** difference, not a capacity difference — all
+   variants peak at the `d_eff = N` ceiling. See `criticality_matched/results/
+   E02_verdict.md` §4.1 and §4.3.
 
 ---
 
