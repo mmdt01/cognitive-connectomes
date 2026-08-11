@@ -173,16 +173,30 @@ def control_gate(scale: int = 448) -> dict:
     exactly one thing -- the ridge parameterisation -- so a large shift here would mean
     the protocol change, not N, is moving the numbers, and would have to be understood
     before the N=1000 result could be read at all.
+
+    The Task B reference is a **gitignored** parquet, so it is present wherever that
+    sweep was run and absent everywhere else -- notably on a fresh cluster checkout.
+    Skip rather than crash: the control's own parquet is already written by then, and
+    the gate can be run later on a machine that has the reference.
     """
-    new = pd.read_parquet(common.RESULTS_DIR / f"n1000_memory_scale_{scale}.parquet")
-    old = pd.read_parquet(common.extended_sweep_path(scale),
+    new_path = common.RESULTS_DIR / f"n1000_memory_scale_{scale}.parquet"
+    old_path = common.extended_sweep_path(scale)
+    if not old_path.exists():
+        print(f"  [control-gate] SKIPPED -- {old_path.name} is not on this machine "
+              "(gitignored). The control parquet is written; run the gate where the "
+              "Task B sweep lives.")
+        return {"status": "skipped", "reason": "reference parquet absent",
+                "reference": str(old_path)}
+    new = pd.read_parquet(new_path)
+    old = pd.read_parquet(old_path,
                           columns=["variant", "seed", "spectral_radius", "mc", "d_eff"])
     keys = ["variant", "seed", "_sr"]
     merged = (new.assign(_sr=new.spectral_radius.round(6))
               .merge(old.assign(_sr=old.spectral_radius.round(6)), on=keys,
                      how="inner", suffixes=("", "_frozen")))
     sup = merged[merged.spectral_radius >= 3.05]
-    out = {"n_cells": int(len(merged)), "n_supercritical": int(len(sup))}
+    out = {"status": "passed", "n_cells": int(len(merged)),
+           "n_supercritical": int(len(sup))}
     for col in ("mc", "d_eff"):
         rel = ((sup[col] - sup[col + "_frozen"]).abs()
                / sup[col + "_frozen"].abs().clip(lower=1e-12))
