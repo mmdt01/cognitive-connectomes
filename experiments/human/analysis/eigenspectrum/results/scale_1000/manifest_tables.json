@@ -1,0 +1,51 @@
+{
+  "experiment": "E0.4 tables",
+  "generated_utc": "2026-08-08T11:33:03.699085+00:00",
+  "scale": 1000,
+  "code_version": {
+    "git_commit": "b8ba26da0765db96b0f022ded62aab756ba1f2be",
+    "git_branch": "main",
+    "git_dirty": true,
+    "git_dirty_files": [
+      "ACTION_PLAN_JOURNAL_ROADMAP.md",
+      "BRAIN_VIZ_PLAN.md",
+      "CLAUDE_CODE_PROMPT_E04_E02.md",
+      "HASE_DIAGRAM_EXPERIMENT.md",
+      "PROJECT_KNOWLEDGE_BASE.md",
+      "PROJECT_PLAN.md",
+      "experiments/human/analysis/criticality_matched/",
+      "experiments/human/analysis/eigenspectrum/",
+      "experiments/human/analysis/spectral.py"
+    ]
+  },
+  "bulk95_definition": "bulk95 = percentile(|lambda|, 95) / |lambda_1|, over the FULL spectrum of the un-rescaled recurrent matrix W (the Perron outlier is included in the percentile population). Computed by src.analysis.spectral.recurrent_spectrum as `bulk95_radius` on the normalised base W / |lambda_1|; identical formula to spectral_metrics' `bulk95_ratio`.",
+  "config": {
+    "n_nodes": 1000,
+    "conditions": [
+      "human_gaussian",
+      "human_empirical_signed",
+      "human_empirical"
+    ],
+    "variants": [
+      "connectome",
+      "connectome_weight_permuted",
+      "random_gaussian",
+      "erdos_renyi",
+      "degree_rewire",
+      "clustering_rewire",
+      "modularity_rewire"
+    ],
+    "n_seeds": 10,
+    "gates": {
+      "reproduction": {
+        "status": "skipped",
+        "reference": "/home/matthys/imperial/thesis/cognitive-connectomes/experiments/human/analysis/results/scale_1000/w_spectra.parquet"
+      },
+      "headline": {
+        "status": "skipped"
+      }
+    },
+    "max_abs_imag": 0.0,
+    "source": "experiments.human.analysis.manifold.spectra.capture_w_spectra -> src.analysis.spectral.recurrent_spectrum"
+  }
+}
