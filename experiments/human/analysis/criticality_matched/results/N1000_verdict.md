@@ -116,4 +116,91 @@ nominal). Predicted: |min `dD`| / N smaller at N=1000 than the 0.054 seen at N=4
 
 ## 4. Outcome
 
-*To be appended after the run. Not yet run at the time of writing.*
+*Run 11 August 2026 on ada (128 workers). N=448 control and N=1000 run from the same
+machine. Artifacts: `n1000_memory_scale_{448,1000}.parquet`.*
+
+### 4.0 Control
+
+The ridge reparameterisation is neutral at N=448: supercritical MC margin 4.35 (frozen,
+absolute α) → **4.40** (new rule), median per-cell change 0.32% MC / 0.70% `d_eff`. ada
+reproduced the laptop's realised α to three significant figures. **Baseline for §2 is
+therefore 4.40.**
+
+### 4.1 PRIMARY — the margin holds
+
+| | N=448 | N=1000 |
+|---|---|---|
+| connectome | 12.32 | 13.93 |
+| weight-permuted | 7.34 | 8.98 |
+| degree | 4.61 | 5.09 |
+| Erdős–Rényi | 2.80 | 3.15 |
+| **margin conn/ER** | **4.40** | **4.42** |
+
+Against §2's criteria the ratio of 4.42 clears the ≥4.35 bar, so it lands in the
+**"scales"** band as written. But the change is **+0.5%**, so the substantive
+description is that it **holds** — flat, not growing. Absolute MC rose ~13% for both
+connectome and ER, and the ratio is what survived unchanged.
+
+**The supercritical margin is not an N=448 accident.** That was the question this run
+existed to answer, and it is answered.
+
+### 4.2 FALSIFICATION — no swap, but the test was underpowered on the predictor side
+
+Predicted: if `bulk95` orders the MC ladder, degree and ER must swap at N=1000, because
+`bulk95` reverses between scales.
+
+**They did not swap.** Degree stays above ER at both scales, decisively and by an
+essentially unchanged margin:
+
+| | ER − degree (paired, per seed) | p |
+|---|---|---|
+| N=448 | −1.804 [−2.125, −1.484] | 0.002 |
+| N=1000 | −1.902 [−2.187, −1.617] | 0.002 |
+
+`bulk95` at N=1000 puts ER (0.4307) *below* degree (0.4449), so it predicts ER should
+retain more memory. It retains decisively less. The ladder Spearman against `bulk95`
+therefore drops from **+1.00 at N=448 to +0.80 at N=1000** — one transposition, on
+exactly the pair where the predictor made a discriminating claim.
+
+**But this does not cleanly falsify, and the reason is a flaw in my own test design.**
+The `bulk95` reversal the test rests on **is not statistically significant**: paired
+across seeds, degree − ER = **+0.0142 [−0.0191, +0.0475], p = 0.16**. At N=448 the same
+contrast *is* significant (−0.0271, CI excludes zero). So at N=1000 the predictor has no
+established ordering between degree and ER, and a test cannot be discriminating on a
+distinction the predictor cannot make.
+
+I pre-registered that the difference was small (3.2%) and asserted the test was "on the
+sign, not the size" — but never checked whether the sign itself was established. It
+isn't. **The honest classification is §3's third branch: inconclusive**, and it is
+inconclusive for a reason I should have caught before running.
+
+What survives: `bulk95`'s *point-estimate* ordering fails to predict the MC ordering at
+N=1000, which is weak evidence against `bulk95`-as-sole-controller and warrants a
+properly powered test. The connectome-vs-nulls separation — where `bulk95` differs by
+~40%, far outside noise — is untouched and remains perfectly ordered.
+
+### 4.3 SECONDARY — both predictions confirmed
+
+**Ceiling not escaped, as stated in advance.** Peak `d_eff/N` at N=1000: connectome
+**0.971**, weight-permuted 0.994, degree 0.984, ER 0.999 (predicted ≈0.96 and ≥0.99).
+Peak `d_eff` remains ceiling-limited, so the decay region is still the place to read the
+result — no revision to `TIER0_STATE_OF_PLAY.md` §1.2 is required.
+
+**Matched peak stays interior.** At σ_max = 10.4 the overlap reaches `σ·bulk95` = 2.610
+and the peak sits at **1.979** (predicted 1.7–2.3), interior with post-peak coverage,
+declining to +459.6 at the edge. σ_max = 10.4 was the right call; σ_max = 8 would have
+placed it at the boundary again.
+
+`dD` peak grows +199.3 → **+612.8**, but that is mostly `d_eff` scaling with N. In
+normalised terms the advantage does grow: peak `dD/N` **0.445 → 0.613**.
+
+### 4.4 What this settles, and what it does not
+
+**Settles:** the supercritical memory margin is scale-stable (4.40 → 4.42), the matched
+peak is a measurement at both scales, and the ceiling caveat is confirmed rather than
+escaped.
+
+**Does not settle:** whether `bulk95` is the ladder controller. The N=1000 test was
+underpowered because the predictor's own degree/ER ordering is within noise there. A
+properly powered version needs either more seeds (to establish the `bulk95` ordering) or
+a variant pair whose `bulk95` separation is large and stable across scales.
