@@ -142,7 +142,7 @@ substrate.
   the spectral precondition (its bulk is compressed, `sr_crit` ≈ 2.1–4.0 across
   scales/consensus — *not* undirected-gaussian-like). This dataset is the external test of that sharpened
   prediction. See `PREDICTION_TASKS_INTERPRETATION.md` §6.
-- **Macro-scale, held out of the main scale row.** Per `PROJECT_PLAN.md`, the cellular
+- **Macro-scale, held out of the main scale row.** Per the project roadmap, the cellular
   scale row (C. elegans → fly → mouse) deliberately excludes the macro-scale human graph
   to avoid confounding organism with scale/resolution; the human connectome is admitted
   only as an **explicit, separate macro-scale generalisation probe**.

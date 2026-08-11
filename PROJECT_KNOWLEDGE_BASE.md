@@ -70,8 +70,8 @@ it ~2× faster than peripheral, robust to whether "hub" means degree or eigenvec
 centrality — confirming the memory controller is the Perron/common mode carried by the
 hubs. Full account in `PHASE_DIAGRAM_EXPERIMENT.md`.
 
-Direction — which of these results to build into the paper — is open and lives in
-`PROJECT_PLAN.md`.
+Direction — which of these results to build into the paper — lives in
+`ACTION_PLAN_JOURNAL_ROADMAP.md`.
 
 ---
 
@@ -134,7 +134,7 @@ and the **ada cluster** (Imperial, 128 CPU cores) for full runs — details in �
 
 ```
 cognitive-connectomes/
-├── PROJECT_KNOWLEDGE_BASE.md / PROJECT_PLAN.md
+├── PROJECT_KNOWLEDGE_BASE.md / ACTION_PLAN_JOURNAL_ROADMAP.md
 ├── PREDICTION_TASKS_INTERPRETATION.md        (four-task interpretation summary)
 ├── data/                                     (per-species subdirs)
 │   ├── celegans/
@@ -656,7 +656,8 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 
 Load this document as the starting context, then state the task. It is the canonical
 record of *what is implemented and what has been found*; the **forward plan and open
-direction live in `PROJECT_PLAN.md`**. Recommended extra context per task:
+direction live in `ACTION_PLAN_JOURNAL_ROADMAP.md`**. Recommended extra context per
+task:
 
 - **The substrate floor (four-task factorial):** `PREDICTION_TASKS_INTERPRETATION.md`
   (the reference summary + mechanism across all four tasks); each task's
