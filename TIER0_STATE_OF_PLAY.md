@@ -1,13 +1,14 @@
 # Tier 0 — canonical state of play
 
-**Status:** consolidated 8 August 2026. **This document supersedes** the individual
+**Status:** consolidated 8 August 2026; N=1000 result added 11 August 2026. **This document supersedes** the individual
 summaries it draws on: `eigenspectrum/results/E04_summary.md`,
 `criticality_matched/results/E02_verdict.md` §4, `taskA_alpha_summary.md`,
 `taskB_summary.md` and `closeout_*`. Those remain as the detailed record and the
 artifact trail; where they disagree with this document, **this document is correct**.
 
-Every number below is traceable to a named artifact. Nothing here required a new
-simulation except Task B (`f = 0`, MC only, N=448).
+Every number below is traceable to a named artifact. Three steps required simulation --
+Task B (`f = 0`, MC only, N=448), the N=448 protocol control, and the N=1000 run (§2.4,
+on ada). Everything else is reanalysis of frozen parquets.
 
 ---
 
