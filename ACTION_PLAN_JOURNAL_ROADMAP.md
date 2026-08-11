@@ -1,7 +1,7 @@
 # Action plan: thesis as journal paper (NMI), with NeuroAI workshop stepping stone
 
-**Status:** v2, revised 11 August 2026 (v1 drafted 29 July, archived as
-`ACTION_PLAN_JOURNAL_ROADMAP_v1_superseded.md`).
+**Status:** v2, revised 11 August 2026 (v1 drafted 29 July; superseded, and preserved in
+git history at commit `88a2a14`).
 **Targets:** NeurIPS NeuroAI workshop (29 Aug, non-archival, 5pp) -> Nature Machine Intelligence.
 **Dropped:** ICLR 2027.
 
