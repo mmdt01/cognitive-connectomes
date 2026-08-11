@@ -11,6 +11,8 @@ which are the only steps that simulate anything:
     --extend-f   extend the f>0 (f, sigma) grid, MC + Lorenz [--jobs N] [--sr-max X]
     --heatmaps   the (f, sigma) panels on both axes + the cross-panel figure
     --closeout   the item 4/5 close-out reanalyses
+    --n1000      the N=1000 memory run (--scale 1000), or its N=448 protocol
+                 control (--scale 448), per N1000_RUN_SPEC.md [--jobs N]
 
 Nothing here overwrites a frozen artifact; every output carries a manifest recording
 the config and the git commit that produced it.
@@ -181,7 +183,7 @@ def run(scale: int = common.SCALE) -> None:
 if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
     modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f",
-                          "--heatmaps", "--closeout") if m in sys.argv]
+                          "--heatmaps", "--closeout", "--n1000") if m in sys.argv]
              or ["--panel"])
     if "--task-b" in modes:
         # The only simulating step: extend the MC sweep so the matched-axis peak
@@ -206,3 +208,9 @@ if __name__ == "__main__":
     if "--closeout" in modes:
         from experiments.human.analysis.criticality_matched import closeout
         closeout.run(scale=scale)
+    if "--n1000" in modes:
+        from experiments.human.analysis.criticality_matched import n1000
+        n1000.run(scale=scale, jobs=common.flag(sys.argv, "--jobs", 1, int))
+        if scale == 448:
+            print("\nControl gate:")
+            n1000.control_gate(scale)
