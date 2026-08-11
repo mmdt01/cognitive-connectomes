@@ -424,7 +424,9 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    controller), independently corroborating the dissociation.
 
 **Standing caveats (do not overclaim).** The memory boundary is partly a finite-size
-(N=448) rank ceiling (ER catching up) — pending N=1000. The ~20% Dale result is a
+rank ceiling (ER catching up); **N=1000 confirms the ceiling is not escaped at any
+practical N**, so read the decay region rather than the peak — but the supercritical
+margin itself is scale-stable (§ANSWERED above). The ~20% Dale result is a
 *tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
 not generation quality; climate-error magnitudes are unreliable (ER divergence) — use
 bounded curvature. Why the connectome's bulk is anomalously compact (the topology →
@@ -458,12 +460,17 @@ lives **entirely in the supercritical decay region** (ρ = −0.93 for σ ≥ 3.
 subcritically** (ρ = +1.00) — and the supercritical ordering is flat across α from
 1e−10 to 1e2, so it is not a ridge artifact.
 
-**RESTATED — what the N=1000 run is for.** It is **not** the ceiling question. Peak MC
-is ~15 against N=448, so MC was never ceiling-limited; the finite-size problem was
-always a `d_eff` problem, and the `d_eff(α)` sweep shows that saturation is confined to
-the *peak*, which is not where the result lives. The N=1000 question is: **does the
-supercritical margin (MC 12.28 vs 2.82 at α=1e-6) scale with N, or is it an N=448
-accident?**
+**ANSWERED — N=1000 (Aug 2026).** The supercritical margin **holds**: MC ratio
+connectome/ER is **4.40 at N=448 and 4.42 at N=1000** (+0.5%), with absolute MC rising
+~13% at both scales. It is **not an N=448 accident**. Protocol: `T` 3000→6000 holding
+`T_eff/N` at ~5.5, ridge `α = λ·trace(G)/N`; the N=448 control confirmed the
+reparameterisation is neutral (4.35→4.40). The ceiling is **not** escaped (peak
+`d_eff/N` 0.971 connectome, 0.984–0.999 nulls), so the robustness-not-capacity framing
+stands, and the matched `dD` peak stays interior (`σ·bulk95` = 1.979). **Open successor
+question: is `bulk95` the ladder controller?** The N=1000 falsification test (degree and
+ER should swap, since `bulk95` reverses between scales) came back **inconclusive** — they
+did not swap, but the `bulk95` reversal itself is not significant (p = 0.16), so the test
+was underpowered on the predictor side. Full account in `TIER0_STATE_OF_PLAY.md` §2.4.
 
 **REFRAMED — the compact bulk is a large Perron root, not a small bulk.** The
 *absolute* bulk radius is near-identical across variants (spread 4.4%) while `bulk₉₅`

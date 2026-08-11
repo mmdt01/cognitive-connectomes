@@ -95,14 +95,19 @@ transforms, so the two computation orders agree to ≤0.0014 and `sr_crit` can b
 reproduced by inverting the reported central `bulk95`. Implemented in
 `eigenspectrum.common.SR_CRIT_CONVENTION`; both scales re-run.
 
-### 1.4 RESTATED — what the N=1000 run is for
+### 1.4 ANSWERED — the N=1000 question
 
-**It is not the ceiling question.** Peak MC is ~15 against N = 448, so MC was never
-ceiling-limited; the finite-size problem was always a `d_eff` problem, and Task A
-showed `d_eff` saturation is confined to the peak, which is not where the result lives.
+It was never the ceiling question: peak MC is ~15 against N = 448, so MC was never
+ceiling-limited, and `d_eff` saturation is confined to the peak, which is not where the
+result lives. The question was whether the supercritical margin scales with N.
 
-> **The N=1000 question is: does the supercritical margin (12.28 vs 2.82 in MC at
-> α = 1e-6) scale with N, or is it an N=448 accident?**
+> **Answered: it holds. Margin 4.40 (N=448) → 4.42 (N=1000), a +0.5% change.** Absolute
+> MC rose ~13% at both scales; the *ratio* is what survived unchanged. The supercritical
+> memory margin is **not an N=448 accident**. Full result in §2.4.
+
+> **The successor question is sharper: is `bulk95` actually the ladder controller?** The
+> N=1000 falsification test came back inconclusive — not because the outcome was noisy
+> but because the *predictor* was (§2.4). That is now the open mechanistic question.
 
 ---
 
@@ -158,6 +163,38 @@ is still censored at σ = 6, and that censoring edge *is* the coverage edge.
 **Open flag:** Panel B on the corrected axis develops a strong negative region around
 x ≈ 1.0, f ≈ 0.35–0.45. Mechanically expected (at matched x the connectome sits at much
 higher nominal σ), but it should be examined before the generative panel is drafted.
+
+### 2.4 N=1000 — the margin holds; the controller test is inconclusive
+
+Run on ada, 128 workers, with the N=448 control from the same machine. Protocol: `T`
+scaled 3000 → 6000 to hold `T_eff/N` (5.58 → 5.50), ridge reparameterised as
+`α = λ·trace(G)/N` with λ pinned so the N=448 supercritical median α equals the frozen
+1e-6. **Control passed**: the reparameterisation moved the N=448 margin 4.35 → 4.40
+(median per-cell change 0.32%), so any shift at N=1000 is attributable to N.
+
+| supercritical MC (σ ≥ `sr_crit`) | N=448 | N=1000 |
+|---|---|---|
+| connectome | 12.32 | 13.93 |
+| weight-permuted | 7.34 | 8.98 |
+| degree | 4.61 | 5.09 |
+| Erdős–Rényi | 2.80 | 3.15 |
+| **margin conn/ER** | **4.40** | **4.42** |
+
+**Secondary predictions, both confirmed in advance.** The ceiling is *not* escaped (peak
+`d_eff/N`: connectome 0.971, nulls 0.984–0.999), so §1.2's robustness-not-capacity
+framing stands. The matched `dD` peak stays **interior** at `σ·bulk95` = 1.979 with
+post-peak coverage to 2.610 — vindicating σ_max = 10.4 over 8. Peak `dD` +199 → +613;
+normalised, `dD/N` 0.445 → 0.613.
+
+**The falsification test did not swap, and the test was flawed.** `bulk95` reverses
+degree/ER between scales, so it predicts ER should retain more memory than degree at
+N=1000. Degree stays above ER at both scales, decisively and unchanged (ER − degree
+−1.80 → −1.90, p = 0.002 both), dropping the ladder Spearman against `bulk95` from
++1.00 to +0.80. **But the reversal the test rests on is not significant** — paired
+degree − ER = +0.0142 [−0.0191, +0.0475], p = 0.16, whereas the same contrast at N=448
+*is* significant. The pre-registration asserted the test was "on the sign, not the size"
+without checking the sign was established; it is not. Correct classification is
+**inconclusive**. The connectome-vs-nulls separation (~40% in `bulk95`) is untouched.
 
 ---
 
@@ -368,5 +405,10 @@ peak; compact wins across the range.**
    since it would invalidate the frozen capture.
 5. **On the Dale axis, sign fraction and non-normality co-vary**, unequally across
    variants. Dale-arm claims are about node-wise inhibition, not sign fraction alone.
-6. **Peak `d_eff` is ceiling-limited at N=448 and will be at any N.** No parcellation
-   makes the peak comparison informative; read the decay region.
+6. **Peak `d_eff` is ceiling-limited at N=448 and will be at any N.** Confirmed at
+   N=1000 (peak `d_eff/N` 0.971–0.999). No parcellation makes the peak comparison
+   informative; read the decay region.
+7. **Whether `bulk95` is the ladder controller is open.** The N=1000 test that was meant
+   to settle it is underpowered *on the predictor side*: the degree/ER `bulk95` ordering
+   at N=1000 is itself within noise (p = 0.16). A properly powered test needs more seeds,
+   or a variant pair whose `bulk95` separation is large and stable across scales.
