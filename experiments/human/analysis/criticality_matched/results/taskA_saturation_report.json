@@ -1,0 +1,35 @@
+{
+  "frozen_alpha": 1e-06,
+  "peak_d_eff_norm_at_frozen": {
+    "clustering_rewire": 0.9935265726662508,
+    "connectome": 0.9606706451348013,
+    "connectome_weight_permuted": 0.9943005584640929,
+    "degree_rewire": 0.9954764808890313,
+    "erdos_renyi": 0.9958228745144351,
+    "modularity_rewire": 0.9926637938309641,
+    "random_gaussian": 0.9975334522301571
+  },
+  "saturated_at_frozen": {
+    "clustering_rewire": true,
+    "connectome": false,
+    "connectome_weight_permuted": true,
+    "degree_rewire": true,
+    "erdos_renyi": true,
+    "modularity_rewire": true,
+    "random_gaussian": true
+  },
+  "all_saturated_at_frozen": false,
+  "max_separation": 0.08771126479168434,
+  "alpha_of_max_separation": 7.017038286703837e-05,
+  "separation_at_frozen": 0.03686280709535583,
+  "alpha_band_strong_separation": [
+    2.030917620904739e-06,
+    0.02030917620904739
+  ],
+  "mc_alpha": {
+    "d_eff_alpha_sweep": "free -- frozen Gram eigenvalues suffice (this module)",
+    "mc_alpha_sweep": "needs the driven states, which are not persisted; requires re-running MC",
+    "cost_if_folded_into_task_b": "near-zero marginal: one eigendecomposition of the per-lag Gram gives every alpha via w(alpha) = U diag(1/(g+alpha)) U^T X^T y",
+    "recommendation": "fold MC(alpha) into Task B's sigma=8 extension rather than running it standalone"
+  }
+}
