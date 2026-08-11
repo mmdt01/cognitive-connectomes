@@ -247,3 +247,19 @@ experiments/human/analysis/eigenspectrum/figures/**/*.pdf
 experiments/human/analysis/criticality_matched/figures/**/*.pdf
 experiments/human/analysis/eigenspectrum/results/**/*.csv
 experiments/human/analysis/criticality_matched/results/*.csv
+
+# Generated summaries and manifests from the Tier 0 packages. Each is rewritten by its
+# own run() in seconds and is superseded by the consolidated state-of-play document, so
+# tracking them duplicates the record and churns the diff on every re-run.
+#
+# The hand-written PRE-REGISTRATIONS are the exception and stay tracked: sections 1-3 of
+# each verdict were written and locked before the corresponding analysis existed
+# (verdict.write() only ever replaces section 4), so they are the audit trail showing the
+# prediction preceded the result, and they cannot be regenerated from any parquet.
+experiments/human/analysis/eigenspectrum/results/**/*.md
+experiments/human/analysis/eigenspectrum/results/**/*.json
+experiments/human/analysis/eigenspectrum/figures/**/*.json
+experiments/human/analysis/criticality_matched/results/*.md
+experiments/human/analysis/criticality_matched/results/*.json
+!experiments/human/analysis/criticality_matched/results/E02_verdict.md
+!experiments/human/analysis/criticality_matched/results/N1000_verdict.md
