@@ -1,6 +1,7 @@
 """The N=1000 memory run, and its N=448 protocol control.
 
-Implements `N1000_RUN_SPEC.md`. Two things distinguish it from Task B's N=448 sweep:
+Configuration and cost recorded in `TIER0_STATE_OF_PLAY.md` sec 2.5. Two things
+distinguish it from Task B's N=448 sweep:
 
 **1. `T` scales with `N` to hold `T_eff/N` fixed.** `T = 3000` at N=448 gives
 `T_eff/N` = 5.58; `T = 6000` at N=1000 gives 5.50. The design Gram is a *sample*

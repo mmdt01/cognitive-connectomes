@@ -6,7 +6,9 @@
 > written** — it is not to be revised, softened, or re-scoped after the fact.
 >
 > Written: 8 August 2026, before any N=1000 MC cell was run.
-> Configuration: `N1000_RUN_SPEC.md`. Prior state: `TIER0_STATE_OF_PLAY.md`.
+> Configuration and prior state: `TIER0_STATE_OF_PLAY.md` (sec 2.5 records the
+> configuration as executed; it was `N1000_RUN_SPEC.md` at the time of writing,
+> since folded in and retired).
 
 ---
 

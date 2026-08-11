@@ -12,7 +12,7 @@ which are the only steps that simulate anything:
     --heatmaps   the (f, sigma) panels on both axes + the cross-panel figure
     --closeout   the item 4/5 close-out reanalyses
     --n1000      the N=1000 memory run (--scale 1000), or its N=448 protocol
-                 control (--scale 448), per N1000_RUN_SPEC.md [--jobs N]
+                 control (--scale 448); config in TIER0 sec 2.5 [--jobs N]
     --n1000-figures  the cross-scale N=448 vs N=1000 figure (reads the run parquets)
 
 Nothing here overwrites a frozen artifact; every output carries a manifest recording
