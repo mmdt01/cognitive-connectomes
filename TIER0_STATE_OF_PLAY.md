@@ -197,6 +197,53 @@ degree − ER = +0.0142 [−0.0191, +0.0475], p = 0.16, whereas the same contras
 without checking the sign was established; it is not. Correct classification is
 **inconclusive**. The connectome-vs-nulls separation (~40% in `bulk95`) is untouched.
 
+### 2.5 N=1000 — configuration as executed, and what it cost
+
+Folded in from `N1000_RUN_SPEC.md`, now retired. This is the record of what was
+actually run, not a plan.
+
+**Grid.** MC only, `f = 0`, variants {connectome, weight-permuted, degree, ER} × 10
+seeds. N=448 control: σ ∈ [0, 8] on the frozen 0.4 step (21 points), `T` = 3000.
+N=1000: **30 non-uniform σ points to 10.4** — 6 coarse over [0, 3.0], **18 dense over
+[3.2, 8.0]** where the result lives, 6 over [8.4, 10.4] for post-peak coverage — with
+`T` = 6000.
+
+**Why σ_max = 10.4 and not 8.** The comparison happens on `σ·bulk95` and the connectome
+has the smallest `bulk95` (0.2509), so it bounds the overlap: σ_max = 8 reaches only
+2.007, which would have put the peak on the boundary and made the turnover invisible —
+recreating exactly the censoring Task B was run to remove. σ_max = 10.4 reaches 2.610,
+matching the N=448 coverage. Vindicated: the peak landed at 1.979, interior.
+
+**Hyperparameters.** `T` = 6000 / warmup 500 holds `T_eff/N` at 5.50 against 5.58 at
+N=448 — the design Gram is a *sample* covariance and its small-eigenvalue tail, which is
+exactly what `d_eff` counts, is what finite `T/N` distorts. Ridge
+`α = λ·trace(G)/N` with **λ = 4.4845e-10**, identical in `d_eff` and MC, which needs two
+evaluator passes per cell (α depends on `trace(G)`, which depends on the states).
+Realised α: median 8.6e-07, range [2.6e-07, 1.1e-06].
+
+**Threading — the operational trap.** `OMP_NUM_THREADS`, `MKL_NUM_THREADS` and
+`OPENBLAS_NUM_THREADS` must all be set to 1 **in the environment before Python starts**.
+The Gram eigendecomposition uses multithreaded BLAS by default, and 128 workers each
+spawning 128 threads will thrash; the in-process `threadpool_limits` cap only constrains
+libraries already loaded. Parallelism belongs at the cell level.
+
+**Cost, measured.** N=448 control: **32 s wall on ada at 128 workers** (2.4 core-s per
+evaluation), against 400 s at 12 workers on the laptop (2.9 core-s per evaluation) — so
+ada's per-core rate is close to the laptop's, not 1.5–2× slower as assumed. Memory is a
+non-issue: the state matrix is 44 MB (5500 × 1000 float64), ~68 MB per worker with the
+Gram and eigendecomposition workspace, ~8.7 GB marginal across 128 fork workers.
+
+> **Estimating lesson, recorded because it recurred three times this session.** Cost
+> from a **measured cell of the actual code path**, never from component timings. The
+> spec's original figures were wrong by ~60× (mis-scaled from a whole-matrix wall-clock
+> as though it were per-cell), the `f>0` extension was under-costed 4.3× (evaluator time
+> only, ignoring the per-σ reservoir rebuild and its dense `eigvals`), and the N=1000
+> estimate omitted the two-pass design that holding α matched requires.
+
+**What this run did not settle:** the `f > 0` censoring and therefore the
+memory/generation boundary crossing (§2.3, separate cheaper run); whether `bulk95` is
+the ladder controller (§2.4); and the Dale non-normality confound (§3.5).
+
 ---
 
 ## 3. Mechanism findings
