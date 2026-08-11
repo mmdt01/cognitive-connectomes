@@ -239,3 +239,11 @@ data/**/*.mat
 data/human/Suarez2021_Data/
 # Self-built group consensus cache (regenerable via experiments/human/build_consensus.py)
 data/human/built_consensus/
+# Tier 0 (E0.4 / E0.2) analysis packages: keep the human-readable summaries (.md) and
+# the provenance manifests (.json), and the 300 dpi PNG figures per repo convention.
+# Vector PDFs duplicate the PNGs and are only needed at paper-writing time, and the
+# derived .csv tables duplicate the .md summaries -- both are one command to regenerate.
+experiments/human/analysis/eigenspectrum/figures/**/*.pdf
+experiments/human/analysis/criticality_matched/figures/**/*.pdf
+experiments/human/analysis/eigenspectrum/results/**/*.csv
+experiments/human/analysis/criticality_matched/results/*.csv
