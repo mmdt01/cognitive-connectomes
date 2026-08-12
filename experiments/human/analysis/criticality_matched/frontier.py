@@ -35,7 +35,7 @@ the unit for the median and the spread.
 import numpy as np
 import pandas as pd
 
-from experiments.human.analysis.criticality_matched import common, extend_f
+from experiments.human.analysis.criticality_matched import analysis, common, extend_f
 
 SIGN_MODE, TARGETING = "edge", "stratified"
 # Ladder order: connectome -> its placement control -> topology-matched -> unstructured.
@@ -565,3 +565,173 @@ def run(scale: int = common.SCALE) -> dict:
         simulates="no -- reanalysis of the f>0 extension captures")
     return {"frontier": front, "sr_crit": crit, "decision": rule, "peaks": peaks,
             "live_window": windows}
+
+
+# ---------------------------------------------------------------------------
+# Mechanism tests: what does the memory advantage actually track?
+# ---------------------------------------------------------------------------
+# The account being tested has two spectral quantities doing separate jobs:
+#   `bulk95` sets WHERE a substrate crosses into supercriticality (the operator is
+#       sigma*W/|lambda_1|, so the bulk's gain is sigma*bulk95);
+#   the PERRON COMMON MODE sets HOW CATASTROPHIC crossing is -- non-negativity gives a
+#       hub-loaded all-positive leading eigenvector, and the network synchronises into
+#       it, crushing the fluctuation subspace the ridge readout uses.
+# If that is right, then (1) the common-mode amplitude must fall as `f` rises and the
+# advantage must fall with it, and (2) re-indexing on x = sigma*bulk95 should absorb the
+# *crossing-location* part of the between-variant difference while leaving an
+# f-dependent residual -- the common-mode penalty. Both are checked below, and both
+# could come back negative.
+_MECH_COLS = ["sign_mode", "targeting", "f", "variant", "spectral_radius", "seed",
+              "draw", "task", "mc", "mean_state", "bulk95"]
+
+
+def load_mechanism_cells(scale: int = common.SCALE) -> pd.DataFrame:
+    frames = []
+    for variant_set in extend_f.VARIANT_SETS:
+        frames.append(pd.read_parquet(extend_f.extension_path(scale, variant_set),
+                                      columns=_MECH_COLS))
+    df = pd.concat(frames, ignore_index=True)
+    df = df[(df.sign_mode == SIGN_MODE) & (df.targeting == TARGETING)
+            & (df.task == "mc") & (df.variant.isin(VARIANTS))].copy()
+    df["abs_mean_state"] = df.mean_state.abs()
+    # Seed is the unit; draws averaged within it.
+    return (df.groupby(["variant", "f", "spectral_radius", "seed"], as_index=False)
+            .agg(mc=("mc", "mean"), abs_mean_state=("abs_mean_state", "mean"),
+                 bulk95=("bulk95", "mean")))
+
+
+def test_common_mode(seeds: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Test 1: does the common mode fall with `f`, and does the advantage track it?
+
+    `|mean_state|` is the common-mode proxy already recorded per cell (Probe 2: the
+    Perron/DC mode carries the mean, which is why time-centring removes it). The
+    advantage is measured against ER, paired within seed.
+    """
+    from scipy.stats import spearmanr
+
+    med = (seeds.groupby(["variant", "f", "spectral_radius"], as_index=False)
+           .agg(mc=("mc", "median"), abs_mean_state=("abs_mean_state", "median"),
+                bulk95=("bulk95", "median")))
+    wide = med.pivot_table(index=["f", "spectral_radius"],
+                           columns="variant", values=["mc", "abs_mean_state", "bulk95"])
+    cells = pd.DataFrame({
+        "dMC": wide[("mc", "connectome")] - wide[("mc", "erdos_renyi")],
+        "cm_er": wide[("abs_mean_state", "erdos_renyi")],
+        "cm_conn": wide[("abs_mean_state", "connectome")],
+        "x_er": (wide[("bulk95", "erdos_renyi")]
+                 * wide.index.get_level_values("spectral_radius")),
+        "x_conn": (wide[("bulk95", "connectome")]
+                   * wide.index.get_level_values("spectral_radius")),
+    }).reset_index().dropna()
+
+    rows = []
+    for label, subset in [("all cells", cells),
+                          ("supercritical (sigma >= 3.05)",
+                           cells[cells.spectral_radius >= 3.05])]:
+        for predictor in ("cm_er", "cm_conn", "x_er", "f"):
+            rho, p = spearmanr(subset[predictor], subset.dMC)
+            rows.append(dict(scope=label, predictor=predictor, n=len(subset),
+                             spearman=float(rho), p=float(p)))
+    # Pooled, `cm_er` and `f` are collinear -- the common mode collapses *because* f
+    # rises -- so a pooled Spearman cannot separate "tracks the common mode" from
+    # "tracks f". WITHIN a fixed f, sigma still varies the common mode over a wide
+    # range, so the within-f correlation is the one that separates them.
+    for f, block in cells.groupby("f"):
+        if len(block) < 5:
+            continue
+        for predictor in ("cm_er", "x_er"):
+            rho, p = spearmanr(block[predictor], block.dMC)
+            rows.append(dict(scope=f"within f = {f:g}", predictor=predictor,
+                             n=len(block), spearman=float(rho), p=float(p)))
+    corr = pd.DataFrame(rows)
+    return cells, corr
+
+
+def test_matched_axis(seeds: pd.DataFrame, n_grid: int = 61) -> pd.DataFrame:
+    """Test 2: how much of the between-variant gap does x = sigma*bulk95 absorb?
+
+    Per (f, seed) the variants' MC curves are interpolated onto a common x grid inside
+    each curve's own support (`analysis._interp`, the same per-seed-then-aggregate
+    routine the rest of the package uses -- never pooled first, nothing extrapolated),
+    then compared at matched x. The comparison is |connectome - ER| at matched sigma
+    against the same quantity at matched x, over the shared coverage.
+    """
+    grid_cache = {}
+    rows = []
+    for f, fgroup in seeds.groupby("f"):
+        # Shared x coverage across every (variant, seed) at this f.
+        lo, hi = -np.inf, np.inf
+        for _, curve in fgroup.groupby(["variant", "seed"]):
+            xs = (curve.spectral_radius * curve.bulk95).to_numpy(float)
+            lo, hi = max(lo, xs.min()), min(hi, xs.max())
+        grid = np.linspace(lo, hi, n_grid)
+        grid_cache[float(f)] = (lo, hi)
+        per_seed_diff, per_seed_diff_nominal = [], []
+        for seed, sgroup in fgroup.groupby("seed"):
+            curves = {}
+            for variant in ("connectome", "erdos_renyi"):
+                v = sgroup[sgroup.variant == variant].sort_values("spectral_radius")
+                if v.empty:
+                    break
+                curves[variant] = analysis._interp(
+                    (v.spectral_radius * v.bulk95).to_numpy(float),
+                    v.mc.to_numpy(float), grid, "linear")
+            if len(curves) != 2:
+                continue
+            per_seed_diff.append(curves["connectome"] - curves["erdos_renyi"])
+            nominal = sgroup.pivot_table(index="spectral_radius", columns="variant",
+                                         values="mc")
+            if {"connectome", "erdos_renyi"} <= set(nominal.columns):
+                # Restricted to the sigma that map inside the shared x coverage, so the
+                # two axes are compared over the same physical region.
+                keep = nominal.index.to_numpy(float)
+                per_seed_diff_nominal.append(
+                    (nominal["connectome"] - nominal["erdos_renyi"]).to_numpy(float)[
+                        (keep * float(sgroup[sgroup.variant == "connectome"]
+                                      .bulk95.iloc[0]) >= lo)
+                        & (keep * float(sgroup[sgroup.variant == "erdos_renyi"]
+                                        .bulk95.iloc[0]) <= hi)])
+        if not per_seed_diff:
+            continue
+        matched = np.nanmedian(np.vstack(per_seed_diff), axis=0)
+        nom = np.concatenate(per_seed_diff_nominal) if per_seed_diff_nominal else np.array([np.nan])
+        rows.append(dict(
+            f=float(f), x_lo=float(lo), x_hi=float(hi),
+            median_abs_gap_matched_x=float(np.nanmedian(np.abs(matched))),
+            max_gap_matched_x=float(np.nanmax(matched)),
+            median_abs_gap_matched_sigma=float(np.nanmedian(np.abs(nom))),
+            max_gap_matched_sigma=float(np.nanmax(nom))))
+    return pd.DataFrame(rows)
+
+
+def run_mechanism(scale: int = common.SCALE) -> dict:
+    common.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    print("=" * 70 + "\nMechanism tests -- common mode vs bulk95\n" + "=" * 70)
+    seeds = load_mechanism_cells(scale)
+    print(f"Loaded {len(seeds)} (variant, f, sigma, seed) MC cells")
+
+    cells, corr = test_common_mode(seeds)
+    print("\nTest 1 -- |mean_state| (common-mode proxy) by f:")
+    piv = (seeds[seeds.spectral_radius.isin([2.0, 6.0])]
+           .groupby(["spectral_radius", "variant", "f"]).abs_mean_state.median()
+           .unstack("variant"))
+    for sr in (2.0, 6.0):
+        print(f"  sigma = {sr:g}")
+        print(piv.loc[sr].reindex(columns=VARIANTS).loc[[0.0, 0.25, 0.5]]
+              .to_string(float_format=lambda v: f"{v:.4f}"))
+    print("\nTest 1 -- what does dMC (connectome - ER) track? (Spearman)")
+    print(corr.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+
+    matched = test_matched_axis(seeds)
+    print("\nTest 2 -- does x = sigma*bulk95 absorb the gap?")
+    print(matched.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
+
+    cells.to_csv(common.RESULTS_DIR / f"e03_mechanism_cells_scale_{scale}.csv",
+                 index=False)
+    corr.to_csv(common.RESULTS_DIR / f"e03_mechanism_corr_scale_{scale}.csv", index=False)
+    matched.to_csv(common.RESULTS_DIR / f"e03_mechanism_matched_scale_{scale}.csv",
+                   index=False)
+
+    from experiments.human.analysis.criticality_matched import panels
+    panels.fig_mechanism(seeds, common.FIGURES_DIR / "fig_mechanism_axes")
+    return {"cells": cells, "corr": corr, "matched": matched}

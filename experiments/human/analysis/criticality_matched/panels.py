@@ -584,3 +584,73 @@ def fig_frontier(front: pd.DataFrame, crit: pd.DataFrame, path_stem) -> None:
         fig.suptitle("Absolute memory and generation across the negative-weight sweep",
                      fontsize=9.5, y=1.01)
         _save(fig, path_stem)
+
+
+def fig_mechanism(seeds: pd.DataFrame, path_stem) -> None:
+    """Absolute MC on nominal sigma versus on x = sigma*bulk95, at f = 0 and f = 0.5.
+
+    The test: if `bulk95` only sets *where* each substrate crosses into
+    supercriticality, re-indexing on x should pull the variants' curves together. What
+    survives the re-indexing is the part `bulk95` does not explain -- on this account,
+    the Perron common-mode penalty, which is why the residual should be large at f = 0
+    (all-positive, common mode present) and small at f = 0.5 (balanced, no common mode).
+    """
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(2, 2, figsize=(6.8, 5.0), squeeze=False)
+        for row, f in enumerate((0.0, 0.5)):
+            sub = seeds[np.isclose(seeds.f, f)]
+            for col, axis in enumerate(("nominal", "matched")):
+                ax = axes[row][col]
+                if axis == "matched":
+                    # Per-seed interpolation onto a common grid, THEN the median --
+                    # grouping by each seed's own x would put one seed in most bins and
+                    # draw a sawtooth. Grid clipped to shared coverage; no extrapolation.
+                    from experiments.human.analysis.criticality_matched import analysis
+                    lo, hi = -np.inf, np.inf
+                    for _, curve in sub.groupby(["variant", "seed"]):
+                        xs_c = (curve.spectral_radius * curve.bulk95).to_numpy(float)
+                        lo, hi = max(lo, xs_c.min()), min(hi, xs_c.max())
+                    grid = np.linspace(lo, hi, 81)
+                for variant in ["connectome", "connectome_weight_permuted",
+                                "degree_rewire", "erdos_renyi"]:
+                    v = sub[sub.variant == variant]
+                    if v.empty:
+                        continue
+                    if axis == "nominal":
+                        grouped = v.groupby("spectral_radius").mc.median()
+                        xs, ys = grouped.index.to_numpy(float), grouped.to_numpy(float)
+                    else:
+                        stack = []
+                        for _, curve in v.groupby("seed"):
+                            curve = curve.sort_values("spectral_radius")
+                            stack.append(analysis._interp(
+                                (curve.spectral_radius * curve.bulk95).to_numpy(float),
+                                curve.mc.to_numpy(float), grid, "linear"))
+                        xs, ys = grid, np.nanmedian(np.vstack(stack), axis=0)
+                    ax.plot(xs, ys, color=common.VARIANT_COLOR.get(variant, _MUT),
+                            lw=1.5, label=common.VARIANT_TITLE.get(variant, variant),
+                            solid_capstyle="round")
+                ax.set_xlabel(r"nominal $\sigma$" if axis == "nominal"
+                              else r"$\sigma\cdot\mathrm{bulk}_{95}$", labelpad=1)
+                ax.set_ylabel(f"MC  ($f = {f:g}$)", labelpad=2)
+                ax.set_ylim(0, 17)
+                if axis == "matched":
+                    ax.axvline(1.0, color=_MUT, lw=0.9, ls=":")
+                    ax.text(1.0, 0.5, " bulk critical", fontsize=6, color=_MUT,
+                            rotation=90, va="bottom", ha="left")
+                ax.set_title("matched on nothing (nominal)" if axis == "nominal"
+                             else "matched on bulk radius", pad=4)
+                _style(ax)
+                _label(ax, "abcd"[row * 2 + col])
+        axes[0][0].legend(loc="lower left", frameon=False, handlelength=1.2, fontsize=6.4)
+        fig.text(0.5, -0.02,
+                 "Top: all-positive ($f=0$), where a Perron common mode exists. Bottom: "
+                 "balanced signs ($f=0.5$), where it does not. If bulk$_{95}$ only sets "
+                 "where each substrate goes supercritical, the right-hand panels should "
+                 "superimpose; whatever residual survives is what bulk$_{95}$ does not "
+                 "explain. Seed medians.",
+                 ha="center", va="top", fontsize=6.2, color=_MUT)
+        fig.suptitle("Does matching on bulk radius absorb the between-substrate gap?",
+                     fontsize=9.5, y=1.00)
+        fig.tight_layout()
+        _save(fig, path_stem)
