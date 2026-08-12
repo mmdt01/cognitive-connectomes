@@ -9,8 +9,11 @@ which are the only steps that simulate anything:
     --task-a     d_eff(alpha): is the ridge effective rank saturated?
     --task-b     extend the f=0 MC sweep to sigma=8 [--jobs N] [--sr-max X] [--mc-alpha]
     --extend-f   extend the f>0 (f, sigma) grid, MC + Lorenz [--jobs N] [--sr-max X]
+                 [--variants boundary|nulls] (boundary = connectome + ER; nulls =
+                 weight-permuted + degree, the pair item 3's frontier still needs)
     --item2      the extension's close-out: reproduction gate, both panels, the
                  nominal-axis control, the Panel B collapse diagnostic, the summary
+    --frontier   E0.3: absolute MC and VPT per (variant, f, sigma), no differencing
     --heatmaps   the (f, sigma) panels on both axes + the cross-panel figure
                  [--source extension|frozen]
     --closeout   the item 4/5 close-out reanalyses
@@ -187,7 +190,7 @@ def run(scale: int = common.SCALE) -> None:
 if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
     modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f", "--item2",
-                          "--heatmaps", "--closeout", "--n1000",
+                          "--frontier", "--heatmaps", "--closeout", "--n1000",
                           "--n1000-figures") if m in sys.argv]
              or ["--panel"])
     if "--task-b" in modes:
@@ -206,10 +209,14 @@ if __name__ == "__main__":
     if "--extend-f" in modes:
         from experiments.human.analysis.criticality_matched import extend_f
         extend_f.run(scale=scale, jobs=common.flag(sys.argv, "--jobs", 1, int),
-                     sr_max=common.flag(sys.argv, "--sr-max", extend_f.SR_MAX, float))
+                     sr_max=common.flag(sys.argv, "--sr-max", extend_f.SR_MAX, float),
+                     variant_set=common.flag(sys.argv, "--variants", "boundary", str))
     if "--item2" in modes:
         from experiments.human.analysis.criticality_matched import extend_f
         extend_f.report(scale=scale)
+    if "--frontier" in modes:
+        from experiments.human.analysis.criticality_matched import frontier
+        frontier.run(scale=scale)
     if "--heatmaps" in modes:
         from experiments.human.analysis.criticality_matched import heatmaps
         heatmaps.run_both(scale=scale,

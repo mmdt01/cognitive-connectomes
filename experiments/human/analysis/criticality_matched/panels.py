@@ -499,3 +499,88 @@ def fig_cross_scale(frames: dict, ladder: pd.DataFrame, path_stem) -> None:
                      fontsize=9.5, y=1.04)
         fig.tight_layout()
         _save(fig, path_stem)
+
+
+def fig_frontier(front: pd.DataFrame, crit: pd.DataFrame, path_stem) -> None:
+    """E0.3: absolute MC and VPT per substrate across the negative-weight sweep.
+
+    Rows are the two metrics, columns the four-variant ladder; one curve per ``f``,
+    against **nominal** sigma. Absolute curves need no matched axis -- each substrate is
+    shown on its own sigma with its own ``sr_crit(f=0)`` marked -- which is why this
+    figure sidesteps the axis question the delta panels cannot (TIER0 §1.1).
+
+    Two things are drawn that a plain curve plot would hide: the metric's hard ceiling
+    (so "flat" can be read as saturated or genuinely flat), and the sigma region where
+    most seeds sit at the metric's floor, where a difference between substrates is not
+    a measurement.
+    """
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+
+    metrics = [m for m in ("mc", "vpt") if m in set(front.metric)]
+    ladder = ["connectome", "connectome_weight_permuted", "degree_rewire",
+              "erdos_renyi"]
+    variants = [v for v in ladder if v in set(front.variant)]
+    fvals = np.sort(front.f.unique())
+    norm = Normalize(vmin=float(fvals.min()), vmax=float(fvals.max()))
+    cmap = plt.get_cmap("viridis")
+    label = {"mc": "memory capacity", "vpt": "valid prediction time (Lyapunov)"}
+
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(len(metrics), len(variants),
+                                 figsize=(2.0 * len(variants) + 0.6, 2.5 * len(metrics)),
+                                 squeeze=False, sharex=True)
+        for row, metric in enumerate(metrics):
+            sub_m = front[front.metric == metric]
+            ymax = float(sub_m["median"].max()) * 1.08
+            for col, variant in enumerate(variants):
+                ax = axes[row][col]
+                sub = sub_m[sub_m.variant == variant]
+
+                # Where most seeds sit at the floor, a between-substrate difference is
+                # not a measurement -- shade it rather than let a curve imply signal.
+                floored = (sub.groupby("spectral_radius").frac_at_floor.median() >= 0.5)
+                if floored.any():
+                    sr = floored.index.to_numpy(float)
+                    ax.fill_between(sr, 0, ymax, where=floored.to_numpy(),
+                                    color=_MUT, alpha=0.13, lw=0, step="mid")
+
+                for f in fvals:
+                    curve = sub[sub.f == f].sort_values("spectral_radius")
+                    if curve.empty:
+                        continue
+                    ax.plot(curve.spectral_radius, curve["median"],
+                            color=cmap(norm(f)), lw=1.25, solid_capstyle="round")
+
+                row_crit = crit[(crit.variant == variant) & (crit.f == 0.0)]
+                if not row_crit.empty:
+                    value = float(row_crit.sr_crit.iloc[0])
+                    ax.axvline(value, color=_INK, lw=0.8, ls=":")
+                    if row == 0:
+                        ax.text(value, ymax * 0.99, r" $sr_{crit}$", fontsize=6,
+                                color=_INK, ha="left", va="top")
+                ax.set_ylim(0, ymax)
+                if row == len(metrics) - 1:
+                    ax.set_xlabel(r"nominal $\sigma$", labelpad=1)
+                if col == 0:
+                    ax.set_ylabel(label.get(metric, metric), labelpad=2)
+                if row == 0:
+                    ax.set_title(common.VARIANT_TITLE.get(variant, variant), pad=4)
+                _style(ax)
+                _label(ax, "abcdefgh"[row * len(variants) + col])
+
+        smap = ScalarMappable(norm=norm, cmap=cmap)
+        cbar = fig.colorbar(smap, ax=axes, fraction=0.02, pad=0.015)
+        cbar.set_label("negative-weight fraction $f$", fontsize=7)
+        cbar.ax.tick_params(labelsize=6.5)
+        fig.text(0.5, -0.02,
+                 "Absolute within-substrate levels — no matched axis and no "
+                 "differencing. Dotted line = each substrate's own $sr_{crit}=1/$"
+                 r"bulk$_{95}$ at $f=0$; grey band = $\sigma$ where the majority of "
+                 "seeds sit at the metric's floor, so a between-substrate difference "
+                 "there is not a measurement. Median over 10 seeds (draws averaged "
+                 "within a seed).",
+                 ha="center", va="top", fontsize=6.2, color=_MUT)
+        fig.suptitle("Absolute memory and generation across the negative-weight sweep",
+                     fontsize=9.5, y=1.01)
+        _save(fig, path_stem)
