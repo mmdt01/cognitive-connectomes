@@ -675,7 +675,14 @@ def fig_dissociation(front: pd.DataFrame, path_stem, contrast: str = "erdos_reny
     from matplotlib.colors import TwoSlopeNorm
 
     metrics = [m for m in ("mc", "vpt") if m in set(front.metric)]
-    titles = {"mc": "memory capacity (MC)", "vpt": "valid prediction time (Lyapunov)"}
+    # (absolute-column label, unused, delta-column label) -- what the COLOUR encodes.
+    bar_labels = {
+        "mc": ("memory capacity  MC", None,
+               r"$\Delta$MC  (connectome $-$ ER)"),
+        "vpt": ("valid prediction time  VPT (Lyapunov)", None,
+                r"$\Delta$VPT  (connectome $-$ ER)"),
+    }
+    row_titles = {"mc": "MEMORY", "vpt": "GENERATION"}
     with plt.rc_context(_RC):
         fig, axes = plt.subplots(len(metrics), 3, figsize=(8.0, 3.1 * len(metrics)),
                                  squeeze=False)
@@ -707,12 +714,21 @@ def fig_dissociation(front: pd.DataFrame, path_stem, contrast: str = "erdos_reny
                                aspect="auto",
                                extent=[xv[0] - dx / 2, xv[-1] + dx / 2,
                                        fv[0] - df_ / 2, fv[-1] + df_ / 2], **kwargs)
-                fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+                # The quantity being plotted is the COLOUR, so it is named on the
+                # colourbar. Putting it beside the y-axis label reads as if it
+                # described f.
+                cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+                cbar.set_label(bar_labels[metric][2 if col == 2 else 0], fontsize=7,
+                               labelpad=3)
+                cbar.ax.tick_params(labelsize=6.5)
                 ax.set_title(label, pad=4)
                 ax.set_xlabel(r"nominal $\sigma$", labelpad=1)
                 if col == 0:
-                    ax.set_ylabel(f"negative-weight fraction $f$\n({titles[metric]})",
-                                  labelpad=2)
+                    ax.set_ylabel(r"negative-weight fraction $f$", labelpad=2)
+                    # Row identity, once per row, clear of the axis labels.
+                    ax.text(-0.42, 0.5, row_titles[metric], transform=ax.transAxes,
+                            rotation=90, va="center", ha="center", fontsize=8.5,
+                            fontweight="bold", color=_INK)
                 _style(ax)
                 _label(ax, "abcdef"[row * 3 + col])
         fig.text(0.5, -0.02,
