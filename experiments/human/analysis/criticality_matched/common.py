@@ -96,6 +96,12 @@ def extended_sweep_path(scale: int = SCALE):
     return RESULTS_DIR / f"taskB_extended_sweep_scale_{scale}.parquet"
 
 
+def f_extension_path(scale: int = SCALE) -> Path:
+    """Item 2's f>0 sweep extension (the frozen capture's grid, re-run out to
+    sigma = 11.2 on one internally consistent flip realisation)."""
+    return RESULTS_DIR / f"item2_f_extension_scale_{scale}.parquet"
+
+
 def phase_cells_path(scale: int = SCALE) -> Path:
     """The frozen phase-diagram capture -- read-only, the primary d_eff source."""
     return (_ROOT / "experiments" / "human" / "analysis" / "phase_diagram" / "results"

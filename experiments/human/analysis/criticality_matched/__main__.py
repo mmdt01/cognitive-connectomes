@@ -9,7 +9,10 @@ which are the only steps that simulate anything:
     --task-a     d_eff(alpha): is the ridge effective rank saturated?
     --task-b     extend the f=0 MC sweep to sigma=8 [--jobs N] [--sr-max X] [--mc-alpha]
     --extend-f   extend the f>0 (f, sigma) grid, MC + Lorenz [--jobs N] [--sr-max X]
+    --item2      the extension's close-out: reproduction gate, both panels, the
+                 nominal-axis control, the Panel B collapse diagnostic, the summary
     --heatmaps   the (f, sigma) panels on both axes + the cross-panel figure
+                 [--source extension|frozen]
     --closeout   the item 4/5 close-out reanalyses
     --n1000      the N=1000 memory run (--scale 1000), or its N=448 protocol
                  control (--scale 448); config in TIER0 sec 2.5 [--jobs N]
@@ -183,7 +186,7 @@ def run(scale: int = common.SCALE) -> None:
 
 if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
-    modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f",
+    modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f", "--item2",
                           "--heatmaps", "--closeout", "--n1000",
                           "--n1000-figures") if m in sys.argv]
              or ["--panel"])
@@ -204,9 +207,14 @@ if __name__ == "__main__":
         from experiments.human.analysis.criticality_matched import extend_f
         extend_f.run(scale=scale, jobs=common.flag(sys.argv, "--jobs", 1, int),
                      sr_max=common.flag(sys.argv, "--sr-max", extend_f.SR_MAX, float))
+    if "--item2" in modes:
+        from experiments.human.analysis.criticality_matched import extend_f
+        extend_f.report(scale=scale)
     if "--heatmaps" in modes:
         from experiments.human.analysis.criticality_matched import heatmaps
-        heatmaps.run_both(scale=scale)
+        heatmaps.run_both(scale=scale,
+                          source=common.flag(sys.argv, "--source",
+                                             heatmaps.DEFAULT_SOURCE, str))
     if "--closeout" in modes:
         from experiments.human.analysis.criticality_matched import closeout
         closeout.run(scale=scale)

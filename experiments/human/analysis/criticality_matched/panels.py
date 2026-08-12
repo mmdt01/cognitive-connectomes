@@ -167,8 +167,8 @@ def fig_heatmaps(results: dict, path_stem) -> None:
     exists to show the pipeline reproduces the published crossing, so that the
     corrected row can be read as a change in the result rather than a change in the
     method. Regions without coverage for every compared variant are left unpainted,
-    and the coverage edge -- which for f > 0 is also the sigma = 6 censoring edge -- is
-    drawn explicitly.
+    and the coverage edge is drawn explicitly -- on the extension it is the swept
+    sigma_max, no longer the inherited sigma = 6 censoring edge.
     """
     from matplotlib.colors import TwoSlopeNorm
     from experiments.human.analysis.criticality_matched import heatmaps as H
@@ -242,12 +242,29 @@ def fig_heatmaps(results: dict, path_stem) -> None:
             _style(ax)
             _label(ax, "abcdef"[row * 3 + 2])
 
-        fig.text(0.5, -0.04,
-                 "Top row: nominal σ (control — reproduces the published crossing). "
-                 "Bottom row: effective criticality. Dashed red = coverage edge, which "
-                 "for f > 0 is the σ = 6 censoring edge (the σ = 8 extension was f = 0 "
-                 "only). Unpainted = no coverage for every compared variant.",
-                 ha="center", va="top", fontsize=6.2, color=_MUT)
+        source = next((res.get("source") for res in results.values()
+                       if res.get("source")), "frozen")
+        sigma_max = max(
+            (float(res["coverage"].sigma_max.max()) for res in results.values()
+             if "coverage" in res and "sigma_max" in res["coverage"]), default=6.0)
+        if source == "extension":
+            caption = (
+                "Top row: nominal σ. Bottom row: effective criticality. Both over the "
+                f"extended sweep (σ ≤ {sigma_max:g} at every f); dashed red = coverage "
+                "edge σ_max·bulk95(f), the limit of the sweep — not extended further. "
+                "Contour level = 25% of the largest fully covered cell. The published "
+                "nominal crossing (σ = 4.39, f = 0.130) returns when the level is "
+                "pinned to σ ≤ 6; over the full sweep the generative panel's own "
+                "maximum — f ≈ 0–0.1, σ ≈ 7–11, where ER collapses and the connectome "
+                "does not — raises the level and the boundaries no longer meet on that "
+                "axis. Unpainted = no coverage for every compared variant.")
+        else:
+            caption = (
+                "Top row: nominal σ (control — reproduces the published crossing). "
+                "Bottom row: effective criticality. Dashed red = coverage edge, which "
+                "for f > 0 is the σ = 6 censoring edge (the σ = 8 extension was f = 0 "
+                "only). Unpainted = no coverage for every compared variant.")
+        fig.text(0.5, -0.04, caption, ha="center", va="top", fontsize=6.2, color=_MUT)
         fig.suptitle("Does the memory/generation dissociation survive "
                      "effective-criticality matching?", fontsize=9.5, y=1.02)
         fig.tight_layout()
