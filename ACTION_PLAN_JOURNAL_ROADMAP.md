@@ -152,7 +152,21 @@ page count.
 |----|-----------|----------------|------|
 | ~~**1**~~ | ~~**`f > 0` extension and Panel B reindex.**~~ **DONE 12 Aug.** Swept to sigma = 11.2. Outcome: the crossing **is** observable and sits at (x = 2.938, f = 0.153); the Panel B negative region is explained (the two variants take the curvature step at nearly the same nominal sigma, so the matched-bulk axis reverses their order); and a new result — the generative resistance margin exists at **f = 0** (ER collapses in 50% of replicates, connectome in 0%), so the "onset in f" was a sigma = 6 artifact. `TIER0` §2.3 rewritten, §6.1 closed, §6.4 refined | Gave generation the matched axis memory already had | 14.5 core-hours measured; **12 min wall** on ada at 128 workers |
 | **2** | **E0.1 mediation.** Partial correlation of Lorenz VPT and curvature controlling for `sigma_eff`, or the same within narrow `sigma_eff` bands | Converts the -0.78-pooled / -0.04-within embarrassment into a result. **Licenses "geometry sets predictive capacity" as a chapter claim.** Reanalysis, no new runs | ~1 day |
-| **3** | **E0.3 absolute (MC, VPT) frontier.** Within-substrate absolute values across the (f, sigma) grid, not differences from ER | Answers the objection the Aceituno section invites: robust at what level? Preliminary arithmetic is favourable: supercritical MC at N=1000 is 13.93 against a global peak of roughly 14.5 to 15.5, so the connectome's supercritical average is ~90 to 95% of the best any substrate reaches at its own tuned optimum, while ER supercritically is 3.15. If that survives, it belongs in the abstract | ~1 day |
+
+> **Design warning for item 2, from E0.3 (12 Aug).** Curvature is not a continuous
+> quantity on this substrate: it is a two-state step, ~0.25 rad (straight) or ~2.9 rad
+> (saturated period-2), with essentially nothing between (`TIER0` §2.3). A pooled
+> correlation between VPT and curvature is then a correlation *between two clusters*,
+> and within a narrow `sigma_eff` band every cell sits in one cluster, so the
+> correlation has nothing to work with. That is very likely the whole of the
+> -0.78-pooled / -0.04-within pattern, and if so the mediation test as specified
+> **cannot** return a result — it would be underpowered by construction, the exact
+> failure the `bulk95` falsification test already made once. Check the two-cluster
+> hypothesis **first** (an hour, data in hand); if it holds, the honest finding is that
+> curvature is a *threshold indicator, not a continuous mediator*, and "geometry sets
+> predictive capacity" needs either a different geometry measure or restating as a
+> threshold claim.
+| ~~**3**~~ | ~~**E0.3 absolute (MC, VPT) frontier.**~~ **DONE 12 Aug.** Four-variant ladder x 11 f x sigma <= 11.2 (needed one 12-min ada run: weight-permuted had never been run under the f sweep, degree only reached sigma = 6). Outcomes: supercritical MC **rises** with f for every substrate, so the memory panel's collapse is the nulls catching up (`TIER0` §2.6, §1.1b); generation is real read as **VPT** rather than curvature (+1.0 to +2.2 Lyapunov times over all three nulls from f ~ 0.20, clearing the placement control); the advantage is a **rescue from Perron domination**, with bulk95 only a partial controller (§3.7); and the hub-gating capstone was restated — nothing collapses, the null moves (§3.8) | Gave the Aceituno "robust at what level" answer and gated the figure set | 14.5 core-hours + reanalysis |
 
 **Stop rule for item 1:** if the crossing appears within the extended coverage, report it
 and update the cross-panel headline. If it does not, "dissociation survives, crossing not
