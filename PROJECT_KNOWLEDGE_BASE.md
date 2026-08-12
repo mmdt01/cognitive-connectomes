@@ -349,14 +349,21 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 - **Memory panel.** ΔD is a low-*f*, supercritical wedge, extinguished by *f* ~0.15–0.20;
   below σ~2.4 the connectome is *worse* than ER. The collapse is ER rising to the N=448
   rank ceiling (partly finite-size), not the connectome degrading.
-- **Generative panel.** Curvature *un-freezes*: ΔS = 0 at *f*=0 and emerges once *f*>0
-  (an onset). The advantage is a *resistance margin* (the connectome stays straight while
-  ER collapses to period-2), not an operating optimum (best generation is at *f*=0). The
-  effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩ crossing 1 predicts the onset.
+- **Generative panel.** Curvature *un-freezes*: the advantage is a *resistance margin*
+  (the connectome stays straight while ER collapses to period-2), not an operating
+  optimum (best generation is at *f*=0). The effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩
+  crossing 1 predicts the onset. **CORRECTED (TIER0 §2.3, Aug 2026): the onset is in σ,
+  not in *f*.** The original reading — ΔS = 0 at *f*=0, emerging only once *f*>0 — was an
+  artifact of stopping at σ=6. Swept to σ=11.2, **ER collapses in 50% of replicates at
+  *f*=0 while the connectome collapses in 0%**: the resistance margin is present at the
+  biologically real non-negative cut, just above where the old sweep stopped.
 - **Cross-panel dissociation (headline).** The two boundaries run opposite in σ and
-  cross near (σ≈4, *f*≈0.12): **memory and generation dissociate**, governed by different
-  controllers (memory ← common mode; generation ← σ_eff→1). Sign composition trades
-  memory capacity against generative robustness.
+  **cross**: **memory and generation dissociate**, governed by different controllers
+  (memory ← common mode; generation ← σ_eff→1). Sign composition trades memory capacity
+  against generative robustness. The crossing's location is axis-dependent (TIER0 §2.3):
+  on the corrected `σ·bulk95` axis it is at (x = 2.938, *f* = 0.153); the nominal
+  (σ≈4, *f*≈0.12) reading holds only on a panel censored at σ=6 and does not survive the
+  longer sweep.
 - **Dale (biological) arm.** Memory identical to edge (robustness); generation
   broader/stronger. The connectome sustains a faithful straight-attractor Lorenz up to
   **~20% inhibition** then collapses — a **tolerance ceiling, not a tuned optimum** (best
@@ -412,7 +419,10 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    generative advantages occupy opposite regions of (*f*, σ) space with opposite
    σ-dependence, governed by different spectral controllers (memory ← hub-localised common
    mode; generation ← global effective radius σ_eff→1). Sign composition is a single knob
-   trading memory capacity against generative robustness.
+   trading memory capacity against generative robustness. The two boundaries **cross** on
+   the corrected axis at (x = 2.938, *f* = 0.153) — confirmed only after the `f > 0`
+   censoring at σ=6 was lifted (TIER0 §2.3); the generative arm's advantage is present at
+   *f*=0 as well, contrary to the original onset-in-*f* reading.
 8. **Biological E/I sits at a tolerance ceiling** (Dale arm): the connectome sustains
    faithful straight-attractor Lorenz generation up to ~20% inhibition then collapses — a
    tolerance ceiling, *not* a tuned optimum (best generation at *f*=0; collapse

@@ -150,7 +150,7 @@ page count.
 
 | id | experiment | why it matters | cost |
 |----|-----------|----------------|------|
-| **1** | **`f > 0` extension and Panel B reindex.** Run to sigma ~ 11 (x ~ 3.57), not sigma = 8 (x = 2.599), so the extrapolated crossing at x ~ 3.5 is actually observable. Confirm the cost estimate covers Lorenz and curvature, not MC only. Resolve the `TIER0` §2.3 open flag (Panel B negative region at x ~ 1.0, f ~ 0.35 to 0.45) in the same pass | Gives generation the matched axis memory already has; closes `TIER0` §2.3 and §6.1 | ~73 min (re-costed; the original 17 min was 4.3x under) |
+| ~~**1**~~ | ~~**`f > 0` extension and Panel B reindex.**~~ **DONE 12 Aug.** Swept to sigma = 11.2. Outcome: the crossing **is** observable and sits at (x = 2.938, f = 0.153); the Panel B negative region is explained (the two variants take the curvature step at nearly the same nominal sigma, so the matched-bulk axis reverses their order); and a new result — the generative resistance margin exists at **f = 0** (ER collapses in 50% of replicates, connectome in 0%), so the "onset in f" was a sigma = 6 artifact. `TIER0` §2.3 rewritten, §6.1 closed, §6.4 refined | Gave generation the matched axis memory already had | 14.5 core-hours measured; **12 min wall** on ada at 128 workers |
 | **2** | **E0.1 mediation.** Partial correlation of Lorenz VPT and curvature controlling for `sigma_eff`, or the same within narrow `sigma_eff` bands | Converts the -0.78-pooled / -0.04-within embarrassment into a result. **Licenses "geometry sets predictive capacity" as a chapter claim.** Reanalysis, no new runs | ~1 day |
 | **3** | **E0.3 absolute (MC, VPT) frontier.** Within-substrate absolute values across the (f, sigma) grid, not differences from ER | Answers the objection the Aceituno section invites: robust at what level? Preliminary arithmetic is favourable: supercritical MC at N=1000 is 13.93 against a global peak of roughly 14.5 to 15.5, so the connectome's supercritical average is ~90 to 95% of the best any substrate reaches at its own tuned optimum, while ER supercritically is 3.15. If that survives, it belongs in the abstract | ~1 day |
 
@@ -159,6 +159,14 @@ and update the cross-panel headline. If it does not, "dissociation survives, cro
 observable within the swept range" is final. Mark the coverage limit on the figure and
 stop. Do not extend further, do not add sigma points chasing it, do not extrapolate into
 a claim.
+
+> **Applied, 12 Aug.** First branch fired: the crossing appears at (x = 2.938, f = 0.153),
+> inside coverage and in a region every replicate reaches. The sweep was not extended
+> further and no sigma points were added. Two conditions travel with the number, both in
+> `TIER0` §2.3: the contour level is taken over fully covered cells (the raw global max is
+> set by a cell backed by 1 replicate of 30, and that convention alone gives no crossing),
+> and on the **nominal** axis the published crossing does not survive the longer sweep at
+> all. Act III must present the crossing with the axis stated, not as a single number.
 
 **Bridge task, nearly free.** NARMA-10 faded because both `d_eff` and PR order the ladder
 on it, so it could not discriminate the measures (Probe 3's purpose). That makes it a

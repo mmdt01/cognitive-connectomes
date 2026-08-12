@@ -1,14 +1,18 @@
 # Tier 0 — canonical state of play
 
-**Status:** consolidated 8 August 2026; N=1000 result added 11 August 2026. **This document supersedes** the individual
+**Status:** consolidated 8 August 2026; N=1000 result added 11 August 2026; `f > 0`
+extension added 12 August 2026 (§2.3, which supersedes the earlier "the crossing does not
+survive" verdict). **This document supersedes** the individual
 summaries it draws on: `eigenspectrum/results/E04_summary.md`,
 `criticality_matched/results/E02_verdict.md` §4, `taskA_alpha_summary.md`,
-`taskB_summary.md` and `closeout_*`. Those remain as the detailed record and the
+`taskB_summary.md`, `item2_summary_scale_448.md` and `closeout_*`. Those remain as the
+detailed record and the
 artifact trail; where they disagree with this document, **this document is correct**.
 
-Every number below is traceable to a named artifact. Three steps required simulation --
-Task B (`f = 0`, MC only, N=448), the N=448 protocol control, and the N=1000 run (§2.4,
-on ada). Everything else is reanalysis of frozen parquets.
+Every number below is traceable to a named artifact. Four steps required simulation --
+Task B (`f = 0`, MC only, N=448), the N=448 protocol control, the N=1000 run (§2.4) and
+the `f > 0` extension (§2.3), all on ada. Everything else is reanalysis of frozen
+parquets.
 
 ---
 
@@ -22,8 +26,10 @@ variants peak at essentially the same height and the connectome retains far more
 as effective criticality rises. The previously reported subcritical *deficit* is
 axis-dependent: present at matched spectral radius, absent at matched bulk radius —
 neither axis is neutral, and the result stands on surviving both. Separately, the
-cross-panel memory/generation **crossing does not survive** reindexing within the range
-the data covers.
+cross-panel memory/generation **crossing survives** reindexing once the `f > 0`
+censoring is lifted — it sits at (x = 2.938, f = 0.153), and the same extension shows
+the generative advantage is present at the biologically real `f = 0` too, where the
+σ = 6 sweep had hidden it (§2.3).
 
 ---
 
@@ -144,26 +150,78 @@ After Task B extended the sweep to σ = 8, the matched peak is **interior** to t
 overlap [0, 2.599] and turns over, declining to +155.5. So 57% is the value at the true
 peak, not a bound. Interpolation-insensitive (linear/cubic within 0.8%).
 
-### 2.3 The (f, σ) panels reindexed — the crossing does not survive
+### 2.3 The (f, σ) panels reindexed — the crossing survives, once the censoring is lifted
 
-**Control passes:** the same pipeline on the nominal axis reproduces the published
-crossing at **(σ = 4.39, f = 0.130)** against the documented (σ ≈ 4, f ≈ 0.12).
+**Superseded 12 August 2026 by the `f > 0` extension** (roadmap §4a item 1, run on ada,
+12 min at 128 workers). The earlier verdict — "the dissociation is not refuted, the
+crossing is" — was read off a panel censored at σ = 6 for every `f > 0`. With the same
+grid swept to **σ = 11.2**, the censoring is gone and the verdict changes.
 
-On `σ·bulk95`, over the covered range the memory boundary (`f*` 0 → 0.119) stays
-**below** the generative boundary (`f*` ≈ 0.285, flat) and they never meet. The gap
-narrows at −0.139 per unit x but is still 0.165 at the coverage limit x = 2.336.
+**Reproduction gate — exact, not distributional.** The extension was run on the machine
+that produced the frozen capture and reproduced **every shared cell bit-for-bit**:
+max |Δ| = 0 on `d_eff`, `mean_curvature`, `bulk95` and `neg_frac` across all 21,120
+shared cells, 19,200 of them at `f > 0`. So §6.4's non-portability is strictly
+*cross-machine*, and the extension is a **strict superset** of the frozen capture —
+every difference below comes from the added σ range alone, not from a new realisation.
 
-> **The dissociation is not refuted — the crossing is.** The boundaries diverge and
-> remain separated by 0.17–0.34 in `f`; the crossing lies beyond the swept range. A
-> linear extrapolation would place it near x ≈ 3.5, which is 1.5× the covered range and
-> is **arithmetic, not a claim**.
+**On `σ·bulk95` the boundaries cross at (x = 2.938, f = 0.153)**, in a region every
+replicate covers. Coverage now runs to x = 3.58–4.36 (was 1.95–2.34). The memory
+boundary rises 0 → 0.19 and the generative boundary falls 0.35 → 0.05; the gap passes
+through zero at 2.94, having been −0.162 and narrowing at the old coverage limit. The
+old linear extrapolation put it near x ≈ 3.5 — right in direction, 19% too far out,
+which is why it was recorded as arithmetic rather than a claim.
 
-Coverage stops at 2.336 because the σ = 8 extension was `f = 0` only; every `f > 0` row
-is still censored at σ = 6, and that censoring edge *is* the coverage edge.
+**The contour level had to be pinned to fully covered cells.** Both boundary operators
+set their contour at 25% of the panel's *global max*, and past the all-replicates
+coverage edge the panel is still populated — but only by the replicates whose own
+`bulk95` reached that far. On the extended panel the raw global max of `dStraight`
+(+2.849) comes from a cell backed by **one replicate of 30**, against +0.032 over fully
+covered cells: an 89× difference in the level, which decides the boundary everywhere.
+The level is therefore taken over cells all 30 replicates reach. Three conventions —
+full-coverage cells, `n ≥ 15`, and the level pinned to the old x ≤ 2.336 range — give
+**the identical crossing**; only the raw-global-max convention (level set by the n = 1
+cell) gives none.
 
-**Open flag:** Panel B on the corrected axis develops a strong negative region around
-x ≈ 1.0, f ≈ 0.35–0.45. Mechanically expected (at matched x the connectome sits at much
-higher nominal σ), but it should be examined before the generative panel is drafted.
+**The nominal axis moves the other way, and that is the same fact.** Over the extended
+sweep the published nominal crossing **does not survive** — not through coverage (every
+nominal cell has all 30 replicates) but because the generative panel's true maximum sits
+at f ≈ 0–0.05, σ ≈ 7–11, which σ = 6 never saw; including it raises the level and drops
+the generative boundary below the memory boundary throughout. Pinning the level back to
+σ ≤ 6 returns **(σ = 4.392, f = 0.1309)** against the published (4.39, 0.130), so the
+pipeline reproduces it exactly: what moved is the panel, not the method. Under
+replicate resampling on the shared σ ≤ 6 grid the crossing sits at σ = 4.53
+[3.85, 5.31], f = 0.136 [0.113, 0.158] — and **fails to appear in 29% of resamples**,
+so it was never a sharp feature even where it was first read.
+
+> **Neither axis is neutral here either (§1.1, generation side).** At σ = 11.2 the
+> connectome reaches x = 3.58 while ER reaches ~6.2, so the region where ER collapses
+> and the connectome does not falls *outside* the matched-x overlap altogether. The
+> effective axis cannot see the generative advantage at its largest; the nominal axis
+> can, and pays by leaving the bulk unmatched. Report both.
+
+**Open flag CLOSED — the Panel B negative region is explained.** Curvature is a step
+function of σ (straight ~0.25 rad → saturated period-2 ~2.9 rad in one grid step), so
+the panel is decided by *where each variant takes the step*. Bracketed at the sweep's
+own 0.4 resolution, `Δx_collapse` (connectome − ER) is negative at 9 of 10 `f`: on the
+matched-bulk axis the connectome steps at a **smaller** x than ER, so between the two
+step locations it is the more curved of the pair and Panel B goes strongly negative. In
+nominal σ the ordering is level or reversed (`Δσ_collapse` ≥ 0). The negative region is
+the generation-side face of the axis asymmetry, not a defect. Its depth is bounded by
+the mode gap (~2.6 rad) and its location by the 0.4 σ grid (±0.16 in x for the
+connectome). The one exception is f = 0.15, where the connectome's nominal margin (3.2
+in σ, against 0–0.8 elsewhere) is large enough to survive the change of axis.
+
+**New: the generative advantage exists at f = 0 — it was censored, not absent.** Over
+σ ≤ 11.2, ER collapses to period-2 in **50%** of replicates (σ ≈ 7.6–8.0) while the
+connectome collapses in **0%**; at f = 0.05 it is 57% against 27%. The phase diagram's
+reading that `ΔS` is ~0 at f = 0 and *emerges* as an onset in `f` is an artifact of
+stopping at σ = 6: **the onset is in σ**, and at f = 0 it lies beyond the old sweep.
+This is the biologically real cut (macro dMRI weights are non-negative), so it matters
+more than the f > 0 counterfactual does.
+
+Artifacts: `criticality_matched/results/item2_summary_scale_448.md`,
+`item2_reproduction_gate_scale_448.csv`, `item2_collapse_loci_scale_448.csv`,
+`e02_heatmap_*_extension*`, `figures/fig_heatmaps_matched_extension.png`.
 
 ### 2.4 N=1000 — the margin holds; the controller test is inconclusive
 
@@ -437,9 +495,13 @@ peak; compact wins across the range.**
 
 ## 6. Known limits — state these, do not work around them
 
-1. **`f > 0` is censored at σ = 6.** The σ = 8 extension was `f = 0` only, so the
-   reindexed heatmap coverage stops at x = 2.336 and the boundary crossing is not
-   observable. Fixable with one ~17-minute run.
+1. ~~**`f > 0` is censored at σ = 6.**~~ **RESOLVED 12 Aug 2026** by the σ = 11.2
+   extension (§2.3): coverage now reaches x = 3.58–4.36 and the crossing is observable
+   at (2.938, 0.153). Residual limit: the boundary past the all-replicates coverage
+   edge is built from a `bulk95`-selected subsample, so the *contour level* is taken
+   over fully covered cells only, and the boundary itself is noisy there. Cost, for the
+   record: 14.5 core-hours measured, 12 min wall at 128 workers — the ~17-minute
+   estimate was right for the wall clock and wrong about why (it costed MC alone).
 2. **`σ·bulk95` matches the linear operator, not the dynamics.** Realised gain at each
    variant's `σ_eff` fold differs materially (0.542 connectome vs 0.690 ER). This is
    part of the mechanism and must not be matched away, but "matched effective
@@ -448,9 +510,13 @@ peak; compact wins across the range.**
    crossing 1" criterion belongs to the *Lorenz* states and must not cross panels.
 4. **The `f > 0` flip pattern is not machine-portable** (unstable `np.argsort` tie order
    on a heavily-tied edge score). Distributions agree (60/60 groups within 4 SE); per-cell
-   values do not. Use `phase_cells.parquet`'s own `bulk95` when reindexing its cells.
+   values do not. Use each file's own `bulk95` when reindexing its cells.
    Fix for future runs: `kind="stable"` in `_select_flips` — deliberately not applied,
-   since it would invalidate the frozen capture.
+   since it would invalidate the frozen capture. **Refined 12 Aug 2026:** the caveat is
+   strictly *cross-machine*. Re-running the grid on ada, the machine that produced the
+   frozen capture, reproduced all 19,200 shared `f > 0` cells **exactly** (§2.3), so
+   flip patterns are reproducible on their originating machine and a re-run there can be
+   spliced onto the frozen capture. Across machines the caveat stands.
 5. **On the Dale axis, sign fraction and non-normality co-vary**, unequally across
    variants. Dale-arm claims are about node-wise inhibition, not sign fraction alone.
 6. **Peak `d_eff` is ceiling-limited at N=448 and will be at any N.** Confirmed at
