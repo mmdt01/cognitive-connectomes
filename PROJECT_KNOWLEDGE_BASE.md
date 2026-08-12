@@ -354,9 +354,12 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
   optimum (best generation is at *f*=0). The effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩
   crossing 1 predicts the onset. **CORRECTED (TIER0 §2.3, Aug 2026): the onset is in σ,
   not in *f*.** The original reading — ΔS = 0 at *f*=0, emerging only once *f*>0 — was an
-  artifact of stopping at σ=6. Swept to σ=11.2, **ER collapses in 50% of replicates at
-  *f*=0 while the connectome collapses in 0%**: the resistance margin is present at the
-  biologically real non-negative cut, just above where the old sweep stopped.
+  artifact of stopping at σ=6. Swept to σ=11.2, **ER collapses in 5 of 10 seeds at *f*=0
+  while the connectome collapses in 0 of 10** (Fisher p=0.033): the resistance margin is
+  present at the biologically real non-negative cut, just above where the old sweep
+  stopped. Modest, and quoted in *seeds* — the 3 draws per seed share a mask/`Win`/input
+  series and are literal duplicates at *f*=0, so Panel B cells rest on ~10 independent
+  units, not 30.
 - **Cross-panel dissociation (headline).** The two boundaries run opposite in σ and
   **cross**: **memory and generation dissociate**, governed by different controllers
   (memory ← common mode; generation ← σ_eff→1). Sign composition trades memory capacity

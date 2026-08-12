@@ -212,8 +212,14 @@ connectome). The one exception is f = 0.15, where the connectome's nominal margi
 in σ, against 0–0.8 elsewhere) is large enough to survive the change of axis.
 
 **New: the generative advantage exists at f = 0 — it was censored, not absent.** Over
-σ ≤ 11.2, ER collapses to period-2 in **50%** of replicates (σ ≈ 7.6–8.0) while the
-connectome collapses in **0%**; at f = 0.05 it is 57% against 27%. The phase diagram's
+σ ≤ 11.2, ER collapses to period-2 in **5 of 10 seeds** (σ ≈ 7.6–8.0) while the
+connectome collapses in **0 of 10** (Fisher exact p = 0.033); at f = 0.05 it is 7 seeds
+against 5. **Quote seeds, not replicates.** The independent unit is the seed: the three
+draws of a seed share its mask, `Win` and input series, and at f = 0 the sign transform
+is the identity, so the draws are literal duplicates. Every Panel B cell therefore rests
+on ~10 independent units, not 30 — which Panel A survives easily (effects of d ≈ +10)
+and Panel B does not. This is a real but modest asymmetry, and it must not be written as
+"50% of replicates". The phase diagram's
 reading that `ΔS` is ~0 at f = 0 and *emerges* as an onset in `f` is an artifact of
 stopping at σ = 6: **the onset is in σ**, and at f = 0 it lies beyond the old sweep.
 This is the biologically real cut (macro dMRI weights are non-negative), so it matters

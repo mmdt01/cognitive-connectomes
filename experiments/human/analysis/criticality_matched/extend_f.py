@@ -287,12 +287,20 @@ def collapse_diagnostic(scale: int = common.SCALE,
             x_lo=float(sr[lo] * bulk[lo]), x_hi=float(sr[k] * bulk[k]),
             sigma_eff_hi=float(rep.effective_radius.to_numpy(float)[k])))
     per_rep = pd.DataFrame(rows)
+    # The independent unit is the SEED, not the replicate: the three draws of a seed
+    # share its mask, Win and input series, and at f = 0 the sign transform is the
+    # identity so they are literally duplicates. Reporting `frac_collapsed` over 30
+    # replicates therefore overstates n -- badly at f = 0, where the real contrast is
+    # over 10 seeds. Both are carried, and the seed count is the one to quote.
+    by_seed = (per_rep.groupby(["f", "variant", "seed"]).collapsed.max()
+               .groupby(level=["f", "variant"]).agg(n_seeds_collapsed="sum",
+                                                    n_seeds="size"))
     summary = (per_rep.groupby(["f", "variant"])
                .agg(frac_collapsed=("collapsed", "mean"),
                     sigma_lo=("sigma_lo", "median"), sigma_hi=("sigma_hi", "median"),
                     x_lo=("x_lo", "median"), x_hi=("x_hi", "median"),
                     sigma_eff_at_collapse=("sigma_eff_hi", "median"))
-               .reset_index())
+               .join(by_seed).reset_index())
     wide = summary.pivot(index="f", columns="variant")
     for col in ("sigma_hi", "x_hi"):
         wide[("delta", col)] = (wide[(col, "connectome")]
@@ -343,8 +351,9 @@ def report(scale: int = common.SCALE) -> dict:
     print("\nPanel B negative region -- collapse loci:")
     loci = collapse_diagnostic(scale, "extension")
     show = loci[loci.variant.isin(VARIANTS)][
-        ["f", "variant", "frac_collapsed", "sigma_lo", "sigma_hi", "x_lo", "x_hi",
-         "sigma_eff_at_collapse", "delta_sigma_collapse", "delta_x_collapse"]]
+        ["f", "variant", "n_seeds_collapsed", "n_seeds", "frac_collapsed",
+         "sigma_lo", "sigma_hi", "x_lo", "x_hi", "sigma_eff_at_collapse",
+         "delta_sigma_collapse", "delta_x_collapse"]]
     print(show.to_string(index=False, float_format=lambda v: f"{v:.3f}"))
 
     eff, nom = results["effective"], results["nominal"]
@@ -440,7 +449,9 @@ def report(scale: int = common.SCALE) -> dict:
             f"{boot['f_ci'][1]:.4f} [{boot['f_ci'][0]:.4f}, {boot['f_ci'][2]:.4f}] |")
 
     crossed = bool(eff["crossing"].get("crosses"))
-    f0 = loci[loci.f == 0.0].set_index("variant").frac_collapsed
+    _f0 = loci[loci.f == 0.0].set_index("variant")
+    f0 = _f0.n_seeds_collapsed
+    f0["n_seeds"] = float(_f0.n_seeds.max())
     lines += [
         "",
         "## 4. Verdict (pre-committed stop rule)",
@@ -476,8 +487,13 @@ def report(scale: int = common.SCALE) -> dict:
         "",
         "**The generative advantage exists at f = 0 and was censored, not absent.** "
         f"Over sigma <= {SR_MAX:g}, ER collapses to the saturated period-2 state in "
-        f"{f0.get('erdos_renyi', float('nan')):.0%} of replicates while the connectome "
-        f"collapses in {f0.get('connectome', float('nan')):.0%}. The phase diagram's "
+        f"**{f0.get('erdos_renyi', float('nan')):.0f} of "
+        f"{f0.get('n_seeds', 10):.0f} seeds** while the connectome collapses in "
+        f"{f0.get('connectome', float('nan')):.0f} (Fisher exact p = 0.033). Quote "
+        "seeds, not replicates: the three draws of a seed share its mask, `Win` and "
+        "input series, and at f = 0 the transform is the identity so they are "
+        "duplicates. This is a real but modest asymmetry, not the 15-vs-0 that "
+        "'50% of 30 replicates' would imply. The phase diagram's "
         "reading that dStraight is ~0 at f = 0 and *emerges* as an onset in f is an "
         "artifact of stopping at sigma = 6: the onset is in sigma, and at f = 0 it "
         "falls beyond the old sweep. This is the biological cut (macro dMRI weights "
