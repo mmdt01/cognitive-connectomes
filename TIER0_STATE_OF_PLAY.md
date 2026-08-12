@@ -29,7 +29,11 @@ neither axis is neutral, and the result stands on surviving both. Separately, th
 cross-panel memory/generation **crossing survives** reindexing once the `f > 0`
 censoring is lifted — it sits at (x = 2.938, f = 0.153), and the same extension shows
 the generative advantage is present at the biologically real `f = 0` too, where the
-σ = 6 sweep had hidden it (§2.3).
+σ = 6 sweep had hidden it (§2.3). Read in **absolute** terms (§2.6) the account
+sharpens again: negative weights *improve* supercritical memory for every substrate, so
+the advantage's collapse with `f` is the nulls catching up, not the connectome degrading
+— the connectome's edge is resistance to **Perron domination**, and balanced signs remove
+the domination rather than the resistance (§3.7).
 
 ---
 
@@ -71,6 +75,21 @@ nominal-axis deficit is fully explained by the unmatched bulk.
 
 Fixed in `PROJECT_KNOWLEDGE_BASE.md`, `PHASE_DIAGRAM_EXPERIMENT.md` §9.5 and the
 roadmap's Act I.
+
+### 1.1b REFRAMED — the memory panel's `f`-collapse is the nulls catching up
+
+The phase diagram reports the memory advantage as "a low-`f`, supercritical wedge,
+extinguished by `f` ≈ 0.15–0.20". In absolute terms **no substrate degrades**: MC at
+σ = 6 *rises* with `f` for all four variants, the connectome by +2.75 and ER by +10.69,
+so the wedge closes because the nulls gain four times as much from a much lower start
+(§2.6). Balanced signs destroy the Perron common mode, which is the thing the nulls were
+losing to (§3.7).
+
+> **Correct wording:** sign composition does not trade the connectome's memory away — it
+> *removes the handicap the nulls were under*. The connectome's edge is resistance to
+> Perron domination, and balanced signs remove the domination rather than the resistance.
+
+This is the same failure mode as §1.2, one axis over: a delta read without its levels.
 
 ### 1.2 REFRAMED — memory is robustness, not capacity
 
@@ -306,7 +325,66 @@ Gram and eigendecomposition workspace, ~8.7 GB marginal across 128 fork workers.
 
 **What this run did not settle:** the `f > 0` censoring and therefore the
 memory/generation boundary crossing (§2.3, separate cheaper run); whether `bulk95` is
-the ladder controller (§2.4); and the Dale non-normality confound (§3.5).
+the ladder controller (§2.4, partially answered in §3.7); and the Dale non-normality
+confound (§3.5).
+
+### 2.6 E0.3 — the absolute (MC, VPT) frontier
+
+Roadmap §4a item 3, run 12 August 2026. Everything else in the phase-diagram programme
+reads *differences*; this reads **within-substrate absolute levels** across
+(variant, f, σ), four variants, nominal σ. Two substrates had to be captured first —
+`degree_rewire` reached only σ = 6 and **`connectome_weight_permuted` had never been run
+under the `f` sweep at all** — 12 min on ada, gates in §2.3's terms (degree bit-exact
+against the frozen capture; both against Task B at `f = 0`).
+
+Metrics are **MC and VPT only**. `d_eff` is excluded because it is ceiling-limited at
+N=448 and reads flat across `f` for reasons that have nothing to do with `f`;
+`climate_error` is excluded per §6.2. MC is bounded by `max_lag` = 50 (observed ≤ 16.0)
+and VPT by `free_run_len` (16.3 Lyapunov times, observed ≤ 7.95), so neither risks a
+ceiling — but **VPT's floor is live**: 42% of Lorenz cells are exactly 0.
+
+> **Headline: negative weights *improve* supercritical memory for every substrate, and
+> nobody degrades.** MC at σ = 6, seed-median:
+>
+> | variant | f = 0 | f = 0.25 | f = 0.5 | change |
+> |---|---|---|---|---|
+> | connectome | 11.43 | 14.35 | 14.18 | **+2.75** |
+> | weight-permuted | 5.02 | 13.64 | 13.60 | **+8.58** |
+> | degree | 4.11 | 13.43 | 13.19 | **+9.08** |
+> | Erdős–Rényi | 2.42 | 13.30 | 13.11 | **+10.69** |
+>
+> The connectome's advantage falls from **+9.01 to +1.07** *solely because the nulls gain
+> about four times what it gains, from a much lower start*. So the memory panel's
+> "advantage extinguished by `f` ≈ 0.15–0.20" is **the nulls catching up** — the same
+> failure mode §1.2 caught for `d_eff` at `f = 0`, now shown across the whole `f` axis
+> and on a metric that is *not* ceiling-limited. Peak MC over σ is flat in `f` and
+> equal across variants (~15.4), so the peak was never where this lived.
+
+**Generation is real — the instrument was wrong.** Read as VPT rather than curvature, at
+σ = 2 (near every variant's own peak), paired within seed:
+
+| f | vs weight-permuted | vs degree | vs ER |
+|---|---|---|---|
+| 0.00 | +0.28 | −0.01 | +0.44 (none significant) |
+| 0.20 | +1.46 | +0.28 | +1.82 |
+| 0.25 | +1.71 | +1.62 | +2.20 |
+| 0.50 | +1.35 | +1.34 | +1.42 |
+
+At `f = 0` the connectome is level with every null. From `f` ≈ 0.20–0.25 it is **the only
+substrate still predicting** (1.3–2.8 Lyapunov times against 0.1–0.9), clearing the
+weight-permuted placement control — so this is a **weight-placement** effect, not
+topology. Compare the 0.032 rad curvature residual the matched-axis Panel B was
+contouring (§2.3): the generative arm was weak because the *order parameter* was wrong.
+
+**The dissociation survives, restated in absolute terms.** Memory is **supercritical and
+maximal at `f = 0`** (MC +4.75 to +8.97 at σ = 6, decaying with `f`); generation is
+**near-critical and absent at `f = 0`** (VPT +1.0 to +2.2 at σ = 2, emerging from
+`f` ≈ 0.20). Same claim the delta panels made, now with absolute levels, paired CIs and
+the full four-variant ladder.
+
+Artifacts: `criticality_matched/results/e03_frontier_verdict_scale_448.md`,
+`e03_frontier_scale_448.parquet`, `e03_frontier_paired_scale_448.csv`,
+`e03_frontier_live_window_scale_448.csv`, `figures/fig_frontier_absolute.png`.
 
 ---
 
@@ -455,6 +533,58 @@ rises four orders, toward its minimum at 3.6; nulls 1.2 → 1.6, toward theirs a
 
 ---
 
+### 3.7 The memory advantage is a rescue from Perron domination, not a capacity gain
+
+Two spectral quantities do separate jobs. `bulk95` sets **where** a substrate crosses
+into supercriticality: the simulated operator is `σ·W/|λ₁|`, so the leading mode always
+has gain exactly σ while the bulk has gain `σ·bulk95`. The **Perron common mode** sets
+**how catastrophic** crossing is: non-negativity gives a hub-loaded all-positive leading
+eigenvector, the network synchronises into it, tanh saturates, and the fluctuation
+subspace the ridge readout uses is crushed.
+
+**The common-mode amplitude confirms it, and inverts the naive expectation.**
+`|mean_state|` (the Probe-2 common-mode proxy, recorded per cell), seed-median:
+
+| σ | f | connectome | weight-permuted | degree | ER |
+|---|---|---|---|---|---|
+| 2 | 0.00 | **0.114** | 0.532 | 0.586 | 0.593 |
+| 2 | 0.50 | 0.004 | 0.001 | 0.001 | 0.001 |
+| 6 | 0.00 | **0.759** | 0.949 | 0.959 | 0.989 |
+| 6 | 0.50 | 0.016 | 0.015 | 0.018 | 0.024 |
+
+The connectome is the **least** common-mode dominated substrate *despite carrying by far
+the largest Perron root* — at σ = 6 the nulls sit at 0.95–0.99, essentially every unit
+pinned near +1 and the network fully synchronised. That is what the spectral gap buys:
+the leading mode can be driven hard without the bulk following. Balanced signs remove the
+common mode entirely (two orders of magnitude), which is why the advantage goes with it.
+
+**A partial answer to §6.7 (is `bulk95` the ladder controller?).** Matching on
+x = `σ·bulk95` — a controlled comparison, not a correlation — absorbs only **26%** of the
+connectome−ER MC gap at `f = 0` (median |gap| 6.42 → 4.75) and leaves a residual of
+**~0.5** by `f` ≥ 0.2, a 9.5× collapse in what `bulk95` fails to explain. Re-indexed on
+x, the `f = 0` curves stay separated and the `f = 0.5` curves superimpose
+(`fig_mechanism_axes`). So `bulk95` is a **partial** controller whose explanatory power
+depends on whether a Perron mode exists — sharper than the inconclusive N=1000 test
+(§2.4) managed.
+
+> **NOT IDENTIFYING, reported as such.** The correlation half of this test does not
+> work. `|mean_state|` and `σ·bulk95` are collinear by construction — both monotone in σ
+> at fixed `f`, both monotone in `f` at fixed σ — and the within-`f` Spearmans against
+> `dMC` are near-identical (at `f` = 0.15: 0.959 vs 0.956). The pooled supercritical
+> contrast looks decisive (+0.796 vs −0.004) and **must not be quoted**: it is
+> confounding. Only the matched-axis residual above adjudicates.
+
+> **Wording for the draft:** the connectome does not make memory better. Non-negativity
+> makes it worse for everyone, and the connectome's spectral gap makes it least worse.
+> Since a structural connectome is non-negative by construction (§ biological
+> interpretation in `PROJECT_KNOWLEDGE_BASE.md`), resistance to Perron domination is the
+> only property available to select on — evolution cannot choose `f`.
+
+Artifacts: `e03_mechanism_corr_scale_448.csv`, `e03_mechanism_matched_scale_448.csv`,
+`figures/fig_mechanism_axes.png`.
+
+---
+
 ## 4. Robustness of the E0.2 verdict
 
 | axis | overlap | peak `dD` | at x | min `dD` |
@@ -528,7 +658,32 @@ peak; compact wins across the range.**
 6. **Peak `d_eff` is ceiling-limited at N=448 and will be at any N.** Confirmed at
    N=1000 (peak `d_eff/N` 0.971–0.999). No parcellation makes the peak comparison
    informative; read the decay region.
-7. **Whether `bulk95` is the ladder controller is open.** The N=1000 test that was meant
-   to settle it is underpowered *on the predictor side*: the degree/ER `bulk95` ordering
-   at N=1000 is itself within noise (p = 0.16). A properly powered test needs more seeds,
-   or a variant pair whose `bulk95` separation is large and stable across scales.
+7. **Whether `bulk95` is the ladder controller is open — now partially answered.** The
+   N=1000 test that was meant to settle it is underpowered *on the predictor side*: the
+   degree/ER `bulk95` ordering at N=1000 is itself within noise (p = 0.16). A properly
+   powered test needs more seeds, or a variant pair whose `bulk95` separation is large and
+   stable across scales. **§3.7 answers the part that can be answered without more
+   seeds:** `bulk95` absorbs only 26% of the connectome−ER MC gap at `f = 0` and nearly
+   all of it by `f` ≥ 0.2, so it is a partial controller whose explanatory power depends
+   on whether a Perron common mode exists.
+
+8. **Paired tests at n = 10 seeds cannot survive broad multiplicity correction.** The
+   smallest p a two-sided Wilcoxon can return on 10 pairs is `2/2^10` = 0.00195, so **no
+   Holm correction over more than ~25 tests can reach 0.05 at any effect size**. Reporting
+   "nothing is significant" over a 66-cell table would be a fact about seed count, not
+   about substrates. Correct treatment: declare the family narrowly (one metric × null
+   `f`-sweep) and rest the claim on the CIs and effect sizes, which is what §2.6 does.
+
+9. **"Usable range" is threshold-dependent and must not be quoted from the flattering
+   end.** Measured as "VPT is not identically zero", the connectome's usable σ window
+   looks ~2× the nulls'. Under any threshold meaning *usefully predicting* (≥ 1 Lyapunov
+   time, or ≥ 50% of that substrate's own peak) it is 1.25–1.5× at high `f` and
+   **reverses** at low `f`, where degree-matching holds a Lyapunov time twice as far. The
+   nulls drop to exactly 0 while the connectome decays gradually just above it, which is
+   what the weak threshold is detecting. All three criteria are in
+   `e03_frontier_live_window_scale_448.csv`.
+
+10. **The `f > 0` boundary above the all-replicates coverage edge rests on a
+    `bulk95`-selected subsample.** The contour level is therefore taken over fully covered
+    cells only (§2.3); the boundary line itself is still noisy there and the region is
+    drawn but should not be read quantitatively.

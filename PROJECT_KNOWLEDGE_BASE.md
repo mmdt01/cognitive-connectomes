@@ -348,7 +348,12 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 `PHASE_DIAGRAM_EXPERIMENT.md`.
 - **Memory panel.** ΔD is a low-*f*, supercritical wedge, extinguished by *f* ~0.15–0.20;
   below σ~2.4 the connectome is *worse* than ER. The collapse is ER rising to the N=448
-  rank ceiling (partly finite-size), not the connectome degrading.
+  rank ceiling (partly finite-size), not the connectome degrading. **CONFIRMED IN ABSOLUTE
+  TERMS (TIER0 §2.6, Aug 2026), and it is not a ceiling artifact:** on MC — which is *not*
+  ceiling-limited at N=448 — supercritical memory *rises* with *f* for every substrate
+  (σ=6, *f* 0→0.5: connectome +2.75, weight-permuted +8.58, degree +9.08, ER +10.69). The
+  advantage falls +9.01 → +1.07 because the nulls gain ~4× what the connectome gains from a
+  much lower start. **Nobody degrades.**
 - **Generative panel.** Curvature *un-freezes*: the advantage is a *resistance margin*
   (the connectome stays straight while ER collapses to period-2), not an operating
   optimum (best generation is at *f*=0). The effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩
@@ -372,6 +377,21 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
   **~20% inhibition** then collapses — a **tolerance ceiling, not a tuned optimum** (best
   at *f*=0; collapse σ-dependent) — placing the biological E/I ratio at the upper edge of
   faithful generation.
+- **Absolute frontier + mechanism (E0.3, TIER0 §2.6 / §3.7).** Reading *levels* rather than
+  differences, over the four-variant ladder × 11 *f* × σ ≤ 11.2 (MC and VPT only; `d_eff`
+  is ceiling-limited, `climate_error` unreliable). Three results. (i) The memory panel's
+  *f*-collapse is the nulls catching up (above). (ii) **Generation is real when read as
+  VPT, not curvature:** level with every null at *f*=0, then from *f*≈0.20–0.25 the
+  connectome is the only substrate still predicting (+1.0 to +2.2 Lyapunov times over all
+  three nulls, clearing the weight-permuted placement control ⇒ a **placement** effect) —
+  against the 0.032 rad curvature residual the matched-axis panel was contouring.
+  (iii) **The advantage is a rescue from Perron domination.** `|mean_state|` (common-mode
+  proxy) at σ=6, *f*=0: connectome **0.759** vs nulls 0.949–0.989 — the connectome is the
+  *least* common-mode dominated substrate despite the largest Perron root, because a large
+  gap lets the leading mode be driven without the bulk following. Balanced signs remove the
+  common mode (2 orders of magnitude) and the advantage with it. Matching on σ·bulk₉₅
+  absorbs only **26%** of the *f*=0 MC gap but nearly all of it by *f*≥0.2, so bulk₉₅ is a
+  *partial* controller whose power depends on whether a Perron mode exists.
 - **Placement (mechanistic capstone).** Memory is **hub-gated**: on the Dale axis
   hub-first < stratified < periphery-first (degree 0.087/0.124/0.164; eigenvector-centrality
   0.103/0.118/0.219 — effect *larger* under the direct Perron score), ~2× more efficient,
@@ -425,7 +445,10 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    trading memory capacity against generative robustness. The two boundaries **cross** on
    the corrected axis at (x = 2.938, *f* = 0.153) — confirmed only after the `f > 0`
    censoring at σ=6 was lifted (TIER0 §2.3); the generative arm's advantage is present at
-   *f*=0 as well, contrary to the original onset-in-*f* reading.
+   *f*=0 as well, contrary to the original onset-in-*f* reading. **Restated in absolute
+   terms** (TIER0 §2.6): memory is supercritical and maximal at *f*=0 (MC +4.75 to +8.97 at
+   σ=6); generation is near-critical and absent at *f*=0 (VPT +1.0 to +2.2 at σ=2, emerging
+   from *f*≈0.20). Read the arms off **MC and VPT**, not `d_eff` and curvature.
 8. **Biological E/I sits at a tolerance ceiling** (Dale arm): the connectome sustains
    faithful straight-attractor Lorenz generation up to ~20% inhibition then collapses — a
    tolerance ceiling, *not* a tuned optimum (best generation at *f*=0; collapse
@@ -435,12 +458,30 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    degree vs eigenvector-centrality hub definition — the memory controller is the
    Perron/common mode carried by the hubs. Generation placement is noisy (global
    controller), independently corroborating the dissociation.
+10. **The memory advantage is a rescue from Perron domination, not a capacity gain**
+    (TIER0 §3.7). Two quantities do separate jobs: bulk₉₅ sets *where* a substrate goes
+    supercritical, the Perron common mode sets *how catastrophic* that is. The connectome is
+    the least common-mode dominated substrate despite the largest Perron root
+    (`|mean_state|` 0.759 vs 0.949–0.989 at σ=6, *f*=0); balanced signs delete the common
+    mode and the advantage together. **Defensible one-liner: the connectome does not make
+    memory better — non-negativity makes it worse for everyone, and the connectome's
+    spectral gap makes it least worse.** This strengthens the biological framing: a
+    structural connectome is non-negative by construction, so resistance to Perron
+    domination is the only property available to select on — evolution cannot choose *f*,
+    and balanced sign (which *is* the field's spread-spectrum optimum, §5 Aceituno) is
+    unavailable to it.
 
 **Standing caveats (do not overclaim).** The memory boundary is partly a finite-size
 rank ceiling (ER catching up); **N=1000 confirms the ceiling is not escaped at any
 practical N**, so read the decay region rather than the peak — but the supercritical
-margin itself is scale-stable (§ANSWERED above). The ~20% Dale result is a
-*tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
+margin itself is scale-stable (§ANSWERED above). **Read deltas only alongside levels:**
+this project has now been caught twice by a difference that moved because a *null* moved
+(TIER0 §1.2 and §1.1b). **Paired tests at n=10 seeds have a Wilcoxon p-floor of 0.00195**,
+so no Holm correction over more than ~25 tests can reach significance at any effect size —
+declare a narrow family and rest claims on CIs (TIER0 §6.8). **"Usable range" is
+threshold-dependent** — at the floor the connectome's VPT window looks 2× the nulls', at any
+usable-prediction threshold 1.25–1.5×, and it *reverses* at low *f* (TIER0 §6.9). The ~20%
+Dale result is a *tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
 not generation quality; climate-error magnitudes are unreliable (ER divergence) — use
 bounded curvature. Why the connectome's bulk is anomalously compact (the topology →
 spectrum link) is not yet derived. **On the Dale axis, sign fraction and non-normality
@@ -669,6 +710,13 @@ Caught at specific stages; recorded so future iterations don't repeat them.
   {connectome, degree, ER} × 10 seeds × 3 draws × {MC, NARMA, Lorenz}; edge + Dale
   modes; degree + eigenvector scores. Order parameters ΔD = `d_eff`(conn)−`d_eff`(ER),
   ΔS = curvature(ER)−curvature(conn); generative predictor `σ_eff = bulk₉₅·σ·⟨1−x²⟩`.
+- **`f > 0` extension + absolute frontier (human N=448, Aug 2026):** the same grid re-run to
+  **σ = 11.2** for four variants (`criticality_matched --extend-f [--variants
+  boundary|nulls]`, 12 min/pair on ada at 128 jobs), then `--item2` (reproduction gate,
+  reindexed panels, collapse diagnostic), `--frontier` (absolute MC/VPT levels + the
+  pre-registered gating rule) and `--mechanism` (common mode vs bulk₉₅). Re-runs on the
+  originating machine reproduce the frozen capture **bit-for-bit**, so the argsort
+  non-portability caveat is cross-machine only. Canonical numbers in TIER0 §2.3, §2.6, §3.7.
 
 ---
 
