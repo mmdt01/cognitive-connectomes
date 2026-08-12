@@ -583,6 +583,40 @@ depends on whether a Perron mode exists — sharper than the inconclusive N=1000
 Artifacts: `e03_mechanism_corr_scale_448.csv`, `e03_mechanism_matched_scale_448.csv`,
 `figures/fig_mechanism_axes.png`.
 
+### 3.8 RESTATED — hub-gating is the Perron account, not a separate result
+
+The placement capstone was read off `f*`, the contour where `dD` falls to 25% of its max
+— a **delta on a ceiling-limited metric**. Read in absolute MC (no ceiling issue) at
+σ = 6 on the Dale axis:
+
+| f | connectome (hub / strat / periph) | ER (hub / strat / periph) |
+|---|---|---|
+| 0.00 | 11.43 / 11.43 / 11.43 | 2.42 / 2.42 / 2.42 |
+| 0.10 | **14.88** / 13.94 / 12.94 | **10.95** / 7.23 / 6.50 |
+| 0.20 | 15.58 / 15.57 / 14.20 | 14.98 / 13.53 / 10.89 |
+
+> **Inhibiting the connectome's hubs *improves* the connectome's memory** — more than any
+> other placement (11.43 → 14.88 at `f` = 0.1, against periphery-first's 12.94). The
+> *advantage* closes fastest under hub-first because **ER gains +8.5 while the connectome
+> gains +3.4**. The `f*` ordering (hub 0.087 < stratified 0.124 < periphery 0.164) is
+> real and reproduces under both hub definitions; the word "collapse" is not. **Nothing
+> collapses.**
+
+Two further reasons the original reading was exposed: ER's own `d_eff` swings **more**
+across targetings than the connectome's (range 172 vs 75 at `f` = 0.1), so the null was
+never a fixed reference; and at σ = 6 every variant is against the `d_eff = N = 448`
+ceiling for `f` ≥ 0.2.
+
+**The mechanism survives and is now a consequence rather than a separate finding.**
+Hub-targeted inhibition is the most efficient way to destroy the Perron common mode
+(§3.7); destroying it helps *every* substrate, and helps most whichever was most dominated
+by it — which is ER. So hub-gating is the placement-resolved face of the same rescue
+account, not an independent controller.
+
+> **This is the third claim in this project to turn out to be "the null moved"** (§1.2,
+> §1.1b, §3.8). Any `f*`, boundary or delta should be read beside its levels before it is
+> written down.
+
 ---
 
 ## 4. Robustness of the E0.2 verdict

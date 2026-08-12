@@ -398,7 +398,12 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
   placement-driven not count-driven. Generation placement is noisy (its controller is
   global), independently corroborating the two-controller dissociation. The edge arm is
   muddy (ER has no hubs to target — the d_eff-ceiling confound), so the clean test is the
-  biological node-wise axis.
+  biological node-wise axis. **RESTATED (Aug 2026):** the boundary *f\** is a *delta* on a
+  ceiling-limited metric, and in absolute MC the connectome's own memory **rises** under
+  hub-first inhibition (fastest of the three placements). The ordering is real; the
+  "collapse" is ER catching up (+8.5 vs +3.4 at *f*=0.1). ER's own `d_eff` also swings more
+  across targetings than the connectome's (range 172 vs 75 at *f*=0.1), so the null was
+  never a fixed reference. See finding 9.
 
 ---
 
@@ -453,11 +458,19 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    faithful straight-attractor Lorenz generation up to ~20% inhibition then collapses — a
    tolerance ceiling, *not* a tuned optimum (best generation at *f*=0; collapse
    σ-dependent).
-9. **Memory is hub-gated** (placement): making hub neurons inhibitory collapses the memory
-   advantage ~2× faster than peripheral (placement-driven, not count-driven), robust to
-   degree vs eigenvector-centrality hub definition — the memory controller is the
-   Perron/common mode carried by the hubs. Generation placement is noisy (global
-   controller), independently corroborating the dissociation.
+9. **Memory is hub-gated** (placement) — **RESTATED Aug 2026, the original wording had the
+   sign of the effect backwards.** Hub-targeted inhibition closes the connectome−ER
+   *advantage* ~2× faster than peripheral (f\* hub 0.087 < strat 0.124 < peri 0.164), and
+   that ordering is robust to degree vs eigenvector-centrality hub definition. But in
+   absolute terms (MC, σ=6, Dale) **inhibiting the connectome's hubs *improves* the
+   connectome's memory** — most of any placement (11.43 → 14.88 at *f*=0.1, against
+   periphery-first's 12.94). The advantage closes because **ER gains +8.5 while the
+   connectome gains +3.4**. Do not write "hub inhibition collapses memory": nothing
+   collapses. Correct mechanism, and it now *follows from* finding 10 rather than standing
+   apart: hub-targeted inhibition is the most efficient way to destroy the Perron common
+   mode, destroying it helps every substrate, and it helps most whichever substrate was
+   most dominated by it — which is ER. Generation placement is noisy (global controller),
+   independently corroborating the dissociation.
 10. **The memory advantage is a rescue from Perron domination, not a capacity gain**
     (TIER0 §3.7). Two quantities do separate jobs: bulk₉₅ sets *where* a substrate goes
     supercritical, the Perron common mode sets *how catastrophic* that is. The connectome is

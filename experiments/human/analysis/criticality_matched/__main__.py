@@ -15,6 +15,7 @@ which are the only steps that simulate anything:
                  nominal-axis control, the Panel B collapse diagnostic, the summary
     --frontier   E0.3: absolute MC and VPT per (variant, f, sigma), no differencing
     --mechanism  common-mode vs bulk95: what the memory advantage tracks
+    --act3-figures  the Act III figure set (A dissociation, B two-axis, D placement)
     --heatmaps   the (f, sigma) panels on both axes + the cross-panel figure
                  [--source extension|frozen]
     --closeout   the item 4/5 close-out reanalyses
@@ -191,7 +192,7 @@ def run(scale: int = common.SCALE) -> None:
 if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
     modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f", "--item2",
-                          "--frontier", "--mechanism", "--heatmaps", "--closeout", "--n1000",
+                          "--frontier", "--mechanism", "--act3-figures", "--heatmaps", "--closeout", "--n1000",
                           "--n1000-figures") if m in sys.argv]
              or ["--panel"])
     if "--task-b" in modes:
@@ -218,6 +219,9 @@ if __name__ == "__main__":
     if "--frontier" in modes:
         from experiments.human.analysis.criticality_matched import frontier
         frontier.run(scale=scale)
+    if "--act3-figures" in modes:
+        from experiments.human.analysis.criticality_matched import frontier
+        frontier.figures(scale=scale)
     if "--mechanism" in modes:
         from experiments.human.analysis.criticality_matched import frontier
         frontier.run_mechanism(scale=scale)

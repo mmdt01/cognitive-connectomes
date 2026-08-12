@@ -11,6 +11,20 @@ Signed order parameters use a diverging map (``RdBu_r``) with the neutral midpoi
 pinned at 0 (symmetric limits), so "no connectome advantage" reads as neutral;
 magnitude predictors use a sequential map. No reservoir runs. Launched via
 ``python -m experiments.human.analysis.phase_diagram --plots [--scale N]``.
+
+
+**DEPRECATED FIGURE SET (Aug 2026).** The rendered figures were removed after the
+audit in `TIER0_STATE_OF_PLAY.md` §2.3 / §2.6 / §3.8. This module still runs, but
+every figure it draws is built on the sigma <= 6 capture and on the two order
+parameters that audit superseded -- `dD` (a difference on the ceiling-limited
+`d_eff`) and `dStraight` (curvature, which saturates to a two-state step). Three
+specific claims they encode are withdrawn or restated: the generative *onset in f*
+(it is an onset in sigma), the cross-panel crossing at (sr ~ 4, f ~ 0.12) (it does
+not survive the extended sweep), and "hub inhibition collapses memory" (the
+connectome's own memory rises; the null rises faster).
+
+Use `criticality_matched --act3-figures` instead: absolute levels beside every
+difference, MC and VPT rather than `d_eff` and curvature, and sigma to 11.2.
 """
 
 import numpy as np

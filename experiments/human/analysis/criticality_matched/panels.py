@@ -159,7 +159,7 @@ def fig_absolute(frames: dict, n_nodes: int, path_stem) -> None:
 
 
 # ---------------------------------------------------------------------------
-def fig_heatmaps(results: dict, path_stem) -> None:
+def fig_heatmaps(results: dict, path_stem, methods_framing: bool = False) -> None:
     """The (f, sigma) panels on both axes, with the cross-panel overlay.
 
     Rows are axes (nominal control on top, effective correction below); columns are
@@ -265,8 +265,11 @@ def fig_heatmaps(results: dict, path_stem) -> None:
                 "for f > 0 is the σ = 6 censoring edge (the σ = 8 extension was f = 0 "
                 "only). Unpainted = no coverage for every compared variant.")
         fig.text(0.5, -0.04, caption, ha="center", va="top", fontsize=6.2, color=_MUT)
-        fig.suptitle("Does the memory/generation dissociation survive "
-                     "effective-criticality matching?", fontsize=9.5, y=1.02)
+        fig.suptitle(
+            "Matching on spectral radius and on bulk radius give different answers"
+            if methods_framing else
+            "Does the memory/generation dissociation survive effective-criticality "
+            "matching?", fontsize=9.5, y=1.02)
         fig.tight_layout()
         _save(fig, path_stem)
 
@@ -652,5 +655,140 @@ def fig_mechanism(seeds: pd.DataFrame, path_stem) -> None:
                  ha="center", va="top", fontsize=6.2, color=_MUT)
         fig.suptitle("Does matching on bulk radius absorb the between-substrate gap?",
                      fontsize=9.5, y=1.00)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+def fig_dissociation(front: pd.DataFrame, path_stem, contrast: str = "erdos_renyi") -> None:
+    """Act III lead: memory and generation in LEVELS as well as differences.
+
+    Rows are the two capacities (MC, VPT); the first two columns are the absolute
+    (f, sigma) surfaces for the connectome and the null, and only the third is their
+    difference. The layout is the point: this project has three times read a delta as a
+    statement about the connectome when the *null* was what moved (TIER0 §1.2, §1.1b,
+    §3.8), and a delta panel shown beside its levels cannot be misread that way.
+
+    Metrics are MC and VPT rather than `d_eff` and curvature -- `d_eff` is ceiling
+    limited at N=448 and curvature saturates to a two-state step, so both compress
+    exactly where the interesting variation is (TIER0 §2.6).
+    """
+    from matplotlib.colors import TwoSlopeNorm
+
+    metrics = [m for m in ("mc", "vpt") if m in set(front.metric)]
+    titles = {"mc": "memory capacity (MC)", "vpt": "valid prediction time (Lyapunov)"}
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(len(metrics), 3, figsize=(8.0, 3.1 * len(metrics)),
+                                 squeeze=False)
+        for row, metric in enumerate(metrics):
+            sub = front[front.metric == metric]
+            conn = sub[sub.variant == "connectome"].pivot_table(
+                index="f", columns="spectral_radius", values="median")
+            null = sub[sub.variant == contrast].pivot_table(
+                index="f", columns="spectral_radius", values="median")
+            delta = conn - null
+            vmax_abs = float(np.nanmax([conn.to_numpy(), null.to_numpy()]))
+            dmax = float(np.nanmax(np.abs(delta.to_numpy()))) or 1e-9
+
+            for col, (Z, label, cmap, norm) in enumerate([
+                (conn, "connectome", "magma", None),
+                (null, common.VARIANT_TITLE.get(contrast, contrast), "magma", None),
+                (delta, f"connectome $-$ {common.VARIANT_TITLE.get(contrast, contrast)}",
+                 "RdBu_r", TwoSlopeNorm(vmin=-dmax, vcenter=0.0, vmax=dmax)),
+            ]):
+                ax = axes[row][col]
+                fv = Z.index.to_numpy(float)
+                xv = Z.columns.to_numpy(float)
+                dx = (xv[1] - xv[0]) if xv.size > 1 else 1.0
+                df_ = (fv[1] - fv[0]) if fv.size > 1 else 0.05
+                kwargs = dict(cmap=cmap) if norm is None else dict(cmap=cmap, norm=norm)
+                if norm is None:
+                    kwargs.update(vmin=0.0, vmax=vmax_abs)
+                im = ax.imshow(np.ma.masked_invalid(Z.to_numpy(float)), origin="lower",
+                               aspect="auto",
+                               extent=[xv[0] - dx / 2, xv[-1] + dx / 2,
+                                       fv[0] - df_ / 2, fv[-1] + df_ / 2], **kwargs)
+                fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+                ax.set_title(label, pad=4)
+                ax.set_xlabel(r"nominal $\sigma$", labelpad=1)
+                if col == 0:
+                    ax.set_ylabel(f"negative-weight fraction $f$\n({titles[metric]})",
+                                  labelpad=2)
+                _style(ax)
+                _label(ax, "abcdef"[row * 3 + col])
+        fig.text(0.5, -0.02,
+                 "Absolute levels (columns 1–2, shared colour scale per row) beside the "
+                 "difference (column 3).\n"
+                 "Memory: the difference closes with $f$ because the NULL rises (+10.7 "
+                 "against the connectome's +2.8 at $\\sigma=6$) — neither substrate "
+                 "degrades.\n"
+                 "Generation: level at $f=0$, separating from $f\\approx0.20$, where the "
+                 "connectome is the only substrate still predicting.\n"
+                 "Seed medians, 10 seeds, draws averaged within a seed; the advantage "
+                 "also clears the weight-permuted and degree-matched nulls (paired, "
+                 "TIER0 §2.6).",
+                 ha="center", va="top", fontsize=6.4, color=_MUT, linespacing=1.6)
+        fig.suptitle("Memory and generation dissociate across the negative-weight sweep",
+                     fontsize=9.5, y=1.01)
+        fig.tight_layout()
+        _save(fig, path_stem)
+
+
+def fig_placement_absolute(levels: pd.DataFrame, path_stem) -> None:
+    """The placement result in levels — replacing the `f*`-only figure it corrects.
+
+    The published reading ("hub inhibition collapses the memory advantage ~2x faster")
+    was taken from a contour on a ceiling-limited difference. In absolute MC the
+    connectome's own memory *rises* fastest under hub-first inhibition; the advantage
+    closes because ER rises faster still. Both substrates are therefore drawn.
+    """
+    style = {"hub_first": dict(color="#c44e52"), "stratified": dict(color=_INK),
+             "periphery_first": dict(color="#4c72b0")}
+    nice = {"hub_first": "hub-first", "stratified": "stratified",
+            "periphery_first": "periphery-first"}
+    variants = [v for v in ("connectome", "erdos_renyi") if v in set(levels.variant)]
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, len(variants) + 1, figsize=(8.2, 2.8), squeeze=False)
+        for col, variant in enumerate(variants):
+            ax = axes[0][col]
+            sub = levels[levels.variant == variant]
+            for targeting, group in sub.groupby("targeting"):
+                group = group.sort_values("f")
+                ax.plot(group.f, group.mc, marker="o", ms=2.6, lw=1.5,
+                        label=nice.get(targeting, targeting),
+                        **style.get(targeting, {}))
+            ax.set_xlabel("inhibitory-neuron fraction $f$", labelpad=1)
+            ax.set_ylabel("MC" if col == 0 else "")
+            ax.set_ylim(0, 18)
+            ax.set_title(common.VARIANT_TITLE.get(variant, variant), pad=4)
+            _style(ax)
+            _label(ax, "abc"[col])
+        axes[0][0].legend(loc="lower right", frameon=False, handlelength=1.3,
+                          fontsize=6.4)
+        ax = axes[0][len(variants)]
+        wide = levels.pivot_table(index=["targeting", "f"], columns="variant",
+                                  values="mc")
+        if {"connectome", "erdos_renyi"} <= set(wide.columns):
+            for targeting in style:
+                if targeting not in wide.index.get_level_values(0):
+                    continue
+                block = wide.loc[targeting].sort_index()
+                ax.plot(block.index.to_numpy(float),
+                        (block["connectome"] - block["erdos_renyi"]).to_numpy(float),
+                        marker="o", ms=2.6, lw=1.5, **style.get(targeting, {}))
+        ax.axhline(0.0, color=_MUT, lw=0.8)
+        ax.set_xlabel("inhibitory-neuron fraction $f$", labelpad=1)
+        ax.set_ylabel(r"$\Delta$MC (connectome $-$ ER)", labelpad=2)
+        ax.set_title("the difference", pad=4)
+        _style(ax)
+        _label(ax, "abc"[len(variants)])
+        fig.text(0.5, -0.06,
+                 "Dale (node-wise inhibition), $\\sigma=6$, seed medians.\n"
+                 "Hub-first inhibition RAISES the connectome's own memory the most (a); "
+                 "it raises ER's more (b), which is why the difference closes fastest "
+                 "(c).\n"
+                 "The $f^*$ ordering hub < stratified < periphery is real — the word "
+                 "'collapse' is not.",
+                 ha="center", va="top", fontsize=6.4, color=_MUT, linespacing=1.6)
+        fig.suptitle("Hub-targeted inhibition: what actually moves", fontsize=9.5, y=1.02)
         fig.tight_layout()
         _save(fig, path_stem)
