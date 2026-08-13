@@ -95,9 +95,13 @@ crossing 1 marks where the geometry leaves the faithful regime (Lorenz-driven st
 only, see `TIER0` §6.3).
 
 **Act III: manifold geometry sets computational capacity.**
-Two dissociable controllers with opposite sigma-dependence: effective dimensionality of
-the fluctuation subspace sets memory; the faithful-geometry window sets closed-loop
-generation. The gap widens the usable window rather than raising a peak. **Both arms
+**One axis, read out with opposite sign** (`TIER0` §3.9) — not two controllers. Where the
+leading effective gain sits relative to +/-1 decides both: a dominant positive mode wastes
+the readout dimensions memory needs while holding the trajectory on a smooth fixed point
+that generation needs, so effective dimensionality of the fluctuation subspace sets memory
+and the faithful-geometry window sets closed-loop generation *from the same cause*. That is
+why the two advantages occupy opposite regions of (f, sigma). The gap widens the usable
+window rather than raising a peak. **Both arms
 carry equal weight in this chapter.** The sign-axis scale argument (macro dMRI is
 non-negative by construction, so f > 0 is a mechanistic counterfactual; C. elegans is
 where it would be anatomical) lives here as a framing section.
@@ -261,7 +265,7 @@ November, so nothing here is lost.
   done well in a week alongside writing, and the macro story does not need it because the
   sign axis is already framed as a counterfactual at f = 0. One deferring sentence in the
   discussion is the right treatment.
-- **E1.5 Mackey-Glass** as an out-of-sample test of the two-controller model (predict the
+- **E1.5 Mackey-Glass** as an out-of-sample test of the single-axis model (predict the
   interior optimum before running; vary tau = 17 and 30 as a memory-demand dial). This is
   the strongest single addition available and it is the first thing to add post-thesis.
 - **Why weight placement produces the gap** (degree-weight correlation? spatial

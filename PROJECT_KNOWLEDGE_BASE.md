@@ -58,11 +58,15 @@ out trajectory straightness (curvature).**
 **Sign-composition phase diagram.** Grading the negative-weight fraction *f* from 0
 (all-positive) to 0.5 (balanced) × spectral radius maps where topology controls the
 manifold geometry computation reads out. Headline: a **memory ↔ generation
-dissociation** — the two advantages occupy opposite regions of (*f*, σ) space,
-governed by **different spectral controllers** (memory ← the hub-localised common
-mode; generation ← the global effective radius `σ_eff = bulk₉₅·σ·⟨1−x²⟩` crossing 1).
-Sign composition is thus a single knob trading memory capacity against generative
-robustness. Under a biological **Dale** sweep the connectome sustains a faithful
+dissociation** — the two advantages occupy opposite regions of (*f*, σ) space, governed
+by **one mechanism whose sign of benefit depends on what is being read out** (TIER0
+§3.9): where the leading effective gain sits relative to ±1. Perron–Frobenius pins a
+non-negative matrix to a dominant **positive** mode, which is a *liability for memory*
+(the network synchronises into it and wastes readout dimensions) and *protective for
+generation* (a fixed point is smooth; gain below −1 would give a period-2 flip-flop).
+The two tasks prefer opposite signs of the same quantity, which is why their advantages
+had to occupy opposite regions. Sign composition is thus a single knob trading memory
+capacity against generative robustness. Under a biological **Dale** sweep the connectome sustains a faithful
 straight Lorenz attractor up to **~20% inhibition** then collapses — a tolerance
 ceiling (not a tuned optimum) sitting at the biological E/I ratio. A **placement**
 study shows the memory effect is **hub-gated**: making hub neurons inhibitory collapses
@@ -366,9 +370,13 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
   series and are literal duplicates at *f*=0, so Panel B cells rest on ~10 independent
   units, not 30.
 - **Cross-panel dissociation (headline).** The two boundaries run opposite in σ and
-  **cross**: **memory and generation dissociate**, governed by different controllers
-  (memory ← common mode; generation ← σ_eff→1). Sign composition trades memory capacity
-  against generative robustness. The crossing's location is axis-dependent (TIER0 §2.3):
+  **cross**: **memory and generation dissociate** — not because two controllers act, but
+  because **one axis is read out with opposite sign** (TIER0 §3.9): a dominant *positive*
+  mode wastes readout dimensions (bad for memory) while keeping the trajectory on a fixed
+  point (good for generation). `σ_eff → 1` remains the empirical locator of the generative
+  threshold at *f*>0, but it is a symptom of that axis rather than an independent
+  controller — and it fails at *f*=0. Sign composition trades memory capacity against
+  generative robustness. The crossing's location is axis-dependent (TIER0 §2.3):
   on the corrected `σ·bulk95` axis it is at (x = 2.938, *f* = 0.153); the nominal
   (σ≈4, *f*≈0.12) reading holds only on a panel censored at σ=6 and does not survive the
   longer sweep.
@@ -395,8 +403,10 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 - **Placement (mechanistic capstone).** Memory is **hub-gated**: on the Dale axis
   hub-first < stratified < periphery-first (degree 0.087/0.124/0.164; eigenvector-centrality
   0.103/0.118/0.219 — effect *larger* under the direct Perron score), ~2× more efficient,
-  placement-driven not count-driven. Generation placement is noisy (its controller is
-  global), independently corroborating the two-controller dissociation. The edge arm is
+  placement-driven not count-driven. Generation placement is noisy — consistent with the
+  single-axis account (TIER0 §3.9), since *where* the negative weights sit changes how
+  efficiently the common mode is destroyed, which is a memory-side readout; the
+  generative branch depends only on whether the leading gain has crossed −1. The edge arm is
   muddy (ER has no hubs to target — the d_eff-ceiling confound), so the clean test is the
   biological node-wise axis. **RESTATED (Aug 2026):** the boundary *f\** is a *delta* on a
   ceiling-limited metric, and in absolute MC the connectome's own memory **rises** under
@@ -445,9 +455,13 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 
 7. **Memory ↔ generation dissociation** (the headline): grading sign, the memory and
    generative advantages occupy opposite regions of (*f*, σ) space with opposite
-   σ-dependence, governed by different spectral controllers (memory ← hub-localised common
-   mode; generation ← global effective radius σ_eff→1). Sign composition is a single knob
-   trading memory capacity against generative robustness. The two boundaries **cross** on
+   σ-dependence — governed by **one mechanism read out with opposite sign**, not two
+   controllers (TIER0 §3.9). Each unit is `x → tanh(gain·x + input)`: gain > +1 gives a
+   stable fixed point, gain < −1 a period-2 orbit, and nothing stable between (hence
+   curvature's two-spike distribution). Perron–Frobenius pins a non-negative matrix to the
+   positive branch, which **wastes readout dimensions** (bad for memory) and **keeps the
+   trajectory smooth** (good for generation). Sign composition is a single knob trading
+   memory capacity against generative robustness. The two boundaries **cross** on
    the corrected axis at (x = 2.938, *f* = 0.153) — confirmed only after the `f > 0`
    censoring at σ=6 was lifted (TIER0 §2.3); the generative arm's advantage is present at
    *f*=0 as well, contrary to the original onset-in-*f* reading. **Restated in absolute

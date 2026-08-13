@@ -617,6 +617,51 @@ account, not an independent controller.
 > §1.1b, §3.8). Any `f*`, boundary or delta should be read beside its levels before it is
 > written down.
 
+### 3.9 REFRAMED — one mechanism, two readouts (replaces "two different controllers")
+
+The programme has described the dissociation as *two* spectral controllers: memory
+governed by the hub-localised common mode, generation by `σ_eff` crossing 1. That
+framing is weaker than the data requires. Both are the **same** quantity — where the
+leading effective gain sits relative to **±1** — and the two tasks simply prefer
+opposite signs of it.
+
+Each unit is `x → tanh(gain·x + input)`, so a one-dimensional map argument applies:
+gain **> +1** gives a stable non-zero **fixed point**; gain **< −1** destabilises it and
+a stable **period-2 orbit** appears. There is no third stable option, which is why
+curvature is not graded but a two-spike distribution — 98% of 38,280 Lorenz cells sit at
+~0.25 rad (smooth) or at **π** (2.99–3.20 rad, successive steps antiparallel) and 0.56%
+lie anywhere between (§ roadmap §4a item 2).
+
+**Perron–Frobenius pins a non-negative matrix to the fixed-point branch.** Its dominant
+eigenvalue is guaranteed real, positive, and carried by an all-positive eigenvector.
+Negative eigenvalues must exist (zero diagonal forces trace = 0) but are subdominant,
+bounded by roughly `bulk95·λ₁` — 0.325 λ₁ for the connectome against 0.55 λ₁ for ER.
+Grading `f` destroys the guarantee: the spectrum becomes symmetric about zero, the most
+negative eigenvalue grows toward λ₁, and the period-2 branch becomes reachable at far
+lower σ.
+
+> **The same fact carries opposite consequences for the two tasks.** A dominant positive
+> mode is a **liability for memory** — the network synchronises into it, every unit does
+> the same thing and readout dimensions are wasted (`|mean_state|` 0.95–0.99 for the
+> nulls at σ = 6, §3.7) — and **protective for generation**, because a fixed point is
+> smooth and smooth is what closed-loop prediction needs. One structural cause, two
+> readouts with opposite preference. That is why the two advantages *had* to occupy
+> opposite regions of (`f`, σ): they are the same axis read from both ends.
+
+**Status: consistent with everything measured, not yet a derivation.** What is measured
+is the bimodality, the binary-bit R² (0.364 against continuous curvature's 0.371), the
+`|mean_state|` ordering, the collapse loci and the two advantage regions. What is
+inference is that a single leading-eigenvalue account generates both.
+
+> **And it does not yet explain the `f = 0` collapse.** At `f = 0` ER collapses in 5 of
+> 10 seeds at σ ≈ 7.6–8.0, but its `σ_eff` there is **0.011** — nowhere near 1, against
+> 0.98–1.02 at `f` ≥ 0.2. The linear account predicts that a non-negative matrix
+> eventually reaches the period-2 branch (subdominant negative eigenvalues do exist) but
+> not *where*, and something saturation-dependent is doing the work. The `σ_eff` = 1
+> criterion is therefore an empirical locator in the `f > 0` regime, not a derived law —
+> and it fails at exactly the biologically real cut. Item 2 (E0.1) tests this rather than
+> assuming it.
+
 ---
 
 ## 4. Robustness of the E0.2 verdict
