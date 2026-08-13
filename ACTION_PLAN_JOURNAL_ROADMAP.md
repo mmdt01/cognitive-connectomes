@@ -151,21 +151,23 @@ page count.
 | id | experiment | why it matters | cost |
 |----|-----------|----------------|------|
 | ~~**1**~~ | ~~**`f > 0` extension and Panel B reindex.**~~ **DONE 12 Aug.** Swept to sigma = 11.2. Outcome: the crossing **is** observable and sits at (x = 2.938, f = 0.153); the Panel B negative region is explained (the two variants take the curvature step at nearly the same nominal sigma, so the matched-bulk axis reverses their order); and a new result — the generative resistance margin exists at **f = 0** (ER collapses in 50% of replicates, connectome in 0%), so the "onset in f" was a sigma = 6 artifact. `TIER0` §2.3 rewritten, §6.1 closed, §6.4 refined | Gave generation the matched axis memory already had | 14.5 core-hours measured; **12 min wall** on ada at 128 workers |
-| **2** | **E0.1 mediation.** Partial correlation of Lorenz VPT and curvature controlling for `sigma_eff`, or the same within narrow `sigma_eff` bands | Converts the -0.78-pooled / -0.04-within embarrassment into a result. **Licenses "geometry sets predictive capacity" as a chapter claim.** Reanalysis, no new runs | ~1 day |
+| **2** | **E0.1 threshold location.** Closed-loop generation is a two-attractor system: the trajectory sits either on the straight Lorenz attractor (~0.25 rad) or in the saturated period-2 state (~3.1 rad). Locate the transition per (variant, `f`) and test what predicts it — the `sigma_eff` = 1 criterion, and the variant-dependent offset it carries | Licenses "geometry sets predictive capacity" as a **threshold** claim, which is what the data supports. Reanalysis, no new runs | ~1 day |
 
-> **Design warning for item 2, from E0.3 (12 Aug).** Curvature is not a continuous
-> quantity on this substrate: it is a two-state step, ~0.25 rad (straight) or ~2.9 rad
-> (saturated period-2), with essentially nothing between (`TIER0` §2.3). A pooled
-> correlation between VPT and curvature is then a correlation *between two clusters*,
-> and within a narrow `sigma_eff` band every cell sits in one cluster, so the
-> correlation has nothing to work with. That is very likely the whole of the
-> -0.78-pooled / -0.04-within pattern, and if so the mediation test as specified
-> **cannot** return a result — it would be underpowered by construction, the exact
-> failure the `bulk95` falsification test already made once. Check the two-cluster
-> hypothesis **first** (an hour, data in hand); if it holds, the honest finding is that
-> curvature is a *threshold indicator, not a continuous mediator*, and "geometry sets
-> predictive capacity" needs either a different geometry measure or restating as a
-> threshold claim.
+> **Why threshold, not dose (measured 12 Aug, 38,280 Lorenz cells).** Curvature is not a
+> graded quantity on this substrate. **98% of cells sit in one of two spikes and 0.56%
+> lie anywhere between them** (215 cells in [0.6, 2.2] rad). Consequently a single binary
+> "has it collapsed" bit explains **R² = 0.364** of VPT variance against continuous
+> curvature's **0.371** — the entire 0.25→3.14 rad range is worth 0.7 percentage points
+> beyond the bit. Within the straight cluster the residual correlation is **+0.145**
+> (*opposite* to the expected sign, n = 15,866); within the collapsed cluster, excluding
+> the 67% of cells at the VPT = 0 floor, it is −0.151. Binning on `sigma_eff` does not
+> isolate a graded path either: each band's correlation tracks its *cluster mixing
+> proportion*, peaking at −0.810 where the band is ~60/40 and weakening toward both ends.
+>
+> **Pre-registered before fitting:** `sigma_eff` = 1 locates the transition, with a
+> variant-dependent offset — measured so far as `sigma_eff` ≈ 0.98–1.02 at collapse for
+> ER against 0.78–0.88 for the connectome. If the offset is not variant-dependent, or if
+> `sigma_eff` locates the transition no better than nominal `sigma` does, say so.
 | ~~**3**~~ | ~~**E0.3 absolute (MC, VPT) frontier.**~~ **DONE 12 Aug.** Four-variant ladder x 11 f x sigma <= 11.2 (needed one 12-min ada run: weight-permuted had never been run under the f sweep, degree only reached sigma = 6). Outcomes: supercritical MC **rises** with f for every substrate, so the memory panel's collapse is the nulls catching up (`TIER0` §2.6, §1.1b); generation is real read as **VPT** rather than curvature (+1.0 to +2.2 Lyapunov times over all three nulls from f ~ 0.20, clearing the placement control); the advantage is a **rescue from Perron domination**, with bulk95 only a partial controller (§3.7); and the hub-gating capstone was restated — nothing collapses, the null moves (§3.8) | Gave the Aceituno "robust at what level" answer and gated the figure set | 14.5 core-hours + reanalysis |
 
 **Stop rule for item 1:** if the crossing appears within the extended coverage, report it
