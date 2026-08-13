@@ -485,8 +485,12 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    censoring at σ=6 was lifted (TIER0 §2.3); the generative arm's advantage is present at
    *f*=0 as well, contrary to the original onset-in-*f* reading. **Restated in absolute
    terms** (TIER0 §2.6): memory is supercritical and maximal at *f*=0 (MC +4.75 to +8.97 at
-   σ=6); generation is near-critical and absent at *f*=0 (VPT +1.0 to +2.2 at σ=2, emerging
-   from *f*≈0.20). Read the arms off **MC and VPT**, not `d_eff` and curvature.
+   σ=6); the generative *advantage over the nulls* is near-critical and absent at *f*=0
+   (VPT +1.0 to +2.2 at σ=2, emerging from *f*≈0.20). **Always attach the σ:** at *f*=0
+   there is no VPT advantage near criticality, but far supercritically (σ≈7.6–8) there IS
+   a collapse-resistance asymmetry (ER 5/10 seeds vs connectome 0/10). Stated without the
+   σ the two read as a contradiction. Read the arms off **MC and VPT**, not `d_eff` and
+   curvature.
 8. **Biological E/I sits at a tolerance ceiling** (Dale arm): the connectome sustains
    faithful straight-attractor Lorenz generation up to ~20% inhibition then collapses — a
    tolerance ceiling, *not* a tuned optimum (best generation at *f*=0; collapse

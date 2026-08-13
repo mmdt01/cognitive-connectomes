@@ -1,17 +1,21 @@
 # Tier 0 — canonical state of play
 
-**Status:** consolidated 8 August 2026; N=1000 result added 11 August 2026; `f > 0`
-extension added 12 August 2026 (§2.3, which supersedes the earlier "the crossing does not
-survive" verdict). **This document supersedes** the individual
-summaries it draws on: `eigenspectrum/results/E04_summary.md`,
-`criticality_matched/results/E02_verdict.md` §4, `taskA_alpha_summary.md`,
-`taskB_summary.md`, `item2_summary_scale_448.md` and `closeout_*`. Those remain as the
-detailed record and the
-artifact trail; where they disagree with this document, **this document is correct**.
+**Status:** consolidated 8 August 2026; N=1000 result added 11 August 2026. **12–13
+August 2026: the three §4a gating reanalyses landed and each changed something** — the
+`f > 0` extension (§2.3, superseding "the crossing does not survive"), the absolute
+frontier (§2.6, superseding the memory panel's mechanism) and the generation threshold
+analysis (§3.10–§3.11, withdrawing the `σ_eff → 1` criterion). **This document
+supersedes** the individual summaries it draws on:
+`eigenspectrum/results/E04_summary.md`, `criticality_matched/results/E02_verdict.md` §4,
+`taskA_alpha_summary.md`, `taskB_summary.md`, `item2_summary_scale_448.md`,
+`e03_frontier_verdict_scale_448.md`, `e01_threshold_verdict_scale_448.md` and
+`closeout_*`. Those remain as the detailed record and the artifact trail; where they
+disagree with this document, **this document is correct**.
 
-Every number below is traceable to a named artifact. Four steps required simulation --
-Task B (`f = 0`, MC only, N=448), the N=448 protocol control, the N=1000 run (§2.4) and
-the `f > 0` extension (§2.3), all on ada. Everything else is reanalysis of frozen
+Every number below is traceable to a named artifact. **Six steps required simulation**,
+all on ada: Task B (`f = 0`, MC only, N=448), the N=448 protocol control, the N=1000 run
+(§2.4), the `f > 0` extension (§2.3), the two-null extension that completed the ladder
+(§2.6) and the Jacobian capture (§3.11). Everything else is reanalysis of frozen
 parquets.
 
 ---
@@ -27,13 +31,23 @@ as effective criticality rises. The previously reported subcritical *deficit* is
 axis-dependent: present at matched spectral radius, absent at matched bulk radius —
 neither axis is neutral, and the result stands on surviving both. Separately, the
 cross-panel memory/generation **crossing survives** reindexing once the `f > 0`
-censoring is lifted — it sits at (x = 2.938, f = 0.153), and the same extension shows
-the generative advantage is present at the biologically real `f = 0` too, where the
-σ = 6 sweep had hidden it (§2.3). Read in **absolute** terms (§2.6) the account
+censoring is lifted — it sits at (x = 2.938, f = 0.153), and the same extension shows a
+generative *collapse-resistance* asymmetry at the biologically real `f = 0` too, far
+supercritically (σ ≈ 7.6–8.0) where the σ = 6 sweep had hidden it — though not near
+criticality, where `f = 0` shows no advantage at all (§2.3, §2.6; always attach the σ). Read in **absolute** terms (§2.6) the account
 sharpens again: negative weights *improve* supercritical memory for every substrate, so
 the advantage's collapse with `f` is the nulls catching up, not the connectome degrading
 — the connectome's edge is resistance to **Perron domination**, and balanced signs remove
 the domination rather than the resistance (§3.7).
+
+**On the generation side the story is different in kind.** Generation is a **switch**,
+not a dial: the trajectory is either on the straight attractor or in a saturated
+period-2 state, with nothing stable between, and a single binary bit explains as much of
+prediction quality as the full continuous geometry does (§3.10). `σ_eff` locates that
+switch better than any alternative but does **not** cross 1 at it, so the criterion is
+withdrawn and only the locator survives. And the gating account is **scope-limited to
+`f > 0`**: at the biologically real `f = 0`, prediction decays ~10× with the geometry
+completely flat (§3.11). What sets generation at `f = 0` is open.
 
 ---
 
@@ -133,7 +147,10 @@ result lives. The question was whether the supercritical margin scales with N.
 
 > **The successor question is sharper: is `bulk95` actually the ladder controller?** The
 > N=1000 falsification test came back inconclusive — not because the outcome was noisy
-> but because the *predictor* was (§2.4). That is now the open mechanistic question.
+> but because the *predictor* was (§2.4). **Partially answered since, in §3.7:** a
+> controlled matched-axis comparison shows `bulk95` absorbs only 26% of the gap at
+> `f = 0` and nearly all of it by `f` >= 0.2, so it is a partial controller whose power
+> depends on whether a Perron mode exists.
 
 ---
 
@@ -246,7 +263,8 @@ more than the f > 0 counterfactual does.
 
 Artifacts: `criticality_matched/results/item2_summary_scale_448.md`,
 `item2_reproduction_gate_scale_448.csv`, `item2_collapse_loci_scale_448.csv`,
-`e02_heatmap_*_extension*`, `figures/fig_heatmaps_matched_extension.png`.
+`e02_heatmap_*_extension*`, `figures/figB_two_axis_methods.png` (the same panels,
+retitled as the two-axis methods figure).
 
 ### 2.4 N=1000 — the margin holds; the controller test is inconclusive
 
@@ -316,12 +334,18 @@ ada's per-core rate is close to the laptop's, not 1.5–2× slower as assumed. M
 non-issue: the state matrix is 44 MB (5500 × 1000 float64), ~68 MB per worker with the
 Gram and eigendecomposition workspace, ~8.7 GB marginal across 128 fork workers.
 
-> **Estimating lesson, recorded because it recurred three times this session.** Cost
-> from a **measured cell of the actual code path**, never from component timings. The
-> spec's original figures were wrong by ~60× (mis-scaled from a whole-matrix wall-clock
-> as though it were per-cell), the `f>0` extension was under-costed 4.3× (evaluator time
-> only, ignoring the per-σ reservoir rebuild and its dense `eigvals`), and the N=1000
-> estimate omitted the two-pass design that holding α matched requires.
+> **Estimating lesson, recorded because it has now recurred four times.** Cost from a
+> **measured cell of the actual code path**, never from component timings. The spec's
+> original figures were wrong by ~60× (mis-scaled from a whole-matrix wall-clock as
+> though it were per-cell), the `f>0` extension was under-costed 4.3× (evaluator time
+> only, ignoring the per-σ reservoir rebuild and its dense `eigvals`), the N=1000 estimate
+> omitted the two-pass design that holding α matched requires, and the Jacobian capture
+> (§3.11) ran ~4× over an unmeasured guess — **no cell was timed for that code path at
+> all**, and it pays a second dense `eigvals` per σ on top of the build's.
+>
+> **A fourth cause worth naming separately: ada is shared.** That run met a load average
+> of **264 on 128 cores** from another user. Per-core rates measured on a quiet machine
+> are an upper bound, not a plan.
 
 **What this run did not settle:** the `f > 0` censoring and therefore the
 memory/generation boundary crossing (§2.3, separate cheaper run); whether `bulk95` is
@@ -377,10 +401,19 @@ topology. Compare the 0.032 rad curvature residual the matched-axis Panel B was
 contouring (§2.3): the generative arm was weak because the *order parameter* was wrong.
 
 **The dissociation survives, restated in absolute terms.** Memory is **supercritical and
-maximal at `f = 0`** (MC +4.75 to +8.97 at σ = 6, decaying with `f`); generation is
-**near-critical and absent at `f = 0`** (VPT +1.0 to +2.2 at σ = 2, emerging from
-`f` ≈ 0.20). Same claim the delta panels made, now with absolute levels, paired CIs and
-the full four-variant ladder.
+maximal at `f = 0`** (MC +4.75 to +8.97 at σ = 6, decaying with `f`); the generative
+*advantage over the nulls* is **near-critical and absent at `f = 0`** (VPT +1.0 to +2.2
+at σ = 2, emerging from `f` ≈ 0.20). Same claim the delta panels made, now with absolute
+levels, paired CIs and the full four-variant ladder.
+
+> **This does not contradict §2.3's "the generative advantage exists at `f = 0`" — the
+> two statements are about different σ, and both are needed.** At `f = 0` there is no VPT
+> advantage *near criticality* (σ ≈ 2: +0.28, −0.01, +0.44, none significant), which is
+> what this section reports. Far supercritically (σ ≈ 7.6–8.0) there *is* a
+> collapse-resistance asymmetry — ER falls into period-2 in 5 of 10 seeds while the
+> connectome does so in 0 of 10 — which is what §2.3 reports. **Always attach the σ.**
+> Written without it, the two read as a contradiction and one of them will be quoted
+> wrongly.
 
 Artifacts: `criticality_matched/results/e03_frontier_verdict_scale_448.md`,
 `e03_frontier_scale_448.parquet`, `e03_frontier_paired_scale_448.csv`,
@@ -736,6 +769,13 @@ draws (38,280 cells, ada).
 |---|---|---|---|---|---|
 | **`λ_min(J)`** | −0.849 | −1 | 0.129 | **0.152** | 0.85 |
 | `σ_eff` | +0.668 | +1 | 0.203 | 0.304 | 0.67 |
+
+> **Why `σ_eff`'s CV is 0.304 here and 0.209 in §3.10.** Different aggregation units, not
+> a disagreement. §3.10 scores per **(variant, `f`) cell** after dropping cells where
+> fewer than half the seeds transition (n = 37); this table scores per **seed-level
+> transition** with no such filter (n = 378), which is noisier and the only unit on which
+> the two quantities can be compared like for like. The comparison *within* this table is
+> the valid one; do not read 0.209 against 0.152.
 
 Keeping the gain heterogeneity **halves** the scatter, so the mean-field step does cost
 something. But `λ_min(J)` does not reach −1 either: generation breaks while the fixed
