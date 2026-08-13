@@ -808,3 +808,89 @@ def fig_placement_absolute(levels: pd.DataFrame, path_stem) -> None:
         fig.suptitle("Hub-targeted inhibition: what actually moves", fontsize=9.5, y=1.02)
         fig.tight_layout()
         _save(fig, path_stem)
+
+
+def fig_threshold(table: pd.DataFrame, fold: pd.DataFrame, path_stem) -> None:
+    """E0.1: where the straight -> period-2 transition sits, and what locates it.
+
+    (a) the transition locus in nominal sigma -- every substrate's threshold falls
+    steeply with f, and they do not coincide; (b) the same transitions expressed in
+    `sigma_eff`, which collapses them onto a near-constant band -- but at ~0.85, not at
+    the 1 the criterion claims; (c) why f = 0 is outside the criterion's reach at all:
+    `sigma_eff` folds, and at f = 0 its maximum never reaches 1.
+    """
+    order = ["connectome", "connectome_weight_permuted", "degree_rewire", "erdos_renyi"]
+    usable = table[table.frac_seeds_collapsed >= 0.5]
+    with plt.rc_context(_RC):
+        fig, axes = plt.subplots(1, 3, figsize=(8.4, 2.9), squeeze=False)
+
+        ax = axes[0][0]
+        for variant in order:
+            sub = usable[usable.variant == variant].sort_values("f")
+            if sub.empty:
+                continue
+            ax.plot(sub.f, sub.spectral_radius_lo, marker="o", ms=3, lw=1.5,
+                    color=common.VARIANT_COLOR.get(variant, _MUT),
+                    label=common.VARIANT_TITLE.get(variant, variant))
+        ax.set_xlabel("negative-weight fraction $f$", labelpad=1)
+        ax.set_ylabel(r"transition at nominal $\sigma$", labelpad=2)
+        ax.set_title("the threshold locus", pad=4)
+        ax.legend(loc="upper right", frameon=False, handlelength=1.2, fontsize=6.2)
+        _style(ax); _label(ax, "a")
+
+        ax = axes[0][1]
+        for variant in order:
+            sub = usable[usable.variant == variant].sort_values("f")
+            if sub.empty:
+                continue
+            ax.fill_between(sub.f, sub.effective_radius_lo, sub.effective_radius_hi,
+                            color=common.VARIANT_COLOR.get(variant, _MUT), alpha=0.18,
+                            lw=0)
+            ax.plot(sub.f, sub.effective_radius_lo, marker="o", ms=3, lw=1.5,
+                    color=common.VARIANT_COLOR.get(variant, _MUT))
+        ax.axhline(1.0, color=_NEG, lw=1.1, ls="--")
+        ax.text(0.02, 1.0, r" claimed $\sigma_{eff}=1$", transform=ax.get_yaxis_transform(),
+                fontsize=6.2, color=_NEG, va="bottom", ha="left")
+        pos = usable[usable.f > 0]
+        band_lo = float(pos.effective_radius_lo.median())
+        band_hi = float(pos.effective_radius_hi.median())
+        ax.axhspan(band_lo, band_hi, color=_INK, alpha=0.10, lw=0)
+        ax.text(0.02, band_lo, f" measured transition band {band_lo:.2f}–{band_hi:.2f}",
+                transform=ax.get_yaxis_transform(), fontsize=6.2, color=_INK,
+                va="top", ha="left")
+        ax.set_ylim(0, 1.15)
+        ax.set_xlabel("negative-weight fraction $f$", labelpad=1)
+        ax.set_ylabel(r"$\sigma_{eff}$ at the transition", labelpad=2)
+        ax.set_title("the same transitions, gain-corrected", pad=4)
+        _style(ax); _label(ax, "b")
+
+        ax = axes[0][2]
+        for variant in order:
+            sub = fold[fold.variant == variant].sort_values("f")
+            if sub.empty:
+                continue
+            ax.plot(sub.f, sub.sigma_eff_max, marker="o", ms=3, lw=1.5,
+                    color=common.VARIANT_COLOR.get(variant, _MUT))
+        ax.axhline(1.0, color=_NEG, lw=1.1, ls="--")
+        ax.set_xlabel("negative-weight fraction $f$", labelpad=1)
+        ax.set_ylabel(r"max $\sigma_{eff}$ over the sweep", labelpad=2)
+        ax.set_ylim(0, 1.15)
+        ax.set_title(r"where $\sigma_{eff}$ cannot reach 1", pad=4)
+        _style(ax); _label(ax, "c")
+
+        fig.text(0.5, -0.04,
+                 "(a) Every substrate's transition falls steeply with $f$ and they do "
+                 "not coincide. (b) In $\\sigma_{eff}$ they collapse onto a near-constant "
+                 "band — but at 0.77–0.90, not the claimed 1 (only 1 of 38 brackets "
+                 "contains 1). Coloured shading = each substrate's own bracket between "
+                 "last-straight and first-collapsed $\\sigma$.\n"
+                 "(c) $\\sigma_{eff}$ folds, so it has a maximum — and that maximum is "
+                 "below 1 for every variant at $f\\leq0.20$ (and for the nulls until "
+                 "$f\\geq0.30$), while transitions happen throughout. Where the claimed "
+                 "value is unreachable the criterion cannot be a stability law. Cells "
+                 "shown are those where a majority of seeds collapse inside the swept "
+                 "range.",
+                 ha="center", va="top", fontsize=6.2, color=_MUT, linespacing=1.6)
+        fig.suptitle("What locates the generation threshold?", fontsize=9.5, y=1.02)
+        fig.tight_layout()
+        _save(fig, path_stem)
