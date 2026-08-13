@@ -91,8 +91,10 @@ evidence). Do not write "compact bulk".
 **Act II: the spectrum decomposes the manifold.**
 The Perron mode carries the mean (a common mode); the bulk carries the fluctuations.
 Sign gates which basis the fluctuations occupy. `sigma_eff = bulk95·sigma·mean_gain`
-crossing 1 marks where the geometry leaves the faithful regime (Lorenz-driven states
-only, see `TIER0` §6.3).
+**locates** where the geometry leaves the faithful regime — best of the candidates tested,
+~3x more invariant than nominal sigma — but it does **not** cross 1 there: the transition
+sits at 0.77 to 0.90, and `sigma_eff` folds so it never reaches 1 at all for f <= 0.20
+(`TIER0` §3.10, §6.3). Lorenz-driven states only. Write "locator", never "criterion".
 
 **Act III: manifold geometry sets computational capacity.**
 **One axis, read out with opposite sign** (`TIER0` §3.9) — not two controllers. Where the
@@ -155,7 +157,7 @@ page count.
 | id | experiment | why it matters | cost |
 |----|-----------|----------------|------|
 | ~~**1**~~ | ~~**`f > 0` extension and Panel B reindex.**~~ **DONE 12 Aug.** Swept to sigma = 11.2. Outcome: the crossing **is** observable and sits at (x = 2.938, f = 0.153); the Panel B negative region is explained (the two variants take the curvature step at nearly the same nominal sigma, so the matched-bulk axis reverses their order); and a new result — the generative resistance margin exists at **f = 0** (ER collapses in 50% of replicates, connectome in 0%), so the "onset in f" was a sigma = 6 artifact. `TIER0` §2.3 rewritten, §6.1 closed, §6.4 refined | Gave generation the matched axis memory already had | 14.5 core-hours measured; **12 min wall** on ada at 128 workers |
-| **2** | **E0.1 threshold location.** Closed-loop generation is a two-attractor system: the trajectory sits either on the straight Lorenz attractor (~0.25 rad) or in the saturated period-2 state (~3.1 rad). Locate the transition per (variant, `f`) and test what predicts it — the `sigma_eff` = 1 criterion, and the variant-dependent offset it carries | Licenses "geometry sets predictive capacity" as a **threshold** claim, which is what the data supports. Reanalysis, no new runs | ~1 day |
+| ~~**2**~~ | ~~**E0.1 threshold location.**~~ **DONE 12 Aug.** Generation is a **switch**: a binary "has it collapsed" bit explains R2 0.364 of VPT against continuous curvature's 0.371, so Act III's claim is *capacity is gated by which regime the manifold is in*, not graded by curvature. `sigma_eff` is the best **locator** of the transition (CV 0.209 against nominal sigma's 0.667), with the pre-registered variant-dependent offset present and ordered by spectral gap. **But `sigma_eff -> 1` is falsified** — 1 of 38 brackets contains 1, the transition sits at 0.77-0.90, and `sigma_eff` cannot reach 1 at all for f <= 0.20 while transitions happen throughout. **OPEN:** what governs the break at f = 0, where the locator does not apply (`TIER0` §3.10) | Licensed the threshold claim; withdrew the criterion | reanalysis |
 
 > **Why threshold, not dose (measured 12 Aug, 38,280 Lorenz cells).** Curvature is not a
 > graded quantity on this substrate. **98% of cells sit in one of two spikes and 0.56%
@@ -167,6 +169,11 @@ page count.
 > the 67% of cells at the VPT = 0 floor, it is −0.151. Binning on `sigma_eff` does not
 > isolate a graded path either: each band's correlation tracks its *cluster mixing
 > proportion*, peaking at −0.810 where the band is ~60/40 and weakening toward both ends.
+>
+> **Outcome against the pre-registration.** The offset *was* variant-dependent as
+> predicted, and `sigma_eff` *did* beat the alternatives — but the pre-registered value of
+> 1 was wrong, and the criterion is withdrawn (`TIER0` §3.10). Recorded here as the
+> prediction stood before fitting:
 >
 > **Pre-registered before fitting:** `sigma_eff` = 1 locates the transition, with a
 > variant-dependent offset — measured so far as `sigma_eff` ≈ 0.98–1.02 at collapse for

@@ -361,7 +361,11 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 - **Generative panel.** Curvature *un-freezes*: the advantage is a *resistance margin*
   (the connectome stays straight while ER collapses to period-2), not an operating
   optimum (best generation is at *f*=0). The effective radius σ_eff = bulk₉₅·σ·⟨1−x²⟩
-  crossing 1 predicts the onset. **CORRECTED (TIER0 §2.3, Aug 2026): the onset is in σ,
+  **locates** the onset — but it does **not** cross 1 there: the transition sits at
+  σ_eff = 0.77–0.90, and σ_eff folds so it never reaches 1 at all for *f* ≤ 0.20 while
+  transitions happen throughout (**criterion withdrawn, TIER0 §3.10**; σ_eff survives as
+  the best empirical locator, ~3× more invariant than the alternatives, not as a law).
+  **CORRECTED (TIER0 §2.3, Aug 2026): the onset is in σ,
   not in *f*.** The original reading — ΔS = 0 at *f*=0, emerging only once *f*>0 — was an
   artifact of stopping at σ=6. Swept to σ=11.2, **ER collapses in 5 of 10 seeds at *f*=0
   while the connectome collapses in 0 of 10** (Fisher p=0.033): the resistance margin is
@@ -373,9 +377,11 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
   **cross**: **memory and generation dissociate** — not because two controllers act, but
   because **one axis is read out with opposite sign** (TIER0 §3.9): a dominant *positive*
   mode wastes readout dimensions (bad for memory) while keeping the trajectory on a fixed
-  point (good for generation). `σ_eff → 1` remains the empirical locator of the generative
-  threshold at *f*>0, but it is a symptom of that axis rather than an independent
-  controller — and it fails at *f*=0. Sign composition trades memory capacity against
+  point (good for generation). `σ_eff` remains the best empirical **locator** of the
+  generative threshold at *f*>0 — but the *criterion* `σ_eff → 1` is withdrawn (TIER0
+  §3.10): the transition sits at 0.77–0.90 and σ_eff cannot even reach 1 for *f* ≤ 0.20.
+  It is a symptom of that axis, not an independent controller — and it does not apply at
+  *f*=0. Sign composition trades memory capacity against
   generative robustness. The crossing's location is axis-dependent (TIER0 §2.3):
   on the corrected `σ·bulk95` axis it is at (x = 2.938, *f* = 0.153); the nominal
   (σ≈4, *f*≈0.12) reading holds only on a panel censored at σ=6 and does not survive the
@@ -448,8 +454,14 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    PR fails. Spectral origin: the connectome's compact eigenvalue bulk (bulk₉₅ 0.325 vs
    0.48–0.55; = 1/sr_crit). This makes the floor's memory advantage a specific, quantified
    geometric mechanism. (Caveat: the d_eff-over-PR advantage is MC-specific.)
-6. **Two computational axes:** memory reads out effective rank; generative (Lorenz)
-   prediction reads out trajectory straightness (curvature). `d_eff` ≈ 0 for Lorenz VPT.
+6. **Two computational axes, and they are different KINDS of relationship** (TIER0
+   §3.10): memory reads out effective rank as a **dial** — it varies smoothly with σ and
+   *f*; generative (Lorenz) prediction reads out trajectory geometry as a **switch** — the
+   trajectory is either on the straight attractor or in the saturated period-2 state, with
+   nothing stable between, and a single binary "has it collapsed" bit explains R²=0.364 of
+   VPT against continuous curvature's 0.371. So the Act III claim is *capacity is **gated**
+   by which dynamical regime the manifold is in*, not *graded by how curved it is*.
+   `d_eff` ≈ 0 for Lorenz VPT.
 
 **Sign composition (phase diagram).**
 
@@ -736,7 +748,9 @@ Caught at specific stages; recorded so future iterations don't repeat them.
   `periphery_first`, `f=0` = identity. Grid: 11 `f` ∈ [0,0.5] × 16 σ ∈ [0,6] ×
   {connectome, degree, ER} × 10 seeds × 3 draws × {MC, NARMA, Lorenz}; edge + Dale
   modes; degree + eigenvector scores. Order parameters ΔD = `d_eff`(conn)−`d_eff`(ER),
-  ΔS = curvature(ER)−curvature(conn); generative predictor `σ_eff = bulk₉₅·σ·⟨1−x²⟩`.
+  ΔS = curvature(ER)−curvature(conn); generative **locator** (not criterion)
+  `σ_eff = bulk₉₅·σ·⟨1−x²⟩`, which marks the transition at 0.77–0.90 rather than at 1
+  (TIER0 §3.10).
 - **`f > 0` extension + absolute frontier (human N=448, Aug 2026):** the same grid re-run to
   **σ = 11.2** for four variants (`criticality_matched --extend-f [--variants
   boundary|nulls]`, 12 min/pair on ada at 128 jobs), then `--item2` (reproduction gate,

@@ -620,8 +620,8 @@ account, not an independent controller.
 ### 3.9 REFRAMED — one mechanism, two readouts (replaces "two different controllers")
 
 The programme has described the dissociation as *two* spectral controllers: memory
-governed by the hub-localised common mode, generation by `σ_eff` crossing 1. That
-framing is weaker than the data requires. Both are the **same** quantity — where the
+governed by the hub-localised common mode, generation by `σ_eff` crossing 1 (a criterion
+since withdrawn, §3.10). That framing is weaker than the data requires. Both are the **same** quantity — where the
 leading effective gain sits relative to **±1** — and the two tasks simply prefer
 opposite signs of it.
 
@@ -654,13 +654,67 @@ is the bimodality, the binary-bit R² (0.364 against continuous curvature's 0.37
 inference is that a single leading-eigenvalue account generates both.
 
 > **And it does not yet explain the `f = 0` collapse.** At `f = 0` ER collapses in 5 of
-> 10 seeds at σ ≈ 7.6–8.0, but its `σ_eff` there is **0.011** — nowhere near 1, against
-> 0.98–1.02 at `f` ≥ 0.2. The linear account predicts that a non-negative matrix
-> eventually reaches the period-2 branch (subdominant negative eigenvalues do exist) but
-> not *where*, and something saturation-dependent is doing the work. The `σ_eff` = 1
-> criterion is therefore an empirical locator in the `f > 0` regime, not a derived law —
-> and it fails at exactly the biologically real cut. Item 2 (E0.1) tests this rather than
-> assuming it.
+> 10 seeds at σ ≈ 7.6–8.0 with `σ_eff` = 0.014 — two orders of magnitude below its own
+> peak. The linear account predicts that a non-negative matrix eventually reaches the
+> period-2 branch (subdominant negative eigenvalues do exist) but not *where*, and
+> something saturation-dependent is doing the work. **E0.1 (§3.10) tested this and
+> confirmed the failure**: `σ_eff` is the best available locator of the transition in the
+> `f > 0` regime but is not a stability law anywhere, and at `f = 0` it does not apply at
+> all. What governs the `f = 0` break is open.
+
+### 3.10 E0.1 — generation is a switch, and `σ_eff → 1` is withdrawn
+
+Roadmap §4a item 2, run 12 August 2026 as a **threshold-location** analysis. The
+mediation form it was originally specified in is not answerable: curvature is a
+two-state step, so a correlation against it is a correlation between two clusters
+(roadmap §4a item 2 carries the measurements).
+
+**Generation is gated, not graded.** A single binary "has it collapsed" bit explains
+**R² = 0.364** of VPT variance; continuous curvature manages **0.371**. The entire
+0.25 → 3.14 rad range is worth 0.7 percentage points beyond the bit. So the Act III
+claim is *capacity is gated by which dynamical regime the manifold is in*, **not**
+*capacity is graded by how curved it is*.
+
+**Which quantity locates the transition?** Each candidate scored by the spread of its own
+value at the transition across 4 variants × 11 `f` — a predictor should take the *same*
+value wherever the transition happens. Read at the last straight σ, before the transition
+changes the gain.
+
+| criterion | median at transition | IQR | **CV** |
+|---|---|---|---|
+| nominal σ | 1.800 | 1.200 | 0.667 |
+| `σ·bulk95` (linear negative-mode gain) | 1.002 | 0.747 | 0.746 |
+| **`σ_eff`** | 0.777 | 0.162 | **0.209** |
+
+`σ_eff` is ~3× more invariant than either alternative, and the **variant-dependent offset
+predicted in advance is present**, ordered by spectral gap: connectome transitions at the
+*lowest* `σ_eff` (0.71–0.82), then weight-permuted (0.79–0.91), degree (0.82–0.91), ER
+highest (0.87–0.95).
+
+> **But `σ_eff → 1` is falsified as a criterion, on two independent grounds.**
+> **(i)** Only **1 of 38** transition brackets contains 1; the transition sits in the band
+> **0.77–0.90** for every variant. **(ii)** `σ_eff` *folds* — it rises, turns over and
+> falls as the tanh gain collapses faster than σ grows — so it has a maximum over the
+> sweep, and that maximum is **below 1 for every variant at `f` ≤ 0.20** (and for the
+> nulls until `f` ≥ 0.30) while transitions happen throughout. A criterion whose claimed
+> value is unreachable in a regime where the event still occurs is not a stability law.
+> **Keep `σ_eff` as the empirical locator; drop the unit crossing.**
+>
+> The *linear* criterion `σ·bulk95` brackets 1 far more often (13/38, median bracket
+> [1.018, 1.221]), consistent with linear instability being necessary but saturation
+> delaying the actual transition.
+
+**OPEN — what governs the `f = 0` break.** At the biologically real cut the locator does
+not apply at all: ER transitions with `σ_eff` = 0.014, two orders of magnitude below its
+own peak of 0.607, and on the *descending* branch (0.014 before the step, 0.011 after).
+**And the connectome never breaks at `f` = 0 at all** — 0 of 10 seeds inside σ ≤ 11.2.
+Whatever drives the `f = 0` collapse, it is not an effective radius crossing anything.
+This is now an explicit open question rather than an assumed answer.
+
+Artifacts: `criticality_matched/results/e01_threshold_verdict_scale_448.md`,
+`e01_threshold_table_scale_448.csv`, `e01_threshold_invariance_scale_448.csv`,
+`e01_threshold_straddle_scale_448.csv`, `e01_sigma_eff_fold_scale_448.csv`,
+`figures/figE_threshold_location.png`.
 
 ---
 
@@ -721,8 +775,14 @@ peak; compact wins across the range.**
    variant's `σ_eff` fold differs materially (0.542 connectome vs 0.690 ER). This is
    part of the mechanism and must not be matched away, but "matched effective
    criticality" must be read narrowly.
-3. **`σ_eff` never reaches 1 on MC driven states** (peaks 0.57–0.63). The "`σ_eff`
-   crossing 1" criterion belongs to the *Lorenz* states and must not cross panels.
+3. **There is no "`σ_eff` crossing 1" criterion — it is withdrawn (§3.10).** `σ_eff`
+   never reaches 1 on MC driven states (peaks 0.57–0.63), and E0.1 shows it does not
+   reach 1 on the *Lorenz* states either over much of the grid: it folds, and its maximum
+   is below 1 for every variant at `f` ≤ 0.20 while generation transitions happen
+   throughout. Where it *is* reachable the transition still sits at 0.77–0.90, not 1.
+   `σ_eff` survives as the best **empirical locator** of the generation threshold
+   (~3× more invariant than the alternatives), not as a stability law, and it is
+   Lorenz-only — it must not cross panels.
 4. **The `f > 0` flip pattern is not machine-portable** (unstable `np.argsort` tie order
    on a heavily-tied edge score). Distributions agree (60/60 groups within 4 SE); per-cell
    values do not. Use each file's own `bulk95` when reindexing its cells.
