@@ -193,7 +193,7 @@ def run(scale: int = common.SCALE) -> None:
 if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
     modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f", "--item2",
-                          "--frontier", "--mechanism", "--e01", "--act3-figures", "--heatmaps", "--closeout", "--n1000",
+                          "--frontier", "--mechanism", "--e01", "--jacobian", "--act3-figures", "--heatmaps", "--closeout", "--n1000",
                           "--n1000-figures") if m in sys.argv]
              or ["--panel"])
     if "--task-b" in modes:
@@ -220,6 +220,9 @@ if __name__ == "__main__":
     if "--frontier" in modes:
         from experiments.human.analysis.criticality_matched import frontier
         frontier.run(scale=scale)
+    if "--jacobian" in modes:
+        from experiments.human.analysis.criticality_matched import jacobian
+        jacobian.run(scale=scale, jobs=common.flag(sys.argv, "--jobs", 1, int))
     if "--e01" in modes:
         from experiments.human.analysis.criticality_matched import threshold
         threshold.run(scale=scale)

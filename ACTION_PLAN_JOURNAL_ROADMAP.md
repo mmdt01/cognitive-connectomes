@@ -278,6 +278,16 @@ November, so nothing here is lost.
 - **Why weight placement produces the gap** (degree-weight correlation? spatial
   embedding? rich-club? Landau & Sompolinsky 2018 the likely source). The open
   mechanistic question a reviewer will certainly ask.
+- **What sets generation at f = 0** (`TIER0` §3.11). At the biologically real cut,
+  prediction decays ~10x with the trajectory geometry completely flat, so the geometric
+  gating account does not apply there — and neither does memory (the connectome has ~4.7x
+  ER's MC at sigma = 6 and slightly *lower* VPT). Currently unexplained, and it is the
+  regime the thesis actually claims to be about.
+- **The closed-loop Jacobian.** Generation feeds the readout back, so the operative map is
+  `x -> tanh((W + Win*W_out)x)`; every stability quantity computed so far omits that
+  rank-3 term, which is the most likely reason both `sigma_eff` and the exact reservoir
+  Jacobian fire *early* (at 67% and 85% of their critical values). Needs the evaluator to
+  expose `W_out`.
 - **Additional geometry measures** (intrinsic dimensionality, tangling) if curvature
   proves too coarse.
 - **The `bulk95`-as-ladder-controller question.** Do not run more seeds. Restate at the

@@ -461,7 +461,14 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    nothing stable between, and a single binary "has it collapsed" bit explains R²=0.364 of
    VPT against continuous curvature's 0.371. So the Act III claim is *capacity is **gated**
    by which dynamical regime the manifold is in*, not *graded by how curved it is*.
-   `d_eff` ≈ 0 for Lorenz VPT.
+   **SCOPE LIMIT (TIER0 §3.11): that holds at *f*>0 only.** At *f*=0 — where the real
+   connectome lives — the connectome's curvature is **flat at 0.26 across the entire σ
+   sweep** while its VPT falls ~10×: capacity is lost with the geometry intact, and
+   curvature is blind to it. The switch is a *sign-composition* phenomenon (a non-negative
+   matrix has no dominant negative eigenvalue to flip), so removing the negative weights
+   removes the switch and the explanation resting on it. What sets generation at *f*=0 is
+   **open** — not geometry, and not memory either (at σ=6 the connectome has ~4.7× ER's MC
+   and slightly *lower* VPT). `d_eff` ≈ 0 for Lorenz VPT.
 
 **Sign composition (phase diagram).**
 

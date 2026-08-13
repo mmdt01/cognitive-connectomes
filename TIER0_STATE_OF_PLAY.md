@@ -673,7 +673,9 @@ two-state step, so a correlation against it is a correlation between two cluster
 **R² = 0.364** of VPT variance; continuous curvature manages **0.371**. The entire
 0.25 → 3.14 rad range is worth 0.7 percentage points beyond the bit. So the Act III
 claim is *capacity is gated by which dynamical regime the manifold is in*, **not**
-*capacity is graded by how curved it is*.
+*capacity is graded by how curved it is*. **Scope limit (§3.11): this holds for
+`f > 0` only.** At `f = 0` — the biological cut — prediction decays ~10× with curvature
+flat at 0.26 across the whole sweep, so geometry gates nothing there.
 
 **Which quantity locates the transition?** Each candidate scored by the spread of its own
 value at the transition across 4 variants × 11 `f` — a predictor should take the *same*
@@ -715,6 +717,70 @@ Artifacts: `criticality_matched/results/e01_threshold_verdict_scale_448.md`,
 `e01_threshold_table_scale_448.csv`, `e01_threshold_invariance_scale_448.csv`,
 `e01_threshold_straddle_scale_448.csv`, `e01_sigma_eff_fold_scale_448.csv`,
 `figures/figE_threshold_location.png`.
+
+### 3.11 The exact Jacobian — a better ruler, no law, and a scope limit on §3.10
+
+§3.10 left the `f = 0` break unexplained. `σ_eff` is a **mean-field** quantity — it uses
+the gain averaged over units — and at `f = 0` the collapsed cells have 88% of units
+saturated with `|mean_state|` = 0.967, so the mean is dominated by units contributing
+~0 while the dynamics live in the unsaturated remainder. The obvious hypothesis was that
+the averaging was the problem. It was tested by computing the **exact** local quantity:
+with `leak = 1` the map is `x → tanh(Wx + Win u)`, so the Jacobian is `J = diag(1−x²)W`,
+kept as a per-unit gain vector and diagonalised exactly via the symmetric similar form
+`diag(√g)·W·diag(√g)`. Full grid, Lorenz, 4 variants × 11 `f` × 29 σ × 10 seeds × 3
+draws (38,280 cells, ada).
+
+**1. The exact Jacobian is a better locator than `σ_eff`, and still not a stability law.**
+
+| quantity | median at transition | its critical value | IQR | CV | fraction of critical |
+|---|---|---|---|---|---|
+| **`λ_min(J)`** | −0.849 | −1 | 0.129 | **0.152** | 0.85 |
+| `σ_eff` | +0.668 | +1 | 0.203 | 0.304 | 0.67 |
+
+Keeping the gain heterogeneity **halves** the scatter, so the mean-field step does cost
+something. But `λ_min(J)` does not reach −1 either: generation breaks while the fixed
+point is still **linearly stable**. So the transition is not a local linear bifurcation
+in either regime, and the mean-field approximation was not the missing piece.
+
+> **What is missing is almost certainly the closed loop.** In generation the input *is*
+> the network's own prediction fed back, so the operative map is
+> `x → tanh((W + Win·W_out)x)` and the true Jacobian carries a rank-3 readout term that
+> none of this computes. Testing it needs `W_out`, which the evaluator does not expose.
+
+**2. The two regimes break by different mechanisms — confirmed on the grid.** At `f > 0`,
+`λ_min(J)` at the transition is tight at −0.849 [−0.898, −0.769] over 378 seed-level
+transitions. At `f = 0` it is −0.165, scattered over [−0.367, −0.044], on 9 transitions
+out of 40 possible. Same measurement, different phenomenon — no longer a single-seed
+hint.
+
+**3. SCOPE LIMIT on §3.10: at `f = 0` capacity is lost with the geometry intact.**
+Seed medians at `f = 0`:
+
+| σ | 2 | 4 | 6 | 8 | 11.2 |
+|---|---|---|---|---|---|
+| connectome curvature | 0.26 | 0.26 | 0.26 | 0.26 | **0.26** |
+| connectome VPT | 4.43 | 2.81 | 0.81 | 1.18 | **0.44** |
+| ER curvature | 0.26 | 0.26 | 0.26 | 0.27 | 1.70 |
+| ER VPT | 3.73 | 2.45 | 1.18 | 0.49 | 0.23 |
+
+The connectome's trajectory geometry is **flat across the entire sweep** while its
+prediction falls ~10×.
+
+> **"Capacity is gated by which dynamical regime the manifold is in" (§3.10) is a
+> statement about the `f > 0` counterfactual, not about the biological substrate.** At
+> `f = 0` — where the real connectome lives, since dMRI weights are non-negative by
+> construction — generation degrades smoothly with **no geometric event at all**, and
+> curvature is blind to it. This is consistent with §3.9 rather than a contradiction: the
+> switch *is* a sign-composition phenomenon, and a non-negative matrix has no dominant
+> negative eigenvalue to flip. Take the negative weights away and the switch, and the
+> explanation resting on it, both disappear.
+
+**OPEN — what sets generation at `f = 0`.** Not geometry (above). **And not memory
+either:** at σ = 6, `f = 0` the connectome has ~4.7× ER's MC (11.43 vs 2.42) and slightly
+*lower* VPT (0.81 vs 1.18), so the obvious fallback does not work. Logged as a named open
+question rather than a third guess.
+
+Artifacts: `e01_jacobian_scale_448.parquet`, `criticality_matched/jacobian.py`.
 
 ---
 
