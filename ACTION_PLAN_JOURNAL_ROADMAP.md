@@ -1,6 +1,6 @@
 # Action plan: thesis as journal paper (NMI), with NeuroAI workshop stepping stone
 
-**Status:** v2, revised 11 August 2026 (v1 drafted 29 July; superseded, and preserved in
+**Status:** v2.1, contributions revised 13 August 2026 after 4a (v2 11 August; v1 drafted 29 July, preserved in
 git history at commit `88a2a14`).
 **Targets:** NeurIPS NeuroAI workshop (29 Aug, non-archival, 5pp) -> Nature Machine Intelligence.
 **Dropped:** ICLR 2027.
@@ -29,43 +29,88 @@ structured, what is still to be done and in what order. Where they overlap on a 
 5. **A figure sweep is scheduled as a work item**, not left to the writing phase.
 6. **Act IV is scoped as conditional** with a pre-committed stopping rule.
 
+**v2.1 (13 Aug), after 4a.** The contributions list went from five to six. It had been
+entirely memory and spectral, with no slot for the generation arm; 4a gave that arm a
+result worth stating (the advantage is present at f = 0, and capacity there is gated
+rather than graded). The Aceituno reconciliation folded into the memory contribution,
+which is where it belongs: it is the same trade stated in the literature's terms. Four
+entries were added to "what must NOT be claimed", three of them retiring claims this
+project made itself.
+
 ---
 
 ## 1. The contribution
 
 **One sentence.** Biological weight placement buys a large spectral gap rather than a
-compact bulk, and that gap trades peak memory capacity for capacity retained across the
-operating range: a trade invisible under the field's standard spectral-radius-matched
-comparison, and one that reconciles a standing disagreement about whether spread or
-compact spectra maximise memory.
+compact bulk; non-negativity pins every substrate to a dominant common mode that costs
+memory and protects generation, so the same axis is read out with opposite sign by the
+two capacities, and the connectome's gap makes it the substrate least dominated by that
+mode. The trade is invisible under the field's standard spectral-radius-matched
+comparison.
 
 **The biological claim that makes it computational neuroscience.** The connectome is not
 organised for capacity. It is organised for not needing to be tuned.
 
-### The five contributions, in the order they should appear in the introduction
+### The six contributions, in the order they should appear in the introduction
 
 1. **The spectral difference is a gap, not a bulk.** The absolute bulk radius is
    near-identical across variants (4.4% spread); the entire between-variant difference
    sits in `|λ₁|`. Gap ratio `|λ₁|/abs_bulk` = 3.08 (connectome) vs 1.81 to 1.92 (nulls),
    identically `1/bulk95` = `sr_crit`. Identifies weight-topology alignment as the causal
-   structural feature. Scale-robust.
-2. **A measured trade-off with a scale-invariant mechanism.** Peak memory 2 to 6% below
-   the nulls (reliable against ER, not against degree); supercritical margin 4.4x;
-   invariant across a 2.2x change in N while the normalised advantage grows
-   (`dD/N` 0.444 -> 0.613).
-3. **Reconciliation of the spread-versus-compact disagreement.** Aceituno, Yan & Liu's
-   ordering is reproduced exactly at alpha = 1e-8 on our own substrates. Both results
-   hold, at different points on the sigma axis. Spread wins at the peak; compact wins
-   across the range.
-4. **A methodological critique of spectral-radius-matched comparison.** Normalising `W`
-   by `|λ₁|` anchors the nominal-sigma axis to an extreme-value statistic that does not
-   concentrate (Hill alpha ~ 2.3). Since variants differ *only* in `|λ₁|`, nominal
-   matching fixes the Perron root and `sigma·bulk95` matching fixes the bulk. Neither is
-   neutral. Applies to the whole connectome-reservoir literature, not just to this work.
-5. **Variance-weighted dimensionality misses readout-relevant structure.** PR orders the
+   structural feature. Scale-robust. *(Act I)*
+
+2. **The memory/generation dissociation is one axis read out with opposite sign, not two
+   controllers** (`TIER0` §3.9). Each unit is `x -> tanh(gain·x + input)`: gain above +1
+   gives a stable fixed point, below -1 a period-2 orbit, nothing stable between.
+   Perron-Frobenius pins a non-negative matrix to the positive branch, which wastes
+   readout dimensions (bad for memory) and holds the trajectory smooth (good for
+   generation). That is *why* the two advantages had to occupy opposite regions of
+   (f, sigma), rather than a fact reported about them. The boundaries cross at
+   (`sigma·bulk95` = 2.938, f = 0.153) on the matched-bulk axis and not at all on the
+   nominal axis past sigma = 6, so **the crossing is only ever quoted with its axis**.
+   *(Act III, unifying section)*
+
+3. **The memory advantage is a rescue from Perron domination, not a capacity gain**
+   (`TIER0` §3.7). The connectome is the *least* common-mode dominated substrate despite
+   the largest Perron root (`|mean_state|` 0.759 vs nulls 0.949 to 0.989 at sigma = 6,
+   f = 0), because a large gap lets the leading mode be driven without the bulk following.
+   Peak memory is 2 to 6% *below* the nulls — reliable against ER and weight-permuted,
+   **not** against degree-matching, so write "parity", never "always worst" (`TIER0`
+   §3.4). The supercritical margin is 4.4x and holds across a 2.2x change in N
+   (ratio 4.40 -> 4.42) while the normalised advantage grows (`dD/N` 0.445 -> 0.613). Nobody degrades with f: supercritical MC rises for every
+   substrate and the advantage narrows because the nulls gain ~4x what the connectome
+   gains from a much lower start. **This also reconciles the spread-versus-compact
+   disagreement** (Aceituno, Yan & Liu): their ordering reproduces exactly at
+   alpha = 1e-8 on our substrates, so spread wins at the peak and compact wins across the
+   range. Defensible one-liner: the connectome does not make memory better, non-negativity
+   makes it worse for everyone, and the connectome's gap makes it least worse.
+   *(Act III, memory arm; the reconciliation is the closing section and the paper's hook)*
+
+4. **The generative advantage is present at the biologically real cut, and capacity there
+   is gated rather than graded.** Read as VPT the connectome is the only substrate still
+   predicting from f ~ 0.20 (+1.0 to +2.2 Lyapunov times over all three nulls, clearing
+   the weight-permuted placement control, so it is a *placement* effect). At f = 0 the
+   resistance margin is real but far supercritical: ER collapses in 5 of 10 seeds at
+   sigma ~ 7.6 to 8, the connectome in 0 of 10 (Fisher p = 0.033). The earlier
+   "onset in f" reading was an artifact of stopping the sweep at sigma = 6. And the
+   relationship is a **switch**, not a dose: curvature is bimodal (98% of cells in two
+   spikes, 0.56% between), so a binary collapsed-or-not bit explains R2 = 0.364 of VPT
+   against continuous curvature's 0.371. **Scope limit stated up front** (`TIER0` §3.11):
+   this holds at f > 0. At f = 0 curvature is flat at 0.26 across the whole sweep while
+   VPT falls ~10x, so what sets generation there is open. *(Act III, prediction arm)*
+
+5. **Spectral-radius-matched comparison is not neutral.** Normalising `W` by `|λ₁|`
+   anchors the nominal-sigma axis to an extreme-value statistic that does not concentrate
+   (Hill alpha ~ 2.3). Since variants differ *only* in `|λ₁|`, nominal matching fixes the
+   Perron root and `sigma·bulk95` matching fixes the bulk, and the memory mechanism under
+   test *is* the Perron mode, so each axis flatters a different answer. Report both, say
+   what each holds fixed, rest the claim on surviving both. Applies to the whole
+   connectome-reservoir literature, not just to this work. *(Chapter 3, methods)*
+
+6. **Variance-weighted dimensionality misses readout-relevant structure.** PR orders the
    memory ladder at +0.11; `d_eff` at +0.998, because memory lives in roughly 400
    low-variance directions PR discounts. Pitch as an empirical demonstration (Dambre 2012
-   is the parent bound; Clark 2025 collides on terminology).
+   is the parent bound; Clark 2025 collides on terminology). *(Act II)*
 
 ### What must NOT be claimed
 
@@ -74,6 +119,23 @@ organised for capacity. It is organised for not needing to be tuned.
   as confirmatory.
 - Hub-gating of memory is a solid empirical result whose proposed mechanism was
   falsified (non-normality, `TIER0` §3.5). Report without a mechanistic story attached.
+- **"Hub inhibition collapses memory."** Nothing collapses (`TIER0` §3.8): inhibiting the
+  connectome's hubs *raises* its own absolute memory, most of any placement. The advantage
+  narrows because ER gains +8.5 against the connectome's +3.4. The ordering is real; the
+  collapse is the null moving.
+- **"`sigma_eff` crosses 1 at the generative transition."** Falsified (`TIER0` §3.10): 1 of
+  38 brackets contains 1, the transition sits at 0.77 to 0.90, and `sigma_eff` cannot reach
+  1 at all for f <= 0.20 while transitions happen throughout. It survives as the best
+  empirical **locator** (CV 0.209 against nominal sigma's 0.667) with a variant-dependent
+  offset ordered by spectral gap. Write "locator", never "criterion" or "law".
+- **A graded straightness account of generation.** Within the straight cluster the residual
+  VPT/curvature correlation is +0.145, the *opposite* sign to the graded story. The pooled
+  -0.78 was cluster mixing.
+- **That the single-axis account explains generation at f = 0.** It demonstrably does not
+  (contribution 4). Name it as an open problem in the discussion rather than letting the
+  f > 0 mechanism read as general.
+- **The crossing, quoted without its axis.** It is at (2.938, 0.153) on `sigma·bulk95` and
+  absent on the nominal axis once the sweep passes sigma = 6.
 - "The connectome is a better reservoir." It is not, at the peak, and the data says so.
 
 ---
