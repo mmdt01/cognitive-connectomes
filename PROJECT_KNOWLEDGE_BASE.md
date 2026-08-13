@@ -34,9 +34,9 @@ Companion detail docs: `MANIFOLD_PROBES_IMPLEMENTATION.md` and
 **The floor — a sign-primary robustness account.** A 7-condition sign × tail ×
 topology factorial (four tasks, replicated on two connectomes) established that the
 connectome's one robust edge is supercritical and driven **primarily by weight
-SIGN**: a non-negative (Perron) matrix has a large isolated eigenvalue over a
-compressed bulk; its all-positive random nulls synchronise into that mode and
-collapse at criticality, while the connectome's compact bulk (`sr_crit = 1/bulk₉₅`)
+SIGN**: a non-negative (Perron) matrix has a large isolated eigenvalue separated from
+its bulk; its all-positive random nulls synchronise into that mode and collapse at
+criticality, while the connectome's larger **spectral gap** (`sr_crit = 1/bulk₉₅`)
 lets it ride through. Sign the same weights and the effect vanishes; heavy tail is a
 secondary residual, directedness minimal. The connectome is never the *best*
 substrate — its edge is **collapse-resistance in an all-positive substrate**,
@@ -50,10 +50,16 @@ collapses it into a saturated period-2 state. Within the non-negative regime,
 **topology sets memory through readout dimensionality**, measured by the **ridge
 effective rank** `d_eff = Σᵢ gᵢ/(gᵢ+α)` — *not* participation ratio, which misses it.
 `d_eff` orders the memory-capacity null ladder perfectly (Spearman +1.00) and predicts
-MC within-regime (+0.998); its spectral origin is the connectome's anomalously
-**compact eigenvalue bulk** (bulk₉₅ 0.325 vs 0.48–0.55 for nulls). Two computational
-axes emerge: **memory reads out effective rank; generative (Lorenz) prediction reads
-out trajectory straightness (curvature).**
+MC within-regime (+0.998). **Its spectral origin is an anomalously large spectral
+GAP, not a compact bulk** (TIER0 §3.1, Aug 2026): the *absolute* bulk radius is
+near-identical across variants (4.4% spread) and the entire difference sits in `|λ₁|`
+(0.189 connectome vs 0.106 ER). Headline statistic: the **gap ratio**
+`|λ₁|/abs_bulk` = **3.08** (connectome) vs **1.81–1.92** (nulls), which is identically
+`1/bulk₉₅` = `sr_crit`, so it renames the existing quantity rather than replacing it.
+The two computational axes are different **kinds** of relationship (TIER0 §3.10):
+memory reads out effective rank as a **dial**; generative prediction reads out which
+dynamical **regime** the trajectory is in as a **switch**. Curvature indicates that
+regime, it does not grade it, and generation is read off **VPT**.
 
 **Sign-composition phase diagram.** Grading the negative-weight fraction *f* from 0
 (all-positive) to 0.5 (balanced) × spectral radius maps where topology controls the
@@ -66,13 +72,29 @@ non-negative matrix to a dominant **positive** mode, which is a *liability for m
 generation* (a fixed point is smooth; gain below −1 would give a period-2 flip-flop).
 The two tasks prefer opposite signs of the same quantity, which is why their advantages
 had to occupy opposite regions. Sign composition is thus a single knob trading memory
-capacity against generative robustness. Under a biological **Dale** sweep the connectome sustains a faithful
-straight Lorenz attractor up to **~20% inhibition** then collapses — a tolerance
-ceiling (not a tuned optimum) sitting at the biological E/I ratio. A **placement**
-study shows the memory effect is **hub-gated**: making hub neurons inhibitory collapses
-it ~2× faster than peripheral, robust to whether "hub" means degree or eigenvector
-centrality — confirming the memory controller is the Perron/common mode carried by the
-hubs. Full account in `PHASE_DIAGRAM_EXPERIMENT.md`.
+capacity against generative robustness. The two boundaries **cross**, but the crossing
+is **axis-dependent**: at (`σ·bulk₉₅` = 2.938, *f* = 0.153) on the matched-bulk axis,
+and not at all on the nominal axis once the sweep runs past σ=6 (TIER0 §2.3). Always
+state the axis. Read the arms off **MC and VPT**, not `d_eff` and curvature.
+**The memory advantage is a rescue from Perron domination, not a capacity gain**
+(TIER0 §3.7): the connectome is the *least* common-mode dominated substrate despite
+having the largest Perron root, because a large gap lets the leading mode be driven
+without the bulk following. Under a biological **Dale** sweep the connectome sustains a
+faithful straight Lorenz attractor up to **~20% inhibition** then collapses — a
+tolerance ceiling (not a tuned optimum) sitting at the biological E/I ratio. A
+**placement** study shows the memory effect is **hub-gated**: hub-targeted inhibition
+closes the connectome−ER advantage ~2× faster than peripheral, robust to whether "hub"
+means degree or eigenvector centrality. **Nothing collapses — the null moves** (TIER0
+§3.8): inhibiting hubs *raises* the connectome's own absolute memory, and the advantage
+narrows because ER gains more. Full account in `PHASE_DIAGRAM_EXPERIMENT.md`.
+
+**Scope limit to carry everywhere (TIER0 §3.11).** The regime-switch account holds at
+*f* > 0 only. At *f* = 0, where the real macro connectome sits, curvature is flat at
+0.26 across the whole σ sweep while VPT falls ~10×: capacity is lost with the geometry
+intact. What sets generation at *f* = 0 is **open**, and it is the regime the project
+actually claims to be about. There *is* a generative resistance margin there (ER
+collapses in 5 of 10 seeds at σ≈7.6–8, the connectome in 0 of 10), so the earlier
+"onset in *f*" reading was an artifact of stopping the sweep at σ=6.
 
 Direction — which of these results to build into the paper — lives in
 `ACTION_PLAN_JOURNAL_ROADMAP.md`.
@@ -241,7 +263,9 @@ All `*.parquet` outputs are gitignored as regenerable; `figures/*.png` are track
   off by default, so committed task runs are byte-identical).
 - Manifold geometry `src/analysis/manifold.py` (on a driven state matrix `x`):
   `gram_spectrum(design)` → `ridge_effective_rank(gram, alpha)` (the `d_eff` memory
-  order parameter), `mean_curvature(x)` (trajectory straightness), `participation_ratio`.
+  order parameter), `mean_curvature(x)` (trajectory straightness — a bimodal *regime*
+  indicator, not a graded generative order parameter; see §7 finding 6),
+  `participation_ratio`.
 - Sign transform `src/analysis/sign_composition.py`: `sign_fraction_matrix` (edge-wise,
   symmetry-preserving) / `sign_fraction_matrix_dale` (node-wise Dale — negates an
   inhibitory neuron's outgoing **column**, breaking symmetry), selected by
@@ -335,9 +359,13 @@ committed task runs). Full working notes: `MANIFOLD_PROBES_IMPLEMENTATION.md`.
   **ridge effective rank** `d_eff = Σᵢ gᵢ/(gᵢ+α)` (effective d.o.f. of the ridge
   solution), not participation ratio. `d_eff` orders the MC null ladder perfectly
   (Spearman +1.00) and predicts MC within-regime (+0.998); PR fails (+0.11 / +0.31).
-  Spectral origin: the connectome's anomalously compact eigenvalue bulk (bulk₉₅ 0.325 vs
-  0.48–0.55 for nulls; orders the MC ladder at −0.96; bulk₉₅ = 1/sr_crit). Two axes:
-  **memory ← effective rank; generation (Lorenz) ← trajectory straightness (curvature)**.
+  Spectral origin **restated (TIER0 §3.1)**: an anomalously large spectral **gap**, not a
+  compact bulk. `bulk₉₅` 0.325 vs 0.48–0.55 for nulls (orders the MC ladder at −0.96;
+  `bulk₉₅` = 1/sr_crit), but the *absolute* bulk radius is near-identical across variants
+  (4.4% spread) and the whole difference is in `|λ₁|`. Two axes: **memory ← effective
+  rank; generation (Lorenz) ← which dynamical regime the trajectory is in**, indicated by
+  curvature and measured as VPT (a switch, not a graded readout of straightness — finding
+  6, TIER0 §3.10).
   (Caveat: `d_eff`'s advantage over PR is MC-specific — PR also orders NARMA.)
 
 **Sign-composition × spectral-radius phase diagram.** Grade the negative-weight
@@ -451,9 +479,12 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
    geometric face of the floor's collapse-resistance.
 5. **Memory is readout dimensionality, measured by ridge effective rank** (Probe 3):
    `d_eff` orders the MC ladder perfectly (+1.00) and predicts MC within-regime (+0.998);
-   PR fails. Spectral origin: the connectome's compact eigenvalue bulk (bulk₉₅ 0.325 vs
-   0.48–0.55; = 1/sr_crit). This makes the floor's memory advantage a specific, quantified
-   geometric mechanism. (Caveat: the d_eff-over-PR advantage is MC-specific.)
+   PR fails. Spectral origin **restated (TIER0 §3.1)**: an anomalously large spectral
+   **gap** (gap ratio `|λ₁|/abs_bulk` 3.08 vs 1.81–1.92), not a compact bulk — the absolute
+   bulk is near-identical across variants and the difference is entirely in `|λ₁|`.
+   `bulk₉₅` 0.325 vs 0.48–0.55 = 1/sr_crit is the same quantity renamed. This makes the
+   floor's memory advantage a specific, quantified geometric mechanism. (Caveat: the
+   d_eff-over-PR advantage is MC-specific.)
 6. **Two computational axes, and they are different KINDS of relationship** (TIER0
    §3.10): memory reads out effective rank as a **dial** — it varies smoothly with σ and
    *f*; generative (Lorenz) prediction reads out trajectory geometry as a **switch** — the
@@ -532,9 +563,10 @@ declare a narrow family and rest claims on CIs (TIER0 §6.8). **"Usable range" i
 threshold-dependent** — at the floor the connectome's VPT window looks 2× the nulls', at any
 usable-prediction threshold 1.25–1.5×, and it *reverses* at low *f* (TIER0 §6.9). The ~20%
 Dale result is a *tolerance*, not a tuned optimum. The generative advantage is *robustness of* generation,
-not generation quality; climate-error magnitudes are unreliable (ER divergence) — use
-bounded curvature. Why the connectome's bulk is anomalously compact (the topology →
-spectrum link) is not yet derived. **On the Dale axis, sign fraction and non-normality
+not generation quality; climate-error magnitudes are unreliable (ER divergence), and
+**curvature is a regime indicator, not a graded generative order parameter** — read the
+generative arm off **VPT** (finding 6, TIER0 §2.6/§3.10). Why weight placement produces
+the large spectral gap (the topology → spectrum link) is not yet derived. **On the Dale axis, sign fraction and non-normality
 co-vary** (edge mode is exactly normal at every *f*; Dale is not, and the connectome
 becomes ~2× as non-normal as its nulls at matched *f*), so Dale-arm claims are about
 node-wise inhibition, not sign fraction alone (E0.4 §4).
@@ -612,9 +644,10 @@ strengthens the framing.
 - **The real connectome does have a genuine Perron mode** (Perron–Frobenius guarantees a
   dominant real positive eigenvalue whose eigenvector loads on the structural
   hubs / rich club) and a measurable bulk — `bulk95` is a property of the *real* matrix,
-  not a counterfactual. (Caveat: the numerical eigenvalue distribution should be plotted
-  from the `w_spectra` `eig_w_real` data rather than asserted; qualitatively expect one
-  large real Perron eigenvalue well separated from a compact bulk, the gap widened by the
+  not a counterfactual. (Confirmed numerically in E0.4 from the `w_spectra` `eig_w_real` data, no longer
+  asserted: the human substrate is symmetric so the spectrum is real, with one large
+  Perron eigenvalue well separated from a bulk that is essentially the nulls' bulk — the
+  gap, not the bulk, is what differs, and it is widened by weight placement on the
   heavy-tailed degree distribution.)
 - **The three-way distinction to carry forward:** *structural* connectome ↔ the
   non-negative matrix `W` (the wiring, has the Perron mode); *dynamics* ↔ activity that
@@ -643,11 +676,18 @@ Caught at specific stages; recorded so future iterations don't repeat them.
   distributions differ. A variant's bulk becomes critical at `sr_crit = 1/bulk₉₅`
   (connectome ≈ 3.3 vs nulls ≈ 2.2–2.7), so sweep **wide** and compare curve-vs-curve
   at operating points, never at a single nominal sr. (v2a; the human probe widened to
-  `[0,6]` as `sr_crit` rises with N.)
-- **Perron–Frobenius compression is the mechanism, not a nuisance.** A non-negative
-  matrix concentrates a large isolated eigenvalue over a compressed bulk; all-positive
-  *random* nulls collapse into it at criticality, the connectome's compact bulk holds.
-  Balanced signs remove the Perron mode and the effect. (v2b → the sign control; recast
+  `[0,6]`, and to `[0,11.2]` in Aug 2026, as `sr_crit` rises with N.) Canonical human
+  values: `sr_crit` 3.078 (connectome) vs 1.81–1.92 (nulls) at N=448, 3.985 vs 2.30–2.44
+  at N=1000, on the median convention below. **But see the two-axis caveat in §7**:
+  matching on `σ·bulk₉₅` fixes the bulk radius and leaves the Perron root unmatched,
+  while nominal-σ matching does the reverse; neither is neutral, so report both.
+- **Perron–Frobenius domination is the mechanism, not a nuisance.** A non-negative
+  matrix concentrates a large isolated eigenvalue away from its bulk; all-positive
+  *random* nulls collapse into that mode at criticality, and the connectome's larger
+  **spectral gap** lets it ride through. Balanced signs remove the Perron mode and the
+  effect. **Restated Aug 2026 (TIER0 §3.1/§3.7):** the gap is the connectome's, the bulk
+  is everyone's — do not write "compressed bulk" — and the benefit is *rescue from*
+  Perron domination rather than compression per se. (v2b → the sign control; recast
   geometrically in Probes 1–3.)
 - **A "gaussian vs empirical" weight contrast conflates SIGN with TAIL** (gaussian
   balanced ±, empirical all-positive). Add an explicit sign control (empirical
@@ -667,10 +707,14 @@ Caught at specific stages; recorded so future iterations don't repeat them.
 - **Mirror the order-parameter to the phenomenon.** The memory advantage *collapses*
   with *f* (a boundary from above); the generative advantage *emerges* (an onset from
   zero). The boundary operator must match, or the generative panel reads as null.
-  (Phase diagram.)
+  (Phase diagram.) **Amended Aug 2026:** the "onset from zero" was itself partly a
+  truncation artifact — swept past σ=6 a generative resistance margin appears at *f*=0
+  too (TIER0 §2.3). Check the sweep covers the phenomenon before inferring its shape.
 - **Climate-error magnitudes are unreliable when a null diverges** (differences inflate
-  as ER blows up); use bounded curvature/straightness as the trustworthy generative
-  order parameter.
+  as ER blows up). Bounded curvature was adopted instead, but **curvature turned out to
+  be bimodal** (98% of cells in two spikes, 0.56% between), so it indicates *which
+  regime* the trajectory is in and cannot grade performance within one. **Use VPT as the
+  generative order parameter** and curvature as the regime label (TIER0 §2.6/§3.10).
 - **n=10 sweeps predict n=50 direction and zero-crossings** (|Δd|≤0.5); reserve n=50
   for magnitude/significance.
 - **BLAS thread limiting must be called *after* numpy import**, or it silently no-ops.
@@ -747,8 +791,8 @@ Caught at specific stages; recorded so future iterations don't repeat them.
   `v2d`=directed_empirical_dale).
 - **Manifold probes (human N=448):** `experiments/human/analysis/manifold/` (`__main__`
   CLI). Metrics in `src/analysis/manifold.py` — `ridge_effective_rank(gram, alpha)` (the
-  `d_eff` memory order parameter), `mean_curvature(x)` (straightness),
-  `participation_ratio`. States captured via the evaluators' opt-in `collect_states`
+  `d_eff` memory order parameter), `mean_curvature(x)` (straightness — bimodal regime
+  indicator, not a graded generative order parameter), `participation_ratio`. States captured via the evaluators' opt-in `collect_states`
   (off by default → committed runs byte-identical). 36,540 state matrices (3 tasks × 3
   conditions × 7 variants × 58 σ × 10 seeds); bit-for-bit validated against the
   committed runs.
