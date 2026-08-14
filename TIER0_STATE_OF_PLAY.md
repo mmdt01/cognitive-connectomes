@@ -34,7 +34,8 @@ cross-panel memory/generation **crossing survives** reindexing once the `f > 0`
 censoring is lifted — it sits at (x = 2.938, f = 0.153), and the same extension shows a
 generative *collapse-resistance* asymmetry at the biologically real `f = 0` too, far
 supercritically (σ ≈ 7.6–8.0) where the σ = 6 sweep had hidden it — though not near
-criticality, where `f = 0` shows no advantage at all (§2.3, §2.6; always attach the σ). Read in **absolute** terms (§2.6) the account
+criticality, where `f = 0` shows no advantage at all (§2.3, §2.6; always attach the σ).
+Read in **absolute** terms (§2.6) the account
 sharpens again: negative weights *improve* supercritical memory for every substrate, so
 the advantage's collapse with `f` is the nulls catching up, not the connectome degrading
 — the connectome's edge is resistance to **Perron domination**, and balanced signs remove
@@ -663,7 +664,7 @@ gain **> +1** gives a stable non-zero **fixed point**; gain **< −1** destabili
 a stable **period-2 orbit** appears. There is no third stable option, which is why
 curvature is not graded but a two-spike distribution — 98% of 38,280 Lorenz cells sit at
 ~0.25 rad (smooth) or at **π** (2.99–3.20 rad, successive steps antiparallel) and 0.56%
-lie anywhere between (§ roadmap §4a item 2).
+lie anywhere between (§3.10).
 
 **Perron–Frobenius pins a non-negative matrix to the fixed-point branch.** Its dominant
 eigenvalue is guaranteed real, positive, and carried by an all-positive eigenvector.
@@ -699,8 +700,29 @@ inference is that a single leading-eigenvalue account generates both.
 
 Roadmap §4a item 2, run 12 August 2026 as a **threshold-location** analysis. The
 mediation form it was originally specified in is not answerable: curvature is a
-two-state step, so a correlation against it is a correlation between two clusters
-(roadmap §4a item 2 carries the measurements).
+two-state step, so a correlation against it is a correlation between two clusters.
+
+> **Why threshold, not dose (measured 12 Aug, 38,280 Lorenz cells).** Curvature is not a
+> graded quantity on this substrate. **98% of cells sit in one of two spikes and 0.56%
+> lie anywhere between them** (215 cells in [0.6, 2.2] rad). Consequently a single binary
+> "has it collapsed" bit explains **R² = 0.364** of VPT variance against continuous
+> curvature's **0.371** — the entire 0.25→3.14 rad range is worth 0.7 percentage points
+> beyond the bit. Within the straight cluster the residual correlation is **+0.145**
+> (*opposite* to the expected sign, n = 15,866); within the collapsed cluster, excluding
+> the 67% of cells at the VPT = 0 floor, it is −0.151. Binning on `σ_eff` does not
+> isolate a graded path either: each band's correlation tracks its *cluster mixing
+> proportion*, peaking at −0.810 where the band is ~60/40 and weakening toward both ends.
+
+> **The pre-registration, as it stood before fitting.** Held here because a falsified
+> prediction is only evidence if the prediction is on the record: *`σ_eff` = 1 locates
+> the transition, with a variant-dependent offset — measured so far as `σ_eff` ≈
+> 0.98–1.02 at collapse for ER against 0.78–0.88 for the connectome. If the offset is not
+> variant-dependent, or if `σ_eff` locates the transition no better than nominal σ does,
+> say so.*
+>
+> **Outcome:** the offset *was* variant-dependent as predicted and `σ_eff` *did* beat the
+> alternatives — but the pre-registered **value** of 1 was wrong, and the criterion is
+> withdrawn below.
 
 **Generation is gated, not graded.** A single binary "has it collapsed" bit explains
 **R² = 0.364** of VPT variance; continuous curvature manages **0.371**. The entire

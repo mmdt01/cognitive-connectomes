@@ -52,8 +52,8 @@ organised for capacity. It is organised for not needing to be tuned.
    §3.4). The supercritical margin is 4.4x and holds across a 2.2x change in N
    (ratio 4.40 -> 4.42) while the normalised advantage grows (`dD/N` 0.445 -> 0.613).
    Nobody degrades with f: supercritical MC rises for every substrate and the advantage
-   narrows because the nulls gain ~4x what the connectome gains from a much lower start. **This also reconciles the spread-versus-compact
-   disagreement** (Aceituno, Yan & Liu): their ordering reproduces exactly at
+   narrows because the nulls gain ~4x what the connectome gains from a much lower start.
+   **This also reconciles the spread-versus-compact disagreement** (Aceituno, Yan & Liu): their ordering reproduces exactly at
    alpha = 1e-8 on our substrates, so spread wins at the peak and compact wins across the
    range. Defensible one-liner: the connectome does not make memory better, non-negativity
    makes it worse for everyone, and the connectome's gap makes it least worse.
@@ -181,9 +181,10 @@ hypotheses dying reads as more trustworthy, not less.
 
 ### 4a. Reanalyses — complete (12 Aug)
 
-The `f > 0` extension, E0.1 and E0.3 all landed. Outcomes and the E0.1 pre-registration
-record are in `TIER0_STATE_OF_PLAY.md` §2.3, §2.6, §3.7, §3.8, §3.10 and §6.4; the claims
-they license are in §1 above. Two items survive into the writing phase:
+The `f > 0` extension, E0.1 and E0.3 all landed. Outcomes are in
+`TIER0_STATE_OF_PLAY.md` §2.3, §2.6, §3.7, §3.8, §3.10 and §3.11, and the E0.1
+pre-registration record — the prediction as it stood before fitting, against a value that
+was then falsified — is held in §3.10; the claims they license are in §1 above. Two items survive into the writing phase:
 
 - **Bridge paragraph (nearly free).** NARMA-10 sits between pure memory and pure
   prediction, and both `d_eff` and PR order the ladder on it. One paragraph showing the
