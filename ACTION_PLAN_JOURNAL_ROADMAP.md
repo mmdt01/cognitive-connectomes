@@ -1,41 +1,14 @@
 # Action plan: thesis as journal paper (NMI), with NeuroAI workshop stepping stone
 
-**Status:** v2.1, contributions revised 13 August 2026 after 4a (v2 11 August; v1 drafted 29 July, preserved in
-git history at commit `88a2a14`).
+**Last revised:** 13 August 2026.
 **Targets:** NeurIPS NeuroAI workshop (29 Aug, non-archival, 5pp) -> Nature Machine Intelligence.
-**Dropped:** ICLR 2027.
+**Not pursuing:** ICLR 2027.
 
 **Division of labour between documents.** `TIER0_STATE_OF_PLAY.md` is canonical for
 *results*: every number, every withdrawal, every artifact trail. This document is
 canonical for *plan and narrative*: what the contribution is, how the thesis is
 structured, what is still to be done and in what order. Where they overlap on a number,
 `TIER0_STATE_OF_PLAY.md` wins.
-
----
-
-## 0. What changed in v2
-
-1. **Tier 0 is essentially complete** and it reshaped the story. E0.2, E0.4, Task A,
-   Task B and the N=1000 run all landed. The supercritical margin scales (4.40 -> 4.42).
-2. **Act I is restated.** Not "compact bulk", but "large spectral gap". The absolute
-   bulk is everyone's; the Perron root is the connectome's.
-3. **The five-act structure collapses to four.** Old Act IV (where the sign axis is
-   biologically real) is a framing section, not a chapter, because C. elegans is now
-   post-thesis. Old Act V (structure-function) becomes Act IV.
-4. **Act III is rebalanced.** Tier 0 drifted almost entirely onto the memory panel
-   because every gating question happened to be a memory question. The generation arm
-   now gets matched treatment before writing starts. This is the most important change
-   in v2.
-5. **A figure sweep is scheduled as a work item**, not left to the writing phase.
-6. **Act IV is scoped as conditional** with a pre-committed stopping rule.
-
-**v2.1 (13 Aug), after 4a.** The contributions list went from five to six. It had been
-entirely memory and spectral, with no slot for the generation arm; 4a gave that arm a
-result worth stating (the advantage is present at f = 0, and capacity there is gated
-rather than graded). The Aceituno reconciliation folded into the memory contribution,
-which is where it belongs: it is the same trade stated in the literature's terms. Four
-entries were added to "what must NOT be claimed", three of them retiring claims this
-project made itself.
 
 ---
 
@@ -51,7 +24,7 @@ comparison.
 **The biological claim that makes it computational neuroscience.** The connectome is not
 organised for capacity. It is organised for not needing to be tuned.
 
-### The six contributions, in the order they should appear in the introduction
+### The contributions, in the order they should appear in the introduction
 
 1. **The spectral difference is a gap, not a bulk.** The absolute bulk radius is
    near-identical across variants (4.4% spread); the entire between-variant difference
@@ -77,9 +50,9 @@ organised for capacity. It is organised for not needing to be tuned.
    Peak memory is 2 to 6% *below* the nulls — reliable against ER and weight-permuted,
    **not** against degree-matching, so write "parity", never "always worst" (`TIER0`
    §3.4). The supercritical margin is 4.4x and holds across a 2.2x change in N
-   (ratio 4.40 -> 4.42) while the normalised advantage grows (`dD/N` 0.445 -> 0.613). Nobody degrades with f: supercritical MC rises for every
-   substrate and the advantage narrows because the nulls gain ~4x what the connectome
-   gains from a much lower start. **This also reconciles the spread-versus-compact
+   (ratio 4.40 -> 4.42) while the normalised advantage grows (`dD/N` 0.445 -> 0.613).
+   Nobody degrades with f: supercritical MC rises for every substrate and the advantage
+   narrows because the nulls gain ~4x what the connectome gains from a much lower start. **This also reconciles the spread-versus-compact
    disagreement** (Aceituno, Yan & Liu): their ordering reproduces exactly at
    alpha = 1e-8 on our substrates, so spread wins at the peak and compact wins across the
    range. Defensible one-liner: the connectome does not make memory better, non-negativity
@@ -206,91 +179,127 @@ hypotheses dying reads as more trustworthy, not less.
 
 ## 4. Work remaining
 
-### 4a. Reanalyses (to ~15 Aug)
+### 4a. Reanalyses — complete (12 Aug)
 
-**Why these three and no others.** Tier 0 landed almost entirely on the memory panel,
-because every gating question was a memory question: E0.2 was the `f = 0` cut, Task A was
-`d_eff(alpha)`, Task B was `MC(alpha)`, the N=1000 run was MC-only by the §4.6 handoff.
-So memory now has effective-criticality matching, an alpha sweep, paired seed statistics
-and a scaling test at two N; generation has none of them. That is a hole in a claim
-already being made (a dissociation needs both arms measured comparably), not a gap in
-page count.
+The `f > 0` extension, E0.1 and E0.3 all landed. Outcomes and the E0.1 pre-registration
+record are in `TIER0_STATE_OF_PLAY.md` §2.3, §2.6, §3.7, §3.8, §3.10 and §6.4; the claims
+they license are in §1 above. Two items survive into the writing phase:
 
-| id | experiment | why it matters | cost |
-|----|-----------|----------------|------|
-| ~~**1**~~ | ~~**`f > 0` extension and Panel B reindex.**~~ **DONE 12 Aug.** Swept to sigma = 11.2. Outcome: the crossing **is** observable and sits at (x = 2.938, f = 0.153); the Panel B negative region is explained (the two variants take the curvature step at nearly the same nominal sigma, so the matched-bulk axis reverses their order); and a new result — the generative resistance margin exists at **f = 0** (ER collapses in 50% of replicates, connectome in 0%), so the "onset in f" was a sigma = 6 artifact. `TIER0` §2.3 rewritten, §6.1 closed, §6.4 refined | Gave generation the matched axis memory already had | 14.5 core-hours measured; **12 min wall** on ada at 128 workers |
-| ~~**2**~~ | ~~**E0.1 threshold location.**~~ **DONE 12 Aug.** Generation is a **switch**: a binary "has it collapsed" bit explains R2 0.364 of VPT against continuous curvature's 0.371, so Act III's claim is *capacity is gated by which regime the manifold is in*, not graded by curvature. `sigma_eff` is the best **locator** of the transition (CV 0.209 against nominal sigma's 0.667), with the pre-registered variant-dependent offset present and ordered by spectral gap. **But `sigma_eff -> 1` is falsified** — 1 of 38 brackets contains 1, the transition sits at 0.77-0.90, and `sigma_eff` cannot reach 1 at all for f <= 0.20 while transitions happen throughout. **OPEN:** what governs the break at f = 0, where the locator does not apply (`TIER0` §3.10) | Licensed the threshold claim; withdrew the criterion | reanalysis |
+- **Bridge paragraph (nearly free).** NARMA-10 sits between pure memory and pure
+  prediction, and both `d_eff` and PR order the ladder on it. One paragraph showing the
+  trade-off varies continuously across MC -> NARMA -> Lorenz strengthens Act III at almost
+  no cost.
+- **Presentation rule for the crossing.** Quote it as (`sigma·bulk95` = 2.938, f = 0.153)
+  with the axis named, and state that it does not survive on the nominal axis once the
+  sweep passes sigma = 6. The contour level is taken over fully covered cells; the raw
+  global max is set by a cell backed by 1 replicate of 30, and that convention gives no
+  crossing at all.
 
-> **Why threshold, not dose (measured 12 Aug, 38,280 Lorenz cells).** Curvature is not a
-> graded quantity on this substrate. **98% of cells sit in one of two spikes and 0.56%
-> lie anywhere between them** (215 cells in [0.6, 2.2] rad). Consequently a single binary
-> "has it collapsed" bit explains **R² = 0.364** of VPT variance against continuous
-> curvature's **0.371** — the entire 0.25→3.14 rad range is worth 0.7 percentage points
-> beyond the bit. Within the straight cluster the residual correlation is **+0.145**
-> (*opposite* to the expected sign, n = 15,866); within the collapsed cluster, excluding
-> the 67% of cells at the VPT = 0 floor, it is −0.151. Binning on `sigma_eff` does not
-> isolate a graded path either: each band's correlation tracks its *cluster mixing
-> proportion*, peaking at −0.810 where the band is ~60/40 and weakening toward both ends.
->
-> **Outcome against the pre-registration.** The offset *was* variant-dependent as
-> predicted, and `sigma_eff` *did* beat the alternatives — but the pre-registered value of
-> 1 was wrong, and the criterion is withdrawn (`TIER0` §3.10). Recorded here as the
-> prediction stood before fitting:
->
-> **Pre-registered before fitting:** `sigma_eff` = 1 locates the transition, with a
-> variant-dependent offset — measured so far as `sigma_eff` ≈ 0.98–1.02 at collapse for
-> ER against 0.78–0.88 for the connectome. If the offset is not variant-dependent, or if
-> `sigma_eff` locates the transition no better than nominal `sigma` does, say so.
-| ~~**3**~~ | ~~**E0.3 absolute (MC, VPT) frontier.**~~ **DONE 12 Aug.** Four-variant ladder x 11 f x sigma <= 11.2 (needed one 12-min ada run: weight-permuted had never been run under the f sweep, degree only reached sigma = 6). Outcomes: supercritical MC **rises** with f for every substrate, so the memory panel's collapse is the nulls catching up (`TIER0` §2.6, §1.1b); generation is real read as **VPT** rather than curvature (+1.0 to +2.2 Lyapunov times over all three nulls from f ~ 0.20, clearing the placement control); the advantage is a **rescue from Perron domination**, with bulk95 only a partial controller (§3.7); and the hub-gating capstone was restated — nothing collapses, the null moves (§3.8) | Gave the Aceituno "robust at what level" answer and gated the figure set | 14.5 core-hours + reanalysis |
+### 4b. The front-to-back sweep (13 to 20 Aug)
 
-**Stop rule for item 1:** if the crossing appears within the extended coverage, report it
-and update the cross-panel headline. If it does not, "dissociation survives, crossing not
-observable within the swept range" is final. Mark the coverage limit on the figure and
-stop. Do not extend further, do not add sigma points chasing it, do not extrapolate into
-a claim.
+A single front-to-back pass through Acts I to III doing five things at once: crystallise
+the narrative, audit the code behind each claim, collect the full task set so no large run
+is needed near the deadline, produce publication-ready figures, and outline the chapters.
+Run as **five Claude Code sessions**, sequential (Act I's restatement propagates
+downstream), each starting from `report/CONVENTIONS.md`.
 
-> **Applied, 12 Aug.** First branch fired: the crossing appears at (x = 2.938, f = 0.153),
-> inside coverage and in a region every replicate reaches. The sweep was not extended
-> further and no sigma points were added. Two conditions travel with the number, both in
-> `TIER0` §2.3: the contour level is taken over fully covered cells (the raw global max is
-> set by a cell backed by 1 replicate of 30, and that convention alone gives no crossing),
-> and on the **nominal** axis the published crossing does not survive the longer sweep at
-> all. Act III must present the crossing with the axis stated, not as a single number.
+| session | scope | output |
+|---|---|---|
+| **0** | Figure list, style contract, claim-to-task mapping, MG pre-registration | `report/FIGURE_LIST.md`, `report/CONVENTIONS.md`, `report/PREREG_MACKEY_GLASS.md` |
+| **1** | Act I: structure sets the spectrum | `report/act1_structure.md` + its figures |
+| **2** | Act II: spectrum decomposes the manifold | `report/act2_manifold.md` + its figures |
+| **3** | Act III memory arm | `report/act3a_memory.md` + its figures |
+| **4** | Act III prediction arm | `report/act3b_prediction.md` + its figures |
 
-**Bridge task, nearly free.** NARMA-10 faded because both `d_eff` and PR order the ladder
-on it, so it could not discriminate the measures (Probe 3's purpose). That makes it a
-useful *bridge*, not a dead end: it sits between pure memory and pure prediction. One
-paragraph showing the trade-off varies continuously across MC -> NARMA -> Lorenz
-strengthens Act III at almost no cost.
+Act III is split because contributions 2, 3 and 4 all live there; it is roughly half the
+thesis and one session will exhaust its context.
 
-### 4b. Figure sweep (to 20 Aug)
+**Session 0 is not optional and comes first.** If each act session picks its own figures
+the chapters will not sit together, cross-act figures (the crossing needs both arms) have
+no owner, and the count drifts past twenty. Half a day, fixing: the master figure list
+(hard cap 14, each with a chapter, a claim, a data source and a caption sketch, with the
+workshop subset marked); the style contract (one colour per variant held across every
+figure, fonts, panel labels, dpi, output paths); and the two pre-commitments below.
 
-**This is an audit, not tidying.** Figures predating 8 August potentially encode claims
-that have since been withdrawn or reversed: the subcritical deficit as a real effect;
-"compact bulk" as the structural story; `sr_crit` on the old per-seed convention; memory
-framed as capacity rather than robustness; weight-permuted `bulk95` at 0.520 rather than
-0.512. A figure carrying a withdrawn claim into the thesis is worse than a missing
-figure, and there is currently no inventory of which ones do.
+#### The audit is claim-driven, not a code review
 
-It also de-risks the workshop. Five pages is roughly four figures; if the sweep produces
-publication-ready figures with captions, the workshop becomes assembly rather than
-production, from material already checked against the canonical record.
+For each act, a **reproduction gate** before any figure work: recompute that act's
+headline numbers from the frozen artifacts and check them against `TIER0` to a stated
+precision. Then read only the functions those claims depend on:
 
-**Three disciplines to keep it bounded:**
+| act | functions under audit |
+|---|---|
+| I | `bulk95` computation, the `\|lambda_1\|` normalisation, null generation and its assertions |
+| II | time-centring, Gram construction, `participation_ratio`, `ridge_effective_rank` |
+| III-memory | MC evaluator, ridge `alpha` reparameterisation, `d_eff` at both scales |
+| III-prediction | VPT definition and horizon, `mean_curvature`, closed-loop rollout, `sigma_eff` |
 
-1. **Fix the figure list before making any figure.** One list, roughly 10 to 12 figures,
-   each mapped to a chapter and a claim. Nothing gets built that is not on the list;
-   nothing on the list gets beautified twice.
-2. **Write the caption first.** If the caption cannot be written defensibly against
-   `TIER0_STATE_OF_PLAY.md`, the figure should not exist in that form. Fastest way to
-   find figures encoding withdrawn claims: the caption will not write.
-3. **Regenerate from a script, not by hand.** One figure module reading the frozen
-   parquets, so that when a number moves every affected figure rebuilds. A day's
-   investment that pays for itself the first time something shifts.
+**A failed reproduction is the finding and it stops the act.** Do not paper over a
+mismatch by regenerating the artifact.
 
-**Fold the minimal Act IV into the sweep:** which Yeo networks load the Perron mode is
-half a day and produces a figure, so it earns a place on the figure list regardless of
-whether the full Act IV ever runs.
+#### Task collection policy: collect everything, decide later
+
+**Every run in this sweep uses all four tasks (MC, NARMA-10, Mackey-Glass, Lorenz)**, so
+the data is banked and no large run is needed near the deadline. Final figures need not
+use all four; that is a write-up decision. Marginal cost is small (the `f > 0` extension
+was 14.5 core-hours for two tasks), and the cost of needing a run on 4 September is not.
+
+Three conditions attach:
+
+1. **Pre-register Mackey-Glass before running it** (`report/PREREG_MACKEY_GLASS.md`, in
+   session 0). MG is not a fourth benchmark, it is the out-of-sample test of contribution
+   2. Being a delay system, closed-loop rollout must hold state at lag tau, so it needs
+   both capacities at once: **the prediction is an interior optimum in f**, unlike MC
+   (edge) and Lorenz (f = 0), and running tau = 17 and 30 makes memory demand a dial whose
+   optimum should shift toward higher f. That is a dose-response curve for the theory on a
+   task it was not fitted to. It is worth nothing if the MG data is inspected first.
+2. **Declare the primary task per claim in session 0.** MC is primary for memory, Lorenz
+   for generation, NARMA and MG are corroboration. With four tasks and two axes there is
+   always a task where any claim holds; this project has already been caught **three
+   times** by a difference that moved because a null moved. Declaring the mapping in advance closes the
+   forking-paths objection at zero cost.
+3. **Persist Gram eigenvalue spectra, never states.** A per-cell Gram spectrum is N floats
+   (~4 KB) and yields `d_eff` at *any* alpha forever; states are 10 to 44 MB per cell and a
+   four-task grid would run to hundreds of gigabytes. Extend the `covariance_spectra.parquet`
+   pattern to all four tasks. Curvature and PR cannot be recovered from the spectrum, so
+   **decide in session 0 which manifold measures are computed inline for NARMA and MG** —
+   that is the one thing a re-run would be needed for.
+
+**The audit budget does not scale with tasks.** Reproduction gates run on the primary task
+per act only. For NARMA and MG, validate integrity (runs completed, no NaNs, all seeds
+present, hyperparameters recorded) and stop. If the audit scales, the freeze slips and the
+point of collecting early is lost.
+
+#### Scope rules
+
+- **A run happens only if a figure on the list needs it.** Everything else goes to §5.
+  Exception: the four-task collection above, which is banked deliberately.
+- **No figure is created that is not on the list.** If a session thinks one is missing, it
+  reports and stops rather than adding it.
+- **Write the caption first.** If the caption cannot be written defensibly against
+  `TIER0_STATE_OF_PLAY.md`, the figure should not exist in that form. This is the fastest
+  test for figures that encode withdrawn claims, and there is no inventory of which ones
+  do: anything predating 8 August may still show the subcritical deficit as real, "compact
+  bulk" as the structural story, `sr_crit` on the old per-seed convention, or memory as
+  capacity rather than robustness.
+- **Regenerate from a module, not by hand.** One figure module reading the frozen parquets,
+  so that when a number moves every affected figure rebuilds.
+
+#### The `report/` folder
+
+Claims-first, not prose-first. Each act file carries a **claims register** (numbered claim
+-> figure ID -> `TIER0` section -> artifact path), then figure specs with captions, then a
+section outline, then an audit log and open issues. The chapter falls out of the register,
+every claim has a figure and a source, and drift is visible.
+
+> **On drafting.** Claim registers, figure captions, audit logs and section outlines are
+> the right use of these sessions. Connected chapter prose is not: check Imperial's
+> position on generative AI in assessed work before going further than an outline, and
+> note that prose generated from a register reads flat and would be rewritten anyway.
+> Writing the chapters is also what delivers the first goal of this sweep.
+
+**Minimal Act IV** (which Yeo networks load the Perron mode) is one entry on the master
+figure list, not a session.
 
 ### 4c. Act IV, full version (29 Aug to 3 Sept window only)
 
@@ -334,9 +343,10 @@ November, so nothing here is lost.
   done well in a week alongside writing, and the macro story does not need it because the
   sign axis is already framed as a counterfactual at f = 0. One deferring sentence in the
   discussion is the right treatment.
-- **E1.5 Mackey-Glass** as an out-of-sample test of the single-axis model (predict the
-  interior optimum before running; vary tau = 17 and 30 as a memory-demand dial). This is
-  the strongest single addition available and it is the first thing to add post-thesis.
+- **E1.5 Mackey-Glass** as an out-of-sample test of the single-axis model. **The data is
+  now collected during §4b and the prediction pre-registered in session 0**, so what is
+  deferred is only the analysis and write-up if the sweep runs late. First thing to
+  complete post-thesis if so.
 - **Why weight placement produces the gap** (degree-weight correlation? spatial
   embedding? rich-club? Landau & Sompolinsky 2018 the likely source). The open
   mechanistic question a reviewer will certainly ask.
@@ -367,7 +377,7 @@ November, so nothing here is lost.
 | when | what |
 |------|------|
 | 11 to 15 Aug | Reanalyses 1 to 3 (`f > 0` extension, E0.1, E0.3) |
-| 15 to 20 Aug | Figure sweep: fix the list, write captions, script the module, regenerate. Minimal Act IV (Yeo loading on the Perron mode) folded in |
+| 13 to 20 Aug | Front-to-back sweep, sessions 0 to 4 (§4b): figure list and pre-registrations, then Acts I, II, III-memory, III-prediction. All runs collect the full four-task set. Minimal Act IV (Yeo loading) folded in as one figure |
 | **20 Aug** | **EXPERIMENT FREEZE.** Anything not producing figures by now does not go in |
 | 20 to 29 Aug | Workshop paper (5pp) assembled from swept figures; submit 29 Aug |
 | 29 Aug to 3 Sept | Act IV full version, if and only if the thesis draft is on track |
