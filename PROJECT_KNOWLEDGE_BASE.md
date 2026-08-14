@@ -556,8 +556,8 @@ eigenvector-centrality placement scores. All arms complete. Full working notes:
 rank ceiling (ER catching up); **N=1000 confirms the ceiling is not escaped at any
 practical N**, so read the decay region rather than the peak — but the supercritical
 margin itself is scale-stable (§ANSWERED above). **Read deltas only alongside levels:**
-this project has now been caught twice by a difference that moved because a *null* moved
-(TIER0 §1.2 and §1.1b). **Paired tests at n=10 seeds have a Wilcoxon p-floor of 0.00195**,
+this project has now been caught **three times** by a difference that moved because a
+*null* moved (TIER0 §1.2, §1.1b and §3.8). **Paired tests at n=10 seeds have a Wilcoxon p-floor of 0.00195**,
 so no Holm correction over more than ~25 tests can reach significance at any effect size —
 declare a narrow family and rest claims on CIs (TIER0 §6.8). **"Usable range" is
 threshold-dependent** — at the floor the connectome's VPT window looks 2× the nulls', at any
