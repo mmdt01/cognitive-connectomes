@@ -91,6 +91,13 @@ AXIS_LABEL = {
 }
 AXIS_SHORT = {"nominal": "nominal", "effective": r"$\sigma\cdot$bulk95"}
 
+# The two phase boundaries. Not variants, so they get their own pair, held fixed for
+# the same reason the variant colours are: the memory boundary is one colour everywhere.
+BOUNDARY_COLOUR = {"dD": "#1f77b4", "dStraight": "#d95f02"}
+BOUNDARY_LABEL = {"dD": "memory boundary", "dStraight": "generative boundary"}
+# Region past the all-replicates coverage edge: drawn, never read (TIER0 §6.10).
+UNCOVERED_COLOUR = "#b0b0b0"
+
 # Shading for the supercritical region and for annotation furniture.
 SUPERCRITICAL_COLOUR = "#fff3e0"
 CEILING_COLOUR = "#888888"

@@ -179,6 +179,41 @@ def _threshold_table() -> pd.DataFrame:
     return pd.read_csv(CRIT / "e01_threshold_table_scale_448.csv")
 
 
+def _boundaries(axis: str) -> pd.DataFrame:
+    """The two phase boundaries on one axis, over the sigma = 11.2 extension.
+
+    ``panel == "dD"`` is the memory boundary, ``panel == "dStraight"`` the generative
+    one. Three contour-level conventions ship side by side: ``f_star`` (level over
+    fully covered cells, the one TIER0 §2.3 adopts), ``f_star_level_on_subrange`` (level
+    pinned to the old x <= 2.336 range, which gives the identical crossing) and
+    ``f_star_level_raw_max`` (level set by a cell backed by 1 replicate of 30, which
+    gives no crossing at all and is the convention TIER0 rejects).
+
+    ``f_star`` is NaN wherever the contour does not exist, so a figure must break the
+    line there rather than interpolate across the gap.
+    """
+    suffix = "" if axis == "effective" else "_nominal"
+    frame = pd.read_csv(CRIT / f"e02_heatmap_boundaries_extension{suffix}.csv")
+    frame["axis"] = axis
+    return frame
+
+
+def _boundaries_both() -> pd.DataFrame:
+    return pd.concat([_boundaries("effective"), _boundaries("nominal")],
+                     ignore_index=True)
+
+
+def _coverage() -> pd.DataFrame:
+    """Per-f extent reached by ALL 30 replicates on the matched-bulk axis.
+
+    Past ``x_hi`` the panel is populated only by the replicates whose own bulk95 reached
+    that far, so the boundary there rests on a bulk95-selected subsample (TIER0 §6.10)
+    and must be drawn as unreadable. The nominal axis needs no such mask: every nominal
+    cell carries all 30 replicates (TIER0 §2.3).
+    """
+    return pd.read_csv(CRIT / "e02_heatmap_coverage_extension.csv")
+
+
 def _perron_yeo() -> pd.DataFrame:
     """Perron-mode mass per Yeo network on the sweep substrate.
 
@@ -439,6 +474,29 @@ def _ph_threshold_table() -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def _ph_boundaries_both() -> pd.DataFrame:
+    rows = []
+    for axis, hi, cross_at in (("effective", 4.36, 2.94), ("nominal", 11.2, None)):
+        for x in np.linspace(0, hi, 121):
+            memory = 0.19 * np.clip((x - 0.9) / (hi - 0.9), 0, 1)
+            generative = 0.35 - 0.30 * np.clip(x / hi, 0, 1)
+            if cross_at is None:                      # nominal: no crossing survives
+                generative = np.clip(generative - 0.14, 0.0, None)
+            rows.append(dict(panel="dD", x=x, f_star=memory,
+                             f_star_level_on_subrange=memory,
+                             f_star_level_raw_max=memory * 0.6, axis=axis))
+            rows.append(dict(panel="dStraight", x=x, f_star=generative,
+                             f_star_level_on_subrange=generative,
+                             f_star_level_raw_max=np.nan, axis=axis))
+    return pd.DataFrame(rows)
+
+
+def _ph_coverage() -> pd.DataFrame:
+    f_grid = np.arange(0, 0.55, 0.05)
+    return pd.DataFrame(dict(f=f_grid, x_lo=0.0,
+                             x_hi=3.58 + 0.8 * f_grid, sigma_max=11.2))
+
+
 def _ph_perron_yeo() -> pd.DataFrame:
     networks = ("VIS", "SM", "DA", "VA", "LIM", "FP", "DMN")
     sizes = (69, 97, 27, 58, 45, 30, 122)
@@ -559,6 +617,20 @@ SOURCES = {
         ("variant", "f", "effective_radius_lo", "effective_radius_hi"),
         "44 rows, one per (variant, f). The bracket is [lo, hi] around the transition.",
         _threshold_table, _ph_threshold_table),
+    "boundaries": Source(
+        "boundaries", CRIT / "e02_heatmap_boundaries_extension.csv",
+        ("panel", "x", "f_star", "f_star_level_on_subrange", "f_star_level_raw_max", "axis"),
+        "both axis files concatenated with an 'axis' column; 121 x-points per (panel, "
+        "axis). panel == 'dD' is the memory boundary, 'dStraight' the generative one. "
+        "Use f_star (level over fully covered cells); f_star is NaN where no contour "
+        "exists, so break the line rather than interpolate.",
+        _boundaries_both, _ph_boundaries_both),
+    "coverage": Source(
+        "coverage", CRIT / "e02_heatmap_coverage_extension.csv",
+        ("f", "x_lo", "x_hi", "sigma_max"),
+        "11 rows, one per f. x_hi is the extent all 30 replicates reach on the matched "
+        "axis; min over f is 3.58. Applies to the effective axis only.",
+        _coverage, _ph_coverage),
     "perron_yeo": Source(
         "perron_yeo", _REPO_ROOT / "data/human/Suarez2021_Data",
         ("network", "n_nodes", "perron_mass", "mass_per_node"),

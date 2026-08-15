@@ -1,8 +1,16 @@
 # Master figure list
 
-**Fixed in session 0, 15 August 2026. Hard cap 14 — the list is at the cap.** No session
+**Fixed in session 0, 15 August 2026. Cap 15 — the list is at the cap.** No session
 creates a figure that is not here; if one seems missing, report and stop. `W` marks the
 workshop subset (5pp, 4 figures).
+
+**The cap was 14 and was raised to 15 in session 0, deliberately and once.** The draft
+list gave contribution 2 — the unifying claim, and the crossing it turns on — no figure
+of its own, on the reasoning that F7 and F13 carry it jointly. They do not: F7 is memory
+against `sigma·bulk95` at f = 0 and F13 is VPT against f at sigma = 2, two orthogonal 1-D
+slices, and no pair of slices shows that the two advantage regions occupy *opposite
+regions of the (f, sigma) plane*. F16 was added for that. The cap is 15 now; it is not a
+precedent, and a session that wants a sixteenth reports and stops.
 
 Every entry has been checked against the frozen artifacts: the file exists, the named
 filter returns rows, and where `TIER0` states a number the filter reproduces it. Every
@@ -12,8 +20,9 @@ them.
 
 **Cut made:** the draft's F3 and F8 both served contribution 5 and are now **one two-panel
 figure, F3**, in chapter 3 where contribution 5 lives. **F8 is retired and its ID left
-unused** rather than renumbering, so references elsewhere still resolve. Rendered figures:
-F1 to F7, F9 to F15 = 14.
+unused** rather than renumbering, so references elsewhere still resolve. **F16 added** for
+contribution 2. Rendered figures: F1 to F7, F9 to F16 = 15. IDs are stable identifiers,
+not a reading order, so F16 sitting in chapter 6 after chapter 7's F15 is intended.
 
 Status: `confirmed` = source verified and filter reproduces `TIER0`; `confirmed*` = source
 verified, see the flag below the table.
@@ -35,11 +44,12 @@ verified, see the flag below the table.
 | F13 | 6 | 4 | Generation read as VPT: +1.0 to +2.2 Lyapunov times from f ~ 0.20 at sigma = 2, clearing the weight-permuted placement control; **plus the f = 0 collapse panel** (ER 5/10 seeds, connectome 0/10) | (a) `e03_frontier_scale_448.parquet` filter `metric == "vpt"`, `spectral_radius == 2.0`. (b) `e03_frontier_paired_scale_448.csv` same filter — paired within seed, so all connectome-minus-null statements come from here. (c) `item2_collapse_loci_scale_448.csv` filter `f == 0`, cols `n_seeds_collapsed / n_seeds` | confirmed | |
 | F14 | 6 | 4 | `sigma_eff` is a **locator, not a criterion**: transition at 0.77-0.90 with variant offsets ordered by spectral gap; CV 0.209 against nominal sigma's 0.667 | `e01_threshold_invariance_scale_448.csv` filter **`scope == "f > 0"`** (n = 37); plus `e01_threshold_table_scale_448.csv` cols `effective_radius_lo/hi` per (variant, f) | confirmed* | |
 | F15 | 7 | anchor | Which Yeo networks load the Perron mode (minimal Act IV) | **computed live, no frozen parquet**: leading eigenvector of the N=448 self-built consensus (`eigh`) x release RSN labels from `data/human/Suarez2021_Data`, restricted to cortical nodes. Seconds, not a run | confirmed* | |
+| F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
 
-Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, F3 carries 5, F6 carries 6,
-F7/F9/F10/F11 carry 3, F12/F13/F14 carry 4. **Contribution 2 has no figure of its own by
-design**: it is the unifying claim that F7 and F13 make jointly, and its out-of-sample
-test is the Mackey-Glass pre-registration, not a panel.
+Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
+carry 3, F12/F13/F14 carry 4, F3 carries 5, F6 carries 6. Contribution 2's *out-of-sample*
+test remains the Mackey-Glass pre-registration rather than a panel; F16 carries the claim
+itself.
 
 ---
 
@@ -108,6 +118,37 @@ seed-level unit (n = 378, §3.11) gives `sigma_eff` 0.304 against the exact Jaco
 shows the §3.10 comparison; if the Jacobian is added it needs its own axis and its own n.
 
 **F14 — no line at 1.** The unit crossing is withdrawn. Draw the 0.77-0.90 band.
+
+**F16 — the coverage mask is the point, not decoration.** Recomputed from the frozen
+boundaries, the matched-bulk axis has **six** crossings, not one: x = 2.943, 3.525, 3.598,
+3.670, 3.743 and 4.361. Only the first lies inside the all-replicates coverage edge
+(minimum `x_hi` = 3.58); the rest are the noisy region TIER0 §6.10 says is "drawn but
+should not be read quantitatively", where the boundary rests on a `bulk95`-selected
+subsample and oscillates. **So the published crossing is the first and only one inside
+coverage, and the figure must make that visible.** Quoted as a bare coordinate it looks
+like a clean feature; hatch the uncovered region and it becomes an honest one. The nominal
+axis needs no mask — every nominal cell carries all 30 replicates (§2.3).
+
+**F16 — the three contour-level conventions reproduce §2.3 exactly.** On the effective
+axis `f_star` and `f_star_level_on_subrange` both give the crossing;
+`f_star_level_raw_max` — the level set by a cell backed by 1 replicate of 30 — gives
+**none**, which is precisely what §2.3 reports. Use `f_star`. The other two columns are
+the robustness check, not alternatives to plot.
+
+**F16 — the published nominal crossing cannot be drawn from this file.** All three
+conventions give no nominal crossing on the extended sweep, which is the claim. But the
+(sigma = 4.392, f = 0.1309) point that reproduces the published value requires re-running
+the boundary operator on the sigma <= 6 **sub-panel**, which is a different computation
+from pinning the level to a subrange. Annotate it as a quoted TIER0 number or leave it to
+the caption; do not imply it came from these curves.
+
+**F16 — the boundaries have gaps.** `f_star` is NaN where no contour exists (the
+generative boundary is defined at 84 of 121 effective-axis points and 46 of 121 nominal).
+Break the line at the gaps; never interpolate across them.
+
+**F16 — ownership.** Chapter 6, contribution 2, the unifying section. It needs both arms,
+so **Session 4 renders it** (it has Session 3's memory arm already validated). Like F3, it
+is a cross-act figure and only one session may own it.
 
 **F15 — no frozen parquet, and one soft assumption.** The leading eigenvector is not
 persisted anywhere, so this figure recomputes it. It also assumes the release node

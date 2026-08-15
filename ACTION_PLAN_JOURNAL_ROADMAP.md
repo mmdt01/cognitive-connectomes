@@ -218,9 +218,16 @@ thesis and one session will exhaust its context.
 **Session 0 is not optional and comes first.** If each act session picks its own figures
 the chapters will not sit together, cross-act figures (the crossing needs both arms) have
 no owner, and the count drifts past twenty. Half a day, fixing: the master figure list
-(hard cap 14, each with a chapter, a claim, a data source and a caption sketch, with the
+(cap 15, each with a chapter, a claim, a data source and a caption sketch, with the
 workshop subset marked); the style contract (one colour per variant held across every
 figure, fonts, panel labels, dpi, output paths); and the two pre-commitments below.
+
+> **The cap was 14 and was raised to 15 in session 0, once.** The draft list left
+> contribution 2 without a figure, on the reasoning that the memory and prediction
+> figures carry it jointly; they do not, since each is a 1-D slice and the claim is that
+> the two advantage regions occupy opposite regions of the (f, sigma) plane. F16 (the two
+> phase boundaries on both axes, with the replicate-coverage mask drawn) was added for
+> it. `report/FIGURE_LIST.md` is canonical for the count.
 
 #### The audit is claim-driven, not a code review
 

@@ -564,6 +564,94 @@ def f14_sigma_eff_is_a_locator(ctx):
     return fig
 
 
+def _first_crossing(memory, generative, limit):
+    """First x below ``limit`` where the two boundaries swap order, or None.
+
+    Computed from the data rather than hard-coded, so the figure follows if a number
+    moves. Gaps (NaN ``f_star``) are dropped before interpolation, never bridged.
+    """
+    memory = memory.dropna(subset=["f_star"]).sort_values("x")
+    generative = generative.dropna(subset=["f_star"]).sort_values("x")
+    if memory.empty or generative.empty:
+        return None
+    grid = np.union1d(memory.x.to_numpy(), generative.x.to_numpy())
+    grid = grid[grid <= limit]
+    if grid.size < 2:
+        return None
+    upper = np.interp(grid, memory.x, memory.f_star)
+    lower = np.interp(grid, generative.x, generative.f_star)
+    sign = np.sign(upper - lower)
+    for i in range(1, len(grid)):
+        if sign[i - 1] * sign[i] < 0:
+            return grid[i], (upper[i] + lower[i]) / 2
+    return None
+
+
+def f16_phase_boundaries(ctx):
+    """The crossing, with its axis and its coverage. Contribution 2's own figure.
+
+    The memory and generative boundaries on both matching axes. On the matched-bulk
+    axis they cross inside full coverage; on the nominal axis they do not cross at all
+    once the sweep passes sigma = 6. Everything past the all-replicates coverage edge
+    is drawn hatched, because the boundary there rests on a bulk95-selected subsample
+    and crosses repeatedly (TIER0 §6.10) -- that region is the reason the published
+    crossing has to be identified as the first one inside coverage, not just "a"
+    crossing.
+    """
+    boundaries = ctx.frame("boundaries")
+    coverage = ctx.frame("coverage")
+    fig, axes = plt.subplots(1, 2, figsize=(7.6, 3.0))
+
+    for ax, axis in zip(axes, ("effective", "nominal")):
+        sub = boundaries[boundaries.axis == axis]
+        x_max = float(sub.x.max())
+        for panel in ("dD", "dStraight"):
+            curve = sub[sub.panel == panel].sort_values("x")
+            ax.plot(curve.x, curve.f_star, color=style.BOUNDARY_COLOUR[panel],
+                    lw=1.6, label=style.BOUNDARY_LABEL[panel])
+
+        limit = x_max
+        if axis == "effective":
+            # Coverage edge is f-dependent; shade to the right of x_hi(f). The nominal
+            # axis needs no mask -- every nominal cell carries all 30 replicates.
+            edge = coverage.sort_values("f")
+            ax.fill_betweenx(edge.f, edge.x_hi, x_max, color=style.UNCOVERED_COLOUR,
+                             alpha=0.28, lw=0, hatch="///", edgecolor="white", zorder=0)
+            limit = float(edge.x_hi.min())
+            ax.axvline(limit, color=style.UNCOVERED_COLOUR, lw=0.9, ls="--")
+            ax.text(limit, 0.985, " not all 30 replicates ",
+                    transform=ax.get_xaxis_transform(), fontsize=style.TICK_SIZE - 1,
+                    va="top", ha="left", color="0.35")
+        else:
+            ax.axvline(6.0, color=style.ANNOTATION_COLOUR, lw=0.9, ls=":")
+            ax.text(6.0, 0.985, " old sweep limit ", transform=ax.get_xaxis_transform(),
+                    fontsize=style.TICK_SIZE - 1, va="top", ha="left",
+                    color=style.ANNOTATION_COLOUR)
+
+        crossing = _first_crossing(sub[sub.panel == "dD"], sub[sub.panel == "dStraight"],
+                                   limit)
+        if crossing is not None:
+            ax.plot([crossing[0]], [crossing[1]], marker="o", ms=6, mfc="none",
+                    mec="black", mew=1.4, zorder=6)
+            ax.annotate(f"({crossing[0]:.3f}, {crossing[1]:.3f})", xy=crossing,
+                        xytext=(6, 10), textcoords="offset points",
+                        fontsize=style.TICK_SIZE, color=style.ANNOTATION_COLOUR)
+        else:
+            ax.text(0.5, 0.06, "no crossing", transform=ax.transAxes, ha="center",
+                    fontsize=style.TICK_SIZE, color=style.ANNOTATION_COLOUR,
+                    style="italic")
+
+        ax.set_xlabel(style.AXIS_LABEL[axis])
+        ax.set_xlim(0, x_max)
+        ax.set_ylim(0, 0.5)
+    axes[0].set_ylabel("sign fraction $f$")
+    style.legend(axes[0], loc="upper left")
+    for ax, letter in zip(axes, "ab"):
+        style.panel_label(ax, letter, dx=-0.10)
+    fig.tight_layout()
+    return fig
+
+
 # =============================================================================
 # Chapter 7 -- Act IV, minimal
 # =============================================================================
@@ -611,9 +699,12 @@ FIGURES = {
     "F13": (6, "generation read as VPT", f13_generation_as_vpt),
     "F14": (6, "sigma_eff as locator, not criterion", f14_sigma_eff_is_a_locator),
     "F15": (7, "which Yeo networks load the Perron mode", f15_yeo_loads_the_perron_mode),
+    "F16": (6, "the crossing, with its axis and its coverage", f16_phase_boundaries),
 }
 
-# The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md.
+# The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
+# reserve if a fifth slot appears.
 WORKSHOP = ("F1", "F2", "F7", "F12")
 
-assert len(FIGURES) == 14, f"hard cap is 14 figures, registry holds {len(FIGURES)}"
+# Cap raised from 14 to 15 in session 0 to give contribution 2 a figure of its own.
+assert len(FIGURES) == 15, f"cap is 15 figures, registry holds {len(FIGURES)}"
