@@ -678,3 +678,49 @@ def test_rank_permutation_pvalue_separated_vs_overlapping():
     b = np.array([0.50, 0.52, 0.51, 0.49, 0.53])  # cleanly separated
     assert stats.rank_permutation_pvalue(a, b, 2000, rng) < 0.05
     assert stats.rank_permutation_pvalue(a, a.copy(), 2000, rng) > 0.5
+
+
+def test_gram_spectrum_round_trips_to_d_eff_at_any_alpha():
+    """The persisted Gram spectrum must reproduce d_eff, and do it at any alpha.
+
+    The phase-diagram capture keeps the Gram SPECTRUM alongside the scalar d_eff it
+    reduces to, because curvature and PR cannot be recovered afterwards and neither
+    could d_eff at a different ridge alpha once the spectrum was discarded. float32 is
+    deliberate: d_eff is a sum of g/(g+alpha) ratios, so the storage precision is far
+    finer than the quantity resolves.
+    """
+    from src.analysis import manifold
+
+    rng = np.random.default_rng(0)
+    states = rng.standard_normal((600, 60)) @ rng.standard_normal((60, 60))
+    design = np.hstack([states, np.ones((states.shape[0], 1))])
+
+    exact = manifold.gram_spectrum(design)
+    stored = exact.astype(np.float32)          # what the capture writes
+
+    for alpha in (1e-8, 1e-6, 1e-4, 1e-2):
+        from_exact = manifold.ridge_effective_rank(exact, alpha)
+        from_stored = manifold.ridge_effective_rank(np.asarray(stored, dtype=float), alpha)
+        assert np.isclose(from_exact, from_stored, rtol=1e-5), (
+            f"float32 storage changed d_eff at alpha={alpha:g}: "
+            f"{from_exact} vs {from_stored}")
+
+    # d_eff must fall as the ridge floor rises, else the stored spectrum is misordered.
+    curve = [manifold.ridge_effective_rank(np.asarray(stored, dtype=float), a)
+             for a in (1e-8, 1e-6, 1e-4, 1e-2)]
+    assert curve == sorted(curve, reverse=True)
+
+
+def test_phase_capture_records_the_gram_spectrum():
+    """Guard the capture's row schema: dropping eig_gram is the one loss a re-run fixes."""
+    import inspect
+
+    from experiments.human.analysis.phase_diagram import capture
+
+    source = inspect.getsource(capture.capture_cell)
+    assert "eig_gram=eig_gram.astype(np.float32)" in source, (
+        "phase-diagram capture no longer persists the Gram spectrum; d_eff would be "
+        "locked to one alpha and only a re-run could recover it")
+    assert "collect_states=True" in source and "states=" not in source.split("row = dict")[1], (
+        "states must be captured for the geometries but never written to the row "
+        "(10 to 44 MB per cell)")

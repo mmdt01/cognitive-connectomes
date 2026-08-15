@@ -863,6 +863,75 @@ question rather than a third guess.
 
 Artifacts: `e01_jacobian_scale_448.parquet`, `criticality_matched/jacobian.py`.
 
+### 3.12 Act II — the manifold probes (promoted from the knowledge base, 15 Aug 2026)
+
+Probes 2 and 3 were written up in `PROJECT_KNOWLEDGE_BASE.md` and the probe summaries but
+never in this document, so Act II's figures had no canonical source and the caption-first
+rule could not be applied to them. Promoted here in session 0. **Every number below was
+recomputed from the frozen parquets at the time of promotion**; nothing is carried over on
+trust.
+
+**1. The Perron mode is a common mode: it lives in the mean, not in the fluctuations.**
+`|mean_state|` at σ = 6 is in §3.7's table (connectome 0.759 against the nulls'
+0.949–0.989). The complementary half is that once the mean over time is removed, the
+leading mode is *gone*: on the all-positive substrate the top `W`-eigenmode captures
+**0.0001** of the time-centred state variance, **below the random-orthonormal baseline of
+0.0023**. So the decomposition is clean — the Perron mode carries the common mode and the
+bulk carries everything the readout can use.
+
+**2. Sign composition selects which structural basis the fluctuations occupy.** Captured
+variance at k = 10, connectome, at each condition's own supercritical operating point:
+
+| task | all-positive: harm / wmodes | signed: harm / wmodes | gaussian: harm / wmodes |
+|---|---|---|---|
+| MC | **0.056** / 0.009 | 0.017 / **0.060** | 0.020 / **0.040** |
+| NARMA-10 | **0.040** / 0.002 | 0.005 / **0.527** | 0.006 / **0.886** |
+| Lorenz | **0.168** / 0.004 | 0.019 / **0.081** | 0.012 / **0.522** |
+
+The *ordering* swaps in all three tasks: harmonics ahead when weights are non-negative,
+`W`-eigenmodes ahead once signs are balanced.
+
+> **State the swap, not the capture.** On the all-positive substrate neither basis
+> captures much at k = 10 (0.04–0.17), so "the manifold lives in low-frequency graph
+> harmonics" **overstates it**. What is measured is which basis wins. The low absolute
+> capture is itself consistent: supercritical `d_eff` on that substrate is ~413 of 448
+> (§3.2), so the fluctuations occupy hundreds of directions and no 10-vector basis should
+> capture them. Where `d_eff` is *low* the capture is high — gaussian NARMA reaches 0.886
+> — and the two probes agree on that without being fitted to each other.
+
+**Scope limit.** Probe 2 captured `connectome` and `degree_rewire` only, at four spectral
+radii. No Probe 2 statement may imply the four-variant ladder.
+
+**Priority.** Sign-gating of the manifold transition is largely pre-empted by Krauss 2019
+and is presented as **confirmatory**, per the roadmap's "what must NOT be claimed".
+
+**3. Variance-weighted dimensionality misses readout-relevant structure (contribution 6).**
+MC on the all-positive substrate, σ ≥ 3.05, α = 1e-6:
+
+| statistic | `d_eff` | PR |
+|---|---|---|
+| ladder ordering against measured MC (7 rungs, median per variant) | **+1.000** | **+0.107** |
+| within-regime, pooled (n = 350 cells) | **+0.998** | +0.308 |
+| range across the seven rungs | **75 to 413** (of N = 448) | 1.19 to 1.38 |
+
+That third row is the argument. Across the same seven substrates `d_eff` moves 5.5-fold
+while PR moves by 16%, because memory lives in roughly 400 low-variance directions that a
+variance-weighted measure discounts. **Both correlations are against *measured MC*, not
+against rung index** — correlating against the index gives −0.18 and +0.54 and is a
+different quantity.
+
+> **Gotcha: `mean_state` is signed and its sign is arbitrary.** It depends on the input
+> realisation, so seeds straddle zero. Take `|mean_state|` *before* aggregating; a signed
+> median silently shrinks the connectome's σ = 6 value from 0.759 to 0.638.
+
+**Cross-capture check.** Probe 1's `saturation_diagnostics.parquet` and the `f > 0`
+extension are independent captures of the same reservoirs; at σ = 6, f = 0 on MC they
+agree to three decimals on `|mean_state|` for all four variants.
+
+Artifacts: `results/scale_448/manifold_alignment.parquet`,
+`saturation_diagnostics.parquet`, `probe3_deff.parquet`, and the `*_summary.md` files
+beside them.
+
 ---
 
 ## 4. Robustness of the E0.2 verdict

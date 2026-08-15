@@ -104,7 +104,13 @@ def capture_cell(cell, state) -> list:
 
         # Order-parameter geometries + the PR contrast.
         design = design_matrix(task_name, x, params)
-        d_eff = manifold.ridge_effective_rank(manifold.gram_spectrum(design), alpha)
+        # Keep the Gram SPECTRUM, not just the scalar it reduces to. The
+        # eigendecomposition runs either way, so persisting it is free in compute and
+        # ~1.8 KB/cell in storage (N float32), and it yields d_eff at ANY alpha
+        # afterwards. Discarding it was the one thing a re-run would have been needed
+        # for -- states, by contrast, are 10 to 44 MB per cell and are never persisted.
+        eig_gram = manifold.gram_spectrum(design)
+        d_eff = manifold.ridge_effective_rank(eig_gram, alpha)
         curv = manifold.mean_curvature(x)
         pr = manifold.participation_ratio(x)
 
@@ -122,6 +128,10 @@ def capture_cell(cell, state) -> list:
             effective_radius=float(bulk95 * spectral_radius * mean_gain),
             neg_frac=neg_frac, bulk95=bulk95, leading_gap=leading_gap,
             perron_root=perron_root, lead_is_real=lead_is_real, alpha=alpha,
+            # float32: the spectrum spans many orders of magnitude but d_eff is a sum of
+            # g/(g+alpha) ratios, so 7 significant figures is far more than it resolves.
+            eig_gram=eig_gram.astype(np.float32),
+            n_design_cols=int(design.shape[1]), t_effective=int(design.shape[0]),
         )
         for perf_metric in spec["perf"]:
             row[perf_metric] = float(out[perf_metric])

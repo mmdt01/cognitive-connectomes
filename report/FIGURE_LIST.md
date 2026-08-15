@@ -87,14 +87,19 @@ radius each seed actually realises inherits the spread.* The permuted-multiset c
 chapter 3 and Session 1 owns contribution 5. **Session 1 renders it; Session 3 must not
 re-render it**, and Session 3's E0.2 reproduction gate is what validates panel (a).
 
-**F4, F5 — Act II has no `TIER0` section.** Probe 2 is written up in
-`PROJECT_KNOWLEDGE_BASE.md` and `manifold_alignment_summary.md`, not in `TIER0`, so the
-caption-first rule ("if the caption cannot be written defensibly against `TIER0`, the
-figure should not exist in that form") cannot be satisfied as stated. `TIER0` §3.7 and
-§3.9 cover the *common mode* half of F4 but nothing covers the basis-swap of F5.
-**Session 2 must either promote the Probe 2 numbers into `TIER0` or record that
-`PROJECT_KNOWLEDGE_BASE.md` is the source of record for Act II** — and say which in the
-act file. Do not let this pass silently.
+**F4, F5 — RESOLVED 15 Aug 2026: Act II now has a `TIER0` section.** Probe 2 and Probe 3
+were promoted into **`TIER0` §3.12**, with every number recomputed from the frozen
+parquets at promotion. Both captions are now written against `TIER0` like every other
+figure. Two constraints come with it:
+
+* **F5 states the *swap*, not the capture.** On the all-positive substrate neither basis
+  captures much at k = 10 (0.04 to 0.17), so "the manifold lives in graph harmonics"
+  overstates it. The claim is which basis wins. The low capture is consistent with
+  supercritical `d_eff` ~413 of 448 on that substrate, and where `d_eff` is low the
+  capture is high (gaussian NARMA, 0.886) — the two probes agree without being fitted
+  to each other, which is worth a caption sentence.
+* **F5 is confirmatory, not novel.** Sign-gating of the manifold transition is largely
+  pre-empted by Krauss 2019 (roadmap, "what must NOT be claimed").
 
 **F4, F5 — Probe 2 is a two-variant, four-sigma capture.** `manifold_alignment.parquet`
 holds `connectome` and `degree_rewire` only, at four spectral radii. Neither figure can
