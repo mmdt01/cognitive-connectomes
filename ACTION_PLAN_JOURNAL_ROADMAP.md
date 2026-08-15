@@ -254,13 +254,17 @@ was 14.5 core-hours for two tasks), and the cost of needing a run on 4 September
 
 Three conditions attach:
 
-1. **Pre-register Mackey-Glass before running it** (`report/PREREG_MACKEY_GLASS.md`, in
-   session 0). MG is not a fourth benchmark, it is the out-of-sample test of contribution
-   2. Being a delay system, closed-loop rollout must hold state at lag tau, so it needs
-   both capacities at once: **the prediction is an interior optimum in f**, unlike MC
-   (edge) and Lorenz (f = 0), and running tau = 17 and 30 makes memory demand a dial whose
-   optimum should shift toward higher f. That is a dose-response curve for the theory on a
-   task it was not fitted to. It is worth nothing if the MG data is inspected first.
+1. **Pre-register Mackey-Glass before running it** (`report/PREREG_MACKEY_GLASS.md`,
+   written and committed in session 0). **Revised in session 0**: MG as the out-of-sample
+   test of contribution 2 required a *closed-loop* rollout, and the implemented task is
+   teacher-forced. Under teacher-forcing the reservoir never sees its own prediction, so
+   the regime switch cannot affect the metric and the interior-optimum prediction is
+   untestable in both directions. MG is therefore **a corroborating memory-side task
+   beside NARMA-10**, carrying a narrower registered prediction: the connectome's paired
+   NRMSE advantage is largest at f = 0 and closes with f (the §2.6 shape, transferred to a
+   task it was not fitted to), with **horizon** replacing tau as the memory-demand dial
+   (h = 84 and h = 300, h = 300 primary). Closed-loop MG is deferred to §5. It is still
+   worth nothing if the MG data is inspected first.
 2. **Declare the primary task per claim in session 0.** MC is primary for memory, Lorenz
    for generation, NARMA and MG are corroboration. With four tasks and two axes there is
    always a task where any claim holds; this project has already been caught **three
@@ -351,10 +355,17 @@ November, so nothing here is lost.
   done well in a week alongside writing, and the macro story does not need it because the
   sign axis is already framed as a counterfactual at f = 0. One deferring sentence in the
   discussion is the right treatment.
-- **E1.5 Mackey-Glass** as an out-of-sample test of the single-axis model. **The data is
-  now collected during §4b and the prediction pre-registered in session 0**, so what is
-  deferred is only the analysis and write-up if the sweep runs late. First thing to
-  complete post-thesis if so.
+- **Closed-loop Mackey-Glass** as the out-of-sample test of contribution 2. **Withdrawn
+  from the thesis in session 0, on design grounds, before any MG data was inspected.** The
+  implemented MG task is teacher-forced, so the reservoir is re-anchored by the true input
+  at every step and the regime switch has no consequence for the metric — which makes both
+  branches of the interior-optimum prediction uninterpretable rather than merely hard to
+  detect. Testing it needs a rollout that feeds the prediction back (~150 to 250 lines
+  mirroring the Lorenz protocol, plus a null-tuned hyperparameter check and ~23 core-hours).
+  Full reasoning preserved in `report/PREREG_MACKEY_GLASS.md` §1.1.
+  **Consequence to state plainly in the discussion: contribution 2 has no out-of-sample
+  test in this thesis.** The driven MG data *is* still collected in §4b and carries a
+  narrower registered prediction on the memory side, but it does not fill that gap.
 - **Why weight placement produces the gap** (degree-weight correlation? spatial
   embedding? rich-club? Landau & Sompolinsky 2018 the likely source). The open
   mechanistic question a reviewer will certainly ask.

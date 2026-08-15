@@ -18,19 +18,30 @@ from experiments.human import matrix_config
 from experiments.human.human_mc import task_config as mc_task_config
 from experiments.human.human_narma10 import task_config as narma_task_config
 from experiments.human.human_lorenz import task_config as lorenz_task_config
+from experiments.human.human_mackey_glass import task_config as mg_task_config
 
 _ANALYSIS_DIR = Path(__file__).resolve().parents[1]   # experiments/human/analysis
 _ROOT = Path(__file__).resolve().parents[4]           # repo root
 FIGURES_DIR = _ANALYSIS_DIR / "figures"
 RESULTS_DIR = _ANALYSIS_DIR / "results"
 
-DEFAULT_TASKS = ["mc", "narma10", "lorenz"]
+# The four-task collection banked by the §4b sweep. Mackey-Glass runs at both horizons:
+# it is **teacher-forced** (the reservoir never sees its own prediction), so it probes
+# memory and nonlinear expressivity rather than closed-loop generation, and the horizon
+# is the memory-demand dial that tau was originally meant to be. h = 300 is primary.
+# See report/PREREG_MACKEY_GLASS.md for what may and may not be claimed from it.
+DEFAULT_TASKS = ["mc", "narma10", "lorenz", "mackey_glass_h84", "mackey_glass_h300"]
 # name -> (committed-results subdir, task_config module, task() args, perf columns).
 TASK_DEFS = {
     "mc": ("human_mc", mc_task_config, (), ["mc"]),
     "narma10": ("human_narma10", narma_task_config, (), ["nrmse"]),
     "lorenz": ("human_lorenz", lorenz_task_config, ("vpt",), ["vpt", "climate_error"]),
+    "mackey_glass_h84": ("human_mackey_glass", mg_task_config, (84,), ["nrmse"]),
+    "mackey_glass_h300": ("human_mackey_glass", mg_task_config, (300,), ["nrmse"]),
 }
+# Tasks whose ridge design is formed the same way, so spectra.design_matrix can share a
+# branch: fit on the train split with an unregularised bias column.
+TRAIN_SPLIT_BIAS_TASKS = ("narma10", "mackey_glass_h84", "mackey_glass_h300")
 
 CONDITION_TITLE = {
     "human_gaussian": "Human · gaussian",
@@ -41,6 +52,8 @@ TASK_TITLE = {
     "mc": "Memory capacity",
     "narma10": "NARMA-10",
     "lorenz": "Lorenz (teacher-forced)",
+    "mackey_glass_h84": "Mackey-Glass h=84 (driven)",
+    "mackey_glass_h300": "Mackey-Glass h=300 (driven)",
 }
 CONDITION_COLOR = {"human_gaussian": "#4c72b0", "human_empirical_signed": "#dd8452",
                    "human_empirical": "#c44e52"}
@@ -86,7 +99,16 @@ def resolve_sweep(subdir: str, scale: int, smoke: bool, sr_max) -> list:
     if manifest.exists():
         grid = json.loads(manifest.read_text())["spectral_radii"]
         return [round(float(sr), 6) for sr in grid]
-    return [round(float(sr), 6) for sr in matrix_config.spectral_sweep(6.0)]
+    # Never fall back to a default ceiling. The whole f>0 censoring problem (TIER0 §2.3)
+    # was a sweep that stopped at sigma = 6, and a silent default here would recreate it
+    # for any task with no committed run -- which is exactly the new ones. Callers that
+    # set their own grid (the phase-diagram capture overrides `sweep` wholesale) never
+    # reach this; callers that do not must say what they want.
+    raise FileNotFoundError(
+        f"no committed manifest at {manifest} and no --sr-max given, so there is no "
+        f"defensible spectral-radius grid for '{subdir}'. Pass sr_max explicitly, or "
+        f"run the committed task first. (Refusing to default to 6.0: that is the "
+        f"censoring TIER0 §2.3 was run to remove.)")
 
 
 def build_specs(scale: int, tasks, smoke: bool, sr_max) -> dict:

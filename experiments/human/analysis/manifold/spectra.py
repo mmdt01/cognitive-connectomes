@@ -74,6 +74,20 @@ _READOUT_DESIGN = {
                "continuity: it is the FULL post-washout span (T-washout rows, no "
                "bias), time-centred."),
     ),
+    "mackey_glass": dict(
+        bias_column=True, input_concatenated=False,
+        states_centred=False, states_scaled=False,
+        solver=("numpy.linalg.solve(design.T @ design + reg, design.T @ y); "
+                "design = [train_states, 1]; reg = alpha*I with reg[-1,-1]=0 "
+                "(intercept unregularised)"),
+        notes=("Identical in form to narma10: the readout is fit on the TRAIN split "
+               "only (first n_train of the post-washout states) plus an unregularised "
+               "bias column, so eig_gram is on n_train rows x (N+1) cols. eig_cov is "
+               "the FULL post-washout span (train+test, no bias), time-centred. The "
+               "task is DRIVEN (teacher-forced): the reservoir is fed the true x(t) at "
+               "every step and never its own prediction, so these states carry no "
+               "closed-loop rollout. Both horizons share this entry."),
+    ),
     "lorenz": dict(
         bias_column=True, input_concatenated=False,
         states_centred=False, states_scaled=False,
@@ -104,7 +118,8 @@ def design_matrix(task_name: str, states: np.ndarray, params: dict) -> np.ndarra
     x = np.asarray(states, dtype=float)
     if task_name == "mc":
         return x
-    if task_name == "narma10":
+    if task_name in common.TRAIN_SPLIT_BIAS_TASKS:
+        # NARMA and Mackey-Glass both fit on the train split with an unregularised bias.
         train = x[: params["n_train"]]
         return np.hstack([train, np.ones((train.shape[0], 1))]) if params.get(
             "readout_bias", True) else train
@@ -220,11 +235,14 @@ def build_readout_config(specs: dict, n_nodes: int) -> dict:
     tasks = {}
     for name, spec in specs.items():
         p = spec["params"]
-        design = _READOUT_DESIGN[name]
+        # Mackey-Glass is registered per horizon (mackey_glass_h84 / _h300) but both
+        # horizons share one readout design, so the design table is keyed by family.
+        family = "mackey_glass" if name.startswith("mackey_glass") else name
+        design = _READOUT_DESIGN[family]
         if name == "mc":
             captured_rows = p["T"] - p["warmup"]
             design_rows = captured_rows            # k=0 representative (per-lag: -k)
-        elif name == "narma10":
+        elif family in ("narma10", "mackey_glass"):
             captured_rows = p["T"] - p["washout"]
             design_rows = p["n_train"]
         elif name == "lorenz":

@@ -178,9 +178,9 @@ cannot be said. **Confirmed in session 0, unchanged from the draft**, with two a
 
 | claim | primary | corroborating |
 |---|---|---|
-| memory capacity, ladder ordering, decay-rate advantage | **MC** | NARMA-10 |
-| closed-loop generation, regime switch, resistance margin | **Lorenz** | Mackey-Glass |
-| the two capacities are one axis read with opposite sign | **MC + Lorenz jointly** | MG (interior optimum, pre-registered) |
+| memory capacity, ladder ordering, decay-rate advantage | **MC** | NARMA-10, **Mackey-Glass** |
+| closed-loop generation, regime switch, resistance margin | **Lorenz** | **none** |
+| the two capacities are one axis read with opposite sign | **MC + Lorenz jointly** | **none — no out-of-sample test** |
 | readout dimensionality vs PR | **MC** | NARMA-10 |
 | the spectral decomposition (contributions 1 and 5) | **no task** — structural | — |
 
@@ -192,10 +192,19 @@ MC -> NARMA -> Lorenz strengthens Act III at almost no cost.
 properties of `W` and of the matching axis. No task can corroborate or refute them, and
 none should be cited as if it could.
 
-**Addition 2 — MG's corroborating role is contingent.** It is blocked on the protocol
-question in `PREREG_MACKEY_GLASS.md` (the implemented evaluator is teacher-forced; the
-pre-registration assumes a closed-loop rollout). Until that is resolved, **no claim rests
-on MG**, and the three rows above stand on their primary task alone.
+**Addition 2 — MG moved to the memory side, and contribution 2 lost its out-of-sample
+test.** Resolved 15 August 2026. The implemented MG task is **teacher-forced**, so the
+reservoir is re-anchored by the true input every step and the regime switch has no
+consequence for the metric. It therefore probes memory and nonlinear expressivity, and
+corroborates **MC**, not Lorenz. The original pre-registration — an interior optimum in
+`f`, testing contribution 2 — is **withdrawn on design grounds before any data was
+inspected**, and is preserved verbatim in `PREREG_MACKEY_GLASS.md` §1.1 with the reason.
+A narrower prediction the driven design can carry is registered in its place.
+
+**Consequence to state in the discussion, not to paper over: contribution 2 has no
+out-of-sample test in this thesis.** It rests on F16 plus the joint reading of F7 and
+F13. Closed-loop MG is deferred work, not a gap that MG's presence in the task list
+quietly fills.
 
 ---
 
