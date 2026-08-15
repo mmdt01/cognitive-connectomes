@@ -27,10 +27,12 @@ organised for capacity. It is organised for not needing to be tuned.
 ### The contributions, in the order they should appear in the introduction
 
 1. **The spectral difference is a gap, not a bulk.** The absolute bulk radius is
-   near-identical across variants (4.4% spread); the entire between-variant difference
-   sits in `|λ₁|`. Gap ratio `|λ₁|/abs_bulk` = 3.08 (connectome) vs 1.81 to 1.92 (nulls),
-   identically `1/bulk95` = `sr_crit`. Identifies weight-topology alignment as the causal
-   structural feature. Scale-robust. *(Act I)*
+   near-identical across variants (4.4% spread **at N=448**; 6.4% at N=1000); the entire
+   between-variant difference sits in `|λ₁|`. Gap ratio `|λ₁|/abs_bulk` = 3.08 (connectome)
+   vs 1.81 to 1.92 (nulls), identically `1/bulk95` = `sr_crit`. Identifies weight-topology
+   alignment as the causal structural feature. **What is scale-robust is the gap-ratio
+   separation** (3.99 vs 2.30 to 2.44 at N=1000), not the near-identity of the bulks, which
+   loosens with N (`TIER0` §3.1). *(Act I)*
 
 2. **The memory/generation dissociation is one axis read out with opposite sign, not two
    controllers** (`TIER0` §3.9). Each unit is `x -> tanh(gain·x + input)`: gain above +1
@@ -39,8 +41,10 @@ organised for capacity. It is organised for not needing to be tuned.
    readout dimensions (bad for memory) and holds the trajectory smooth (good for
    generation). That is *why* the two advantages had to occupy opposite regions of
    (f, sigma), rather than a fact reported about them. The boundaries cross at
-   (`sigma·bulk95` = 2.938, f = 0.153) on the matched-bulk axis and not at all on the
-   nominal axis past sigma = 6, so **the crossing is only ever quoted with its axis**.
+   (`sigma·bulk95` = 2.938, f = 0.153) on the matched-bulk axis — **the first crossing
+   inside full replicate coverage**, five more sitting past the coverage edge where the
+   boundary must not be read (`TIER0` §2.3, §6.10) — and not at all on the nominal axis
+   past sigma = 6, so **the crossing is only ever quoted with its axis**.
    *(Act III, unifying section)*
 
 3. **The memory advantage is a rescue from Perron domination, not a capacity gain**
@@ -50,7 +54,9 @@ organised for capacity. It is organised for not needing to be tuned.
    Peak memory is 2 to 6% *below* the nulls — reliable against ER and weight-permuted,
    **not** against degree-matching, so write "parity", never "always worst" (`TIER0`
    §3.4). The supercritical margin is 4.4x and holds across a 2.2x change in N
-   (ratio 4.40 -> 4.42) while the normalised advantage grows (`dD/N` 0.445 -> 0.613).
+   (ratio 4.40 -> 4.42 with the threshold set at the connectome's `sr_crit` for every
+   variant; 3.56 -> 3.85, i.e. growing, with each variant's own — **report both**,
+   `TIER0` §2.4) while the normalised advantage grows (`dD/N` 0.445 -> 0.613).
    Nobody degrades with f: supercritical MC rises for every substrate and the advantage
    narrows because the nulls gain ~4x what the connectome gains from a much lower start.
    **This also reconciles the spread-versus-compact disagreement** (Aceituno, Yan & Liu): their ordering reproduces exactly at
@@ -81,7 +87,10 @@ organised for capacity. It is organised for not needing to be tuned.
    connectome-reservoir literature, not just to this work. *(Chapter 3, methods)*
 
 6. **Variance-weighted dimensionality misses readout-relevant structure.** PR orders the
-   memory ladder at +0.11; `d_eff` at +0.998, because memory lives in roughly 400
+   memory ladder at +0.11 while `d_eff` orders it at +1.00 — **both seven-rung
+   correlations against measured MC**; pooled within-regime the pair is +0.31 against
+   +0.998. Quote one aggregation unit or the other, never one number from each
+   (`TIER0` §3.12). The mechanism is that memory lives in roughly 400
    low-variance directions PR discounts. Pitch as an empirical demonstration (Dambre 2012
    is the parent bound; Clark 2025 collides on terminology). *(Act II)*
 

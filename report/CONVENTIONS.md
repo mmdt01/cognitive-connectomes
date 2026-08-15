@@ -27,7 +27,7 @@ checked against `TIER0`.
 | "hub inhibition collapses memory" | "hub-targeted inhibition closes the advantage fastest; nothing collapses, the null moves" |
 | "`sigma_eff` crosses 1 at the transition" | "`sigma_eff` is the best empirical **locator**"; the criterion is falsified |
 | "generation tracks trajectory straightness" | "capacity is gated by which dynamical regime the manifold is in" |
-| the crossing, quoted bare | always with its axis: (`sigma·bulk95` = 2.938, f = 0.153), absent on the nominal axis |
+| the crossing, quoted bare | always with its axis: the **first crossing inside full replicate coverage**, at (`sigma·bulk95` = 2.938, f = 0.153); five more sit past the coverage edge and must not be read; absent on the nominal axis |
 | "the connectome is a better reservoir" | it is not, at the peak; the advantage is supercritical robustness |
 
 ## Numerical conventions

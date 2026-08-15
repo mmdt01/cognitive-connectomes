@@ -8,10 +8,20 @@
 > Written: **15 August 2026**, session 0 of the §4b sweep.
 > Code state at pre-registration: commit `5fbe250`.
 >
-> **Revised 15 August 2026, before any Mackey-Glass data was inspected.** The secondary
-> horizon dose-response prediction was **withdrawn** and replaced by a diagnostic with no
-> claim attached; the reason is in §2.1. The revision only ever *weakens* what is claimed,
-> and it happened before any run. Nothing here is revised once an outcome exists.
+> **Revised twice on 15 August 2026, both times before any Mackey-Glass data was
+> inspected, and both times only to weaken or disambiguate what is claimed.** Nothing here
+> is revised once an outcome exists.
+>
+> 1. The secondary horizon dose-response prediction was **withdrawn** and replaced by a
+>    diagnostic with no claim attached (§2.1).
+> 2. The direction of the predicted quantity was **ambiguous and is now pinned** (§2).
+>    "Advantage" was defined as *connectome minus null* on a lower-is-better metric, so an
+>    advantage was a negative number, while the trend was predicted "negative" meaning
+>    *shrinking* — under which reading the prediction and its own falsifier
+>    ("flat or increasing") pointed the same way. `advantage` is now defined as
+>    `NRMSE_null - NRMSE_connectome`, positive means the connectome is better, and the
+>    prediction and falsifier are restated against that. The null family is also now named
+>    in full rather than left as "every null".
 
 ---
 
@@ -68,23 +78,39 @@ supercritical memory rises with `f` for every substrate and the connectome's adv
 narrows because **the nulls catch up, not because the connectome degrades** — to a third
 memory-loaded task that was not used to derive it.
 
-**Declared quantity.** The prediction is about the **connectome's advantage over the
-nulls** (NRMSE, connectome minus null, paired within seed), not absolute NRMSE. Absolute
-NRMSE is not comparable across `f` because the target series is unchanged while the
-reservoir's operating point is not.
+**Declared quantity, with its sign fixed.** NRMSE is lower-is-better, so "advantage" is
+defined here once and used only in this direction:
 
-**Primary.** At the supercritical operating point, the connectome's NRMSE advantage over
-every null is **largest at `f` = 0 and decreases monotonically with `f`**, closing to
-within noise by `f` ≈ 0.25 — the same shape MC shows (`TIER0` §2.6), on a task the account
-was not fitted to.
+> **`advantage = NRMSE_null - NRMSE_connectome`, paired within seed.
+> Positive means the connectome is better.**
 
-- predicted advantage at `f` = 0: **connectome better than ER**, and better than
-  weight-permuted, at sigma ≥ 3.078
-- predicted at `f` ≥ 0.25: **all three contrasts within noise** (paired 95% CI includes 0)
-- predicted direction of the trend in `f`: **negative** (advantage shrinking)
+The prediction is about that quantity, not about absolute NRMSE: absolute NRMSE is not
+comparable across `f` because the target series is unchanged while the reservoir's
+operating point is not.
 
-**What would falsify this.** Either: the advantage at `f` = 0 absent or reversed; or the
-trend in `f` flat or increasing.
+**The null family is all three, named:** `erdos_renyi`, `connectome_weight_permuted` and
+`degree_rewire`. Degree-matching is **in**, and is named explicitly because it is the null
+that does not cooperate elsewhere — the peak-memory deficit is reliable against ER and
+weight-permuted but **not** against degree (`TIER0` §3.4, 1 of 5 alphas). Leaving it
+unstated would let the family be chosen after the fact, which is the whole thing this
+document exists to prevent.
+
+**Primary.** At the supercritical operating point (sigma >= 3.078), `advantage` is
+**positive and largest at `f` = 0** against all three nulls, and **decreases toward zero
+as `f` rises**, reaching zero within noise by `f` ≈ 0.25 — the same shape MC shows
+(`TIER0` §2.6), on a task the account was not fitted to.
+
+- predicted at `f` = 0: `advantage` > 0 against **all three** nulls, paired 95% CI
+  excluding zero for at least ER and weight-permuted
+- predicted at `f` >= 0.25: **all three contrasts within noise**, paired 95% CI including
+  zero
+- predicted **sign of the trend of `advantage` against `f`: negative** — that is,
+  `advantage` *shrinks* from a positive value at `f` = 0 toward zero, it does not become
+  large and negative
+
+**What would falsify this.** Either: `advantage` at `f` = 0 is zero or negative (the
+connectome no better than the nulls, or worse); or the trend of `advantage` against `f` is
+flat or **positive** (the advantage failing to close, or widening).
 
 **There is no secondary prediction.** `h` = 84 is collected but nothing is predicted of
 it — see §2.1.
@@ -97,7 +123,8 @@ is larger at h = 300 than at h = 84.* Held here because a prediction that is qui
 dropped is worse than one that fails.
 
 **Why it was withdrawn: it is confirmable by an artifact.** `h` = 84 is the easy horizon
-(NRMSE ~0.09 at rung 0 on C. elegans, §3.1). If it sits near the floor for every substrate
+(NRMSE ~0.09 at rung 0 on C. elegans; see the disclosure in §3, commitment 1). If it sits
+near the floor for every substrate
 on the human connectome too, the connectome-minus-null advantage there is compressed
 toward zero *because every substrate is nearly perfect* — and then
 `advantage(h=300) > advantage(h=84)` returns **confirmed for a ceiling reason with nothing
@@ -149,11 +176,16 @@ consistency check on the transfer, and must be reported as one.
    `phase_diagram/capture.py` computes all three for every task in the list.
 4. **Same grid, seeds and null ladder** as the other three tasks, so the comparison is
    paired: 4 variants x 11 `f` x 29 sigma x 10 seeds x 3 draws.
-5. **No tuning toward the prediction.** The reservoir hyperparameters
+5. **The delay is fixed at tau = 17 and is not a manipulated variable.** It was one in the
+   withdrawn design; it is now frozen at the canonical mild-chaos value in `MG_PARAMS`
+   alongside a = 0.2, b = 0.1, n = 10. **tau = 30 is not run**, and no claim in this
+   thesis may reference a tau dose-response. Memory demand is varied by forecast horizon
+   only, and that variation carries no prediction (§2.1).
+6. **No tuning toward the prediction.** The reservoir hyperparameters
    (`input_scaling` = 0.5, `leak_rate` = 0.3) are the frozen C. elegans values and are not
    re-tuned. If they are ever re-tuned it must be on a null, never the connectome, and the
    re-tune must be recorded here before the grid is re-read.
-6. **Scope.** This tests the transfer of the §2.6 memory account to a driven delay task.
+7. **Scope.** This tests the transfer of the §2.6 memory account to a driven delay task.
    It says nothing about the `f` = 0 generation regime (`TIER0` §3.11), nothing about
    closed-loop rollout, and nothing about contribution 2.
 

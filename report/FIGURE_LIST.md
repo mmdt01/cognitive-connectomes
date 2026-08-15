@@ -35,12 +35,12 @@ verified, see the flag below the table.
 | F4 | 5 | (Act II) | The Perron mode is a common mode: it carries the mean, and after time-centring the dominant W-eigenmodes carry ~0 of the fluctuation variance | `results/scale_448/manifold_alignment.parquet` filter `condition == "human_empirical"`, `variant == "connectome"`, `task == "mc"`, supercritical operating point; plus `saturation_diagnostics.parquet` `mean_state` | confirmed* | |
 | F5 | 5 | (Act II) | Sign selects the basis: balanced -> W-eigenmodes, all-positive -> low-frequency graph harmonics | `manifold_alignment.parquet`; one panel per `condition`, curves over `basis in {harmonics, wmodes, random}`, `task == "lorenz"` | confirmed* | |
 | F6 | 5 | 6 | PR misses readout-relevant structure: against measured MC across the seven rungs, `d_eff` orders at **+1.000** and PR at **+0.107**; pooled within-regime +0.998 against +0.308 | `results/scale_448/probe3_deff.parquet`; filter `task == "mc"`, `condition == "human_empirical"`, `spectral_radius >= 3.05`, `alpha == 1e-6` (350 rows, 7 variants) | confirmed | |
-| F7 | 6 | 3 | **The crossing**: the connectome peaks lowest (432.4) yet retains most (47% at the top of the overlap, against 28/21/12%); `d_eff` decay on the matched axis, ceiling drawn | `criticality_matched/results/taskB_extended_sweep_scale_448.parquet`; `variant, spectral_radius, bulk95, d_eff`; no row filter (f = 0, MC, 4 variants, sigma 0 to 8 step 0.4, 10 seeds); `x = spectral_radius * bulk95` from the file's own column | confirmed | W |
+| F7 | 6 | 3 | **The crossing**: the connectome peaks lowest (432.4) yet retains most (47% at the top of the overlap, against 28/22/11%, `TIER0` §1.2); `d_eff` decay on the matched axis, ceiling drawn | `criticality_matched/results/taskB_extended_sweep_scale_448.parquet`; `variant, spectral_radius, bulk95, d_eff`; no row filter (f = 0, MC, 4 variants, sigma 0 to 8 step 0.4, 10 seeds); `x = spectral_radius * bulk95` from the file's own column | confirmed | W |
 | ~~F8~~ | | | **RETIRED — merged into F3.** Do not render. | | retired | |
-| F9 | 6 | 3 | The supercritical margin is scale-invariant: 4.40 -> 4.42 across a 2.2x change in N | `n1000_memory_scale_448.parquet` + `n1000_memory_scale_1000.parquet`; supercritical = `spectral_radius >= 3.078` (N=448) / `>= 3.985` (N=1000), i.e. **the connectome's `sr_crit`, applied to every variant** | confirmed* | |
+| F9 | 6 | 3 | The supercritical margin holds across a 2.2x change in N: **4.40 -> 4.42** on the connectome's `sr_crit` applied to all, **3.56 -> 3.85** on each variant's own. Both panels, per `TIER0` §2.4 | `n1000_memory_scale_448.parquet` + `n1000_memory_scale_1000.parquet`; supercritical = `spectral_radius >= 3.078` (N=448) / `>= 3.985` (N=1000), i.e. **the connectome's `sr_crit`, applied to every variant** | confirmed* | |
 | F10 | 6 | 3 | Peak parity, not deficit: paired per-seed differences with CIs across the alpha grid; 2-6%, reliable against ER and weight-permuted, **not** against degree-matching | `criticality_matched/results/closeout_peak_parity.csv`; 15 rows = 5 alpha x 3 contrasts, cols `mean_diff, ci_lo, ci_hi, wilcoxon_p` | confirmed | |
 | F11 | 6 | 3 | Rescue from Perron domination: `\|mean_state\|` 0.759 against the nulls' 0.949-0.989 at sigma = 6, f = 0; and matching on `sigma·bulk95` absorbs only **26%** of the f = 0 gap | (a) `item2_f_extension_scale_448.parquet` + `item3_f_extension_nulls_scale_448.parquet`, filter `task == "mc"`, `spectral_radius == 6.0`, col `mean_state` by `f`. (b) `e03_mechanism_matched_scale_448.csv` cols `median_abs_gap_matched_x` vs `..._sigma` (6.42 -> 4.75 at f = 0) | confirmed | |
-| F12 | 6 | 4 | Curvature is **bimodal**: 215 of 38,280 cells (0.56%) lie in [0.6, 2.2] rad; a binary collapsed-or-not bit explains R2 = 0.364 against continuous curvature's 0.370 | `criticality_matched/results/e01_jacobian_scale_448.parquet`; cols `mean_curvature, vpt`; no row filter (38,280 Lorenz cells = 4 variants x 11 f x 29 sigma x 10 seeds x 3 draws) | confirmed | W |
+| F12 | 6 | 4 | Curvature is **bimodal**: 215 of 38,280 cells (0.56%) lie in [0.6, 2.2] rad; a binary collapsed-or-not bit explains R2 = 0.364 against continuous curvature's 0.371 | `criticality_matched/results/e01_jacobian_scale_448.parquet`; cols `mean_curvature, vpt`; no row filter (38,280 Lorenz cells = 4 variants x 11 f x 29 sigma x 10 seeds x 3 draws) | confirmed | W |
 | F13 | 6 | 4 | Generation read as VPT: +1.0 to +2.2 Lyapunov times from f ~ 0.20 at sigma = 2, clearing the weight-permuted placement control; **plus the f = 0 collapse panel** (ER 5/10 seeds, connectome 0/10) | (a) `e03_frontier_scale_448.parquet` filter `metric == "vpt"`, `spectral_radius == 2.0`. (b) `e03_frontier_paired_scale_448.csv` same filter — paired within seed, so all connectome-minus-null statements come from here. (c) `item2_collapse_loci_scale_448.csv` filter `f == 0`, cols `n_seeds_collapsed / n_seeds` | confirmed | |
 | F14 | 6 | 4 | `sigma_eff` is a **locator, not a criterion**: transition at 0.77-0.90 with variant offsets ordered by spectral gap; CV 0.209 against nominal sigma's 0.667 | `e01_threshold_invariance_scale_448.csv` filter **`scope == "f > 0"`** (n = 37); plus `e01_threshold_table_scale_448.csv` cols `effective_radius_lo/hi` per (variant, f) | confirmed* | |
 | F15 | 7 | anchor | Which Yeo networks load the Perron mode (minimal Act IV) | **computed live, no frozen parquet**: leading eigenvector of the N=448 self-built consensus (`eigh`) x release RSN labels from `data/human/Suarez2021_Data`, restricted to cortical nodes. Seconds, not a run | confirmed* | |
@@ -64,8 +64,10 @@ radius is `bulk95 * lambda_max_raw`, and `|lambda_1|` is `lambda_max_raw`. Compu
 "absolute bulk" from `bulk95_radius` returns the ratio and gives a 47.3% spread where
 `TIER0` §3.1 reports 4.4%.
 
-**F2 — "holds at both N" needs qualifying.** The 4.4% absolute-bulk spread is an
-**N=448** number; at N=1000 it is **6.9%**. The gap-ratio separation does hold at both
+**F2 — "holds at both N" needs qualifying.** Promoted to `TIER0` §3.1 on 15 August
+2026, which is now the canonical home; this entry points at it. The 4.4% absolute-bulk
+spread is an **N=448** number; at N=1000 it is **6.4%** (or 6.9% under the other
+aggregation — §3.1 states both). The gap-ratio separation does hold at both
 (3.985 against 2.30-2.44), but the *null ordering* reverses between scales (`TIER0` §2.1),
 so the caption must state the scale for the spread and must not carry the null ordering
 across.
@@ -124,9 +126,17 @@ shows the §3.10 comparison; if the Jacobian is added it needs its own axis and 
 
 **F14 — no line at 1.** The unit crossing is withdrawn. Draw the 0.77-0.90 band.
 
-**F16 — the coverage mask is the point, not decoration.** Recomputed from the frozen
-boundaries, the matched-bulk axis has **six** crossings, not one: x = 2.943, 3.525, 3.598,
-3.670, 3.743 and 4.361. Only the first lies inside the all-replicates coverage edge
+**F16 — the coverage mask is the point, not decoration.** Promoted to `TIER0` §2.3 on
+15 August 2026, which is now the canonical home; this entry points at it. Recomputed from
+the frozen boundaries, the matched-bulk axis has **six** crossings, not one: x = 2.943,
+3.525, 3.598, 3.670, 3.743 and 4.361.
+
+**The two coordinates are the same object, and the figure quotes the published one.**
+(2.938, 0.153) is the value of record; the 2.943 above is a coarse linear interpolation on
+the union of the two boundaries' grids, not a competing estimate, and the 0.005 gap is
+that interpolation. `CONVENTIONS` mandates quoting the coordinate exactly, so **the caption
+quotes (2.938, 0.153)** and the builder marks the crossing it finds without relabelling
+it. Only the first lies inside the all-replicates coverage edge
 (minimum `x_hi` = 3.58); the rest are the noisy region TIER0 §6.10 says is "drawn but
 should not be read quantitatively", where the boundary rests on a `bulk95`-selected
 subsample and oscillates. **So the published crossing is the first and only one inside
@@ -162,12 +172,12 @@ node-strength and edge-weight correspondence at **r >= 0.98**, which is an agree
 an identity. State it in the caption. (Recomputed here: Perron root 0.188862, matching
 `lambda_max_raw` to six decimals, so the substrate is the right one.)
 
-**Repo contradiction, resolved for `TIER0`.** `TIER0` §2.1 says weight-permuted `bulk95`
-is **0.5120** ("not the 0.520 quoted in the roadmap"); §3.1's table uses **0.5203**. The
-frozen data gives mean 0.5120 and **median 0.5203**, and `CONVENTIONS` plus `TIER0` §1.3
-mandate the median. §2.1's own row is internally inconsistent — it pairs 0.5120 with
-`sr_crit` 1.922, which is 1/0.5203, not 1/0.5120 (= 1.953). **The median governs: 0.5203,
-`sr_crit` 1.922.** §2.1's parenthetical should be struck.
+**Repo contradiction — FIXED IN `TIER0`, not pending.** `TIER0` §2.1's `bulk95`
+columns held per-seed **means** beside `1/median` `sr_crit` values, at both scales. They
+were corrected to medians on 15 August 2026 (commit `861984e`) and §2.1 carries a dated
+note listing the withdrawn values. **Nothing here instructs `TIER0`** — this entry records
+where the fix landed, because a rank-4 document may not carry a correction a rank-1 one has
+not absorbed.
 
 ---
 

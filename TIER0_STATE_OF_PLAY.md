@@ -227,6 +227,21 @@ through zero at 2.94, having been −0.162 and narrowing at the old coverage lim
 old linear extrapolation put it near x ≈ 3.5 — right in direction, 19% too far out,
 which is why it was recorded as arithmetic rather than a claim.
 
+**There are six crossings on the matched axis, and the published one is the first — the
+only one inside full replicate coverage.** Recomputed from the frozen boundary files in
+session 0 (15 August 2026), the memory and generative boundaries swap order at
+**x = 2.943, 3.525, 3.598, 3.670, 3.743 and 4.361**. The all-replicates coverage edge is
+`x_hi` = 3.58 at its minimum over `f`, so **only the first lies inside it**; the other five
+sit in the region §6.10 says is drawn but must not be read quantitatively, where the
+boundary rests on a `bulk95`-selected subsample and oscillates.
+
+> **Quote the crossing as the first one inside full replicate coverage, not as "the"
+> crossing.** The bare phrasing implies a unique feature, and a reader who recomputes the
+> boundaries will find six. The published (2.938, 0.153) remains the value of record; the
+> 2.943 above is a coarse linear interpolation on the union of the two boundaries' grids,
+> not a competing estimate, and the 0.005 gap is that interpolation, not a disagreement.
+> On the nominal axis there is **no** crossing under any of the three level conventions.
+
 **The contour level had to be pinned to fully covered cells.** Both boundary operators
 set their contour at 25% of the panel's *global max*, and past the all-replicates
 coverage edge the panel is still populated — but only by the replicates whose own
@@ -294,13 +309,42 @@ scaled 3000 → 6000 to hold `T_eff/N` (5.58 → 5.50), ridge reparameterised as
 1e-6. **Control passed**: the reparameterisation moved the N=448 margin 4.35 → 4.40
 (median per-cell change 0.32%), so any shift at N=1000 is attributable to N.
 
-| supercritical MC (σ ≥ `sr_crit`) | N=448 | N=1000 |
+| supercritical MC (σ ≥ **the connectome's** `sr_crit`) | N=448 | N=1000 |
 |---|---|---|
 | connectome | 12.32 | 13.93 |
 | weight-permuted | 7.34 | 8.98 |
 | degree | 4.61 | 5.09 |
 | Erdős–Rényi | 2.80 | 3.15 |
 | **margin conn/ER** | **4.40** | **4.42** |
+
+**The threshold is the connectome's `sr_crit` (3.078 at N=448, 3.985 at N=1000) applied to
+every variant, and the result depends on that choice. Report both.** Added 15 August 2026
+(session 0): the two-axis discipline of §1.1 exists precisely because a result that turns
+on a matching choice must be shown under both, and this is the same situation one axis
+over.
+
+| supercritical MC, threshold = **each variant's own** `sr_crit` | N=448 | N=1000 |
+|---|---|---|
+| connectome | 12.32 | 13.93 |
+| weight-permuted | 8.81 | 9.66 |
+| degree | 5.43 | 5.73 |
+| Erdős–Rényi | 3.46 | 3.62 |
+| **margin conn/ER** | **3.56** | **3.85** |
+
+> **The two filters say different things and both are defensible.** On the connectome's
+> threshold the margin is **invariant** (4.40 → 4.42, +0.5%). On each variant's own
+> threshold it **grows ~8%** with N (3.56 → 3.85). Neither is a null result: the margin
+> holds or improves either way, and the claim "the supercritical memory margin is not an
+> N=448 accident" survives both. What must not be written is "scale-invariant" full stop,
+> since that is true of one filter only.
+>
+> **Why the connectome's threshold is the primary reading**, on the same grounds §3.2 uses:
+> it is the *conservative* choice. It samples every null further above its own critical
+> point, where the null has decayed more — so it is the filter that flatters the
+> connectome, and it is reported as primary only because it is the one comparison in which
+> every variant is evaluated over an identical σ range. Using each variant's own threshold
+> compares each in its own regime and is the more natural reading of the word
+> "supercritical"; it gives the smaller margin and the growing one.
 
 **Secondary predictions, both confirmed in advance.** The ceiling is *not* escaped (peak
 `d_eff/N`: connectome 0.971, nulls 0.984–0.999), so §1.2's robustness-not-capacity
@@ -467,6 +511,30 @@ The **absolute** bulk radius is near-identical across variants (spread **4.4%**)
 Note the identity: `|λ₁|/abs_bulk = 1/bulk95 = sr_crit` — the gap ratio, the inverse
 bulk and the critical scale are **the same number**, so adopting it costs nothing and
 names the quantity after what it measures.
+
+**The 4.4% is an N=448 number. The gap ratio is what is scale-robust, not the spread.**
+Added 15 August 2026 (session 0), because the figure list needed the scale attached and
+the roadmap's contribution 1 was carrying "4.4% spread" and "scale-robust" in one
+sentence.
+
+| | N=448 | N=1000 |
+|---|---|---|
+| absolute-bulk spread across variants | **4.4%** | **6.4%** |
+| `bulk95` spread | 47.3% | 48.5% |
+| gap ratio, connectome vs nulls | **3.078** vs 1.81–1.92 | **3.985** vs 2.30–2.44 |
+
+> **What survives the change of scale is the separation, not the near-identity.** The
+> connectome's gap ratio stands ~1.7x clear of every null at both scales; the nulls'
+> absolute bulks are near-identical at N=448 and merely close at N=1000. Write "the
+> absolute bulk is essentially everyone's" of N=448, and "the gap ratio separates the
+> connectome from every null at both scales" of the scale claim. Do not let one sentence
+> carry both.
+
+**Aggregation note.** The absolute-bulk column above is `median(bulk95) x
+median(|λ₁|)` — the convention §3.1's table already used, which it reproduces exactly at
+N=448. Taking the median of the per-seed products instead gives the identical 4.4% at
+N=448 but **6.9%** at N=1000. Quote the aggregation with the number at N=1000, where the
+two differ.
 
 > **Restate Act I:** connectome weight placement does not compress the bulk. It raises
 > the Perron root (1.78× ER's) over a bulk that is essentially everyone's.
