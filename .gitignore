@@ -269,3 +269,7 @@ experiments/human/analysis/criticality_matched/results/*.md
 experiments/human/analysis/criticality_matched/results/*.json
 !experiments/human/analysis/criticality_matched/results/E02_verdict.md
 !experiments/human/analysis/criticality_matched/results/N1000_verdict.md
+
+# Local artifact snapshots (tools/snapshot_results.sh). Tens of MB, and the point of
+# them is to live somewhere that is not this repo.
+snapshots/

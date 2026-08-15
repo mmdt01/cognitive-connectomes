@@ -53,13 +53,24 @@ checked against `TIER0`.
 
 Fixed in session 0 and held across every figure so the chapters sit together.
 
-- **Variant colours** (never varied): connectome, connectome_weight_permuted,
-  degree_rewire, erdos_renyi, random_gaussian — assign once in the figure module.
+- **Variant colours** (never varied), assigned once in `report/figlib/style.py`. **All
+  seven rungs**, not five: the criticality-matched programme sweeps four
+  (`connectome`, `connectome_weight_permuted`, `degree_rewire`, `erdos_renyi`) but
+  Probe 3's ladder is seven, so `random_gaussian`, `clustering_rewire` and
+  `modularity_rewire` need fixed colours too or F6 invents its own.
+- **One substrate, one colour, thesis-wide.** The palette equals
+  `src/experiment/plots._VARIANT_STYLE`, so a sweep figure and a committed per-task
+  figure put the same substrate in the same colour. `style.check_colour_consistency()`
+  asserts it and the smoke entry point runs it, so the two cannot drift silently.
+- **Phase boundaries** get their own fixed pair (`style.BOUNDARY_COLOUR`): they are not
+  variants, and the memory boundary is one colour everywhere it appears.
 - Panel labels **a, b, c** lower-case bold, top-left.
 - Font sizes: axis labels 9pt, ticks 8pt, panel labels 10pt bold.
-- **300 dpi**, PDF plus PNG, written to `report/figures/`.
+- **300 dpi**, PDF plus PNG, written to `report/figures/`. PNGs are tracked, vector PDFs
+  are gitignored and regenerable in one command.
 - Every figure is produced by the shared figure module reading frozen parquets. **No
   hand-tuned one-offs** — when a number moves, everything rebuilds.
+  `python -m report.figlib --verify | --smoke | --all | --only F7`.
 
 ## Working rules
 
