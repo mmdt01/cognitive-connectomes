@@ -262,8 +262,11 @@ Three conditions attach:
    untestable in both directions. MG is therefore **a corroborating memory-side task
    beside NARMA-10**, carrying a narrower registered prediction: the connectome's paired
    NRMSE advantage is largest at f = 0 and closes with f (the §2.6 shape, transferred to a
-   task it was not fitted to), with **horizon** replacing tau as the memory-demand dial
-   (h = 84 and h = 300, h = 300 primary). Closed-loop MG is deferred to §5. It is still
+   task it was not fitted to). Both horizons are collected; **h = 300 is the pre-declared
+   primary and is not swappable after the data is seen**. A horizon dose-response was
+   registered and withdrawn the same day — it is confirmable by a ceiling artifact at
+   h = 84, which is the fourth instance of the delta-without-levels failure this project
+   has already been caught by three times. Closed-loop MG is deferred to §5. It is still
    worth nothing if the MG data is inspected first.
 2. **Declare the primary task per claim in session 0.** MC is primary for memory, Lorenz
    for generation, NARMA and MG are corroboration. With four tasks and two axes there is

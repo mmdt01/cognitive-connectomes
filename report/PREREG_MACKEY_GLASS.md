@@ -7,6 +7,11 @@
 >
 > Written: **15 August 2026**, session 0 of the §4b sweep.
 > Code state at pre-registration: commit `5fbe250`.
+>
+> **Revised 15 August 2026, before any Mackey-Glass data was inspected.** The secondary
+> horizon dose-response prediction was **withdrawn** and replaced by a diagnostic with no
+> claim attached; the reason is in §2.1. The revision only ever *weakens* what is claimed,
+> and it happened before any run. Nothing here is revised once an outcome exists.
 
 ---
 
@@ -78,15 +83,35 @@ was not fitted to.
 - predicted at `f` ≥ 0.25: **all three contrasts within noise** (paired 95% CI includes 0)
 - predicted direction of the trend in `f`: **negative** (advantage shrinking)
 
-**Secondary — the horizon dose-response.** Horizon replaces tau as the memory-demand dial:
-`h` = 300 requires holding more of the trajectory than `h` = 84. So the connectome's
-advantage at `f` = 0 is **larger at h = 300 than at h = 84**.
+**What would falsify this.** Either: the advantage at `f` = 0 absent or reversed; or the
+trend in `f` flat or increasing.
 
-- predicted sign of `advantage(h=300) - advantage(h=84)` at `f` = 0: **positive**
+**There is no secondary prediction.** `h` = 84 is collected but nothing is predicted of
+it — see §2.1.
 
-**What would falsify this.** Any of: the advantage at `f` = 0 absent or reversed; the
-trend in `f` flat or increasing; the advantage at `h` = 84 exceeding that at `h` = 300 at
-`f` = 0.
+### 2.1 The horizon dose-response, withdrawn
+
+A secondary prediction was registered and then withdrawn on the same day, before any run:
+*horizon replaces tau as the memory-demand dial, so the connectome's advantage at `f` = 0
+is larger at h = 300 than at h = 84.* Held here because a prediction that is quietly
+dropped is worse than one that fails.
+
+**Why it was withdrawn: it is confirmable by an artifact.** `h` = 84 is the easy horizon
+(NRMSE ~0.09 at rung 0 on C. elegans, §3.1). If it sits near the floor for every substrate
+on the human connectome too, the connectome-minus-null advantage there is compressed
+toward zero *because every substrate is nearly perfect* — and then
+`advantage(h=300) > advantage(h=84)` returns **confirmed for a ceiling reason with nothing
+to do with memory demand**.
+
+That is the failure mode `TIER0` §1.2, §1.1b and §3.8 each record: a delta read without
+its levels, where the null moved rather than the substrate. This project has been caught by
+it three times. A prediction likely to be confirmed by the fourth instance is worth less
+than no prediction, because it has to be defended with a known confound attached.
+
+**What `h` = 84 is for instead.** A saturation diagnostic and a hedge against choosing the
+horizon blind: it shows whether the task sits in a regime where substrates can differ at
+all. **Descriptive reporting only.** No claim rests on it, and it may not be promoted (see
+§3.2).
 
 **What this does *not* test.** Contribution 2. Nothing here distinguishes the single-axis
 account from any account in which the connectome simply has more memory. It is a
@@ -105,11 +130,20 @@ consistency check on the transfer, and must be reported as one.
    read from a comment in `task_config.py`. They are recorded here so the exposure is on
    the record: h = 84 NRMSE ~0.09, h = 300 NRMSE ~0.47, at rung 0 on the C. elegans
    substrate. No parquet or figure, on either substrate, was opened.
-2. **Primary metric declared in advance:** **NRMSE at the forecast horizon**, paired
-   within seed as connectome minus null, at **h = 300 primary** and h = 84 secondary.
-   h = 300 is the chaos-limited regime; h = 84 risks a floor effect, so **check for
-   saturation before reading the trend**, and if h = 84 is at the floor for every
-   substrate, report the dose-response as untestable rather than as a null result.
+2. **Primary metric and horizon declared in advance, and not swappable.** The metric is
+   **NRMSE at the forecast horizon**, paired within seed as connectome minus null. The
+   primary horizon is **h = 300**, the chaos-limited regime where substrates can separate;
+   h = 84 is a diagnostic (§2.1).
+
+   > **h = 300 may not be swapped for h = 84 after the data is seen**, and h = 84 may not
+   > be promoted to primary because it happens to look better. Both horizons are collected
+   > so the *data* exists, not so the *claim* can pick its ground afterwards — with two
+   > horizons, four variants and eleven `f` there is always somewhere a difference holds,
+   > which is the whole reason this mapping is declared in advance. If h = 300 turns out to
+   > sit at the no-skill ceiling for every substrate, the honest report is **"MG was
+   > uninformative at the pre-declared horizon"**, with h = 84 shown descriptively beside
+   > it and labelled as not pre-declared. That is a publishable sentence. Quietly leading
+   > with h = 84 is not.
 3. **`mean_curvature`, `participation_ratio` and `mean_gain` are computed inline on MG
    driven states**, since they cannot be recovered from the persisted Gram spectra. Done:
    `phase_diagram/capture.py` computes all three for every task in the list.
