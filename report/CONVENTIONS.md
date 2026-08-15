@@ -53,11 +53,19 @@ checked against `TIER0`.
 
 Fixed in session 0 and held across every figure so the chapters sit together.
 
-- **Variant colours** (never varied), assigned once in `report/figlib/style.py`. **All
-  seven rungs**, not five: the criticality-matched programme sweeps four
-  (`connectome`, `connectome_weight_permuted`, `degree_rewire`, `erdos_renyi`) but
-  Probe 3's ladder is seven, so `random_gaussian`, `clustering_rewire` and
-  `modularity_rewire` need fixed colours too or F6 invents its own.
+- **Variant colours** (never varied), assigned once in `report/figlib/style.py`.
+  **Four rungs carry almost everything**: `connectome`, `connectome_weight_permuted`,
+  `degree_rewire`, `erdos_renyi` are the ladder the criticality-matched programme sweeps
+  and the only variants in 12 of the 13 variant-bearing figure sources.
+- **Three further rungs exist for exactly one figure.** `random_gaussian`,
+  `clustering_rewire` and `modularity_rewire` appear only in `probe3_deff.parquet`, which
+  feeds **F6 alone** — Probe 3's ladder is seven rungs and the PR-versus-`d_eff` ordering
+  is computed across all of them. They are assigned fixed colours so F6 does not invent
+  its own, and for no other reason. **A colour existing is not licence to add a variant to
+  a ladder figure**: if one of the three turns up outside F6, that is a scope question,
+  not a palette question. (An earlier version of this contract named five variants — the
+  ladder plus `random_gaussian` — which was an odd cut, since rung 0 appears in exactly
+  the same one figure as rungs 3 and 4.)
 - **One substrate, one colour, thesis-wide.** The palette equals
   `src/experiment/plots._VARIANT_STYLE`, so a sweep figure and a committed per-task
   figure put the same substrate in the same colour. `style.check_colour_consistency()`

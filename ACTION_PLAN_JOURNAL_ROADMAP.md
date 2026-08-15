@@ -169,7 +169,7 @@ carefully and skim the middle; the contribution must survive that reading patter
 
 | ch | title | content | status |
 |----|-------|---------|--------|
-| 1 | Introduction | Question; the five contributions as a numbered list; the "not organised for capacity" sentence | to write |
+| 1 | Introduction | Question; the **six** contributions as a numbered list; the "not organised for capacity" sentence | to write |
 | 2 | Background | Connectome reservoirs (Suarez); chaotic-attractor RC (Pathak, Lu, Hunt, Ott, Hart) even though not pursued; memory bounds (Dambre); spectral structure and memory (Aceituno; Rajan-Abbott; Landau & Sompolinsky); E/I structure (Cornford, Li, Srinivasan); neural manifolds (Sadtler, Feulner, Henaff). Name the two competitor papers explicitly | adapt from interim report |
 | 3 | Methods and the comparison problem | Substrates, null ladder, tasks, measures. **Then the two-axis argument as a methods result**: `sigma·W/|λ₁|` has spectral radius exactly sigma, so nominal matching fixes the Perron root and `sigma·bulk95` fixes the bulk. Close on "we therefore report both throughout" | mostly written, needs the two-axis section |
 | 4 | Act I: structure sets the spectrum | Gap-ratio decomposition; E0.4; scale robustness; the `|λ₁|/abs_bulk = 1/bulk95 = sr_crit` identity; extreme-value forensics on `|λ₁|` | results in hand |
@@ -449,7 +449,7 @@ to NMI. If it does not, nothing is lost that was already committed to print.
 2. **Which input drive for Act IV?** Noise is standard for resting-state comparison, but
    task-driven states are what every other result uses. Possibly both.
 3. **NMI scope check.** Is the ML-facing angle strong enough for NMI, or does the paper
-   drift toward PLOS CB / Network Neuroscience as it becomes more neuro? Contribution 4
-   (the methodological critique) and contribution 5 (dimensionality measures) are the two
-   most ML-facing; if they carry weight in the final draft, NMI holds. Revisit once Act IV
-   resolves.
+   drift toward PLOS CB / Network Neuroscience as it becomes more neuro? **Contribution 5**
+   (the methodological critique) and **contribution 6** (dimensionality measures) are the
+   two most ML-facing; if they carry weight in the final draft, NMI holds. Revisit once
+   Act IV resolves.
