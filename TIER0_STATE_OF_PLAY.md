@@ -161,17 +161,36 @@ result lives. The question was whether the supercritical margin scales with N.
 
 Reproduction gate passed at N=448: 210 cells match the frozen `w_spectra.parquet` to
 1.2e-14; documented values return (connectome `bulk95` 0.3249, `sr_crit` 3.078; nulls
-0.489–0.551). Weight-permuted is **0.512**, not the 0.520 quoted in the roadmap.
+0.481–0.553).
+
+**Every number below is a median over seeds**, per §1.3 and `CONVENTIONS`, so `sr_crit`
+is exactly `1 / bulk95` row by row.
 
 | variant | `bulk95` N=448 | `sr_crit` | `bulk95` N=1000 | `sr_crit` |
 |---|---|---|---|---|
 | connectome | 0.3249 | **3.078** | 0.2509 | **3.985** |
-| weight-permuted | 0.5120 | 1.922 | 0.4254 | 2.395 |
-| degree | 0.5238 | 1.873 | 0.4449 | 2.301 |
-| Erdős–Rényi | 0.5509 | 1.807 | 0.4307 | 2.438 |
+| weight-permuted | 0.5203 | 1.922 | 0.4176 | 2.395 |
+| degree | 0.5338 | 1.873 | 0.4346 | 2.301 |
+| Erdős–Rényi | 0.5535 | 1.807 | 0.4102 | 2.438 |
+
+> **Corrected 15 August 2026 (session 0).** The `bulk95` columns previously held the
+> per-seed **mean** while the `sr_crit` columns beside them held `1/median` — the two
+> columns were on different conventions, at both scales, which is exactly the Jensen bias
+> §1.3 exists to prevent. Only the `bulk95` columns moved; every `sr_crit` was already
+> correct, so nothing downstream changes. The roadmap's **0.520** for weight-permuted was
+> right and an earlier note here calling it 0.512 has been withdrawn. Anyone holding
+> 0.5120 / 0.5238 / 0.5509 (N=448) or 0.4254 / 0.4449 / 0.4307 (N=1000) is holding the
+> means. §3.1's table was already on medians and is unchanged.
 
 **The null ordering by `bulk95` reverses between scales** (at N=448 ER > degree; at
-N=1000 ER < degree), so that ordering must not be assumed to carry.
+N=1000 ER < degree), so that ordering must not be assumed to carry. The reversal holds
+under either convention; the ordering of the *other* two nulls does not, which is a
+further reason to quote medians only.
+
+**The connectome/ER `bulk95` ratio rises with scale: 0.587 (N=448) → 0.612 (N=1000).**
+On the withdrawn mean convention it read 0.590 → 0.583, i.e. falling. The direction of
+this ratio depends on the convention, so quote it only as a median and only with both
+values.
 
 ### 2.2 E0.2 — the `f = 0` memory panel (`criticality_matched/`)
 
