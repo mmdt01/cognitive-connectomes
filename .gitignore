@@ -245,6 +245,12 @@ data/human/built_consensus/
 # derived .csv tables duplicate the .md summaries -- both are one command to regenerate.
 experiments/human/analysis/eigenspectrum/figures/**/*.pdf
 experiments/human/analysis/criticality_matched/figures/**/*.pdf
+
+# Sweep figures (report/figlib): same convention -- 300 dpi PNGs tracked, vector PDFs
+# regenerable in one command. The placeholder renders from `--smoke` are a layout check
+# on synthetic data and are never a result, so they stay out of the repo entirely.
+report/figures/_smoke/
+report/figures/**/*.pdf
 experiments/human/analysis/eigenspectrum/results/**/*.csv
 experiments/human/analysis/criticality_matched/results/*.csv
 
