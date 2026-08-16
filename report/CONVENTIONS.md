@@ -54,6 +54,17 @@ checked against `TIER0`.
 Fixed in session 0 and held across every figure so the chapters sit together.
 
 - **Variant colours** (never varied), assigned once in `report/figlib/style.py`.
+  **Amended once, in session 1: the palette is Okabe-Ito.** The session-0 set put the
+  three nulls on purple / pink / light blue, which is weak under deuteranopia and
+  collapses in greyscale — a defect in figures whose job is telling four substrates
+  apart. Okabe-Ito is safe under all three common dichromacies and separates by
+  luminance in greyscale, and it was already the palette of the committed E0.4 figures,
+  so the change also ended a split between those and the sweep. `figlib/style.py` and
+  `src/experiment/plots._VARIANT_STYLE` moved together in one commit and all 15 sweep
+  figures plus the variant-styled per-task figures were re-rendered from frozen
+  parquets. **This was a deliberate one-time amendment and is not a precedent**: the
+  contract below still holds, and a session that wants a different colour reports and
+  stops.
   **Four rungs carry almost everything**: `connectome`, `connectome_weight_permuted`,
   `degree_rewire`, `erdos_renyi` are the ladder the criticality-matched programme sweeps
   and the only variants in 12 of the 13 variant-bearing figure sources.

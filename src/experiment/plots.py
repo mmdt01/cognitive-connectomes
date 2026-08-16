@@ -14,15 +14,20 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import pandas as pd
 
+# Okabe-Ito, colourblind-safe and greyscale-separable by luminance. Moved here from the
+# session-0 set in session 1, thesis-wide and in one commit; see the rationale on
+# `report/figlib/style.VARIANT_COLOUR`, which `style.check_colour_consistency()` asserts
+# this dict equals. **Change one and you must change the other**, or the sweep figures
+# and the per-task figures put the same substrate in two colours.
 _VARIANT_STYLE = {
-    "connectome": dict(color="black", lw=2.4, zorder=5, marker="o", ms=4),
-    "connectome_weight_permuted": dict(color="#9467bd", lw=1.8, ls="-.",
+    "connectome": dict(color="#000000", lw=2.4, zorder=5, marker="o", ms=4),
+    "connectome_weight_permuted": dict(color="#D55E00", lw=1.8, ls="-.",
                                        marker="s", ms=3, zorder=4),
-    "random_gaussian": dict(color="#bbbbbb", lw=1.3, ls="--"),
-    "erdos_renyi": dict(color="#88aadd", lw=1.3, ls="--"),
-    "degree_rewire": dict(color="#e377c2", lw=1.6),
-    "clustering_rewire": dict(color="#2ca02c", lw=1.6),
-    "modularity_rewire": dict(color="#ff7f0e", lw=1.6),
+    "random_gaussian": dict(color="#CC79A7", lw=1.3, ls="--"),
+    "erdos_renyi": dict(color="#009E73", lw=1.3, ls="--"),
+    "degree_rewire": dict(color="#0072B2", lw=1.6),
+    "clustering_rewire": dict(color="#56B4E9", lw=1.6),
+    "modularity_rewire": dict(color="#E69F00", lw=1.6),
 }
 _VARIANT_LABEL = {
     "connectome": "connectome",

@@ -25,16 +25,28 @@ FORMATS = ("pdf", "png")
 
 # ------------------------------------------------------------------------- variants
 # Fixed in session 0, held across every figure. Never varied.
+#
+# **Moved to Okabe-Ito in session 1, deliberately and thesis-wide.** The session-0 set
+# (purple #9467bd / pink #e377c2 / light blue #88aadd for the three nulls) is weak under
+# deuteranopia and collapses in greyscale, which for a figure whose whole job is telling
+# four substrates apart is a defect rather than a taste question. Okabe-Ito is
+# colourblind-safe under deuteranopia, protanopia and tritanopia and separates by
+# luminance in greyscale. It was already the palette of the committed E0.4 figures
+# (`experiments/human/analysis/eigenspectrum/common.VARIANT_COLOR`), so this change also
+# ends a split that existed between those figures and the sweep.
+#
+# `src/experiment/plots._VARIANT_STYLE` moved with it in the same commit --
+# `check_colour_consistency()` asserts the two are equal and would raise otherwise.
 VARIANT_COLOUR = {
-    "connectome": "black",
-    "connectome_weight_permuted": "#9467bd",
-    "degree_rewire": "#e377c2",
-    "erdos_renyi": "#88aadd",
-    "random_gaussian": "#bbbbbb",
+    "connectome": "#000000",                   # black
+    "connectome_weight_permuted": "#D55E00",   # vermillion
+    "degree_rewire": "#0072B2",                # blue
+    "erdos_renyi": "#009E73",                  # bluish green
+    "random_gaussian": "#CC79A7",              # reddish purple
     # The two upper rungs. CONVENTIONS names the five above; these are needed because
     # Probe 3's ladder is seven rungs, and one colour per substrate has to hold there too.
-    "clustering_rewire": "#2ca02c",
-    "modularity_rewire": "#ff7f0e",
+    "clustering_rewire": "#56B4E9",            # sky blue
+    "modularity_rewire": "#E69F00",            # orange
 }
 VARIANT_LABEL = {
     "connectome": "connectome",
@@ -44,6 +56,44 @@ VARIANT_LABEL = {
     "random_gaussian": "rung 0 · random",
     "clustering_rewire": "rung 3 · clustering",
     "modularity_rewire": "rung 4 · modularity",
+}
+# Two-line categorical-axis labels. VARIANT_LABEL is a legend label and is too wide
+# for a four-bar x-axis at 9pt -- splitting on " · " leaves "connectome\nperm.
+# weights", which collides with its neighbours. Same names, same order, wrapped to
+# fit; use these for tick labels and VARIANT_LABEL for legends.
+# Plain substrate names for small-multiple panel titles, where the panels contrast the
+# substrates themselves rather than their position on the null ladder, so the rung
+# numbering carried by VARIANT_LABEL is noise. Matches the committed E0.4 figure's
+# titles, which is where this idiom comes from.
+VARIANT_TITLE = {
+    "connectome": "Connectome",
+    "connectome_weight_permuted": "Weight-permuted",
+    "degree_rewire": "Degree-matching",
+    "erdos_renyi": "Erdős–Rényi",
+    "random_gaussian": "Random gaussian",
+    "clustering_rewire": "Clustering-matching",
+    "modularity_rewire": "Modularity-matching",
+}
+VARIANT_TICK = {
+    "connectome": "connec-\ntome",
+    "connectome_weight_permuted": "perm.\nweights",
+    "degree_rewire": "rung 2\ndegree",
+    "erdos_renyi": "rung 1\nER",
+    "random_gaussian": "rung 0\nrandom",
+    "clustering_rewire": "rung 3\nclust.",
+    "modularity_rewire": "rung 4\nmodul.",
+}
+# Wrapped VARIANT_TITLE, for a categorical axis inside a figure whose other panels are
+# titled with VARIANT_TITLE. Mixing the two naming schemes in one figure (rung numbers
+# on the axis, plain names on the panels) makes them read as different sets of things.
+VARIANT_TITLE_TICK = {
+    "connectome": "Connectome",
+    "connectome_weight_permuted": "Weight-\npermuted",
+    "degree_rewire": "Degree-\nmatching",
+    "erdos_renyi": "Erdős–\nRényi",
+    "random_gaussian": "Random\ngaussian",
+    "clustering_rewire": "Clustering-\nmatching",
+    "modularity_rewire": "Modularity-\nmatching",
 }
 # Substrate first, then the null ladder outward from it. Legends follow this order.
 VARIANT_ORDER = ["connectome", "connectome_weight_permuted", "degree_rewire",
@@ -139,8 +189,26 @@ def apply_rcparams() -> None:
 
 
 # ----------------------------------------------------------------------- furniture
-def panel_label(ax, letter: str, dx: float = -0.08, dy: float = 1.06) -> None:
-    """Lower-case bold panel label at the top left, per the style contract."""
+def panel_label(ax, letter: str, dx: float = -0.08, dy: float = 1.06,
+                offset_points: tuple = None) -> None:
+    """Lower-case bold panel label at the top left, per the style contract.
+
+    ``dx`` / ``dy`` are **axes fractions**, so the absolute offset they buy scales with
+    the panel. That is fine while a figure's panels are all one size, which is true of
+    every figure here except F1, and it is why this remains the default.
+
+    Pass ``offset_points=(dx_pt, dy_pt)`` instead when a figure mixes panel sizes: the
+    label is then placed a fixed distance from the axes' top-left corner regardless of
+    how tall the panel is, which is what makes a set of labels line up. F1 stacks four
+    short rows beside two tall panels (91.8 px against 203.0 px), where the same ``dy``
+    put the 'e' 21.5 px higher on the page than the 'a' beside it.
+    """
+    if offset_points is not None:
+        ax.annotate(letter, xy=(0.0, 1.0), xycoords="axes fraction",
+                    xytext=offset_points, textcoords="offset points",
+                    fontsize=PANEL_LABEL_SIZE, fontweight="bold",
+                    va="bottom", ha="right")
+        return
     ax.text(dx, dy, letter, transform=ax.transAxes, fontsize=PANEL_LABEL_SIZE,
             fontweight="bold", va="top", ha="right")
 
