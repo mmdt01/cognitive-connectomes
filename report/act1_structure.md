@@ -589,6 +589,22 @@ and anything a later session needs to know.
     across human MC / NARMA-10 / Lorenz at both scales and C. elegans Mackey-Glass at
     both horizons. No simulation ran. MG was included because
     `PREREG_MACKEY_GLASS.md` §§1-3 are written and committed, lifting working rule 6.
+
+    **Extended to the manifold probes, where the obvious entry point would have
+    regenerated a frozen source.** Six further committed figures use `_VARIANT_STYLE`:
+    probe1's `manifold_{pr,mean_curvature,spectral_entropy}_vs_sr.png` and probe3's
+    `probe3_deff_{vs_mc,vs_sr,two_axis}.png`. **None is a thesis figure** —
+    `FIGURE_LIST` is canonical for those, and Act II's chapter figures F4 to F6 render
+    through `figlib` on the current palette — so these are analysis-time artifacts,
+    refreshed only so the repo does not carry two palettes. The trap: `probe3.run_deff`
+    describes itself as *"No reservoir runs"*, which is true of compute, but it
+    **rewrites `probe3_deff.parquet`** — the frozen source F6 reads and the one
+    `TIER0` §3.12's numbers were promoted from. `probe3.run` likewise rewrites
+    `manifold_geometry_performance.parquet` and `manifold_gap_tracking.parquet`. The
+    tool therefore reads the frozen parquets and calls the plotting functions directly
+    (probe3's are private `_plot_*`; that is deliberate), and **fingerprints every
+    parquet under `experiments/` before and after, raising if one moves**. 90 parquets,
+    unchanged, verified on the run that produced these six.
 12. **Two tracked figures were already stale before this session and remain so.**
     `celegans_mackey_glass/figures/h{84,300}/effect_sizes_vs_spectral_radius.png` are
     untagged legacy names from before `plots.py` began metric-tagging its effect-size
