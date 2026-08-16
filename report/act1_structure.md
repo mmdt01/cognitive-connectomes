@@ -406,7 +406,7 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   assertions live in the shared path.
 - **Governance.** `CONVENTIONS` working rule 3 is "no figure that is not on
   `FIGURE_LIST.md` — if one seems missing, report and stop", and `FIGURE_LIST` caps the
-  main text at 15 with `figures.py` asserting it. A scale replicate is exactly the case
+  main text at 15 with `figures/__init__.py` asserting it. A scale replicate is exactly the case
   that would erode a cap by increments, so it went into a **separate `SUPPLEMENTARY`
   registry** instead: `FIGURES` still holds 15 and still carries its assertion. The bar
   recorded in `FIGURE_LIST` is that an S-figure makes no claim the main text does not
@@ -585,9 +585,11 @@ and anything a later session needs to know.
 9. **`style.VARIANT_TICK` added.** `VARIANT_LABEL` is a legend label and is too wide for a
    four-category bar axis at 8pt — "connectome" and "perm. weights" overlapped in F2 and
    F3. A two-line tick variant was added to `report/figlib/style.py`. **Applied to F2 and
-   F3 only.** Four other builders (lines ~413, ~446, ~618 of `figures.py`, belonging to
-   later sessions' figures) still split `VARIANT_LABEL` on " · " and will have the same
-   collision; they are those sessions' to change, and the helper is there for them.
+   F3 only.** F7 and F9 (`figures/act3_memory.py`) and F13
+   (`figures/act3_prediction.py`) still split `VARIANT_LABEL` on " · " and will hit the
+   same collision; they are those sessions' to change, and the helper is there for them.
+   Note F7 and F13 have panels narrower than F2's, so a straight tick swap will not fit —
+   they will want F2's figure-legend treatment instead.
 10. **The palette moved to Okabe-Ito, thesis-wide, on the author's decision.** The
     session-0 set put the three nulls on purple `#9467bd` / pink `#e377c2` / light blue
     `#88aadd`, which is weak under deuteranopia and collapses in greyscale — a defect in
@@ -695,7 +697,38 @@ and anything a later session needs to know.
     the row that could not show either problem, and both survived several rounds of
     inspection because of it. Shared-grid histograms drawn against per-series reference
     lines should be assumed guilty until measured.
-14. **N=1000 now has a cell-for-cell reproduction, which it did not before.** E0.4's
+14. **`figures.py` split into a package, one module per act.** It had reached 1006
+    lines and was still growing; four more sessions add to it. Split along the section
+    banners it already carried, so the seams were structural rather than invented:
+    `figures/__init__.py` (registry + cap assertion), `common.py`, and
+    `act1_structure` / `act2_manifold` / `act3_memory` / `act3_prediction` /
+    `act4_anchor` — **one module per act, which is one module per sweep session**, so
+    sessions 2 to 4 each edit one file. Largest is now 428 lines (Act I, which carries
+    the 237-line shared `_spectrum_figure` behind F1 and S1).
+
+    **The act decides the module, not the chapter.** F3 prints in chapter 3 but is Act
+    I's argument and Session 1 renders it; F16 prints in chapter 6 but needs both Act III
+    arms so Session 4 renders it. Chapter 6 splits cleanly along the two arms, which is
+    also the sessions-3/4 boundary.
+
+    **The registry stayed central deliberately.** A per-module registry merged at import
+    time could be grown one figure at a time without anything noticing — exactly the
+    drift `FIGURE_LIST`'s cap of 15 exists to prevent. It stays in `__init__.py` with the
+    assertion, and that assertion was tested by injection (a bogus 16th entry raises
+    `cap is 15 figures, registry holds 16`) rather than assumed.
+
+    **Verified byte-identical.** Renders were first shown deterministic across two runs,
+    making a hash comparison a meaningful gate; all 16 figures then hashed identically
+    before and after the move. Public names are unchanged, so
+    `from report.figlib.figures import FIGURES` still resolves and `--only`, `--smoke`,
+    `--all` are unaffected. No unused imports left behind (checked per module).
+
+    **`sources.py` was deliberately not split.** At 669 lines it has the same shape, but
+    its natural axis is different: sources are shared across acts (`spectra_both` feeds
+    F2, `taskb` feeds F7), so an act split would cut across the grain. If it is ever
+    split it should be by experiment — eigenspectrum, criticality_matched, manifold
+    probes, phase diagram — and not in the same change.
+15. **N=1000 now has a cell-for-cell reproduction, which it did not before.** E0.4's
     `reproduction_gate` skips at N=1000 for want of a committed `w_spectra.parquet`
     reference, so `TIER0` §2.1's "Reproduction gate passed at N=448" was the only such
     statement on record. Rebuilding all 40 N=1000 ladder cells from

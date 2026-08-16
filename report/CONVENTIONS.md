@@ -90,6 +90,14 @@ Fixed in session 0 and held across every figure so the chapters sit together.
 - Every figure is produced by the shared figure module reading frozen parquets. **No
   hand-tuned one-offs** — when a number moves, everything rebuilds.
   `python -m report.figlib --verify | --smoke | --all | --only F7`.
+- **One builder module per act, which is one module per session.** `report/figlib/
+  figures/` is a package: the registry and its cap assertion in `__init__.py`, the
+  builders in `act1_structure` / `act2_manifold` / `act3_memory` / `act3_prediction` /
+  `act4_anchor`. **Edit your own act's module and nothing else** — a session touching
+  another act's builders is either a cross-act figure (F3 and F16, whose owners
+  `FIGURE_LIST` names explicitly) or a mistake. The registry stays central precisely so
+  the cap cannot be raised a module at a time. Genuinely cross-act constants go in
+  `figures/common.py`; act-local thresholds stay with the act that uses them.
 
 ## Working rules
 

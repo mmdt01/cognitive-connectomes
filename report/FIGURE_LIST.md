@@ -18,6 +18,23 @@ figure is built by `report/figlib` (`python -m report.figlib --only F7`), and th
 below are the ones encoded in `report/figlib/sources.py`, not a parallel description of
 them.
 
+**Where a figure's builder lives.** `report/figlib/figures/` is a package with the
+registry in `__init__.py` and the builders in **one module per act, which is one module
+per sweep session** — so a session edits its own module and nothing else:
+
+| module | session | figures |
+|---|---|---|
+| `act1_structure.py` | 1 | F1, F2, **F3**, S1 |
+| `act2_manifold.py` | 2 | F4, F5, F6 |
+| `act3_memory.py` | 3 | F7, F9, F10, F11 |
+| `act3_prediction.py` | 4 | F12, F13, F14, **F16** |
+| `act4_anchor.py` | — | F15 |
+
+**The act decides the module, not the chapter**, and the two cross-act figures are why
+that matters: F3 prints in chapter 3 but is Act I's argument and Session 1 renders it;
+F16 prints in chapter 6 but needs both Act III arms, so Session 4 renders it. The
+per-figure ownership flags below remain canonical.
+
 **Cut made:** the draft's F3 and F8 both served contribution 5 and were merged into one
 two-panel F3 in chapter 3 where contribution 5 lives. **F8 is retired and its ID left
 unused** rather than renumbering, so references elsewhere still resolve. **Session 1 then
@@ -60,8 +77,8 @@ itself.
 
 **Added 15 August 2026 (session 1), at the author's request.** These are **not** part of
 the numbered main-text list and do **not** consume a main-text slot: `FIGURES` in
-`report/figlib/figures.py` still holds exactly 15 and still carries the assertion that
-enforces it. S-figures live in a separate `SUPPLEMENTARY` registry, and
+`report/figlib/figures/__init__.py` still holds exactly 15 and still carries the
+assertion that enforces it. S-figures live in a separate `SUPPLEMENTARY` registry, and
 `python -m report.figlib` renders both. The rule that no figure exists outside this file
 still binds, which is why they are listed here.
 
