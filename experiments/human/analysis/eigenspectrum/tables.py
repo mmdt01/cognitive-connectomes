@@ -49,9 +49,13 @@ from experiments.human.analysis.eigenspectrum import common
 # means the substrate or the spectral code has changed and the run must stop.
 _HEADLINE_448 = {
     "connectome": dict(bulk95=0.325, tol=0.005, sr_crit=3.08, sr_tol=0.05),
-    # The task spec and ACTION_PLAN quote 0.520 for the weight-permuted control, but
-    # the committed spectral_metrics.md has 0.512. Gated on the committed value; the
-    # doc drift is reported, not silently accepted (see the E0.4 summary).
+    # The two numbers are two AGGREGATORS of the same cells, not a disagreement:
+    # 0.5120 is the per-seed MEAN and 0.5203 is the MEDIAN. The roadmap's 0.520 is the
+    # median and is the correct figure (TIER0 sec 2.1, corrected 15 Aug 2026); the
+    # earlier reading of it as "documentation drift" was backwards and is withdrawn.
+    # This gate compares against `means` below, so the threshold stays on 0.512 -- it
+    # is gating the mean against the mean. Fix the aggregator (see `summarise`, which
+    # is already on the median) rather than this number.
     "connectome_weight_permuted": dict(bulk95=0.512, tol=0.010, quoted=0.520),
 }
 _NULL_BAND = (0.48, 0.56)      # documented "nulls ~0.48-0.55", with rounding headroom
@@ -184,11 +188,15 @@ def headline_gate(df: pd.DataFrame, scale: int) -> dict:
             if not ok_sr:
                 failures.append(f"{variant} sr_crit {got_sr:.4f} != {spec['sr_crit']}")
         if "quoted" in spec and abs(got - spec["quoted"]) > spec["tol"]:
+            median = float(emp[emp.variant == variant].bulk95.median())
             notes.append(
-                f"{variant}: measured bulk95 = {got:.4f}, but the task spec and "
-                f"ACTION_PLAN_JOURNAL_ROADMAP.md quote {spec['quoted']:.3f}. The "
-                f"committed spectral_metrics.md agrees with the measurement "
-                f"({spec['bulk95']:.3f}); the quoted figure is a documentation drift.")
+                f"{variant}: this gate's bulk95 = {got:.4f} is the per-seed MEAN; the "
+                f"median is {median:.4f}, and ACTION_PLAN_JOURNAL_ROADMAP.md's "
+                f"{spec['quoted']:.3f} is the median and is correct. The two are "
+                f"aggregators of the same cells, not a discrepancy. Report the median "
+                f"(CONVENTIONS, sr_crit = 1/median(bulk95)); this gate and the "
+                f"mean +/- sd table in bulk95_summary.md are still on the mean and "
+                f"should move to the median when E0.4 is next re-run.")
 
     lo, hi = _NULL_BAND
     for variant in _NULL_VARIANTS:
