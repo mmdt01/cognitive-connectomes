@@ -37,6 +37,8 @@ Two gates run before anything is written:
    than writing a table, because a change here invalidates everything downstream.
 """
 
+import json
+
 import numpy as np
 import pandas as pd
 
@@ -253,13 +255,20 @@ def _markdown(summary: pd.DataFrame, scale: int, n_nodes: int, gates: dict) -> s
         "(no reservoir simulation).\n",
         f"`{common.BULK95_DEFINITION}`\n",
         f"`{common.SR_CRIT_CONVENTION}`\n",
-        "Values are **mean ± sd across seeds**, except `sr_crit`, which is "
-        "`1 / median(bulk95)` (a single number, not a mean of per-seed values). "
-        "`lambda_max_raw` is the "
-        "un-normalised `|λ₁|` the reservoir build divides out; every other column is "
-        "on the normalised base `W / |λ₁|`. The connectome has sd = 0 by "
-        "construction in the empirical column -- it is one fixed graph, only the "
-        "nulls are resampled.\n",
+        "Values are **median across seeds**, with the sd beside them as a spread. The "
+        "median is the reported aggregate throughout, per `SR_CRIT_CONVENTION` above, "
+        "so `sr_crit` is exactly `1 / bulk95` row by row and a reader can reproduce it "
+        "by hand. **This table previously printed the per-seed MEAN beside a "
+        "`1/median` `sr_crit`** -- two conventions in adjacent columns, which is the "
+        "Jensen trap the convention exists to prevent, and which put the withdrawn "
+        "0.5120 / 0.5238 / 0.5509 (N=448) into circulation. `TIER0` §2.1 corrected the "
+        "published values on 15 August 2026; this file followed on 16 August. The "
+        "per-seed mean is still in `bulk95_summary.csv` as `bulk95_mean` for anyone "
+        "who wants it.\n",
+        "`lambda_max_raw` is the un-normalised `|λ₁|` the reservoir build divides out; "
+        "every other column is on the normalised base `W / |λ₁|`. The connectome has "
+        "sd = 0 by construction in the empirical column -- it is one fixed graph, only "
+        "the nulls are resampled.\n",
     ]
     for condition in common.CONDITIONS:
         sub = summary[summary.condition == condition]
@@ -267,18 +276,18 @@ def _markdown(summary: pd.DataFrame, scale: int, n_nodes: int, gates: dict) -> s
             continue
         lines += [
             f"\n## `{condition}`\n",
-            "| variant | bulk95 | sr_crit = 1/median(bulk95) | outlier-to-bulk gap | "
-            "\\|λ₂\\|/\\|λ₁\\| | λ_max (raw) |",
+            "| variant | bulk95 (median ± sd) | sr_crit = 1/median(bulk95) | "
+            "outlier-to-bulk gap | \\|λ₂\\|/\\|λ₁\\| | λ_max (raw) |",
             "|---|---|---|---|---|---|",
         ]
         for row in sub.itertuples():
             lines.append(
                 f"| {common.VARIANT_TITLE.get(row.variant, row.variant)} "
-                f"| {row.bulk95_mean:.4f} ± {row.bulk95_std:.4f} "
+                f"| {row.bulk95_median:.4f} ± {row.bulk95_std:.4f} "
                 f"| {row.sr_crit:.3f} "
-                f"| {row.outlier_bulk_gap_mean:.4f} ± {row.outlier_bulk_gap_std:.4f} "
-                f"| {row.lambda2_ratio_mean:.4f} ± {row.lambda2_ratio_std:.4f} "
-                f"| {row.lambda_max_raw_mean:.4f} ± {row.lambda_max_raw_std:.4f} |")
+                f"| {row.outlier_bulk_gap_median:.4f} ± {row.outlier_bulk_gap_std:.4f} "
+                f"| {row.lambda2_ratio_median:.4f} ± {row.lambda2_ratio_std:.4f} "
+                f"| {row.lambda_max_raw_median:.4f} ± {row.lambda_max_raw_std:.4f} |")
 
     lines.append("\n## Gates\n")
     repro, head = gates.get("reproduction", {}), gates.get("headline", {})
@@ -292,6 +301,57 @@ def _markdown(summary: pd.DataFrame, scale: int, n_nodes: int, gates: dict) -> s
     for note in head.get("notes", []):
         lines.append(f"- NOTE: {note}")
     return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# Derived-summary rewrite (no capture)
+# ---------------------------------------------------------------------------
+def rewrite_summaries(scale: int) -> pd.DataFrame:
+    """Rebuild `bulk95_summary.{csv,md}` from the frozen `spectra_per_seed.parquet`.
+
+    For when the *presentation* changes but the numbers do not -- as when this table
+    moved off the per-seed mean and onto the median. `run()` would do the same job, but
+    it re-captures 210 eigendecompositions and **rewrites
+    `spectra_per_seed.parquet`**, which F1, F2 and S1 read; regenerating a frozen source
+    to fix a rendering is exactly what `CONVENTIONS` working rule 1 forbids. The summary
+    is a pure function of that parquet (verified: `summarise()` on the frozen file
+    reproduces the committed CSV to 1e-12 at both scales), so it can be rebuilt without
+    touching it.
+
+    The gate lines are replayed from `manifest_tables.json` rather than re-run, and
+    labelled as such: no gate is executed here, and claiming one would be a lie in a
+    provenance file.
+    """
+    results_dir, _ = common.scale_dirs(scale)
+    frozen = results_dir / "spectra_per_seed.parquet"
+    if not frozen.exists():
+        raise FileNotFoundError(f"{frozen} absent -- run --tables first.")
+
+    before = (frozen.stat().st_mtime_ns, frozen.stat().st_size)
+    df = pd.read_parquet(frozen)
+    n_nodes = int(np.asarray(df.eig_w_real.iloc[0]).size)
+    summary = summarise(df)
+
+    manifest_path = results_dir / "manifest_tables.json"
+    gates = {}
+    if manifest_path.exists():
+        gates = json.loads(manifest_path.read_text()).get("config", {}).get("gates", {})
+
+    summary.to_csv(results_dir / "bulk95_summary.csv", index=False)
+    text = _markdown(summary, scale, n_nodes, gates).replace(
+        "\n## Gates\n",
+        "\n## Gates\n\n> Replayed from `manifest_tables.json`; this rewrite ran no "
+        "gate. It rebuilt the summary from the frozen `spectra_per_seed.parquet` "
+        "without re-capturing, so the gate results below are those of the run that "
+        "produced that parquet.\n")
+    (results_dir / "bulk95_summary.md").write_text(text)
+    print(f"Rewrote {results_dir / 'bulk95_summary.csv'} and "
+          f"{results_dir / 'bulk95_summary.md'} from the frozen spectra")
+
+    after = (frozen.stat().st_mtime_ns, frozen.stat().st_size)
+    assert before == after, (
+        f"{frozen} changed during a summary rewrite; it must be read-only here.")
+    return summary
 
 
 # ---------------------------------------------------------------------------

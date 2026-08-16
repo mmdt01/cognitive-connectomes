@@ -481,26 +481,45 @@ written by hand, not generated (see the roadmap §4b note on drafting).
 Anything that did not reproduce, any number that moved, any claim that had to be weakened,
 and anything a later session needs to know.
 
-1. **The mixed-convention defect is still live in the code, though `TIER0` is fixed.**
-   `TIER0` §2.1 was corrected in session 0 (commit `861984e`), but the artifact that
-   produced the withdrawn values has not been touched and still reports them:
-   `eigenspectrum/results/scale_{448,1000}/bulk95_summary.md` prints `bulk95` as
-   **mean ± sd** in a column beside `sr_crit = 1/median(bulk95)` — the two conventions
-   side by side, which is what §1.3 exists to prevent. The committed N=448 table there
-   still reads 0.5120 / 0.5238 / 0.5509 for the nulls. Two code sites:
-   `experiments/human/analysis/eigenspectrum/tables.py:164-165` (`headline_gate` builds
-   `means` from `.mean()` then attaches `1/median` `sr_crit` to it) and
-   `tables.py:_markdown` (the "mean ± sd" table).
-   **Additionally, `_HEADLINE_448`'s note is backwards**: it gates weight-permuted at
-   0.512 and emits "the task spec and ACTION_PLAN quote 0.520 ... the quoted figure is a
-   documentation drift". 0.520 is the **median** and is correct; 0.512 is the mean. The
-   note text has been corrected in place (comment only — no gate threshold, no computed
-   value, and therefore no artifact, was changed). **The `.md` files themselves are not
-   regenerated**: no listed figure needs a re-run (`CONVENTIONS` working rule 4), and
-   regenerating an artifact is not how a mismatch is resolved (rule 1). Whoever next runs
-   E0.4 should fix `summarise`/`_markdown` to report the median and re-emit both scales.
-   **Nothing downstream is affected** — no figure or table reads `bulk95_summary.md`, and
-   every `sr_crit` was already on the median.
+1. **The mixed-convention defect — RESOLVED 16 August 2026, after being mis-scoped
+   twice.** `TIER0` §2.1 was corrected in session 0 (commit `861984e`), but the code that
+   produced the withdrawn values was not: `tables.py:_markdown` printed `bulk95` as
+   **mean ± sd** in a column beside `sr_crit = 1/median(bulk95)` — two conventions side by
+   side, which is exactly the Jensen trap §1.3 exists to prevent, and the origin of the
+   withdrawn 0.5120 / 0.5238 / 0.5509. `_HEADLINE_448`'s note was also backwards, calling
+   the correct median (0.520) "a documentation drift" against the mean (0.512).
+
+   **Two things this session got wrong about it, corrected here.** First, the note was
+   described as needing an E0.4 re-run to clear. It did not: the summary is a pure
+   function of the frozen `spectra_per_seed.parquet` — verified, `summarise()` on that
+   file reproduces the committed CSV to 1e-12 at both scales — so it can be rebuilt
+   without re-capturing. `run()` would have re-captured 210 eigendecompositions **and
+   rewritten `spectra_per_seed.parquet`**, the source F1, F2 and S1 read, which working
+   rule 1 forbids. `tables.rewrite_summaries(scale)` does the rebuild instead, asserts
+   the parquet does not move, and replays the gate lines from `manifest_tables.json`
+   labelled as replayed rather than claiming a gate it did not run.
+
+   Second, this file and commit `e992cfc` both called the summaries **"committed"**. They
+   are not. `.gitignore` excludes the whole of `eigenspectrum/results/` — parquets (229),
+   CSVs (254), markdown (265) and manifests (267) — so every E0.4 output is a local,
+   regenerable artifact. Nothing in the repo ever carried the withdrawn numbers; what
+   carried them was the generator, which is tracked and is now fixed.
+
+   **Why the summaries were not simply deleted**, which was the proposal: `bulk95_
+   summary.csv` is a **live dependency**, read by
+   `criticality_matched/common.py:eigenspectrum_summary()` — the E0.2/E0.3 pipeline that
+   produces F3's source — and by `eigenspectrum/summary.py`, with
+   `criticality_matched/__main__.py` erroring if the N=1000 file is absent. It is also
+   not defective: it carries `bulk95_mean` **and** `bulk95_median` alongside
+   `sr_crit`. Only the `.md` rendering was wrong, and deleting a generated file would
+   have left the generator intact to recreate it.
+
+   Both scales' `.md` and `.csv` are now rebuilt from the frozen spectra. The N=448
+   human_empirical table reads 0.3249 / 3.078, 0.5203 / 1.922, 0.5338 / 1.873,
+   0.5535 / 1.807 — `TIER0` §2.1 exactly, with `sr_crit` now reproducible by hand as
+   `1 / bulk95` row by row. The header records what the table used to print and why it
+   changed.
+
 2. **The spread convention was not documented and had to be recovered.** `TIER0` §3.1
    quotes 4.4% / 6.4% / 6.9% / 47.3% / 48.5% without saying how a "spread" is formed.
    Only **range / mean** reproduces all five; range/min gives 4.51/6.72/7.18/70.35/73.20
