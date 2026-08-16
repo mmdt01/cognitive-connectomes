@@ -18,9 +18,12 @@ figure is built by `report/figlib` (`python -m report.figlib --only F7`), and th
 below are the ones encoded in `report/figlib/sources.py`, not a parallel description of
 them.
 
-**Cut made:** the draft's F3 and F8 both served contribution 5 and are now **one two-panel
-figure, F3**, in chapter 3 where contribution 5 lives. **F8 is retired and its ID left
-unused** rather than renumbering, so references elsewhere still resolve. **F16 added** for
+**Cut made:** the draft's F3 and F8 both served contribution 5 and were merged into one
+two-panel F3 in chapter 3 where contribution 5 lives. **F8 is retired and its ID left
+unused** rather than renumbering, so references elsewhere still resolve. **Session 1 then
+cut the merged-in panel too** (see the F3 flag): the two panels argued different things
+and read as two half-figures, so F3 is now a single panel and F8's content is methods
+prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
 contribution 2. Rendered figures: F1 to F7, F9 to F16 = 15. IDs are stable identifiers,
 not a reading order, so F16 sitting in chapter 6 after chapter 7's F15 is intended.
 
@@ -29,9 +32,9 @@ verified, see the flag below the table.
 
 | id | ch | contr. | claim it carries | source, columns, filter | status | W |
 |----|----|--------|------------------|-------------------------|--------|---|
-| F1 | 4 | 1 | The spectrum is one large real Perron eigenvalue separated from a bulk that is essentially the nulls' bulk | `eigenspectrum/results/scale_448/spectra_per_seed.parquet`; `eig_w_real` (448 floats/row), `bulk95`; filter `condition == "human_empirical"` and `variant in LADDER` (40 rows) | confirmed* | W |
-| F2 | 4 | 1 | The difference is a **gap**, not a bulk: absolute bulk near-identical (4.4% spread at N=448), gap ratio 3.078 vs 1.81-1.92 | same file at `scale_448` **and** `scale_1000`; `abs_bulk = bulk95 * lambda_max_raw` (median over seeds), `gap_ratio = 1/median(bulk95)` | confirmed* | W |
-| F3 | 3 | 5 | **Neither axis is neutral** (merged F3 + F8). (a) the same E0.2 data on both axes: +343.3 at nominal 4.47 / -217.4, against +196.5 at `sigma·bulk95` 1.949 / -24.0. (b) why: `\|lambda_1\|` is a non-concentrating order statistic, so the per-seed normaliser is noise the permuted-multiset control does not carry | (a) `criticality_matched/results/e02_panel.parquet` filter `interp == "linear"`, cols `x, dD_median, dD_q25, dD_q75, axis`; plus `e02_axis_summary.csv` (2 rows). (b) `spectra_per_seed.parquet` both scales, `lambda_max_raw` relative s.d. across seeds | confirmed* | |
+| F1 | 4 | 1 | The spectrum is one large real Perron eigenvalue separated from a bulk that is essentially the nulls' bulk | `eigenspectrum/results/scale_448/spectra_per_seed.parquet`; `eig_w_real` (448 floats/row), `bulk95`, `lambda_max_raw`; filter `condition == "human_empirical"` and `variant in LADDER` (40 rows) | confirmed* | W |
+| F2 | 4 | 1 | The difference is a **gap**, not a bulk: absolute bulk near-identical (4.4% spread at N=448), gap ratio 3.078 vs 1.81-1.92 | same file at `scale_448` **and** `scale_1000`; `abs_bulk = median(bulk95) * median(lambda_max_raw)`, `gap_ratio = 1/median(bulk95)` | confirmed* | W |
+| F3 | 3 | 5 | **Neither axis is neutral.** (a) connectome and ER on nominal sigma, (b) the same two on `sigma·bulk95`, (c) the deltas: +343.3 at nominal 4.47 / -217.4, against +196.5 at 1.949 / -24.0 | `criticality_matched/results/e02_panel.parquet` filter `interp == "linear"`, cols `x, axis, d_eff_connectome, d_eff_erdos_renyi, dD_median, dD_q25, dD_q75`; plus `e02_axis_summary.csv` (2 rows) | confirmed* | |
 | F4 | 5 | (Act II) | The Perron mode is a common mode: it carries the mean, and after time-centring the dominant W-eigenmodes carry ~0 of the fluctuation variance | `results/scale_448/manifold_alignment.parquet` filter `condition == "human_empirical"`, `variant == "connectome"`, `task == "mc"`, supercritical operating point; plus `saturation_diagnostics.parquet` `mean_state` | confirmed* | |
 | F5 | 5 | (Act II) | Sign selects the basis: balanced -> W-eigenmodes, all-positive -> low-frequency graph harmonics | `manifold_alignment.parquet`; one panel per `condition`, curves over `basis in {harmonics, wmodes, random}`, `task == "lorenz"` | confirmed* | |
 | F6 | 5 | 6 | PR misses readout-relevant structure: against measured MC across the seven rungs, `d_eff` orders at **+1.000** and PR at **+0.107**; pooled within-regime +0.998 against +0.308 | `results/scale_448/probe3_deff.parquet`; filter `task == "mc"`, `condition == "human_empirical"`, `spectral_radius >= 3.05`, `alpha == 1e-6` (350 rows, 7 variants) | confirmed | |
@@ -53,9 +56,90 @@ itself.
 
 ---
 
+## Supplementary figures — appendix, outside the cap
+
+**Added 15 August 2026 (session 1), at the author's request.** These are **not** part of
+the numbered main-text list and do **not** consume a main-text slot: `FIGURES` in
+`report/figlib/figures.py` still holds exactly 15 and still carries the assertion that
+enforces it. S-figures live in a separate `SUPPLEMENTARY` registry, and
+`python -m report.figlib` renders both. The rule that no figure exists outside this file
+still binds, which is why they are listed here.
+
+**The bar for an S-figure, so this does not become a way around the cap:** it makes **no
+claim the main text does not already make**, and it is built by an **existing builder at
+different parameters**. Anything needing its own builder is a new figure and goes through
+the cap — report and stop.
+
+| id | main-text twin | what it adds | source, columns, filter | status |
+|----|----|----|----|----|
+| S1 | F1 | F1 rebuilt at **N = 1000**. Same builder, same claim, larger parcellation; shows the gap-ratio separation surviving a 2.2x change in N, and makes the null-ordering reversal visible | `eigenspectrum/results/scale_1000/spectra_per_seed.parquet` (source `spectra_1000`); `eig_w_real` (1000 floats/row), `bulk95`, `lambda_max_raw`; filter `condition == "human_empirical"` and `variant in LADDER` (40 rows) | confirmed |
+
+**S1 — the row ordering is NOT monotone at N=1000, and the caption must not imply it
+is.** Rows a-d are in ladder order, and at N=448 that happens to coincide with descending
+gap ratio (3.08, 1.92, 1.87, 1.81), which is why F1's caption can say "rises from 1.81 to
+3.08". At N=1000 the same rows read **3.99, 2.39, 2.30, 2.44** — the ER row's gap ratio
+exceeds the degree row's, because the null ordering by `bulk95` reverses between scales
+(`TIER0` §2.1). The connectome's ~1.7x separation from every null holds at both. Quote
+the separation, never the sweep down the column.
+
+**S1 — the builder is shared, so F1's flags all apply.** Median-`|lambda_1|` scaling,
+per-row `[-lambda_1, +lambda_1]` binning and the two assertions that guard them are in
+the common code path; S1 cannot drift from F1 without both moving together.
+
+---
+
 ## Flags — read these before rendering
 
 Each is a place a session would otherwise get a defensible-looking figure that is wrong.
+
+**F1 — REBUILT 15 August 2026 (session 1), on the E0.4 figure's layout.** F1 now uses
+the small-multiples layout of the committed `eigenspectrum/figures/fig1_spectrum.png` —
+one substrate per panel, an ECDF, a per-seed strip — with **every axis re-pointed from
+`bulk95` to the gap**. That source figure is titled "Connectome weight placement
+compresses the eigenvalue bulk" and draws all six panels in units of `|lambda_1|`;
+normalising each substrate by its own Perron root, which is the only thing that differs,
+is exactly what makes the connectome's band look narrow.
+
+**(a-d) are stacked vertically down the left on one shared raw-units axis**, so the four
+bulk bands sit at the same page coordinate and the reader sights down the column: the
+bulk edges align (0.0587 to 0.0614, 4.4% spread) while the grey gap out to `lambda_1`
+grows from row d to row a. That stacking is what carries the claim. **(e) is top right
+and is the NORMALISED ECDF** — the units every spectral-radius-matched comparison in the
+thesis uses — where the curves separate everywhere and `bulk95` is readable off the
+95th-percentile crossing (0.325 against 0.52 to 0.55). **(f) is bottom right**: the
+per-seed gap ratio, with `bulk95` on the right-hand axis.
+
+A raw-units ECDF was tried as (e) and dropped: with the panels stacked it made the same
+"common bulk, different tail" point less directly than the stack itself, so (e) was
+freed for the normalised view instead. The consequence is that **a-d carry the entire
+raw-units argument alone**, and the caption must tie (e) back to them as the same
+spectra one division apart rather than leaving the two unit systems to sit unremarked.
+
+**Panels a-d draw one spectrum each** — for the nulls, the seed whose `bulk95` is
+nearest the median — so all four carry 448 eigenvalues at equal sampling noise rather
+than the connectome's 448 against the nulls' pooled 4,480. Panels e and f use all 10
+seeds.
+
+**That spectrum is scaled by the MEDIAN `|lambda_1|`, not by its own seed's, and the
+builder asserts it.** Mixing the two puts the bars and the furniture on different
+aggregations: the seed is chosen for `bulk95`, which constrains its `|lambda_1|` not at
+all, so the largest eigenvalue lands off the `lambda_1` rule — it overshot by 0.0063 on
+the ER row and fell 0.0076 short on the degree row before this was fixed. **The
+connectome row is exact either way**, because it is one fixed graph, so the row a reader
+checks first is the one row that cannot reveal the problem. `eig_w_real` is stored
+normalised, so median-scaling puts the largest bar exactly on the rule by construction.
+See `report/act1_structure.md` §5 for the residual this does *not* remove.
+
+**Each row is binned over exactly `[-lambda_1, +lambda_1]`, and the builder asserts it.**
+A shared bin grid leaves the bar *containing* the extreme eigenvalue overhanging the
+`lambda_1` rule by whatever fraction of a bin width the grid happens to impose — measured
+at 91% and 93% on the weight-permuted and degree rows, and on the negative side too for
+ER. Binning each row over its own `[-lambda_1, +lambda_1]` makes the histogram's support
+exactly the shaded gap, since `lambda_1` is the largest modulus. Bin *count* varies per
+row so bin *width* stays constant to ~0.3%. **Both this and the median-scaling defect
+above were invisible on the connectome row**, which is the row a reader checks first;
+assume shared-grid histograms drawn against per-series reference lines are wrong until
+measured from the rendered artists.
 
 **F1, F2 — the spectra are stored normalised, and one column is mis-named.**
 `perron_root` is 1.0 in every row (the spectrum is stored with `|lambda_1|` divided out),
@@ -72,22 +156,55 @@ aggregation — §3.1 states both). The gap-ratio separation does hold at both
 so the caption must state the scale for the spread and must not carry the null ordering
 across.
 
-**F3 — the draft claim was mis-attributed, and is restated here.** The draft read
-"`|lambda_1|` is an extreme-value statistic (tracks max sampled weight, Hill alpha ~2.3),
-so the nominal axis is anchored to one draw". E0.4 §5 attributes the Hill index (2.49 at
-N=448 -> 2.28 at N=1000) to the **empirical weight pool**, not to `|lambda_1|`;
-`|lambda_1|` *tracks* the largest sampled weight (corr +0.85 to +0.95). And E0.4's own
-stated consequence is that **per-seed `sigma·bulk95` axes inherit that noise**, which is
-why E0.2 aggregates per seed. `TIER0` §1.1 is explicit that the simulated operator's
-spectral radius is **exactly sigma for every variant**, so the nominal axis is not noisy
-in sigma. Defensible wording: *the normaliser is a single non-concentrating order
-statistic, so what nominal matching equalises rests on one sampled weight, and the bulk
-radius each seed actually realises inherits the spread.* The permuted-multiset control
-(relative s.d. exactly 0) is the evidence and belongs in the panel.
+**F3 — REDUCED TO ONE PANEL, 15 August 2026 (session 1).** The draft's F8 had been merged
+in as a second panel (relative s.d. of `|lambda_1|` across seeds). It is now cut. The two
+panels argued **different things**: panel (a) argues *neither axis is neutral*, which
+follows geometrically from F1/F2's finding that the substrates differ in only one
+quantity; the merged-in panel argued *the normaliser is itself unstable*, a related but
+separate criticism. Two arguments in one figure read as two half-figures. Panel (a) makes
+contribution 5's claim on its own, so **F8's content is now methods prose** with its
+numbers inline (`report/act1_structure.md`, claim A1.7), and F3 has no panel letters.
 
-**F3 — the one cross-act figure.** Panel (a) is E0.2 data, but the figure sits in
-chapter 3 and Session 1 owns contribution 5. **Session 1 renders it; Session 3 must not
-re-render it**, and Session 3's E0.2 reproduction gate is what validates panel (a).
+**The numbers the prose must carry, so cutting the panel does not lose them.** All
+recomputed in `act1_structure.md` §5, on the non-negative substrate:
+
+* `|lambda_1|` relative s.d. across seeds — connectome **0** (one fixed graph, nothing
+  resampled); weight-permuted **0.0628** at N=448, 0.0385 at N=1000; degree 0.0885 /
+  0.0908; ER 0.0867 / 0.1285. The permuted control freezes the weight draw, so its
+  residual is the **placement** contribution alone.
+* Largest sampled weight — relative s.d. **0** under permutation (identical multiset every
+  seed), **0.119** at N=448 and 0.167 at N=1000 for the resampling nulls, taking only
+  **2 distinct values across 10 seeds** at N=448 (3 at N=1000), and correlating **+0.854
+  to +0.949** with `|lambda_1|`.
+* **Do not write** "`|lambda_1|` is an extreme-value statistic with Hill alpha ~2.3": E0.4
+  §5 attributes the Hill index (2.49 at N=448 -> 2.28 at N=1000) to the **empirical weight
+  pool**, not to `|lambda_1|`. And `TIER0` §1.1 is explicit that the simulated operator's
+  spectral radius is **exactly sigma for every variant**, so the nominal axis is *not*
+  noisy in sigma. Defensible wording: *the normaliser is a single non-concentrating order
+  statistic, so what nominal matching equalises rests on one sampled weight, and the bulk
+  radius each seed actually realises inherits the spread.*
+* **Do not write** "the permuted-multiset control has relative s.d. exactly 0" without
+  saying of what. It is exactly 0 for the largest sampled **weight**, and 0.0628 for
+  `|lambda_1|`. An earlier version of this entry conflated the two.
+
+**F3 — (a) and (b) are NOT expected to subtract to (c).** `dD_median` is the median over
+seeds of the **per-seed difference**; `d_eff_connectome` and `d_eff_erdos_renyi` are the
+medians of each substrate **separately**, and the median of differences is not the
+difference of medians. They part by up to **9.4** on the nominal axis and **8.3** on the
+matched one; at the peak, +343.3 against +338.1. (c) keeps the paired per-seed statistic
+because that is the correct one for a paired comparison and is what `TIER0` §2.2
+publishes; **the caption states the discrepancy** rather than hiding it. Do not "fix" it
+by redrawing (c) as the difference of medians — that would abandon the published numbers.
+
+**F3 — the `d_eff = N` ceiling is load-bearing, not decoration.** ER runs along it (peak
+0.997 of N = 448, against the connectome's 0.965), so the connectome "advantage" in (c)
+is largely how far below ceiling the connectome sits and where. `CONVENTIONS` requires
+the ceiling on every memory figure; here it is also the reason panels (a) and (b) earn
+their space.
+
+**F3 — the one cross-act figure.** The data is E0.2's, but the figure sits in chapter 3
+and Session 1 owns contribution 5. **Session 1 renders it; Session 3 must not re-render
+it**, and Session 3's E0.2 reproduction gate is what validates it.
 
 **F4, F5 — RESOLVED 15 Aug 2026: Act II now has a `TIER0` section.** Probe 2 and Probe 3
 were promoted into **`TIER0` §3.12**, with every number recomputed from the frozen

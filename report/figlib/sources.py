@@ -517,6 +517,12 @@ SOURCES = {
         "condition == 'human_empirical' and variant in the four-variant ladder; "
         "40 rows (4 variants x 10 seeds). abs_bulk and gap_ratio derived here.",
         lambda: _spectra(448), lambda: _ph_spectra(448)),
+    "spectra_1000": Source(
+        "spectra_1000", EIGEN / "scale_1000/spectra_per_seed.parquet",
+        ("eig_w_real", "bulk95", "lambda_max_raw", "abs_bulk", "gap_ratio"),
+        "same filter as spectra_448 at the larger parcellation; 40 rows "
+        "(4 variants x 10 seeds), 1000 floats per eig_w_real. Feeds S1.",
+        lambda: _spectra(1000), lambda: _ph_spectra(1000)),
     "spectra_both": Source(
         "spectra_both", EIGEN / "scale_1000/spectra_per_seed.parquet",
         ("bulk95", "lambda_max_raw", "abs_bulk", "gap_ratio", "scale"),
