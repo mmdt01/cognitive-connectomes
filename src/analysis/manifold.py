@@ -13,12 +13,19 @@ Two axes (following the manifold-probe plan):
   state covariance ``C = cov(X)``. PR counts effective dimensions; entropy weights
   the low-variance tail differently, so PR and entropy diverging is a signal that
   a heavy-tailed weight regime is reshaping the geometry.
-- **Temporal** (how predictable motion along the manifold is):
+- **Temporal** (which dynamical regime the trajectory is in):
   ``mean_curvature`` -- the mean turning angle between consecutive velocity
-  vectors (the Henaff/Simoncelli straightening measure; lower = straighter = more
-  linearly extrapolable). It disambiguates a manifold collapsed to a line (low PR,
-  low curvature) from a genuinely straightened high-dimensional trajectory (high
-  PR, low curvature).
+  vectors (the Henaff/Simoncelli straightening measure). **Read it as a bimodal
+  regime indicator, not as a graded readout.** Empirically the distribution is two
+  spikes: 98% of 38,280 Lorenz cells sit at either ~0.26 or ~2.9 rad and 0.56% lie
+  between, so the value reports which side of the transition a cell is on rather
+  than how far along a continuum it sits, and a binary collapsed-or-not bit
+  explains as much of VPT as the continuous quantity does (R2 0.364 against 0.371).
+  A graded straightness account is on the roadmap's "what must NOT be claimed"
+  list: within the straight cluster the residual VPT/curvature correlation is
+  +0.145, the *opposite* sign to the graded story (``TIER0`` §3.10, §3.11).
+  It still disambiguates a manifold collapsed to a line (low PR, low curvature)
+  from a high-dimensional trajectory at the same curvature (high PR).
 
 Probe 2 (structural alignment) uses ``basis_alignment`` / ``random_basis_band``:
 the fraction of state variance captured by the top-k vectors of a given orthonormal
@@ -165,7 +172,11 @@ def mean_curvature(states: np.ndarray, min_speed: float = 1e-8) -> float:
     ``c_t = arccos( clip( (v_t . v_{t+1}) / (||v_t|| ||v_{t+1}||), -1, 1 ) )``.
     Steps where either speed ``< min_speed`` are skipped (an undefined direction).
     Returns the mean over ``t`` in **radians** (``nan`` if no step qualifies).
-    Lower = straighter = more linearly predictable.
+
+    Lower = straighter, but the empirical distribution is **bimodal**, so read the
+    value as a regime indicator (collapsed or not) rather than as a graded
+    predictor -- see the module docstring. The metric itself is continuous and
+    correct on any input; it is the *interpretation* that is not a dose-response.
     """
     states = np.asarray(states, dtype=float)
     v = np.diff(states, axis=0)

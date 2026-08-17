@@ -5,7 +5,8 @@ Connectome-agnostic: every function takes a plain weighted adjacency matrix ``W`
 characterise any connectome or null. Because the reservoir rescales ``W`` to a
 matched nominal spectral radius (``|lambda_1|``), the informative quantities are
 **scale-invariant ratios of the bulk to the dominant eigenvalue** -- they describe
-how compressed the effective dynamics are at a matched operating point.
+how far the dominant eigenvalue stands clear of the bulk at a matched operating
+point.
 
 Metrics (``spectral_metrics``):
 
@@ -18,8 +19,17 @@ Metrics (``spectral_metrics``):
 ``n_critical``      ``# {|lambda| > 0.9 |lambda_1|}`` -- near-dominant modes.
 ================== ====================================================================
 
-Lower ``bulk95_ratio`` / ``mean_ratio`` => more compressed bulk => milder effective
-dynamics at a matched nominal spectral radius.
+Lower ``bulk95_ratio`` / ``mean_ratio`` => a **larger spectral gap** => the leading
+mode stands further clear of the bulk at a matched nominal spectral radius.
+
+**Not "a more compressed bulk"** -- that reading is withdrawn (``TIER0`` §3.1,
+``report/CONVENTIONS.md``). In raw units the *absolute* bulk radius is near-identical
+across the connectome and its nulls (0.0587 to 0.0614 at N=448, a spread of 4.4% of
+the mean) and the entire between-variant difference sits in ``|lambda_1|``. Every
+ratio above divides by ``|lambda_1|``, which is the one quantity that differs, so it
+is the division that manufactures the appearance of a narrower band. The defensible
+statement is the gap ratio ``|lambda_1| / absolute bulk``, identically
+``1 / bulk95_ratio`` and identically ``sr_crit``.
 """
 
 import numpy as np
