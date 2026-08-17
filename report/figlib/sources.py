@@ -105,6 +105,46 @@ def _probe3() -> pd.DataFrame:
                  & (frame.alpha == 1e-6)].copy()
 
 
+# F6a draws one cell's two spectra, so the cell has to be chosen by a stated rule rather
+# than picked. These are that rule's parameters; the seed is *derived* below, never named.
+MECHANISM_SR = 3.0526          # the supercritical grid point Probe 2 also operates at
+MECHANISM_VARIANT = "connectome"
+
+
+def _gram_spectra() -> pd.DataFrame:
+    """The raw covariance and design-Gram spectra behind one `d_eff` / PR pair.
+
+    `probe3_deff.parquet` carries `d_eff` and `pr` as scalars; F6's mechanism panel needs
+    the spectra they are summed from, which only `covariance_spectra.parquet` has. Both
+    measures are **exact sums of per-direction weights** over these two spectra --
+    `d_eff = sum_i g_i / (g_i + alpha)` and `PR = sum_i p_i / sum_j p_j^2` with
+    `p = lambda / sum(lambda)` -- and that identity is what the panel plots.
+
+    One cell only, chosen by rule and not by hand: `MECHANISM_VARIANT` at
+    `MECHANISM_SR`, the seed whose `d_eff` is **nearest the median of the ten seeds at
+    that (variant, sigma)**. Everything the panel draws is that one cell's, so no median
+    is mixed into a per-cell panel (Act I audit item 13).
+
+    Returned tidy, one row per direction, rank 1 = largest.
+    """
+    frame = pd.read_parquet(
+        PROBES / "scale_448/covariance_spectra.parquet",
+        filters=[("task", "==", "mc"), ("condition", "==", BASE_CONDITION),
+                 ("variant", "==", MECHANISM_VARIANT)])
+    frame = frame[np.isclose(frame.spectral_radius, MECHANISM_SR)]
+    alpha = float(frame.alpha.iloc[0])
+    d_eff = frame.eig_gram.map(
+        lambda g: float((np.asarray(g, float) / (np.asarray(g, float) + alpha)).sum()))
+    cell = frame.loc[(d_eff - d_eff.median()).abs().idxmin()]
+    eig_cov = np.asarray(cell.eig_cov, dtype=float)
+    eig_gram = np.asarray(cell.eig_gram, dtype=float)
+    return pd.DataFrame(dict(
+        rank=np.arange(1, eig_cov.size + 1), eig_cov=eig_cov, eig_gram=eig_gram,
+        alpha=alpha, seed=int(cell.seed), spectral_radius=float(cell.spectral_radius),
+        variant=str(cell.variant), n_design_cols=int(cell.n_design_cols),
+        T_effective=int(cell.T_effective)))
+
+
 def _taskb() -> pd.DataFrame:
     """Task B: f = 0, MC, four variants, sigma to 8. Adds the matched axis x."""
     frame = pd.read_parquet(CRIT / "taskB_extended_sweep_scale_448.parquet").copy()
@@ -301,14 +341,45 @@ def _ph_probe3() -> pd.DataFrame:
     variants = LADDER + ["clustering_rewire", "modularity_rewire", "random_gaussian"]
     rows = []
     for i, variant in enumerate(variants):
-        for sr in (3.05, 4.0, 5.0, 6.0):
+        for sr in (MECHANISM_SR, 4.0, 5.0, 6.0):
             for seed in range(10):
                 d_eff = 420 - 50 * i + 5 * _RNG.standard_normal()
                 rows.append(dict(task="mc", condition=BASE_CONDITION, variant=variant,
                                  rung=i - 1, spectral_radius=sr, seed=seed,
                                  alpha=1e-6, d_eff=d_eff, pr=1.2 + 0.02 * _RNG.standard_normal(),
                                  mc=4 + d_eff / 45))
-    return pd.DataFrame(rows)
+    frame = pd.DataFrame(rows)
+    # Overwrite the one cell F6a draws with the exact sums of the placeholder spectra, so
+    # the "area under the curve is the measure" assertion is meaningful under --smoke.
+    _, eig_cov, eig_gram = _ph_gram_arrays()
+    p = eig_cov / eig_cov.sum()
+    is_cell = np.ones(len(frame), dtype=bool)
+    for column, value in _PH_MECHANISM.items():
+        is_cell &= np.isclose(frame[column], value) if column != "variant" \
+            else (frame[column] == value)
+    frame.loc[is_cell, "d_eff"] = (eig_gram / (eig_gram + _PH_MECHANISM["alpha"])).sum()
+    frame.loc[is_cell, "pr"] = (p / (p ** 2).sum()).sum()
+    return frame
+
+
+# F6a asserts that the area under each drawn weight curve equals the frozen scalar it is
+# labelled with. That assertion is arithmetic, not a claim about the result, so it should
+# run under --smoke too -- which means the probe3 and gram_spectra placeholders have to
+# describe the same cell. They are built from one array pair here so they cannot drift.
+_PH_MECHANISM = dict(variant="connectome", seed=0, spectral_radius=MECHANISM_SR,
+                     alpha=1e-6)
+
+
+def _ph_gram_arrays() -> tuple:
+    rank = np.arange(1, N_NODES + 1)
+    eig_cov = 70.0 * np.exp(-rank / 1.4) + 1e-9 * np.exp(-rank / 90.0)
+    return rank, eig_cov, 2500.0 * eig_cov + 1e-5
+
+
+def _ph_gram_spectra() -> pd.DataFrame:
+    rank, eig_cov, eig_gram = _ph_gram_arrays()
+    return pd.DataFrame(dict(rank=rank, eig_cov=eig_cov, eig_gram=eig_gram,
+                             n_design_cols=N_NODES, T_effective=2500, **_PH_MECHANISM))
 
 
 def _ph_taskb() -> pd.DataFrame:
@@ -546,6 +617,13 @@ SOURCES = {
         "task == 'mc', condition == 'human_empirical', spectral_radius >= 3.05, "
         "alpha == 1e-6 (the only alpha captured supercritically). 350 rows, 7 variants.",
         _probe3, _ph_probe3),
+    "gram_spectra": Source(
+        "gram_spectra", PROBES / "scale_448/covariance_spectra.parquet",
+        ("rank", "eig_cov", "eig_gram", "alpha"),
+        "task == 'mc', condition == 'human_empirical', variant == 'connectome', "
+        "spectral_radius == 3.0526; then the ONE seed whose d_eff is nearest the median "
+        "of the ten. 448 rows, one per direction. F6a only.",
+        _gram_spectra, _ph_gram_spectra),
     "taskb": Source(
         "taskb", CRIT / "taskB_extended_sweep_scale_448.parquet",
         ("variant", "spectral_radius", "bulk95", "x", "d_eff", "mc"),

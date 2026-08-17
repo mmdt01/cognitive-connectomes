@@ -126,6 +126,50 @@ CONDITION_LABEL = {
     "human_empirical_signed": "signed (empirical weights)",
     "human_gaussian": "gaussian weights",
 }
+
+# ------------------------------------------------------------------- bases / measures
+# Act II contrasts *bases* (F4, F5) and *dimensionality measures* (F6), neither of which
+# is a substrate. They get their own two-colour accent set, **off the Okabe-Ito wheel on
+# purpose**, plus grey for whichever series is the chance baseline.
+#
+# Why a separate set at all. Okabe-Ito has eight hues, the variant contract spends seven
+# of them, and the eighth (#F0E442 yellow) is unusable on white. So a basis palette must
+# either reuse a substrate colour -- and F4 draws bases in (a) beside variants in (b),
+# which would give one hue two meanings in one figure -- or leave the wheel. It leaves.
+#
+# Why these two. Chosen by measurement, not by eye: CIE76 dE in Lab after Vienot/Brettel
+# dichromacy simulation, scored on separation among the bases, distance from all seven
+# substrate colours, and greyscale luminance. Indigo/brick dominated every candidate
+# tried on all three at once (among-bases 50.8, vs-variants 11.5, greyscale dL 14.5;
+# runners-up traded one against another). `check_basis_palette()` re-derives those
+# numbers and is run by the smoke entry point, so the choice cannot silently drift into
+# a clash. dE ~ 2.3 is a just-noticeable difference and >15 is comfortably distinct.
+#
+# Dash and marker are kept **as well as** hue. The encoding is deliberately redundant so
+# the series survive greyscale printing and any dichromacy, rather than resting on colour
+# alone -- which is what made the previous all-black version unreadable in the first place.
+BASIS_COLOUR = {"harmonics": "#33356B", "wmodes": "#A63603", "random": "#9A9A9A"}
+BASIS_STYLE = {
+    "harmonics": dict(color=BASIS_COLOUR["harmonics"], ls="-", marker="o", ms=3.2, lw=1.6),
+    "wmodes": dict(color=BASIS_COLOUR["wmodes"], ls="--", marker="s", ms=3.2, lw=1.6),
+    "random": dict(color=BASIS_COLOUR["random"], ls=":", marker=None, lw=1.3),
+}
+BASIS_LABEL = {
+    "harmonics": "graph harmonics (low freq.)",
+    "wmodes": r"$W$ eigenmodes (dominant)",
+    "random": "random orthonormal (chance)",
+}
+BASIS_BAND_COLOUR = BASIS_COLOUR["random"]
+
+# The two dimensionality measures F6 contrasts, on the same accent pair. Nothing links
+# `d_eff` to harmonics or PR to the W-modes -- the pair simply means "the two quantities
+# this act sets against each other", and reusing it keeps one accent set across Act II
+# rather than inventing a third.
+MEASURE_STYLE = {
+    "d_eff": dict(color=BASIS_COLOUR["harmonics"], ls="-", lw=1.7),
+    "pr": dict(color=BASIS_COLOUR["wmodes"], ls="--", lw=1.7),
+}
+MEASURE_FILL = {"d_eff": BASIS_COLOUR["harmonics"], "pr": BASIS_COLOUR["wmodes"]}
 CONDITION_COLOUR = {
     "human_empirical": "#c44e52",
     "human_empirical_signed": "#dd8452",
@@ -227,12 +271,24 @@ def ordered_variants(present) -> list:
     return [v for v in VARIANT_ORDER if v in present]
 
 
-def draw_ceiling(ax, n_nodes: int, label: str = None) -> None:
-    """Draw the ``d_eff = N`` ceiling. CONVENTIONS: every memory figure shows it."""
-    ax.axhline(n_nodes, color=CEILING_COLOUR, lw=0.9, ls=":", zorder=1)
-    ax.text(0.995, n_nodes, label or f"$d_{{\\rm eff}} = N = {n_nodes}$",
-            transform=ax.get_yaxis_transform(), ha="right", va="bottom",
-            fontsize=TICK_SIZE, color=CEILING_COLOUR)
+def draw_ceiling(ax, n_nodes: int, label: str = None, on: str = "y") -> None:
+    """Draw the ``d_eff = N`` ceiling. CONVENTIONS: every memory figure shows it.
+
+    ``on`` names the axis ``d_eff`` is plotted against. F3 puts it on y (the default,
+    unchanged); F6 puts it on x, where a horizontal rule would mark nothing.
+    """
+    if on == "y":
+        ax.axhline(n_nodes, color=CEILING_COLOUR, lw=0.9, ls=":", zorder=1)
+        ax.text(0.995, n_nodes, label or f"$d_{{\\rm eff}} = N = {n_nodes}$",
+                transform=ax.get_yaxis_transform(), ha="right", va="bottom",
+                fontsize=TICK_SIZE, color=CEILING_COLOUR)
+        return
+    if on != "x":
+        raise ValueError(f"draw_ceiling: 'on' must be 'x' or 'y', got {on!r}")
+    ax.axvline(n_nodes, color=CEILING_COLOUR, lw=0.9, ls=":", zorder=1)
+    ax.text(n_nodes, 0.99, label or f"$N = {n_nodes}$ ",
+            transform=ax.get_xaxis_transform(), ha="right", va="top",
+            rotation=90, fontsize=TICK_SIZE, color=CEILING_COLOUR)
 
 
 def shade_supercritical(ax, start: float, end: float = None) -> None:
@@ -272,6 +328,63 @@ def save(fig, figure_id: str, subdir: str = None) -> list:
 
 
 # --------------------------------------------------------------------- consistency
+
+# Vienot/Brettel dichromacy simulation, used only by `check_basis_palette` below.
+_LMS = [[17.8824, 43.5161, 4.11935], [3.45565, 27.1554, 3.86714],
+        [0.0299566, 0.184309, 1.46709]]
+_DICHROMAT = {
+    "protanopia": [[0, 2.02344, -2.52581], [0, 1, 0], [0, 0, 1]],
+    "deuteranopia": [[1, 0, 0], [0.494207, 0, 1.24827], [0, 0, 1]],
+    "tritanopia": [[1, 0, 0], [0, 1, 0], [-0.395913, 0.801109, 0]],
+}
+# Floors the measured palette clears with room to spare (50.8 / 11.5 in the session-2
+# search). Set below the measurement, not at it, so an intentional future tweak is not
+# forced to reproduce these hexes exactly -- only to stay legible and un-clashing.
+BASIS_SEPARATION_FLOOR = 25.0      # among the bases, worst case over all vision types
+BASIS_VARIANT_FLOOR = 8.0          # any basis colour against any substrate colour
+
+
+def _lab(hex_colour: str, vision: str = "normal"):
+    import numpy as np
+    raw = hex_colour.lstrip("#")
+    rgb = np.array([int(raw[i:i + 2], 16) / 255.0 for i in (0, 2, 4)])
+    if vision != "normal":
+        rgb = np.clip(np.linalg.solve(np.array(_LMS),
+                                      np.array(_DICHROMAT[vision]) @ (np.array(_LMS) @ rgb)),
+                      0, 1)
+    linear = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+    xyz = (np.array([[0.4124, 0.3576, 0.1805], [0.2126, 0.7152, 0.0722],
+                     [0.0193, 0.1192, 0.9505]]) @ linear) / np.array([0.95047, 1.0, 1.08883])
+    f = np.where(xyz > 0.008856, np.cbrt(xyz), 7.787 * xyz + 16 / 116)
+    return np.array([116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])])
+
+
+def check_basis_palette() -> dict:
+    """Assert the Act II accent colours are legible and do not clash with substrates.
+
+    Re-derives the two numbers the palette was chosen on (CIE76 dE after Vienot/Brettel
+    dichromacy simulation) so a later edit cannot quietly reintroduce either failure the
+    current palette was picked to avoid: three basis curves that cannot be told apart,
+    or a basis hue a reader would read as a substrate.
+    """
+    import numpy as np
+    visions = ("normal", "protanopia", "deuteranopia", "tritanopia")
+    keys = list(BASIS_COLOUR)
+    among = min(float(np.linalg.norm(_lab(BASIS_COLOUR[a], v) - _lab(BASIS_COLOUR[b], v)))
+                for v in visions for i, a in enumerate(keys) for b in keys[i + 1:])
+    versus = min(float(np.linalg.norm(_lab(BASIS_COLOUR[k], v) - _lab(c, v)))
+                 for v in visions for k in keys for c in VARIANT_COLOUR.values())
+    assert among >= BASIS_SEPARATION_FLOOR, (
+        f"Act II basis colours are not separable: worst pairwise dE {among:.1f} over "
+        f"normal vision and the three dichromacies, floor {BASIS_SEPARATION_FLOOR}. "
+        "Three curves share a panel in F4a and F5; they have to be tellable apart.")
+    assert versus >= BASIS_VARIANT_FLOOR, (
+        f"An Act II basis colour collides with a substrate colour: worst dE "
+        f"{versus:.1f}, floor {BASIS_VARIANT_FLOOR}. F4 draws bases in (a) beside "
+        "variants in (b), so a shared hue would carry two meanings in one figure.")
+    return {"among_bases": among, "vs_variants": versus}
+
+
 def check_colour_consistency() -> None:
     """Assert the sweep palette equals the committed task-figure palette.
 

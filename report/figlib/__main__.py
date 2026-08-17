@@ -63,6 +63,7 @@ def main(argv) -> int:
         return _verify()
 
     style.check_colour_consistency()
+    style.check_basis_palette()
     if "--smoke" in argv:
         return _render(list(ALL_FIGURES), placeholder=True, subdir="_smoke")
     if "--only" in argv:
