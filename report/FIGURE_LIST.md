@@ -244,7 +244,8 @@ show the four-variant ladder, and neither should imply it.
 **F6 — the statistic is a correlation with measured MC, not with rung index.** Over the
 seven rungs, `spearman(d_eff, mc) = +1.000` and `spearman(pr, mc) = +0.107`; pooled
 within-regime, `+0.9982` against `+0.308`. Correlating against the rung *index* gives
--0.18 and +0.54 and is not the claim. `alpha == 1e-6` is the only alpha this file carries
+-0.18 and -0.54 and is not the claim (published as +0.54; the sign was corrected in
+session 2 against `probe3_deff.parquet`, and `TIER0` §3.12 carries the note). `alpha == 1e-6` is the only alpha this file carries
 at `spectral_radius >= 3.05`.
 
 **F9 — the supercritical threshold is the connectome's, applied to everyone.** With

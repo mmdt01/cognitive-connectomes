@@ -985,8 +985,13 @@ MC on the all-positive substrate, σ ≥ 3.05, α = 1e-6:
 That third row is the argument. Across the same seven substrates `d_eff` moves 5.5-fold
 while PR moves by 16%, because memory lives in roughly 400 low-variance directions that a
 variance-weighted measure discounts. **Both correlations are against *measured MC*, not
-against rung index** — correlating against the index gives −0.18 and +0.54 and is a
-different quantity.
+against rung index** — correlating against the index gives −0.18 and −0.54 and is a
+different quantity. (The PR sign was published as +0.54 and **corrected to −0.54 in
+session 2**, recomputed from `probe3_deff.parquet`: `spearman(rung, d_eff)` = −0.1802 and
+`spearman(rung, pr)` = −0.5406. The magnitude was right, the sign was not, and PR is
+negatively rank-correlated with the index under every index definition tried — the
+`rung` column −0.541, position in ladder order −0.607. Nothing rests on it, since this is
+the number that must not be quoted, but it is stated twice in canonical documents.)
 
 > **Gotcha: `mean_state` is signed and its sign is arbitrary.** It depends on the input
 > realisation, so seeds straddle zero. Take `|mean_state|` *before* aggregating; a signed
