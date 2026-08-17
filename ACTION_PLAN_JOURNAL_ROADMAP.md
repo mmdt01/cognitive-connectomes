@@ -358,6 +358,66 @@ manipulation changes shape. This determines the whole design.
 
 ---
 
+### 4d. Two manifold-trajectory experiments (raised in session 2, 17 Aug)
+
+Both come from one question asked during Act II's figure review — why no act visualises
+the *trajectory* on the latent manifold — and both were scoped against the frozen data
+before being written down. **Both are session 4's, and they are ranked: E2 first, E1 only
+if a slot remains.** Neither is a sanctioned figure yet: the main text is capped at 15 and
+full, so either one landing needs a cap decision, and they compete for the same slot.
+
+**The finding that shaped both, and that must be carried into either.** Recomputed from
+`covariance_spectra.parquet`, the *variance* subspace of the time-centred fluctuations is
+nearly substrate-invariant:
+
+| task, sigma = 3.05 | PC1 | PC1-3 | PCs to 95% | `d_eff` |
+|---|---|---|---|---|
+| MC, across all four ladder rungs | 0.88 to 0.91 | **0.978 to 0.991** | **2, every rung** | **75 to 413** |
+| Lorenz, across all four | 0.60 to 0.63 | 0.910 to 0.981 | **3, every rung** | — |
+
+So a top-3 PCA trajectory is *faithful* (96 to 99% of the variance) but shows the part of
+the geometry that does **not** separate the substrates, while the part that does — the
+~400 directions clearing the ridge floor — is invisible in it by construction. This is
+contribution 6 restated as a geometry fact. **Neither experiment may caption a PCA
+trajectory as "the manifold the readout computes in"**: that contradicts F6.
+
+**E1 — the two curvature regimes, made visible. Owner: session 4. Ranked BELOW E2.**
+A trajectory plot showing a smooth orbit against an antiparallel zig-zag: what curvature's
+two spikes actually look like. It would fill the gap recorded in `report/act2_manifold.md`
+§5 item 15, where Act II hands Act III no temporal intuition. **Not at `f` = 0 on the
+all-positive substrate**, where curvature is flat at 0.26 rad across the whole sweep and
+there is nothing to draw — it needs the signed or gaussian columns, or `f` > 0. Needs
+states regenerated (they are not persisted) and its own builder.
+
+> **Ownership, corrected.** This was first written as "an option for Act II", which gave
+> it **no owner at all**: Act II is session 2 and session 2 closed on 17 Aug, so an option
+> parked there could only evaporate. Sessions 3 and 4 are what remain. **Session 4 builds
+> it** — it owns curvature, F12 and contribution 4 — while the figure would **print in
+> chapter 5**, where the manifold is decomposed and where the intuition is needed. That
+> split is already the house convention (`FIGURE_LIST`: a figure's act decides its module,
+> not its chapter; F3 prints in chapter 3 and session 1 builds it), so E1 would be a
+> **cross-act figure** living in `figures/act3_prediction.py` with `FIGURE_LIST` naming
+> its owner explicitly, exactly as F3 and F16 do.
+
+**The decision rule, not an intention.** E1 and E2 compete for one cap slot and the cap is
+15 and full. **E2 resolves first.** If a slot remains after E2 is settled, E1 may take it;
+if not, **E1 is dropped and the reason is written into `report/act3b_prediction.md` §6**.
+The ranking is deliberate: E2 produces evidence the thesis does not have, E1 illustrates a
+result it already carries in F12. If only one lands it should be E2. Both are bounded by
+the **20 Aug experiment freeze**.
+
+**E2 — closed-loop faithful geometry. Specified work, Act III prediction arm, session 4.**
+The substantive one. Full specification lives in `report/act3b_prediction.md` §6 so the
+owning session inherits it rather than the idea; in one line: **every state matrix in the
+repo is teacher-forced** (`readout_config.json` says so explicitly for Lorenz — "not the
+autonomous free-run"), so nothing anywhere captures the free-running rollout, and
+plotting the *generated* attractor against the *true* one in PC space is a direct
+visualisation of what `climate_error` already scores. Pre-stated claim, falsifiable:
+**the connectome's free-run attractor retains the true climate to higher `f` than the
+nulls do.** "Interesting latent dynamics" is not a claim and is not what this is for.
+
+---
+
 ## 5. Deferred to post-thesis (explicitly, not by omission)
 
 The thesis is a checkpoint, not the paper. The journal version goes out in October or
