@@ -100,19 +100,23 @@ def build_outcome(summaries: dict, sensitivity: dict, ceilings: dict,
          "fraction at the true peak rather than a lower bound on an unobserved one. "
          ) + f"{handoff['extend_448']}",
         "",
-        "**The result in the other direction is larger than the one predicted.** The "
-        "connectome's *subcritical deficit* — the claim that it is markedly worse "
-        "than ER below σ ≈ 2.4 — is almost entirely a normalisation artifact: the "
-        f"most negative `dD` collapses from {_fmt(nom['min_dD'], '+.1f')} to "
-        f"{_fmt(eff['min_dD'], '+.1f')}, i.e. {1 - neg_retained:.0%} of it disappears "
-        "once the substrates are compared at matched effective criticality. At low "
-        "effective criticality the connectome is in fact marginally *better*. Any "
-        "statement that the connectome is subcritically worse should be withdrawn or "
-        "restated as an artifact of nominal-σ matching.\n",
+        "**The result in the other direction is axis-dependent, and neither axis is "
+        "neutral.** The connectome's *subcritical deficit* is "
+        f"{_fmt(nom['min_dD'], '+.1f')} at matched **spectral radius** and "
+        f"{_fmt(eff['min_dD'], '+.1f')} at matched **bulk radius** — "
+        f"{1 - neg_retained:.0%} smaller on the second axis. The operator simulated is "
+        "`σ·W/|λ₁|`, whose spectral radius is exactly σ for every variant, so the two "
+        "axes are not 'wrong' and 'right': nominal σ holds the Perron root fixed and "
+        "lets the bulk vary, `σ·bulk95` does the reverse, and the mechanism under test "
+        "*is* the Perron mode. **Do not write that the deficit is a normalisation "
+        "artifact** (`TIER0` §1.1 rules that wording out). Report both axes, say what "
+        "each holds fixed, and summarise as **parity below criticality, advantage "
+        "above** — true on the matched axis, and defensible because the nominal-axis "
+        "deficit is accounted for by the unmatched bulk.\n",
         "### 4.2 Why the shapes differ\n",
         "At matched effective criticality the two substrates sit at very different "
-        "nominal radii — the connectome always higher, because its bulk is more "
-        "compressed:\n",
+        "nominal radii — the connectome always higher, because its spectral gap is "
+        "larger:\n",
         "| σ·bulk95 | connectome σ | ER σ |",
         "|---|---|---|",
     ]
@@ -197,9 +201,9 @@ def build_outcome(summaries: dict, sensitivity: dict, ceilings: dict,
         "The connectome turns over at σ = 3.6 while both nulls turn over at σ = 1.6. "
         "`σ_eff = bulk95 · σ · ⟨1−x²⟩` folds when the tanh gain falls faster than σ "
         "rises, so the turning point *is* the point at which the substrate's own gain "
-        "collapse overtakes its linear growth. The connectome's compact bulk keeps its "
-        "states off saturation for more than twice as much σ as the nulls manage. This "
-        "is a mechanism result, not a scoping caveat.\n",
+        "collapse overtakes its linear growth. The connectome's larger spectral gap "
+        "keeps its states off saturation for more than twice as much σ as the nulls "
+        "manage. This is a mechanism result, not a scoping caveat.\n",
         "**But it means `σ·bulk95` matches the linear operator, not the dynamics.** "
         "Backing the gain out at each variant's fold:\n",
         "| variant | fold at σ | `σ_eff` there | implied gain ⟨1−x²⟩ |",
@@ -216,7 +220,7 @@ def build_outcome(summaries: dict, sensitivity: dict, ceilings: dict,
         "So at matched `σ·bulk95` the substrates sit at materially different *realised* "
         "gain (≈0.54 for the connectome at its fold against ≈0.69 for ER at its own). "
         "**This is not to be matched away** — the gain difference is part of the "
-        "mechanism the compact bulk produces, and removing it would remove the effect "
+        "mechanism the spectral gap produces, and removing it would remove the effect "
         "being measured. It does mean the phrase \"matched effective criticality\" "
         "must be read narrowly: the *linear operator* is matched, the *dynamics* are "
         "not, and any claim that the two substrates are \"in the same regime\" at a "
