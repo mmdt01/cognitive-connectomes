@@ -184,6 +184,11 @@ AXIS_LABEL = {
     "effective": r"$\sigma \cdot \mathrm{bulk95}$   (bulk radius held fixed)",
 }
 AXIS_SHORT = {"nominal": "nominal", "effective": r"$\sigma\cdot$bulk95"}
+# One colour per matching axis, for the figures that contrast the two rather than
+# plotting on one of them (F3 panel c, F11 panel b). Not substrate colours and not
+# boundary colours: a third small namespace, for the same reason the other two exist --
+# the nominal axis is one colour everywhere it is set against the matched one.
+AXIS_COLOUR = {"nominal": "#1f77b4", "effective": "#c44e52"}
 
 # The two phase boundaries. Not variants, so they get their own pair, held fixed for
 # the same reason the variant colours are: the memory boundary is one colour everywhere.
@@ -271,16 +276,22 @@ def ordered_variants(present) -> list:
     return [v for v in VARIANT_ORDER if v in present]
 
 
-def draw_ceiling(ax, n_nodes: int, label: str = None, on: str = "y") -> None:
+def draw_ceiling(ax, n_nodes: int, label: str = None, on: str = "y",
+                 side: str = "right") -> None:
     """Draw the ``d_eff = N`` ceiling. CONVENTIONS: every memory figure shows it.
 
     ``on`` names the axis ``d_eff`` is plotted against. F3 puts it on y (the default,
     unchanged); F6 puts it on x, where a horizontal rule would mark nothing.
+
+    ``side`` moves the rule's label to the other end of it, for a panel whose right
+    edge is already spoken for. F7 needs it: its top-of-overlap rule stands at the
+    right-hand edge and a right-aligned ceiling label has the rule drawn through it.
     """
     if on == "y":
         ax.axhline(n_nodes, color=CEILING_COLOUR, lw=0.9, ls=":", zorder=1)
-        ax.text(0.995, n_nodes, label or f"$d_{{\\rm eff}} = N = {n_nodes}$",
-                transform=ax.get_yaxis_transform(), ha="right", va="bottom",
+        at, align = ((0.995, "right") if side == "right" else (0.008, "left"))
+        ax.text(at, n_nodes, label or f"$d_{{\\rm eff}} = N = {n_nodes}$",
+                transform=ax.get_yaxis_transform(), ha=align, va="bottom",
                 fontsize=TICK_SIZE, color=CEILING_COLOUR)
         return
     if on != "x":

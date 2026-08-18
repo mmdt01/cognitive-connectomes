@@ -628,7 +628,11 @@ SOURCES = {
         "taskb", CRIT / "taskB_extended_sweep_scale_448.parquet",
         ("variant", "spectral_radius", "bulk95", "x", "d_eff", "mc"),
         "no row filter; f = 0, MC, four variants, sigma in [0, 8] step 0.4, 10 seeds. "
-        "x = spectral_radius * bulk95 from the file's own bulk95 column.",
+        "x = spectral_radius * bulk95 from the file's own bulk95 column. bulk95 is "
+        "PER SEED for the three resampling nulls, so aggregate per seed then across "
+        "seeds (interpolate each seed's curve onto the common x grid, then median); "
+        "medianing d_eff at fixed nominal sigma is a different statistic and does not "
+        "reproduce TIER0 sec 1.2.",
         _taskb, _ph_taskb),
     "e02_panel": Source(
         "e02_panel", CRIT / "e02_panel.parquet",
