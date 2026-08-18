@@ -55,7 +55,7 @@ verified, see the flag below the table.
 | F4 | 5 | (Act II) | The Perron mode is a common mode: it carries the mean, and after time-centring the dominant W-eigenmodes carry ~0 of the fluctuation variance | `results/scale_448/manifold_alignment.parquet` filter `condition == "human_empirical"`, `variant == "connectome"`, `task == "mc"`, supercritical operating point; plus `saturation_diagnostics.parquet` `mean_state` | confirmed* | |
 | F5 | 5 | (Act II) | Sign selects the basis: balanced -> W-eigenmodes, all-positive -> low-frequency graph harmonics | `manifold_alignment.parquet`; one panel per `condition`, curves over `basis in {harmonics, wmodes, random}`, `task == "lorenz"` | confirmed* | |
 | F6 | 5 | 6 | PR misses readout-relevant structure: against measured MC across the seven rungs, `d_eff` orders at **+1.000** and PR at **+0.107**; pooled within-regime +0.998 against +0.308 | **(b, c)** `results/scale_448/probe3_deff.parquet`; filter `task == "mc"`, `condition == "human_empirical"`, `spectral_radius >= 3.05`, `alpha == 1e-6` (350 rows, 7 variants). **(a)** `results/scale_448/covariance_spectra.parquet`, same task/condition, `variant == "connectome"`, `spectral_radius == 3.0526`, then the ONE seed whose `d_eff` is nearest the median of the ten; cols `eig_cov, eig_gram, alpha` (448 rows, one per direction) | confirmed | |
-| F7 | 6 | 3 | **The crossing**: the connectome peaks lowest (432.4) yet retains most (47% at the top of the overlap, against 28/22/11%, `TIER0` §1.2); `d_eff` decay on the matched axis, ceiling drawn | `criticality_matched/results/taskB_extended_sweep_scale_448.parquet`; `variant, spectral_radius, bulk95, d_eff`; no row filter (f = 0, MC, 4 variants, sigma 0 to 8 step 0.4, 10 seeds); `x = spectral_radius * bulk95` from the file's own column | confirmed | W |
+| F7 | 6 | 3 | **The crossing**: the connectome peaks lowest (432.4) yet retains most (47% at the top of the overlap, against 28/22/11%, `TIER0` §1.2); `d_eff` decay on the matched axis, ceiling drawn | `criticality_matched/results/taskB_extended_sweep_scale_448.parquet`; `variant, seed, spectral_radius, bulk95, d_eff`; no row filter (f = 0, MC, 4 variants, sigma 0 to 8 step 0.4, 10 seeds); `x = spectral_radius * bulk95` from the file's own column, **per seed**, then interpolated onto the common grid and medianed across seeds (see the F7 flag) | confirmed* | W |
 | ~~F8~~ | | | **RETIRED — merged into F3.** Do not render. | | retired | |
 | F9 | 6 | 3 | The supercritical margin holds across a 2.2x change in N: **4.40 -> 4.42** on the connectome's `sr_crit` applied to all, **3.56 -> 3.85** on each variant's own. Both panels, per `TIER0` §2.4 | `n1000_memory_scale_448.parquet` + `n1000_memory_scale_1000.parquet`; supercritical = `spectral_radius >= 3.078` (N=448) / `>= 3.985` (N=1000), i.e. **the connectome's `sr_crit`, applied to every variant** | confirmed* | |
 | F10 | 6 | 3 | Peak parity, not deficit: paired per-seed differences with CIs across the alpha grid; 2-6%, reliable against ER and weight-permuted, **not** against degree-matching | `criticality_matched/results/closeout_peak_parity.csv`; 15 rows = 5 alpha x 3 contrasts, cols `mean_diff, ci_lo, ci_hi, wilcoxon_p` | confirmed | |
@@ -248,10 +248,49 @@ within-regime, `+0.9982` against `+0.308`. Correlating against the rung *index* 
 session 2 against `probe3_deff.parquet`, and `TIER0` §3.12 carries the note). `alpha == 1e-6` is the only alpha this file carries
 at `spectral_radius >= 3.05`.
 
+**F7 — `bulk95` is per seed, so the aggregation order is part of the filter. Added 17
+August 2026 (session 3).** For the connectome `bulk95` is one number (one fixed graph);
+for the three resampling nulls it is a **per-seed** extreme-value statistic, spreading
+0.41 to 0.61 across ten degree-rewire seeds. So on the matched axis each seed sits on
+its own `x` grid, and E0.2 aggregates **per seed then across seeds** throughout
+(`E02_verdict` §4.4, which states the reason). `TIER0` §1.2's crossing table is that
+statistic and reproduces to all published digits under it.
+
+Medianing `d_eff` at fixed nominal σ and calling `σ · median(bulk95)` the x coordinate
+is a *different* statistic — it collapses ten x values into one — and the session-0
+builder did exactly that. Measured, it moves the published peak **locations** by up to
+0.15 on x (degree 0.91 → 0.85, ER 0.97 → 1.11), the peaks by up to 1.3 `d_eff`, and the
+retained fractions by a point (ER 11% → 12%). **The connectome row is unaffected**,
+because its `bulk95` is a constant — so the row a reader checks first is again the one
+row that cannot reveal the problem (Act I item 13, Act II item 1, now here).
+
 **F9 — the supercritical threshold is the connectome's, applied to everyone.** With
 `sigma >= sr_crit` per variant the margins are 3.56 and 3.85; with `sigma >=` the
 connectome's `sr_crit` they are **4.40 and 4.42**, which is `TIER0` §2.4. Same data,
-different filter, and only one of them is the published number.
+different filter, and only one of them is the published number. **Session 3 draws both
+panels**, because §2.4 says to report both and the two say different things: on the
+connectome's threshold the margin is flat (+0.5%), on each variant's own it grows ~8%.
+
+**F7, F9, F10, F11 — the real null-model names, matching F1 to F6. Changed 17 August
+2026 (session 3), on the author's review.** Act III's builders were on `VARIANT_LABEL` /
+`VARIANT_TICK` (the rung numbering) while chapters 3 to 5 use `VARIANT_TITLE` /
+`VARIANT_TITLE_TICK`, so three substrates were named one way in chapter 5 and another in
+chapter 6. All four figures now use the plain names. The names are wider than the
+one-unit category spacing, so F7's and F9's bar/dot axes **rotate their tick labels 30°**
+rather than shrink them, and F9's panel-(a) legend became a **two-column crossed legend**
+(substrate by colour, scale by dash) because four "Connectome, N = 448" entries are wider
+than the panel. `VARIANT_TICK` and `VARIANT_LABEL` remain in `style.py`: this is a
+per-figure choice, as it already was for F1 and F4b, not an amendment to the contract.
+**`act3_prediction.py` (F12 to F14, F16) has not been changed** — it is session 4's.
+
+**F11 — `|.|` before the median, not after, and the builder asserts it.** `mean_state`
+is signed with a sign set by the input realisation. Under median-then-abs the σ = 6,
+`f` = 0 column reads connectome **0.638** and weight-permuted **0.575**, i.e. the null
+below the connectome — the panel would argue against its own caption and against
+`TIER0` §3.7. Under abs-then-median it returns §3.7's published 0.759 / 0.949 / 0.959 /
+0.989 exactly. This is the same defect Act II found in F4b (`report/act2_manifold.md`
+audit item 1) and it was present in session 0's F11 builder too; both builders now
+assert the connectome is lowest, so it fails the build rather than the reader.
 
 **F14 — two aggregation units, do not read them against each other.** CV 0.209 is per
 (variant, f) with under-half-transitioning cells dropped (n = 37, `TIER0` §3.10). The
