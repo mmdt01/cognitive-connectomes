@@ -254,6 +254,20 @@ def _coverage() -> pd.DataFrame:
     return pd.read_csv(CRIT / "e02_heatmap_coverage_extension.csv")
 
 
+def _free_run() -> pd.DataFrame:
+    """E2's free-run attractors: the generated Lorenz trajectory per (variant, f, seed).
+
+    No row filter -- the capture *is* the filter (sigma = 2, one draw, the four-rung
+    ladder). `trajectory` arrives flattened, so the builder reshapes with `n_steps`.
+    """
+    return pd.read_parquet(CRIT / "e2_free_run_scale_448.parquet")
+
+
+def _curvature_regimes() -> pd.DataFrame:
+    """E1's two cells: the same substrate either side of its own curvature transition."""
+    return pd.read_parquet(CRIT / "e1_curvature_regimes_scale_448.parquet")
+
+
 def _perron_yeo() -> pd.DataFrame:
     """Perron-mode mass per Yeo network on the sweep substrate.
 
@@ -475,7 +489,12 @@ def _ph_jacobian() -> pd.DataFrame:
         seed=_RNG.integers(0, 10, n), draw=_RNG.integers(0, 3, n), task="lorenz",
         mean_curvature=curvature, vpt=vpt,
         lambda_min_J=-0.85 + 0.1 * _RNG.standard_normal(n),
-        mean_gain=0.5 * _RNG.random(n), effective_radius=_RNG.random(n)))
+        mean_gain=0.5 * _RNG.random(n), effective_radius=_RNG.random(n),
+        # Added in session 4 for F17 panel (d), which reads the FROZEN capture rather
+        # than E2's fresh one -- 30 cells per (variant, f) against 10. Additive: F12 and
+        # F14 read `mean_curvature`, `vpt` and `lambda_min_J` and are untouched.
+        climate_error=np.where(collapsed, 3.0 + 4.0 * _RNG.random(n),
+                               0.06 + 0.3 * _RNG.random(n))))
 
 
 def _ph_frontier() -> pd.DataFrame:
@@ -566,6 +585,55 @@ def _ph_coverage() -> pd.DataFrame:
     f_grid = np.arange(0, 0.55, 0.05)
     return pd.DataFrame(dict(f=f_grid, x_lo=0.0,
                              x_hi=3.58 + 0.8 * f_grid, sigma_max=11.2))
+
+
+def _ph_free_run() -> pd.DataFrame:
+    """Synthetic free-runs: a Lorenz-ish orbit that collapses to a point as f rises."""
+    steps, rows = 400, []
+    t = np.linspace(0, 40, steps)
+    for variant in LADDER:
+        # The connectome keeps its spread further up the f axis, which is the shape the
+        # layout has to accommodate; the numbers are invented.
+        limit = 0.42 if variant == "connectome" else 0.22
+        for f in np.round(np.arange(0, 0.55, 0.05), 2):
+            for seed in range(10):
+                alive = f < limit + 0.05 * _RNG.standard_normal()
+                orbit = np.column_stack([
+                    np.sin(t + seed), np.cos(1.3 * t + seed), np.sin(0.7 * t) ** 2])
+                orbit = orbit * (1.0 if alive else 0.01)
+                rows.append(dict(
+                    variant=variant, f=float(f), spectral_radius=2.0, seed=seed, draw=0,
+                    task="lorenz", bulk95=0.32,
+                    climate_error=float(0.08 if alive else 6.0), diverged=False,
+                    sd_ratio=float(1.0 if alive else 0.0),
+                    mean_curvature_driven=0.26, n_steps=steps,
+                    trajectory=orbit.astype(np.float32).ravel()))
+    return pd.DataFrame(rows)
+
+
+def _ph_curvature_regimes() -> pd.DataFrame:
+    """Synthetic regimes: one smooth orbit and one antiparallel zig-zag."""
+    steps, units = 400, 6
+    t = np.linspace(0, 24, steps)
+    rows = []
+    for regime, sigma in (("smooth", 2.0), ("collapsed", 2.4)):
+        if regime == "smooth":
+            traces = np.column_stack([np.sin(t + k) for k in range(units)])
+            angles = 0.26 + 0.01 * _RNG.standard_normal(steps - 2)
+        else:
+            flip = np.where(np.arange(steps) % 2, 1.0, -1.0)
+            traces = np.column_stack([0.9 * flip * (1 + 0.05 * k) for k in range(units)])
+            angles = np.pi - 0.15 * np.abs(_RNG.standard_normal(steps - 2))
+        rows.append(dict(
+            regime=regime, variant="connectome", f=0.25, seed=1,
+            spectral_radius=sigma, bulk95=0.38,
+            mean_curvature=float(np.mean(angles)), vpt=0.37 if regime == "smooth" else 0.02,
+            climate_error=0.06 if regime == "smooth" else 5.0,
+            n_steps=steps, n_units=units,
+            turning_angles=angles.astype(np.float32),
+            unit_traces=traces.astype(np.float32).ravel(),
+            unit_index=np.arange(units, dtype=np.int32)))
+    return pd.DataFrame(rows)
 
 
 def _ph_perron_yeo() -> pd.DataFrame:
@@ -672,9 +740,12 @@ SOURCES = {
         _f_extension, _ph_f_extension),
     "jacobian": Source(
         "jacobian", CRIT / "e01_jacobian_scale_448.parquet",
-        ("variant", "f", "spectral_radius", "mean_curvature", "vpt", "lambda_min_J"),
+        ("variant", "f", "spectral_radius", "mean_curvature", "vpt", "lambda_min_J",
+         "climate_error"),
         "no row filter; 38,280 Lorenz cells = 4 variants x 11 f x 29 sigma x 10 seeds "
-        "x 3 draws. The cell count TIER0 §3.10 quotes.",
+        "x 3 draws. The cell count TIER0 §3.10 quotes. F17 reads `climate_error` from "
+        "here rather than from the fresh E2 capture: 30 cells per (variant, f) against "
+        "10, and per-cell values are chaotic in the BLAS reduction order either way.",
         _jacobian, _ph_jacobian),
     "frontier": Source(
         "frontier", CRIT / "e03_frontier_scale_448.parquet",
@@ -719,6 +790,26 @@ SOURCES = {
         "11 rows, one per f. x_hi is the extent all 30 replicates reach on the matched "
         "axis; min over f is 3.58. Applies to the effective axis only.",
         _coverage, _ph_coverage),
+    "free_run": Source(
+        "free_run", CRIT / "e2_free_run_scale_448.parquet",
+        ("variant", "f", "seed", "climate_error", "sd_ratio", "trajectory", "n_steps"),
+        "440 rows = 4 variants x 11 f x 10 seeds, one draw, at sigma = 2. E2's capture: "
+        "the generated Lorenz attractor from the autonomous free-run, which no other "
+        "artifact holds -- every persisted state matrix is teacher-forced. `trajectory` "
+        "is the flattened (n_steps, 3) z-scored generated series. Per-cell climate_error "
+        "is chaotic in the BLAS reduction order over the 81.5 Lyapunov times of the "
+        "rollout, so read seed medians and never a cell; the scalar CLAIM is quoted from "
+        "the frozen `jacobian` source, which carries 3x the cells.",
+        _free_run, _ph_free_run),
+    "curvature_regimes": Source(
+        "curvature_regimes", CRIT / "e1_curvature_regimes_scale_448.parquet",
+        ("regime", "variant", "f", "seed", "spectral_radius", "mean_curvature",
+         "turning_angles", "unit_traces", "unit_index"),
+        "2 rows, one per regime. One substrate, one f, one seed, two sigma one grid step "
+        "apart, so the regime is the only thing that differs. The cell is selected by a "
+        "scan ON THE CAPTURING MACHINE, not read off the frozen panel: TIER0 §6.4 makes "
+        "the f > 0 flip pattern non-portable across machines.",
+        _curvature_regimes, _ph_curvature_regimes),
     "perron_yeo": Source(
         "perron_yeo", _REPO_ROOT / "data/human/Suarez2021_Data",
         ("network", "n_nodes", "perron_mass", "mass_per_node"),

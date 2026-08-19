@@ -7,7 +7,7 @@ builders live one module per act, which is also one module per sweep session:
 ``act1_structure``    session 1 F1, F2, F3, S1   (chapters 3 and 4)
 ``act2_manifold``     session 2 F4, F5, F6       (chapter 5)
 ``act3_memory``       session 3 F7, F9-F11       (chapter 6, memory arm)
-``act3_prediction``   session 4 F12-F14, F16     (chapter 6, prediction arm)
+``act3_prediction``   session 4 F12-F14, F16, F17, S2 (chapter 6; S2 prints in 5)
 ``act4_anchor``       --        F15              (chapter 7)
 ===================== ========= ================================================
 
@@ -31,7 +31,7 @@ from report.figlib.figures.act3_memory import (
     f7_the_crossing, f9_scale_invariance, f10_peak_parity, f11_perron_rescue)
 from report.figlib.figures.act3_prediction import (
     f12_curvature_is_bimodal, f13_generation_as_vpt, f14_sigma_eff_is_a_locator,
-    f16_phase_boundaries)
+    f16_phase_boundaries, f17_free_run_attractors, s2_curvature_regimes)
 from report.figlib.figures.act4_anchor import f15_yeo_loads_the_perron_mode
 
 # =============================================================================
@@ -53,17 +53,27 @@ FIGURES = {
     "F14": (6, "sigma_eff as locator, not criterion", f14_sigma_eff_is_a_locator),
     "F15": (7, "which Yeo networks load the Perron mode", f15_yeo_loads_the_perron_mode),
     "F16": (6, "the crossing, with its axis and its coverage", f16_phase_boundaries),
+    "F17": (6, "the free-running attractor, and how it fails", f17_free_run_attractors),
 }
 
 # The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
 # reserve if a fifth slot appears.
 WORKSHOP = ("F1", "F2", "F7", "F12")
 
-# Cap raised from 14 to 15 in session 0 to give contribution 2 a figure of its own.
-# This assertion is why the registry lives here rather than one dict per act module: a
-# per-module registry merged at import time could be grown a figure at a time without
-# anything noticing, which is exactly the drift FIGURE_LIST's cap exists to prevent.
-assert len(FIGURES) == 15, f"cap is 15 figures, registry holds {len(FIGURES)}"
+# **The cap is now a soft count, and this assertion records the count rather than
+# enforcing a ceiling.** Raised from 14 to 15 in session 0 (contribution 2 needed a
+# figure of its own), and from 15 to 16 in session 4 on the author's decision of
+# 19 August 2026, which replaced the old "one slot, first past the post" rule for E1 and
+# E2 with "build both, place each on what it turns out to show". F17 is E2: the
+# free-running rollout, which no other artifact in the repository captures, carrying a
+# pre-registered claim whose second clause it refutes. It is evidence, not an
+# illustration, so it takes a main-text slot.
+#
+# The assertion stays for the reason it was written: a per-module registry merged at
+# import time could be grown a figure at a time without anything noticing, and this is
+# the one place a session must edit -- and therefore justify -- to add one. What changed
+# is that the number is a fact to keep true, not a gate to argue past.
+assert len(FIGURES) == 16, f"registry holds {len(FIGURES)} figures, not 16"
 
 # ---------------------------------------------------------------------------------
 # Supplementary figures -- appendix only, NOT part of the numbered main-text list.
@@ -79,6 +89,15 @@ assert len(FIGURES) == 15, f"cap is 15 figures, registry holds {len(FIGURES)}"
 # own builder is a new figure and goes through the cap.
 SUPPLEMENTARY = {
     "S1": (None, "F1 at N = 1000 (appendix scale replicate)", s1_spectrum_n1000),
+    # S2 is E1. It makes no claim the main text does not already make -- curvature is
+    # bimodal is F12's claim -- so it is supplementary; but it needs its own builder,
+    # which the original S-figure bar forbade. Session 4 amended that bar (see
+    # `FIGURE_LIST.md`): "no new claim" is the test that matters, and "an existing
+    # builder at different parameters" was a proxy for it that excluded the one thing a
+    # supplementary figure is most useful for -- supplying intuition for a claim the main
+    # text asserts. It prints in chapter 5, where the manifold is decomposed.
+    "S2": (None, "the two curvature regimes made visible (chapter 5)",
+           s2_curvature_regimes),
 }
 for _id, (_chapter, _name, _builder) in SUPPLEMENTARY.items():
     assert _id.startswith("S") and _id not in FIGURES, (

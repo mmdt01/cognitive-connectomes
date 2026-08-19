@@ -1,16 +1,35 @@
 # Master figure list
 
-**Fixed in session 0, 15 August 2026. Cap 15 — the list is at the cap.** No session
-creates a figure that is not here; if one seems missing, report and stop. `W` marks the
-workshop subset (5pp, 4 figures).
+**Fixed in session 0, 15 August 2026. Count 16.** No session creates a figure that is
+not here; if one seems missing, report and stop. `W` marks the workshop subset (5pp, 4
+figures).
+
+> **AMENDED 19 August 2026 (session 4), on the author's decision. The cap is now a soft
+> count, not a gate.** The rule this list carried was "one slot, first past the post":
+> E1 and E2 (roadmap §4d) competed for a single cap slot, E2 resolved first, and E1 was
+> to be dropped with the reason recorded. That rule is replaced by **build both, then
+> place each on what it turns out to show**. The cap no longer decides whether work
+> happens; it records how many main-text figures exist, and a session that adds one must
+> still edit this file and `figures/__init__.py` together and say why.
+>
+> **What that produced.** E2 became **F17** in the main text: the free-running rollout is
+> a measurement no other artifact in the repository holds, it carries a pre-registered
+> claim, and it *refuted* half of that claim — evidence, not illustration. E1 became
+> **S2**, supplementary: it makes no claim the main text does not already make.
+> Count 15 → 16 main-text figures, plus a second S-figure. The amendment is recorded in
+> `report/act3b_prediction.md` §6.
 
 **The cap was 14 and was raised to 15 in session 0, deliberately and once.** The draft
 list gave contribution 2 — the unifying claim, and the crossing it turns on — no figure
 of its own, on the reasoning that F7 and F13 carry it jointly. They do not: F7 is memory
 against `sigma·bulk95` at f = 0 and F13 is VPT against f at sigma = 2, two orthogonal 1-D
 slices, and no pair of slices shows that the two advantage regions occupy *opposite
-regions of the (f, sigma) plane*. F16 was added for that. The cap is 15 now; it is not a
-precedent, and a session that wants a sixteenth reports and stops.
+regions of the (f, sigma) plane*. F16 was added for that. ~~The cap is 15 now; it is not
+a precedent, and a session that wants a sixteenth reports and stops.~~ **Superseded by
+the 19 August amendment above**: the sixteenth was wanted, was argued for, and was added
+— by editing this file and the registry together, which is the part of the old rule that
+survived. The paragraph is kept struck through rather than deleted, because the reasoning
+in its first half (why two 1-D slices cannot carry contribution 2) is still live.
 
 Every entry has been checked against the frozen artifacts: the file exists, the named
 filter returns rows, and where `TIER0` states a number the filter reproduces it. Every
@@ -27,7 +46,7 @@ per sweep session** — so a session edits its own module and nothing else:
 | `act1_structure.py` | 1 | F1, F2, **F3**, S1 |
 | `act2_manifold.py` | 2 | F4, F5, F6 |
 | `act3_memory.py` | 3 | F7, F9, F10, F11 |
-| `act3_prediction.py` | 4 | F12, F13, F14, **F16** |
+| `act3_prediction.py` | 4 | F12, F13, F14, **F16**, F17, **S2** |
 | `act4_anchor.py` | — | F15 |
 
 **The act decides the module, not the chapter**, and the two cross-act figures are why
@@ -41,8 +60,9 @@ unused** rather than renumbering, so references elsewhere still resolve. **Sessi
 cut the merged-in panel too** (see the F3 flag): the two panels argued different things
 and read as two half-figures, so F3 is now a single panel and F8's content is methods
 prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
-contribution 2. Rendered figures: F1 to F7, F9 to F16 = 15. IDs are stable identifiers,
-not a reading order, so F16 sitting in chapter 6 after chapter 7's F15 is intended.
+contribution 2. **F17 added** in session 4 for E2. Rendered figures: F1 to F7, F9 to F17
+= 16. IDs are stable identifiers, not a reading order, so F16 and F17 sitting in chapter
+6 after chapter 7's F15 is intended.
 
 Status: `confirmed` = source verified and filter reproduces `TIER0`; `confirmed*` = source
 verified, see the flag below the table.
@@ -64,10 +84,11 @@ verified, see the flag below the table.
 | F13 | 6 | 4 | Generation read as VPT: +1.0 to +2.2 Lyapunov times from f ~ 0.20 at sigma = 2, clearing the weight-permuted placement control; **plus the f = 0 collapse panel** (ER 5/10 seeds, connectome 0/10) | (a) `e03_frontier_scale_448.parquet` filter `metric == "vpt"`, `spectral_radius == 2.0`. (b) `e03_frontier_paired_scale_448.csv` same filter — paired within seed, so all connectome-minus-null statements come from here. (c) `item2_collapse_loci_scale_448.csv` filter `f == 0`, cols `n_seeds_collapsed / n_seeds` | confirmed | |
 | F14 | 6 | 4 | `sigma_eff` is a **locator, not a criterion**: transition at 0.77-0.90 with variant offsets ordered by spectral gap; CV 0.209 against nominal sigma's 0.667 | `e01_threshold_invariance_scale_448.csv` filter **`scope == "f > 0"`** (n = 37); plus `e01_threshold_table_scale_448.csv` cols `effective_radius_lo/hi` per (variant, f) | confirmed* | |
 | F15 | 7 | anchor | Which Yeo networks load the Perron mode (minimal Act IV) | **computed live, no frozen parquet**: leading eigenvector of the N=448 self-built consensus (`eigh`) x release RSN labels from `data/human/Suarez2021_Data`, restricted to cortical nodes. Seconds, not a run | confirmed* | |
+| F17 | 6 | 4 | **The free-running rollout, which no other artifact captures.** Every persisted state matrix is teacher-forced. Pre-stated claim: the connectome retains the true climate to higher `f` (**confirmed**: 0.43 of frozen cells against the nulls' 0.14 at `f` >= 0.30) and the collapse is a change of shape not of scale (**refuted**: `sd_ratio` is bimodal, 229 of 440 cells at a fixed point against 158 keeping the spread, 11 between) | `criticality_matched/results/e2_free_run_scale_448.parquet` (source `free_run`), 440 rows = 4 variants x 11 `f` x 10 seeds at sigma = 2, cols `climate_error, sd_ratio, trajectory`; **panel (d) reads the frozen `e01_jacobian_scale_448.parquet` instead**, which carries 30 cells per (variant, `f`) against this capture's 10 | confirmed* | |
 | F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
 
 Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
-carry 3, F12/F13/F14 carry 4, F3 carries 5, F6 carries 6. Contribution 2's *out-of-sample*
+carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6. Contribution 2's *out-of-sample*
 test remains the Mackey-Glass pre-registration rather than a panel; F16 carries the claim
 itself.
 
@@ -82,14 +103,23 @@ assertion that enforces it. S-figures live in a separate `SUPPLEMENTARY` registr
 `python -m report.figlib` renders both. The rule that no figure exists outside this file
 still binds, which is why they are listed here.
 
-**The bar for an S-figure, so this does not become a way around the cap:** it makes **no
-claim the main text does not already make**, and it is built by an **existing builder at
-different parameters**. Anything needing its own builder is a new figure and goes through
-the cap — report and stop.
+**The bar for an S-figure, so this does not become a way around the count:** it makes
+**no claim the main text does not already make**.
+
+> **AMENDED 19 August 2026 (session 4).** The bar used to carry a second clause — "and
+> it is built by an **existing builder at different parameters**" — and S2 fails it: E1
+> needs its own builder. The clause is dropped, because it was a *proxy* for the test
+> that matters and it excluded exactly the case a supplementary figure is most useful
+> for: supplying intuition for a claim the main text asserts but cannot illustrate. S1
+> (a scale replicate) satisfied both clauses and made the proxy look free; S2 is the
+> case that shows it was not. **"No claim the main text does not already make" is now
+> the whole bar**, and it is the clause doing the work — a figure that makes a new claim
+> is a main-text figure and goes in the numbered list, whoever built it.
 
 | id | main-text twin | what it adds | source, columns, filter | status |
 |----|----|----|----|----|
 | S1 | F1 | F1 rebuilt at **N = 1000**. Same builder, same claim, larger parcellation; shows the gap-ratio separation surviving a 2.2x change in N, and makes the null-ordering reversal visible | `eigenspectrum/results/scale_1000/spectra_per_seed.parquet` (source `spectra_1000`); `eig_w_real` (1000 floats/row), `bulk95`, `lambda_max_raw`; filter `condition == "human_empirical"` and `variant in LADDER` (40 rows) | confirmed |
+| S2 | F12 | **E1 — the two curvature regimes made visible. Prints in chapter 5**, built in `act3_prediction.py` (session 4 owns it; the act decides the module, as for F3 and F16). Unit traces either side of one substrate's transition plus the per-step turning-angle distributions — the temporal intuition Act II hands over as a boundary rather than a result (`act2_manifold.md` §5 item 15). Makes **no** claim F12 does not | `criticality_matched/results/e1_curvature_regimes_scale_448.parquet` (source `curvature_regimes`); 2 rows, cols `regime, spectral_radius, mean_curvature, turning_angles, unit_traces`; connectome, `f` = 0.25, one seed, two sigma one grid step apart | confirmed* |
 
 **S1 — the row ordering is NOT monotone at N=1000, and the caption must not imply it
 is.** Rows a-d are in ladder order, and at N=448 that happens to coincide with descending

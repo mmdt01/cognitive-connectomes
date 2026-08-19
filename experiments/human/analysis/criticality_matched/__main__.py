@@ -23,6 +23,11 @@ which are the only steps that simulate anything:
     --n1000      the N=1000 memory run (--scale 1000), or its N=448 protocol
                  control (--scale 448); config in TIER0 sec 2.5 [--jobs N]
     --n1000-figures  the cross-scale N=448 vs N=1000 figure (reads the run parquets)
+    --free-run   E2 + E1: the free-running rollout, which nothing else in the repo
+                 captures (every persisted state matrix is teacher-forced). E2 is the
+                 generated Lorenz attractor across (variant, f) at sigma = 2; E1 is the
+                 reservoir state trajectory either side of one transition. Simulates.
+                 [--jobs N] [--smoke]
 
 Nothing here overwrites a frozen artifact; every output carries a manifest recording
 the config and the git commit that produced it.
@@ -194,7 +199,7 @@ if __name__ == "__main__":
     scale = common.flag(sys.argv, "--scale", common.SCALE, int)
     modes = ([m for m in ("--panel", "--task-a", "--task-b", "--extend-f", "--item2",
                           "--frontier", "--mechanism", "--e01", "--jacobian", "--act3-figures", "--heatmaps", "--closeout", "--n1000",
-                          "--n1000-figures") if m in sys.argv]
+                          "--n1000-figures", "--free-run") if m in sys.argv]
              or ["--panel"])
     if "--task-b" in modes:
         # The only simulating step: extend the MC sweep so the matched-axis peak
@@ -249,3 +254,7 @@ if __name__ == "__main__":
     if "--n1000-figures" in modes:
         from experiments.human.analysis.criticality_matched import n1000
         n1000.figures()
+    if "--free-run" in modes:
+        from experiments.human.analysis.criticality_matched import free_run
+        free_run.run(scale=scale, jobs=common.flag(sys.argv, "--jobs", 1, int),
+                     smoke="--smoke" in sys.argv)

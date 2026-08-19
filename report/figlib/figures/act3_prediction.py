@@ -558,3 +558,256 @@ def f16_phase_boundaries(ctx):
         style.panel_label(ax, letter, dx=-0.11)
     fig.tight_layout()
     return fig
+
+
+# =============================================================================
+# E2 and E1 -- the free-running rollout, captured by session 4.
+#
+# `criticality_matched/free_run.py` holds the capture and the reasoning behind it. Two
+# things about it govern everything below and are repeated because forgetting either
+# produces a defensible-looking figure that is wrong:
+#
+# * **Per-cell `climate_error` is not reproducible.** The climate rollout is 81.5
+#   Lyapunov times, so a machine-epsilon difference in BLAS reduction order decorrelates
+#   the trajectory. Seed medians only; and the scalar CLAIM is quoted from the frozen
+#   `jacobian` source, which carries 30 cells per (variant, f) against this capture's 10.
+#   The fresh capture exists to show the trajectories, which nothing else holds.
+# * **The `f` > 0 flip pattern is not machine-portable** (TIER0 §6.4), so a cell index
+#   does not select the same realisation here as on the machine that froze the panel.
+#   E1's cell is chosen by a scan on the capturing machine for exactly that reason.
+# =============================================================================
+
+# A free-run whose spread falls below this fraction of the true attractor's has collapsed
+# onto a fixed point rather than drifted. Measured, not chosen: `sd_ratio` is itself
+# bimodal -- 229 of 440 cells sit below 0.05 and 158 between 0.90 and 1.10, with 11
+# anywhere between -- so any cut inside the empty band gives the same figure.
+POINT_COLLAPSE = 0.05
+# Faithful climate. Same idea: the faithful/collapsed separation is 20 to 40x on seed
+# medians, against ~2.5x per-cell irreproducibility, so the cut is not near anything.
+FAITHFUL_CLIMATE = 0.5
+
+
+def _trajectories(frame):
+    """Reshape the flattened `(n_steps, 3)` generated series back per row."""
+    return {row.Index: np.asarray(row.trajectory, float).reshape(row.n_steps, 3)
+            for row in frame.itertuples()}
+
+
+def f17_free_run_attractors(ctx):
+    """E2 -- what a given `climate_error` actually looks like, in the closed loop.
+
+    **The gap this fills.** Every state matrix in the repository is teacher-forced;
+    `readout_config.json` says so for Lorenz in as many words. So nothing in Probes 1 to
+    3, the phase diagram or the criticality-matched sweep has ever looked at the
+    trajectory the reservoir produces when it is driving itself, which is the regime the
+    entire prediction arm is about. `climate_error` scores that trajectory's statistics
+    and no artifact shows its shape.
+
+    **The pre-stated claim, and how it came out.** Registered before any of this code
+    existed (`report/act3b_prediction.md` §6.1): *the connectome's free-run attractor
+    retains the true Lorenz climate to a higher `f` than the nulls do, and the collapse
+    when it comes is a change of shape rather than a drift of scale.* First clause
+    **confirmed**; second clause **refuted**, and the refutation is the more interesting
+    half. The collapse is overwhelmingly a collapse of *scale*: the free-run falls onto a
+    fixed point and the attractor's spread goes to zero. Panel (c) is what refutes it, so
+    it is drawn rather than quietly dropped.
+
+    **Why the refutation strengthens the chapter rather than denting it.** §3.9's
+    one-dimensional map argument says a gain above +1 gives a stable non-zero *fixed
+    point* and a gain below -1 a period-2 orbit, with nothing stable between. A free-run
+    collapsing to a point is that fixed-point branch, observed in the closed loop on a
+    measurement that has never been made -- and `sd_ratio` turns out to be bimodal in
+    exactly the way curvature is (F12). Two independent order parameters, one measured
+    under teacher forcing and one under autonomous rollout, both binary.
+    """
+    frame = ctx.frame("free_run")
+    frozen = ctx.frame("jacobian")
+    fig = plt.figure(figsize=(9.0, 5.2))
+    grid = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.92], hspace=0.62, wspace=0.34)
+
+    # --- (a, b) the attractors themselves, at one f either side of the separation ------
+    # The seed drawn is the one whose climate_error is NEAREST ITS CELL'S MEDIAN -- the
+    # same rule F1 and F6 use for picking a representative seed, and the only rule that
+    # cannot be accused of choosing a flattering realisation.
+    trajectories = _trajectories(frame)
+    # f = 0.25, not 0.30: at 0.30 every substrate's median-climate seed has collapsed, so
+    # the panel is four invisible dots -- a true picture of the data and a useless one.
+    # 0.25 is where the substrates actually separate (connectome sd_ratio median 1.00
+    # against the nulls' 0.00, 0.36, 0.00), which is what the pair of panels is for.
+    for column, f_value in enumerate((0.0, 0.25)):
+        ax = fig.add_subplot(grid[0, column])
+        cell = frame[np.isclose(frame.f, f_value)]
+        collapsed = []
+        for variant in style.ordered_variants(cell.variant.unique()):
+            sub = cell[cell.variant == variant]
+            median = sub.climate_error.median()
+            pick = sub.index[(sub.climate_error - median).abs().argmin()]
+            orbit = trajectories[pick]
+            colour = style.VARIANT_COLOUR[variant]
+            ax.plot(orbit[:, 0], orbit[:, 2], lw=0.5, alpha=0.85, color=colour,
+                    label=style.VARIANT_TITLE[variant])
+            # A free-run at a fixed point is a single dot and vanishes at this scale, so
+            # it is marked. Not drawing it would read as "this substrate is missing".
+            if float(sub.loc[pick, "sd_ratio"]) < POINT_COLLAPSE:
+                ax.plot(orbit[:, 0].mean(), orbit[:, 2].mean(), marker="o", ms=7,
+                        mfc="none", mec=colour, mew=1.6, zorder=6)
+                collapsed.append(style.VARIANT_TITLE[variant])
+        ax.set_xlabel("generated $x$  (z-scored)")
+        ax.set_ylabel("generated $z$" if column == 0 else None)
+        ax.set_title(rf"$f$ = {f_value:g},  $\sigma$ = 2" "\n"
+                     "median-climate seed per substrate", fontsize=style.TITLE_SIZE - 1)
+        ax.set_xlim(-3.2, 3.2)
+        ax.set_ylim(-2.6, 3.2)
+        if collapsed:
+            # Wrapped two per line and left-aligned to its own panel: centred, the
+            # three-substrate note under (b) runs into the one-substrate note under (a).
+            wrapped = ",\n".join(", ".join(collapsed[i:i + 2])
+                                  for i in range(0, len(collapsed), 2))
+            ax.annotate("○ at a fixed point: " + wrapped,
+                        xy=(0.0, -0.28), xycoords="axes fraction", ha="left",
+                        va="top", fontsize=style.TICK_SIZE - 2, color="0.35")
+        if column == 0:
+            style.legend(ax, loc="upper left", fontsize=style.LEGEND_SIZE - 3,
+                         handlelength=1.1, labelspacing=0.25, borderpad=0.1)
+        style.panel_label(ax, "ab"[column], offset_points=(-36, 4))
+
+    # --- (c) the refutation: the collapse is a loss of scale ---------------------------
+    ax = fig.add_subplot(grid[0, 2])
+    ratio = frame.sd_ratio.to_numpy(float)
+    ratio = ratio[np.isfinite(ratio)]
+    ax.hist(np.clip(ratio, 0, 2.0), bins=np.linspace(0, 2.0, 60), color="0.35")
+    ax.axvspan(POINT_COLLAPSE, 0.9, color=style.ANNOTATION_ACCENT, alpha=0.13, lw=0)
+    between = int(((ratio >= POINT_COLLAPSE) & (ratio <= 0.9)).sum())
+    ax.set_xlabel("free-run spread / true spread")
+    ax.set_ylabel(f"cells  (n = {ratio.size})")
+    ax.set_title(f"{int((ratio < POINT_COLLAPSE).sum())} cells at a fixed point,\n"
+                 f"{int(((ratio > 0.9) & (ratio < 1.1)).sum())} keeping the spread, "
+                 f"{between} between", fontsize=style.TITLE_SIZE - 1)
+    style.panel_label(ax, "c", offset_points=(-36, 4))
+
+    # --- (d) the confirmed clause, on the FROZEN capture -------------------------------
+    # 30 cells per (variant, f) against the fresh capture's 10, and it is the canonical
+    # artifact. The fresh capture supplies shape; the frozen one supplies the scalar.
+    ax = fig.add_subplot(grid[1, :2])
+    near = frozen[np.isclose(frozen.spectral_radius, 2.0)]
+    faithful = (near.assign(ok=near.climate_error < FAITHFUL_CLIMATE)
+                .pivot_table(index="f", columns="variant", values="ok", aggfunc="mean"))
+    for variant in style.ordered_variants(faithful.columns):
+        ax.plot(faithful.index, faithful[variant], marker="o", ms=3,
+                **style.variant_kwargs(variant, label=style.VARIANT_TITLE[variant]))
+    high_f = faithful[faithful.index >= 0.30]
+    nulls = [c for c in faithful.columns if c != "connectome"]
+    connectome_rate = float(high_f["connectome"].mean())
+    null_rate = float(high_f[nulls].mean().mean())
+    assert ctx.placeholder or connectome_rate > null_rate, (
+        "F17: the pre-stated claim is that the connectome keeps a faithful climate to "
+        f"higher f; measured {connectome_rate:.3f} against the nulls' {null_rate:.3f}.")
+    ax.axvspan(0.30, float(faithful.index.max()), color=style.SUPERCRITICAL_COLOUR,
+               zorder=0)
+    ax.annotate(rf"$f \geq$ 0.30:  connectome {connectome_rate:.2f}" "\n"
+                f"against the nulls' {null_rate:.2f}",
+                xy=(0.40, 0.82), xycoords=("data", "axes fraction"), ha="center",
+                fontsize=style.TICK_SIZE - 1, color="0.35")
+    ax.set_xlabel("sign fraction $f$")
+    ax.set_ylabel(f"cells with climate error < {FAITHFUL_CLIMATE:g}\n"
+                  r"(30 per cell, frozen, $\sigma$ = 2)")
+    ax.set_ylim(0, 1.0)
+    style.legend(ax, loc="lower left", fontsize=style.LEGEND_SIZE - 2, ncol=2,
+                 columnspacing=0.8, handlelength=1.3)
+    style.panel_label(ax, "d", offset_points=(-46, 4))
+
+    # --- (e) the same thing read as the fixed-point rate, on the fresh capture ---------
+    ax = fig.add_subplot(grid[1, 2])
+    high = frame[frame.f >= 0.20]
+    rates = (high.assign(pt=high.sd_ratio < POINT_COLLAPSE)
+             .groupby("variant").pt.mean())
+    order = style.ordered_variants(rates.index)
+    ax.bar(np.arange(len(order)), [rates[v] for v in order],
+           color=[style.VARIANT_COLOUR[v] for v in order],
+           edgecolor="white", linewidth=0.5)
+    for i, variant in enumerate(order):
+        ax.text(i, rates[variant] + 0.02, f"{rates[variant]:.2f}", ha="center",
+                fontsize=style.TICK_SIZE - 1)
+    ax.set_xticks(np.arange(len(order)))
+    ax.set_xticklabels([style.VARIANT_TITLE_TICK[v] for v in order],
+                       fontsize=style.TICK_SIZE - 2, rotation=30, ha="right",
+                       rotation_mode="anchor")
+    ax.set_ylabel("free-runs at a fixed point")
+    ax.set_ylim(0, 0.85)
+    ax.set_title(r"$f \geq$ 0.20, fresh capture", fontsize=style.TITLE_SIZE - 1)
+    ax.grid(axis="x", visible=False)
+    style.panel_label(ax, "e", offset_points=(-36, 4))
+    return fig
+
+
+def s2_curvature_regimes(ctx):
+    """E1 -- the two curvature regimes made visible. Supplementary; prints in chapter 5.
+
+    **What it adds, and what it does not.** It makes **no claim the main text does not
+    already make**: curvature is bimodal, and that is F12's claim and contribution 4's.
+    What it adds is the temporal intuition Act II hands over as a boundary rather than a
+    result (`report/act2_manifold.md` §5 item 15), so that F12 does not introduce
+    curvature to a reader with no run-up. That is why it is a supplementary figure rather
+    than a main-text one -- and it is the reason the S-figure bar had to be amended, since
+    it needs its own builder.
+
+    **One substrate, one `f`, one seed, two sigma one grid step apart.** Nothing but the
+    regime differs, so the figure cannot be read as a substrate contrast. Not at `f` = 0,
+    where curvature is flat at 0.26 rad across the entire sweep and there is nothing to
+    draw.
+
+    **It shows a regime, not a capacity, and it is not a projection.** Panels (a) and (b)
+    are raw unit traces and panel (c) is the per-step turning-angle distribution -- the
+    quantity `mean_curvature` averages. Deliberately no PCA: a top-3 PCA trajectory is
+    faithful to 96 to 99% of the fluctuation variance but is nearly substrate-invariant
+    (PCs-to-95% is 3 on Lorenz for every rung while `d_eff` spans 75 to 413), so
+    captioning one as the subspace the readout computes in would contradict F6, which is
+    Act II's own contribution. Traces and angles carry no such implication.
+    """
+    frame = ctx.frame("curvature_regimes").set_index("regime")
+    fig, axes = plt.subplots(1, 3, figsize=(9.0, 2.7),
+                             gridspec_kw=dict(width_ratios=[1.15, 1.15, 1.0]))
+    window = 44                       # steps of trace shown; enough to see alternation
+
+    for column, regime in enumerate(("smooth", "collapsed")):
+        row = frame.loc[regime]
+        traces = np.asarray(row.unit_traces, float).reshape(row.n_steps, row.n_units)
+        ax = axes[column]
+        for unit in range(row.n_units):
+            ax.plot(np.arange(window), traces[:window, unit], lw=1.0, alpha=0.85,
+                    color=plt.cm.Greys(0.35 + 0.09 * unit))
+        ax.set_xlabel("time step")
+        ax.set_ylabel("unit activation $x_i$" if column == 0 else None)
+        ax.set_ylim(-1.05, 1.05)
+        ax.set_title(f"{regime}:  " r"$\sigma$ = " f"{row.spectral_radius:g},  "
+                     r"$\bar{c}$ = " f"{row.mean_curvature:.2f} rad\n"
+                     f"VPT {row.vpt:.2f}, climate error {row.climate_error:.2f}",
+                     fontsize=style.TITLE_SIZE - 1)
+
+    # --- (c) the distribution the mean is a mean OF ------------------------------------
+    # This is the panel that earns the figure. F12 plots the mean curvature per cell and
+    # shows that the means are bimodal ACROSS cells; what it cannot show is that within a
+    # single cell the per-step angles are concentrated, so the mean is describing a
+    # regime rather than averaging a spread. That is the difference between "gated" and
+    # "graded" seen from inside one cell.
+    bins = np.linspace(0, np.pi, 70)
+    for regime, shade in (("smooth", "0.25"), ("collapsed", style.ANNOTATION_ACCENT)):
+        row = frame.loc[regime]
+        angles = np.asarray(row.turning_angles, float)
+        axes[2].hist(angles, bins=bins, color=shade, alpha=0.8,
+                     label=f"{regime}  (n = {angles.size})")
+    axes[2].set_xlabel("per-step turning angle (rad)")
+    axes[2].set_ylabel("steps")
+    axes[2].set_xticks([0, np.pi / 2, np.pi])
+    axes[2].set_xticklabels(["0", r"$\pi/2$", r"$\pi$"])
+    axes[2].set_title("within each cell the angles are\nconcentrated, not spread",
+                      fontsize=style.TITLE_SIZE - 1)
+    style.legend(axes[2], loc="upper center", fontsize=style.LEGEND_SIZE - 2)
+
+    if not ctx.placeholder:
+        assert frame.loc["smooth"].mean_curvature < 1.0 < frame.loc["collapsed"].mean_curvature, \
+            "S2: the two cells must straddle the collapse separator, one each side."
+    for ax, letter in zip(axes, "abc"):
+        style.panel_label(ax, letter, offset_points=(-36, 4))
+    fig.tight_layout()
+    return fig
