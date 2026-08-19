@@ -201,6 +201,12 @@ UNCOVERED_COLOUR = "#b0b0b0"
 SUPERCRITICAL_COLOUR = "#fff3e0"
 CEILING_COLOUR = "#888888"
 ANNOTATION_COLOUR = "#333333"
+# The one accent used to mark a *claim* inside a panel -- a band, a threshold, the bar
+# that carries the result. Added in session 4 as a NAME for a value already in use as a
+# literal in `act1_structure` and `act4_anchor`, so no rendered figure changes colour;
+# it exists so the prediction arm's five annotation marks cannot drift apart. Not a
+# variant, axis or boundary colour: those three namespaces stay closed.
+ANNOTATION_ACCENT = "#c44e52"
 
 # --------------------------------------------------------------------------- fonts
 AXIS_LABEL_SIZE = 9
