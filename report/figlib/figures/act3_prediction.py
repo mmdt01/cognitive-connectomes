@@ -783,6 +783,12 @@ def s2_curvature_regimes(ctx):
     where curvature is flat at 0.26 rad across the entire sweep and there is nothing to
     draw.
 
+    **Colour is `style.REGIME_COLOUR`, the same pair F12 uses** (added 20 August 2026,
+    closing the loose end that item 13 of `act3b_prediction.md` §5 recorded). One regime,
+    one colour, across both figures: a reader who has learned indigo-is-smooth and
+    crimson-is-collapsed in F12 reads S2 without relearning anything. Within a panel,
+    lightness separates the six units and carries no other meaning.
+
     **It shows a regime, not a capacity, and it is not a projection.** Panels (a) and (b)
     are raw unit traces and panel (c) is the per-step turning-angle distribution -- the
     quantity `mean_curvature` averages. Deliberately no PCA: a top-3 PCA trajectory is
@@ -800,16 +806,24 @@ def s2_curvature_regimes(ctx):
         row = frame.loc[regime]
         traces = np.asarray(row.unit_traces, float).reshape(row.n_steps, row.n_units)
         ax = axes[column]
+        # Shades within the panel's own regime colour, so hue says which regime and
+        # lightness only separates the six units. Sampled over the saturated half of the
+        # ramp: the pale end exists for density maps and is too faint for a line.
+        shades = style.regime_cmap(regime)(np.linspace(0.45, 1.0, row.n_units))
         for unit in range(row.n_units):
             ax.plot(np.arange(window), traces[:window, unit], lw=1.0, alpha=0.85,
-                    color=plt.cm.Greys(0.35 + 0.09 * unit))
+                    color=shades[unit])
         ax.set_xlabel("time step")
         ax.set_ylabel("unit activation $x_i$" if column == 0 else None)
         ax.set_ylim(-1.05, 1.05)
-        ax.set_title(f"{regime}:  " r"$\sigma$ = " f"{row.spectral_radius:g},  "
+        # The title takes the regime colour too, which ties panel to legend entry in (c)
+        # without spending a legend on panels that hold one series each.
+        ax.set_title(f"{style.REGIME_LABEL[regime]}:  " r"$\sigma$ = "
+                     f"{row.spectral_radius:g},  "
                      r"$\bar{c}$ = " f"{row.mean_curvature:.2f} rad\n"
                      f"VPT {row.vpt:.2f}, climate error {row.climate_error:.2f}",
-                     fontsize=style.TITLE_SIZE - 1)
+                     fontsize=style.TITLE_SIZE - 1,
+                     color=style.REGIME_COLOUR[regime])
 
     # --- (c) the distribution the mean is a mean OF ------------------------------------
     # This is the panel that earns the figure. F12 plots the mean curvature per cell and
@@ -818,13 +832,18 @@ def s2_curvature_regimes(ctx):
     # regime rather than averaging a spread. That is the difference between "gated" and
     # "graded" seen from inside one cell.
     bins = np.linspace(0, np.pi, 70)
-    for regime, shade in (("smooth", "0.25"), ("collapsed", style.ANNOTATION_ACCENT)):
+    sizes = set()
+    for regime in ("smooth", "collapsed"):
         row = frame.loc[regime]
         angles = np.asarray(row.turning_angles, float)
-        axes[2].hist(angles, bins=bins, color=shade, alpha=0.8,
-                     label=f"{regime}  (n = {angles.size})")
+        sizes.add(angles.size)
+        axes[2].hist(angles, bins=bins, color=style.REGIME_COLOUR[regime], alpha=0.85,
+                     label=style.REGIME_LABEL[regime])
+    # Both cells are read over the same window, so quoting n twice in the legend was
+    # repeating one number. It goes on the axis instead.
+    assert len(sizes) == 1, f"S2: the two regimes hold different step counts {sizes}"
     axes[2].set_xlabel("per-step turning angle (rad)")
-    axes[2].set_ylabel("steps")
+    axes[2].set_ylabel(f"steps  (n = {sizes.pop()} each)")
     axes[2].set_xticks([0, np.pi / 2, np.pi])
     axes[2].set_xticklabels(["0", r"$\pi/2$", r"$\pi$"])
     axes[2].set_title("within each cell the angles are\nconcentrated, not spread",

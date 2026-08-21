@@ -431,7 +431,9 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   carry no such implication.
 - **Caption (final wording):** *What the two curvature regimes look like in time.* One
   substrate (connectome, `f` = 0.25, one seed) at two spectral radii **one grid step
-  apart**, so the regime is the only thing that differs. (a) Below the transition the
+  apart**, so the regime is the only thing that differs. Colour is the regime throughout,
+  and is the same pair F12 uses: indigo for smooth, crimson for collapsed. Within a
+  panel, lightness separates the six units and means nothing else. (a) Below the transition the
   most active units trace smooth, slowly turning trajectories; mean curvature 0.26 rad,
   VPT 0.37, climate error 0.06. (b) One grid step above, the same units alternate sign
   every step — successive velocity vectors antiparallel; mean curvature 2.82 rad, VPT
@@ -697,9 +699,17 @@ written by hand, not generated (see the roadmap §4b note on drafting).
     load-bearing. If a figure ever needs the two regimes interleaved along one axis, this
     pair is wrong for it, and that is a scope question rather than a palette one.
 
-    **S2 should follow.** It contrasts the same two regimes and currently draws them in
-    neutral grey and the generic accent, so it is the one remaining place where a regime
-    is not in its regime colour. Not changed here, because S2 has not been reviewed yet.
+    **S2 follows, and the loose end is closed.** It contrasts the same two regimes and
+    drew them in neutral grey and the generic accent; it now uses `REGIME_COLOUR` too.
+    One regime, one colour, across both figures — a reader who has learned
+    indigo-is-smooth and crimson-is-collapsed in F12 reads S2 without relearning
+    anything. Within an S2 trace panel, **lightness separates the six units and carries
+    no other meaning**, sampled over the saturated half of `regime_cmap` because the pale
+    end exists for F12b's density maps and is too faint for a line. The panel titles take
+    the regime colour as well, which ties each panel to its legend entry in (c) without
+    spending a legend on panels that hold one series each. Two small tidies came with it:
+    the legend was quoting the same n twice, so it moved to the y axis, and an assertion
+    now guards that the two regimes really are read over the same window.
 
 11. **What this act ran, and what it deliberately did not.** Two captures, both on the
     laptop, both costed from a measured cell of the real code path (**1.27 s/cell**, not a
