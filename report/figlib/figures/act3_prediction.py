@@ -85,9 +85,19 @@ def f12_curvature_is_bimodal(ctx):
                              gridspec_kw=dict(width_ratios=[1.1, 1.15, 0.95]))
 
     # --- (a) the two spikes and the empty band ------------------------------------
-    axes[0].hist(curvature, bins=np.linspace(0, np.pi, 160), color="0.35")
-    axes[0].axvspan(*CURVATURE_GAP, color=style.ANNOTATION_ACCENT, alpha=0.13, lw=0)
-    axes[0].axvline(COLLAPSE_BIT, color=style.ANNOTATION_ACCENT, lw=0.9, ls="--")
+    # Two histograms on one grid, split at the separator, so the colour a bar carries IS
+    # the binary bit whose R^2 panel (b) reports. The band and the separator drop to
+    # neutral grey: they are furniture now, and leaving them in the accent would have
+    # them competing with the two colours that mean something.
+    bins = np.linspace(0, np.pi, 160)
+    for regime, mask in (("smooth", curvature < COLLAPSE_BIT),
+                         ("collapsed", curvature >= COLLAPSE_BIT)):
+        axes[0].hist(curvature[mask], bins=bins, color=style.REGIME_COLOUR[regime],
+                     label=style.REGIME_LABEL[regime])
+    axes[0].axvspan(*CURVATURE_GAP, color="0.85", alpha=0.55, lw=0, zorder=0)
+    axes[0].axvline(COLLAPSE_BIT, color="0.35", lw=0.9, ls="--")
+    style.legend(axes[0], loc="upper center", fontsize=style.LEGEND_SIZE - 2,
+                 handlelength=1.1, labelspacing=0.25, borderpad=0.15)
     axes[0].set_yscale("log")
     axes[0].set_xlabel("mean curvature (rad)")
     axes[0].set_ylabel(f"cells  (n = {n_cells:,})")
@@ -116,9 +126,16 @@ def f12_curvature_is_bimodal(ctx):
         f"F12: binary-bit R2 {r2_bit:.4f} / continuous {r2_continuous:.4f} against "
         f"TIER0 §3.10's {R2_BIT} / {R2_CONTINUOUS}. The published pair is reproduced by "
         "splitting at CURV_COLLAPSE = 1.0; do not adjust the threshold to fit.")
-    axes[1].hexbin(curvature, vpt, gridsize=(60, 34), bins="log",
-                   cmap="Greys", mincnt=1, linewidths=0, rasterized=True)
-    axes[1].axvspan(*CURVATURE_GAP, color=style.ANNOTATION_ACCENT, alpha=0.13, lw=0)
+    # One hexbin per regime on a shared extent, each in its own regime colour, so the
+    # density map carries the same encoding as (a)'s bars rather than a second one.
+    extent = (float(curvature.min()), float(curvature.max()),
+              float(vpt.min()), float(vpt.max()))
+    for regime, mask in (("smooth", curvature < COLLAPSE_BIT),
+                         ("collapsed", curvature >= COLLAPSE_BIT)):
+        axes[1].hexbin(curvature[mask], vpt[mask], gridsize=(60, 34), bins="log",
+                       cmap=style.regime_cmap(regime), mincnt=1, linewidths=0,
+                       extent=extent, rasterized=True)
+    axes[1].axvspan(*CURVATURE_GAP, color="0.85", alpha=0.55, lw=0, zorder=0)
     axes[1].set_xlabel("mean curvature (rad)")
     axes[1].set_ylabel("VPT (Lyapunov times)")
     floor = float((vpt == 0).mean())
@@ -143,8 +160,12 @@ def f12_curvature_is_bimodal(ctx):
     medians = np.array([np.median(vpt[straight][index == k]) for k in range(10)])
     q25 = np.array([np.quantile(vpt[straight][index == k], 0.25) for k in range(10)])
     q75 = np.array([np.quantile(vpt[straight][index == k], 0.75) for k in range(10)])
-    axes[2].fill_between(centres, q25, q75, color="0.75", alpha=0.5, lw=0)
-    axes[2].plot(centres, medians, marker="o", ms=4, color=style.ANNOTATION_ACCENT, lw=1.6)
+    # This panel IS the smooth cluster, so it takes the smooth colour rather than the
+    # generic accent -- one regime, one colour, across the figure and across S2.
+    axes[2].fill_between(centres, q25, q75, color=style.REGIME_COLOUR["smooth"],
+                         alpha=0.16, lw=0)
+    axes[2].plot(centres, medians, marker="o", ms=4, lw=1.6,
+                 color=style.REGIME_COLOUR["smooth"])
     axes[2].set_xlabel("mean curvature (rad), by decile")
     axes[2].set_ylabel("VPT (Lyapunov times)")
     axes[2].set_title(r"smooth cluster: Spearman $\rho$ = " f"+{rho:.3f}",

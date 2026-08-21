@@ -190,6 +190,58 @@ AXIS_SHORT = {"nominal": "nominal", "effective": r"$\sigma\cdot$bulk95"}
 # the nominal axis is one colour everywhere it is set against the matched one.
 AXIS_COLOUR = {"nominal": "#1f77b4", "effective": "#c44e52"}
 
+# ------------------------------------------------------------------------- regimes
+# The two dynamical regimes: smooth (the fixed-point branch) and collapsed (period-2).
+# A fourth small namespace, added in session 4 for exactly the reason BOUNDARY_COLOUR and
+# AXIS_COLOUR exist -- a regime is not a substrate, and one regime should be one colour
+# wherever it appears. F12 colours its cells by which side of the collapse separator they
+# fall on; S2 contrasts the same two regimes directly.
+#
+# **Colour is carrying the claim here, not decorating.** F12's result is that a single
+# binary bit -- collapsed or not -- explains as much of the prediction score as continuous
+# curvature does. Colouring by that bit is showing the reader what the bit *is*.
+#
+# **Chosen by measurement, in the same idiom as BASIS_COLOUR, and the measurement changed
+# the answer.** The first pick was ColorBrewer RdBu's blue/red (#2166AC / #D6604D) on the
+# reasoning that RdBu is a certified colourblind-safe scheme. Measured, that pair sits
+# **dE 0.7** from a substrate colour -- indistinguishable from degree-matching's #0072B2
+# under one of the dichromacies -- which would have put a substrate hue on a
+# non-substrate quantity. A grid search over 384 candidate inks, scored on worst-case
+# CIE76 dE across normal vision and the three dichromacies, gives the pair below:
+#
+#   * **dE 22.9** from every substrate colour (BASIS_VARIANT_FLOOR, the comparable
+#     existing floor, is 8.0)
+#   * **dE 10.4** from every furniture colour already in use
+#   * **dE 56.5** between the two regimes themselves
+#
+# **Greyscale separation is weak (relative luminance 0.026 against 0.087) and that is
+# accepted, on a stated reason.** The variant and basis palettes need luminance separation
+# because their series overlap inside one panel and colour is the only thing telling them
+# apart. Regimes never overlap: in F12 the two sit at opposite ends of the curvature axis
+# with a near-empty band between them, and in S2 they are in different panels. Position
+# disambiguates, so hue is reinforcing rather than load-bearing. **If a figure ever needs
+# the two regimes interleaved along an axis, this pair is wrong for it** -- that is a
+# scope question, not a palette one.
+REGIME_COLOUR = {"smooth": "#17158c", "collapsed": "#a5103d"}
+REGIME_LABEL = {"smooth": "smooth", "collapsed": "collapsed (period-2)"}
+REGIME_VARIANT_FLOOR = 15.0        # a regime colour against any substrate colour
+REGIME_SEPARATION_FLOOR = 40.0     # the two regimes against each other
+
+
+def regime_cmap(regime: str):
+    """A pale-to-saturated colormap in one regime's colour, for density panels.
+
+    Starts at a light tint rather than white so a single-count hexagon is still visible
+    on the page, and ends at the regime colour itself. Used by F12b, which draws the two
+    regimes as two hexbins so the density map carries the same encoding as F12a's bars.
+    """
+    import numpy as np
+    from matplotlib.colors import LinearSegmentedColormap, to_rgb
+    base = np.array(to_rgb(REGIME_COLOUR[regime]))
+    pale = 1.0 - 0.16 * (1.0 - base)          # 16% of the way from white to the colour
+    return LinearSegmentedColormap.from_list(f"regime_{regime}", [pale, base])
+
+
 # The two phase boundaries. Not variants, so they get their own pair, held fixed for
 # the same reason the variant colours are: the memory boundary is one colour everywhere.
 BOUNDARY_COLOUR = {"dD": "#1f77b4", "dStraight": "#d95f02"}
@@ -400,6 +452,30 @@ def check_basis_palette() -> dict:
         f"{versus:.1f}, floor {BASIS_VARIANT_FLOOR}. F4 draws bases in (a) beside "
         "variants in (b), so a shared hue would carry two meanings in one figure.")
     return {"among_bases": among, "vs_variants": versus}
+
+
+def check_regime_palette() -> dict:
+    """Assert the regime pair stays clear of the substrate palette and of itself.
+
+    Re-derives the numbers the pair was chosen on, so a later edit cannot reintroduce the
+    failure the first attempt had: a regime colour a reader would read as a substrate.
+    The greyscale margin is deliberately NOT asserted -- see the note on REGIME_COLOUR.
+    """
+    import numpy as np
+    visions = ("normal", "protanopia", "deuteranopia", "tritanopia")
+    smooth, collapsed = REGIME_COLOUR["smooth"], REGIME_COLOUR["collapsed"]
+    between = min(float(np.linalg.norm(_lab(smooth, v) - _lab(collapsed, v)))
+                  for v in visions)
+    versus = min(float(np.linalg.norm(_lab(REGIME_COLOUR[k], v) - _lab(c, v)))
+                 for v in visions for k in REGIME_COLOUR for c in VARIANT_COLOUR.values())
+    assert between >= REGIME_SEPARATION_FLOOR, (
+        f"the two regime colours are not separable: worst dE {between:.1f} over normal "
+        f"vision and the three dichromacies, floor {REGIME_SEPARATION_FLOOR}.")
+    assert versus >= REGIME_VARIANT_FLOOR, (
+        f"a regime colour collides with a substrate colour: worst dE {versus:.1f}, floor "
+        f"{REGIME_VARIANT_FLOOR}. A regime is not a substrate and must not borrow its "
+        "hue -- this is the check the first RdBu pick failed at dE 0.7.")
+    return {"between_regimes": between, "vs_variants": versus}
 
 
 def check_colour_consistency() -> None:

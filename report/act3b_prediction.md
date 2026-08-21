@@ -245,6 +245,15 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
 > floor fraction, and the sign of ρ. A title cannot drift from the data, and neither can
 > the caption, without the build failing.
 
+> **Colour encodes the binary bit** (added 20 August 2026; see §5 item 13 for the palette
+> decision). Panels (a) and (b) are drawn as **two** series split at the collapse
+> separator, in the two `style.REGIME_COLOUR` inks, and panel (c) — which *is* the smooth
+> cluster — takes the smooth ink. So the colour a cell carries is exactly the
+> collapsed-or-not bit whose R² panel (b) reports: the figure shows the reader what the
+> bit is rather than asking them to take it on trust. The band and the separator dropped
+> to neutral grey in the same change, because furniture in an accent colour would have
+> competed with the two colours that now mean something.
+
 - **Caption (final wording):** *Predictive capacity is gated by a regime, not graded by
   curvature.* Each point is one **cell**: one Lorenz evaluation of one substrate at one
   sign fraction, spectral radius, seed and flip realisation (38,280 in all; the
@@ -257,8 +266,9 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   period-2 mode at ~π. The shaded band marks the interval [0.6, 2.2] rad between them,
   which holds **216 cells, 0.56% of the panel**; the dashed line at 1 rad is the
   collapsed-or-not separator, which sits inside that empty band and is therefore not a
-  tuned threshold. Curvature is not a quantity this substrate takes intermediate values
-  of.
+  tuned threshold. **Colour throughout the figure is that separator** — indigo for cells
+  the bit calls smooth, crimson for cells it calls collapsed. Curvature is not a quantity
+  this substrate takes intermediate values of.
   **(b)** Against valid-prediction time, a single binary "has it collapsed" bit explains
   **R² = 0.364** of the variance; the continuous quantity manages **0.370**. The entire
   0.25 → 3.14 rad range is worth **0.7 percentage points** beyond the bit. **41% of cells
@@ -653,6 +663,43 @@ written by hand, not generated (see the roadmap §4b note on drafting).
     **structural** ones stay live on both paths — F14's assertion that panels (a) and (b)
     hold the same population, F16's assertion that a crossing exists at all on the
     effective axis and that no line is drawn at `σ_eff` = 1, S2's straddle check.
+
+13. **A fourth colour namespace, chosen by measurement — and the measurement overturned
+    the first choice.** F12's colour now encodes the collapsed-or-not bit rather than
+    decorating, which needed a regime pair distinct from the substrate palette, so
+    `style.REGIME_COLOUR` joins `VARIANT_COLOUR`, `BASIS_COLOUR`, `BOUNDARY_COLOUR` and
+    `AXIS_COLOUR` as its own small namespace, on the same principle: a regime is not a
+    substrate, and one regime is one colour wherever it appears.
+
+    **The first pick was wrong and only measurement caught it.** ColorBrewer RdBu's
+    blue/red (#2166AC / #D6604D) was chosen on the reasoning that RdBu is a certified
+    colourblind-safe scheme — which is true, and irrelevant to the question actually being
+    asked. Run through `style._lab`, the module's existing Vienot/Brettel dichromacy
+    simulation, that pair sits **dE 0.7** from a substrate colour: under one of the
+    dichromacies it is indistinguishable from degree-matching's #0072B2. It would have put
+    a substrate hue on a non-substrate quantity, thesis-wide, and it looked entirely
+    defensible.
+
+    A grid search over 384 candidate inks, scored on worst-case CIE76 dE across normal
+    vision and all three dichromacies, returns **indigo #17158c / crimson #a5103d**:
+    dE **22.9** from every substrate colour (the comparable existing floor,
+    `BASIS_VARIANT_FLOOR`, is 8.0), dE **10.4** from every furniture colour, dE **56.5**
+    between the two regimes. `check_regime_palette()` re-derives all of it and is run by
+    the smoke entry point, so the choice cannot silently drift — the same guard
+    `check_basis_palette()` provides for Act II.
+
+    **One property is knowingly not met, and it is asserted nowhere for that reason.**
+    Greyscale separation is weak: relative luminance 0.026 against 0.087. The variant and
+    basis palettes need luminance separation because their series overlap inside a panel
+    and colour is the only thing separating them. Regimes never overlap — in F12 they sit
+    at opposite ends of the curvature axis with a near-empty band between, and in S2 they
+    are in different panels — so position disambiguates and hue is reinforcing rather than
+    load-bearing. If a figure ever needs the two regimes interleaved along one axis, this
+    pair is wrong for it, and that is a scope question rather than a palette one.
+
+    **S2 should follow.** It contrasts the same two regimes and currently draws them in
+    neutral grey and the generic accent, so it is the one remaining place where a regime
+    is not in its regime colour. Not changed here, because S2 has not been reviewed yet.
 
 11. **What this act ran, and what it deliberately did not.** Two captures, both on the
     laptop, both costed from a measured cell of the real code path (**1.27 s/cell**, not a
