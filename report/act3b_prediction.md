@@ -390,8 +390,24 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   faithful climate against `f`, frozen; (e) the fixed-point rate per substrate, fresh
 - **The seed drawn in (a) and (b) is the one nearest its own cell's median**, the rule
   F1 and F6 already use — the only rule that cannot be accused of picking a flattering
-  realisation. Free-runs sitting at a fixed point are marked with a ring, because a dot
-  is invisible at this scale and an unmarked absence reads as a missing substrate.
+  realisation.
+- **The fixed points are mostly off the panel, and drawing them naively was a bug that
+  looked like a finished figure.** A collapsed free-run does not settle somewhere inside
+  the attractor; it leaves and stops far outside it. Measured over all 229 collapsed
+  cells: **87% rest more than 3 z-scored units from the origin, median 11.5, furthest
+  38.5**, against a true attractor spanning about ±2.5 per coordinate. Drawn as a plain
+  ring at its true position, a fixed point at *z* = +14 is simply absent — so the first
+  version of this panel named three collapsed substrates and showed the reader one
+  marker. Out-of-range points are now clamped to the panel edge and drawn as an outward
+  arrowhead. The window is **not** widened to contain them: the furthest would squash the
+  attractor to a smudge.
+- **A single shared substrate key** sits above the figure. Placing it inside (a) was
+  tried and abandoned on measurement — a search over every legend-sized window of that
+  panel found none free, the emptiest (the notch between the butterfly's wings) still
+  carrying ~100 trajectory points, and every corner worse. One key serves all five
+  panels, so (d)'s duplicate legend went with it and both panels got their space back.
+  The (a) and (b) titles dropped to one line in the same pass, which cleared the
+  collision the wider two-line titles had with the neighbouring panel labels.
 - **`f` = 0.25 rather than 0.30 in (b)**: at 0.30 every substrate's median seed has
   collapsed, so the panel is four invisible dots — a true picture and a useless one.
 - **Caption (final wording):** *What a given climate error looks like, in the regime the
@@ -399,9 +415,13 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   teacher-forced, so this is the first look at the trajectory the reservoir produces when
   it drives itself. (a) At `f` = 0 and σ = 2 every substrate reproduces the Lorenz
   attractor. (b) At `f` = 0.25 only the connectome still does; all three nulls have
-  collapsed onto a fixed point (rings). (c) That failure mode is **bimodal, as curvature
-  is**: of 440 free-runs, 229 retain under 5% of the true attractor's spread and 158
-  retain 90–110%, with 11 anywhere between. (d) On the frozen capture, the fraction of
+  collapsed onto a fixed point (open markers; an arrowhead means that point lies outside
+  the plotted window). (c) That failure mode is **bimodal, as curvature is**: of 440
+  free-runs, 229 retain under 5% of the true attractor's spread and 158 retain 90–110%,
+  with 11 anywhere between. The point they stop at is typically **outside the attractor
+  altogether** — 87% of the 229 sit more than 3 z-scored units from the origin, median
+  11.5, against a true span of about ±2.5 — which is why those cells' climate errors run
+  to 8 and beyond rather than to some modest value. (d) On the frozen capture, the fraction of
   cells holding a faithful climate: at `f` ≥ 0.30 the connectome keeps **0.43** against
   the nulls' **0.14**. (e) Read as the fixed-point rate over `f` ≥ 0.20, the same
   ordering. **Registered before the capture existed: the first clause holds and the
