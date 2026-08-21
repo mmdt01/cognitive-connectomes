@@ -61,6 +61,14 @@ def f12_curvature_is_bimodal(ctx):
     (turning angle between successive velocity vectors, pi = antiparallel), while VPT
     is a **free-run** outcome. The figure relates a driven-manifold diagnostic to a
     closed-loop capacity; that is the claim, and the caption says so.
+
+    **No panel carries a title or an in-panel annotation** (author's decision, 20 August
+    2026). Every number that was written into the panels -- the gap count, the two R^2,
+    the VPT floor fraction, Spearman rho and the cluster size -- now lives in the caption
+    in `report/act3b_prediction.md` §3. They are all still *computed* here, and each is
+    now guarded by an assertion, so the caption cannot drift away from the data without
+    the build failing. That is the trade: a figure whose panels are bare depends on its
+    caption being right, so the caption's numbers are the ones under test.
     """
     frame = ctx.frame("jacobian")
     curvature = frame.mean_curvature.to_numpy(float)
@@ -79,18 +87,16 @@ def f12_curvature_is_bimodal(ctx):
     axes[0].set_yscale("log")
     axes[0].set_xlabel("mean curvature (rad)")
     axes[0].set_ylabel(f"cells  (n = {n_cells:,})")
+    # The counts are still computed -- they gate the figure and they are quoted in the
+    # caption -- but nothing is written into the panel. The shaded band and the dashed
+    # separator carry the structure; naming the two modes and counting the gap is the
+    # caption's job.
     between = int(((curvature >= CURVATURE_GAP[0])
                    & (curvature <= CURVATURE_GAP[1])).sum())
-    axes[0].annotate(f"{between} cells in\n[0.6, 2.2] rad\n"
-                     f"({100 * between / n_cells:.2f}%)",
-                     xy=(1.42, 0.60), xycoords=("data", "axes fraction"),
-                     ha="left", fontsize=style.TICK_SIZE - 1,
-                     color=style.ANNOTATION_ACCENT)
-    axes[0].annotate("smooth", xy=(0.26, 0.93), xycoords=("data", "axes fraction"),
-                     ha="center", fontsize=style.TICK_SIZE - 1, color="0.25")
-    axes[0].annotate(r"period-2 ($\approx \pi$)", xy=(2.90, 0.93),
-                     xycoords=("data", "axes fraction"), ha="right",
-                     fontsize=style.TICK_SIZE - 1, color="0.25")
+    assert ctx.placeholder or between < 0.01 * n_cells, (
+        f"F12: {between} cells ({100 * between / n_cells:.2f}%) lie in "
+        f"{CURVATURE_GAP} rad. The band is supposed to be near-empty; if it is not, the "
+        "bimodality claim in the caption is wrong and the caption is what a reader sees.")
 
     # --- (b) the bit explains as much as the quantity ------------------------------
     bit = (curvature > COLLAPSE_BIT).astype(float)
@@ -109,13 +115,12 @@ def f12_curvature_is_bimodal(ctx):
     axes[1].axvspan(*CURVATURE_GAP, color=style.ANNOTATION_ACCENT, alpha=0.13, lw=0)
     axes[1].set_xlabel("mean curvature (rad)")
     axes[1].set_ylabel("VPT (Lyapunov times)")
-    axes[1].set_title(f"collapsed-or-not bit  $R^2$ = {r2_bit:.3f}\n"
-                      f"continuous curvature  $R^2$ = {r2_continuous:.3f}",
-                      fontsize=style.TITLE_SIZE - 1)
+    # Both R^2 and the floor fraction go in the caption, not on the panel. They are still
+    # computed here so the assertion above can gate them and so the caption cannot drift
+    # from the data without the build failing.
     floor = float((vpt == 0).mean())
-    axes[1].annotate(f"{100 * floor:.0f}% of cells at VPT = 0",
-                     xy=(0.97, 0.06), xycoords="axes fraction", ha="right",
-                     fontsize=style.TICK_SIZE - 1, color="0.35")
+    assert ctx.placeholder or 0.35 < floor < 0.50, (
+        f"F12: {100 * floor:.1f}% of cells sit at VPT = 0; the caption says 41%.")
 
     # --- (c) within the straight cluster the residual runs the WRONG way -----------
     # Shown as curvature deciles, not as a scatter: 99% of the smooth cluster sits in a
@@ -137,12 +142,8 @@ def f12_curvature_is_bimodal(ctx):
     axes[2].plot(centres, medians, marker="o", ms=4, color=style.ANNOTATION_ACCENT, lw=1.6)
     axes[2].set_xlabel("mean curvature (rad), by decile")
     axes[2].set_ylabel("VPT (Lyapunov times)")
-    axes[2].set_title("within the smooth cluster, median and IQR\n"
-                      r"Spearman $\rho$ = " + f"+{rho:.3f}  (n = {int(straight.sum()):,})",
-                      fontsize=style.TITLE_SIZE - 1)
-    axes[2].annotate("straighter is not better", xy=(0.5, 0.90),
-                     xycoords="axes fraction", ha="center",
-                     fontsize=style.TICK_SIZE - 1, color=style.ANNOTATION_ACCENT)
+    # rho, the cluster size and the reading of them are the caption's. What the panel has
+    # to do unaided is show a line that does not fall as curvature rises.
 
     for ax, letter in zip(axes, "abc"):
         style.panel_label(ax, letter, dx=-0.16)

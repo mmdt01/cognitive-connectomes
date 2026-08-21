@@ -58,6 +58,59 @@ this register, not the other way round.
 
 ## 2. Reproduction gate
 
+### 2.0 What a "cell" is, since every number in this act is counted in them
+
+A **cell** is one row of the capture: one complete Lorenz evaluation of one reservoir at
+one operating point. It is the unit F12, F13, F14 and F17 all plot, and the unit every
+count in the gate table below is expressed in, so it is worth stating once rather than
+leaving a reader to infer it.
+
+A cell is keyed by five coordinates:
+
+| coordinate | values | what it changes |
+|---|---|---|
+| `variant` | 4 | which substrate: connectome, weight-permuted, degree-matching, Erdős–Rényi |
+| `f` | 11 (0 to 0.50, step 0.05) | the fraction of edges given a negative sign |
+| `spectral_radius` σ | 29 (0 to 11.2, step 0.4) | how hard `W` is driven |
+| `seed` | 10 | the null instance, `Win`, and the Lorenz initial condition |
+| `draw` | 3 | which stratified realisation of the sign-flip pattern |
+
+4 × 11 × 29 × 10 × 3 = **38,280**, which is the cell count `TIER0` §3.10 quotes.
+
+**What happens inside one cell.** Build the reservoir from that (`variant`, `f`, `seed`,
+`draw`) matrix, rescaled to σ; teacher-force 10,000 Lorenz steps to get a 10,000 × 448
+driven state matrix, from which `mean_curvature`, `σ_eff`, `mean_state` and
+`frac_saturated` are read; fit the ridge readout on those states; then cut the reservoir
+loose and free-run it, from which `vpt` and `climate_error` are read. **A cell is
+therefore already an aggregate** — `mean_curvature` is a mean over ~10,000 steps and `vpt`
+a mean over 20 rollouts — and it contributes exactly **one point**, not a distribution, to
+any figure.
+
+> **A cell is not an independent observation, and the figures must not be read as though
+> 38,280 of them were.** The three draws of a seed share its mask, its `Win` and its input
+> series; only the flip pattern differs. At `f` = 0 the sign transform is the identity, so
+> the draws are **literally identical** — checked here, and **100%** of (variant, σ, seed)
+> groups return the same `mean_curvature` and the same `vpt` across all three draws. At
+> `f` = 0.25, curvature differs across draws in 96.6% of groups but `vpt` is still
+> identical in **45.1%**, mostly because both sit on the VPT = 0 floor. **The independent
+> unit is the seed**, so the effective n is nearer 12,760 than 38,280, and nearer a third
+> of that again at low `f`. This is `TIER0` §2.3's "quote seeds, not replicates" rule, and
+> it is why F13's collapse panel counts **seeds** (5/10, 0/10) and why the Fisher test is
+> on 10 units per substrate rather than 30.
+
+**Where this bites and where it does not.** It does not threaten F12: panels (a) and (b)
+describe the *shape* of a distribution — a two-spike histogram and an R² comparison — and
+triplicating each seed inflates the count without moving the bimodality or shifting either
+R² materially, because the duplication is symmetric across the two clusters. It would bite
+any figure quoting a **standard error, a confidence interval or a p-value** over pooled
+cells, which is exactly why every such statement in this act comes from
+`e03_frontier_paired_scale_448.csv`, where the pairing is within seed, or from a seed
+count. **F12's panel labels quote the raw cell count**, which is the honest description of
+what is drawn; the caption states the unit so the count cannot be mistaken for a sample
+size.
+
+### 2.1 The gate
+
 Run before any figure work. **Result: PASSES.** Every quantity recomputed from the frozen
 artifacts; two small discrepancies logged rather than smoothed away.
 
@@ -160,30 +213,58 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
 ### F12 — curvature is bimodal: generation is gated, not graded
 
 - **Claim carried:** A3P.1, A3P.2
-- **Source:** `e01_jacobian_scale_448.parquet`, no row filter (38,280 Lorenz cells =
-  4 variants × 11 `f` × 29 σ × 10 seeds × 3 draws)
-- **Panels:** (a) curvature histogram, log counts, with the empty band shaded and the
-  separator drawn; (b) VPT against curvature as a log-density hexbin with both R²;
-  (c) the smooth cluster alone, by curvature decile, median and IQR
+- **Source:** `e01_jacobian_scale_448.parquet`, no row filter — all **38,280 cells**
+  (§2.0 defines the unit: 4 variants × 11 `f` × 29 σ × 10 seeds × 3 draws, one Lorenz
+  evaluation each). Two columns only, and they come from **different regimes**:
+  `mean_curvature` from the teacher-forced driven states, `vpt` from the autonomous
+  free-run.
+- **Panels:** (a) curvature histogram, 160 bins over [0, π], log counts, with the
+  between-mode band shaded and the separator dashed; (b) VPT against curvature as a
+  log-density hexbin, same band shaded; (c) the smooth cluster alone, binned into
+  curvature deciles, median and IQR
 - **Why it leads:** without it the entire switch framing reads as asserted.
 - **Panel (c) is deciles, not a scatter, and that is a decision not a default.** 99% of
   the smooth cluster sits in a ~0.017 rad column, so a hexbin of it is one dark stripe
   and the *sign* of the trend — which is the whole claim — is invisible. Deciles put the
-  rank statistic on the page as something a reader can see running upward.
+  rank statistic on the page as something a reader can see running upward. Note that ρ is
+  computed on all 15,866 raw cells, **not** on the ten decile points; the deciles are the
+  display, not the statistic.
+
+> **No titles, no in-panel annotations (author's decision, 20 August 2026).** The gap
+> count, the two R², the VPT floor fraction, Spearman ρ and the cluster size were all
+> written into the panels and are now **in the caption instead**. The panels keep only
+> what is structural: the shaded band, the dashed separator, and the axes. Every one of
+> those numbers is still computed in the builder and is now **guarded by an assertion**,
+> so the caption cannot drift away from the data without the build failing. That is the
+> trade a bare figure makes — it depends on its caption being right, so the caption's
+> numbers are the ones under test.
+
 - **Caption (final wording):** *Predictive capacity is gated by a regime, not graded by
-  curvature.* (a) Mean trajectory curvature over all 38,280 Lorenz cells is a two-spike
-  distribution: a smooth mode near 0.25 rad and a period-2 mode near π, with **216 cells
-  (0.56%) anywhere between**. The dashed line is the collapsed-or-not separator at 1 rad,
-  which sits in the empty band and is not a tuned threshold. (b) Against valid-prediction
-  time, a single binary "has it collapsed" bit explains **R² = 0.364**; the continuous
-  quantity manages **0.370**, so the entire 0.25 → 3.14 rad range is worth 0.7 percentage
-  points beyond the bit. 41% of cells sit at the VPT floor of exactly zero. (c) Within
-  the smooth cluster the residual relation runs the *wrong way* for a graded account:
-  Spearman ρ = **+0.145** over 15,866 cells, i.e. straighter is not better. Curvature is
-  measured on the teacher-forced state trajectory in ℝ⁴⁴⁸ and VPT on the autonomous
-  free-run; the figure relates a property of the driven manifold to a closed-loop
-  capacity. **This holds for `f` > 0 only** — at `f` = 0 curvature is flat across the
-  whole sweep while prediction falls tenfold (`TIER0` §3.11).
+  curvature.* Each point is one **cell**: one Lorenz evaluation of one substrate at one
+  sign fraction, spectral radius, seed and flip realisation (38,280 in all; the
+  independent unit is the seed, of which there are ten per condition). Curvature is
+  measured on the teacher-forced state trajectory in ℝ⁴⁴⁸ — the mean turning angle
+  between successive velocity vectors, so π means successive steps are antiparallel — and
+  valid-prediction time on the autonomous free-run, so the figure relates a property of
+  the driven manifold to a closed-loop capacity.
+  **(a)** Mean curvature is a two-spike distribution: a smooth mode at ~0.25 rad and a
+  period-2 mode at ~π. The shaded band marks the interval [0.6, 2.2] rad between them,
+  which holds **216 cells, 0.56% of the panel**; the dashed line at 1 rad is the
+  collapsed-or-not separator, which sits inside that empty band and is therefore not a
+  tuned threshold. Curvature is not a quantity this substrate takes intermediate values
+  of.
+  **(b)** Against valid-prediction time, a single binary "has it collapsed" bit explains
+  **R² = 0.364** of the variance; the continuous quantity manages **0.370**. The entire
+  0.25 → 3.14 rad range is worth **0.7 percentage points** beyond the bit. **41% of cells
+  sit at the VPT floor of exactly zero**, all of them in the collapsed mode.
+  **(c)** Within the smooth cluster alone (curvature < 1 rad, **n = 15,866**), binned into
+  curvature deciles with median and interquartile range, the residual relation runs the
+  *wrong way* for a graded account: **Spearman ρ = +0.145**. Straighter is not better.
+  The line rises over eight deciles and falls in the last, which is the widest bin and the
+  one reaching up to the separator.
+  **Scope: this holds for `f` > 0.** At `f` = 0 — the biologically real cut — curvature is
+  flat at 0.26 rad across the entire σ sweep while prediction falls roughly tenfold, so
+  geometry gates nothing there (`TIER0` §3.11, and §5 item 6 of this act).
 
 ### F13 — generation read as VPT, including at the biologically real cut
 
