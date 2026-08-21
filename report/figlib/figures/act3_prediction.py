@@ -612,6 +612,11 @@ POINT_COLLAPSE = 0.05
 # Faithful climate. Same idea: the faithful/collapsed separation is 20 to 40x on seed
 # medians, against ~2.5x per-cell irreproducibility, so the cut is not near anything.
 FAITHFUL_CLIMATE = 0.5
+# The panel window for F17's attractor plots, in z-scored Lorenz coordinates. The true
+# attractor spans roughly +/- 2.5 per coordinate, so this frames it with a little air.
+# It is NOT widened to contain the collapsed cells' fixed points: the median one sits
+# 11.5 units out and the furthest 38.5, which would squash the attractor to a smudge.
+ATTRACTOR_XLIM, ATTRACTOR_YLIM = (-3.2, 3.2), (-2.6, 3.2)
 
 
 def _trajectories(frame):
@@ -649,8 +654,15 @@ def f17_free_run_attractors(ctx):
     """
     frame = ctx.frame("free_run")
     frozen = ctx.frame("jacobian")
-    fig = plt.figure(figsize=(9.0, 5.2))
-    grid = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.92], hspace=0.62, wspace=0.34)
+    fig = plt.figure(figsize=(9.0, 5.4))
+    # `top` leaves a strip for one shared substrate key. Placing it inside (a) was tried
+    # and abandoned: a search over every legend-sized window of that panel found none
+    # free -- the emptiest, the notch between the butterfly's wings, still has ~100
+    # trajectory points running through it, and every corner is worse. One key above the
+    # figure serves all five panels, so (d)'s duplicate legend goes too and both panels
+    # get their space back.
+    grid = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.92], hspace=0.62, wspace=0.34,
+                            top=0.855)
 
     # --- (a, b) the attractors themselves, at one f either side of the separation ------
     # The seed drawn is the one whose climate_error is NEAREST ITS CELL'S MEDIAN -- the
@@ -676,27 +688,52 @@ def f17_free_run_attractors(ctx):
             # A free-run at a fixed point is a single dot and vanishes at this scale, so
             # it is marked. Not drawing it would read as "this substrate is missing".
             if float(sub.loc[pick, "sd_ratio"]) < POINT_COLLAPSE:
-                ax.plot(orbit[:, 0].mean(), orbit[:, 2].mean(), marker="o", ms=7,
-                        mfc="none", mec=colour, mew=1.6, zorder=6)
-                collapsed.append(style.VARIANT_TITLE[variant])
+                collapsed.append((variant, orbit[:, 0].mean(), orbit[:, 2].mean()))
         ax.set_xlabel("generated $x$  (z-scored)")
         ax.set_ylabel("generated $z$" if column == 0 else None)
-        ax.set_title(rf"$f$ = {f_value:g},  $\sigma$ = 2" "\n"
-                     "median-climate seed per substrate", fontsize=style.TITLE_SIZE - 1)
-        ax.set_xlim(-3.2, 3.2)
-        ax.set_ylim(-2.6, 3.2)
+        ax.set_title(rf"$f$ = {f_value:g},  $\sigma$ = 2", fontsize=style.TITLE_SIZE - 1)
+        ax.set_xlim(*ATTRACTOR_XLIM)
+        ax.set_ylim(*ATTRACTOR_YLIM)
+        # **Most fixed points are off the panel, and drawing them naively is a bug that
+        # looks like a figure.** The free-run does not settle somewhere inside the
+        # attractor; it leaves and stops far outside it -- 87% of the 229 collapsed cells
+        # rest more than 3 z-scored units from the origin, median 11.5, against an
+        # attractor spanning about +/- 2.5. Drawn as a plain ring at its true position,
+        # a fixed point at z = +14 is simply absent, so the note under the panel would
+        # name three substrates the reader can find one of. Out-of-range points are
+        # therefore clamped to the edge and drawn as an outward arrowhead.
+        off_panel = False
+        for variant, px, pz in collapsed:
+            colour = style.VARIANT_COLOUR[variant]
+            inside = (ATTRACTOR_XLIM[0] <= px <= ATTRACTOR_XLIM[1]
+                      and ATTRACTOR_YLIM[0] <= pz <= ATTRACTOR_YLIM[1])
+            if inside:
+                ax.plot(px, pz, marker="o", ms=7, mfc="none", mec=colour, mew=1.6,
+                        zorder=6)
+                continue
+            off_panel = True
+            pad = 0.14
+            cx = float(np.clip(px, ATTRACTOR_XLIM[0] + pad, ATTRACTOR_XLIM[1] - pad))
+            cz = float(np.clip(pz, ATTRACTOR_YLIM[0] + pad, ATTRACTOR_YLIM[1] - pad))
+            marker = ("^" if pz > ATTRACTOR_YLIM[1] else "v" if pz < ATTRACTOR_YLIM[0]
+                      else ">" if px > ATTRACTOR_XLIM[1] else "<")
+            ax.plot(cx, cz, marker=marker, ms=6, mfc="none", mec=colour, mew=1.6,
+                    zorder=6, clip_on=False)
         if collapsed:
-            # Wrapped two per line and left-aligned to its own panel: centred, the
-            # three-substrate note under (b) runs into the one-substrate note under (a).
-            wrapped = ",\n".join(", ".join(collapsed[i:i + 2])
-                                  for i in range(0, len(collapsed), 2))
-            ax.annotate("○ at a fixed point: " + wrapped,
-                        xy=(0.0, -0.28), xycoords="axes fraction", ha="left",
+            note = ("open marker: stopped at a fixed point"
+                    + ("  (arrowhead: off-panel)" if off_panel else ""))
+            ax.annotate(note, xy=(0.0, -0.30), xycoords="axes fraction", ha="left",
                         va="top", fontsize=style.TICK_SIZE - 2, color="0.35")
         if column == 0:
-            style.legend(ax, loc="upper left", fontsize=style.LEGEND_SIZE - 3,
-                         handlelength=1.1, labelspacing=0.25, borderpad=0.1)
+            key_handles, key_labels = ax.get_legend_handles_labels()
         style.panel_label(ax, "ab"[column], offset_points=(-36, 4))
+
+    # The shared key. Solid swatches, because in (a) and (b) colour alone identifies a
+    # substrate; (d)'s curves add dash on top of the same colours, which the key does not
+    # need to repeat.
+    fig.legend(key_handles, key_labels, loc="upper center", ncol=4, frameon=False,
+               bbox_to_anchor=(0.5, 1.0), fontsize=style.LEGEND_SIZE,
+               handlelength=1.6, columnspacing=1.8)
 
     # --- (c) the refutation: the collapse is a loss of scale ---------------------------
     ax = fig.add_subplot(grid[0, 2])
@@ -739,8 +776,6 @@ def f17_free_run_attractors(ctx):
     ax.set_ylabel(f"cells with climate error < {FAITHFUL_CLIMATE:g}\n"
                   r"(30 per cell, frozen, $\sigma$ = 2)")
     ax.set_ylim(0, 1.0)
-    style.legend(ax, loc="lower left", fontsize=style.LEGEND_SIZE - 2, ncol=2,
-                 columnspacing=0.8, handlelength=1.3)
     style.panel_label(ax, "d", offset_points=(-46, 4))
 
     # --- (e) the same thing read as the fixed-point rate, on the fresh capture ---------
