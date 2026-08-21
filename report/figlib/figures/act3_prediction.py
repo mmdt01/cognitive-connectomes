@@ -62,13 +62,17 @@ def f12_curvature_is_bimodal(ctx):
     is a **free-run** outcome. The figure relates a driven-manifold diagnostic to a
     closed-loop capacity; that is the claim, and the caption says so.
 
-    **No panel carries a title or an in-panel annotation** (author's decision, 20 August
-    2026). Every number that was written into the panels -- the gap count, the two R^2,
-    the VPT floor fraction, Spearman rho and the cluster size -- now lives in the caption
-    in `report/act3b_prediction.md` §3. They are all still *computed* here, and each is
-    now guarded by an assertion, so the caption cannot drift away from the data without
-    the build failing. That is the trade: a figure whose panels are bare depends on its
-    caption being right, so the caption's numbers are the ones under test.
+    **Each panel carries a one-line title stating its own finding, and no other in-panel
+    text** (author's decision, 20 August 2026, revised the same day). The five floating
+    annotations were removed and not restored -- the mode names, the gap count, the VPT
+    floor fraction and the "straighter is not better" verdict all sit in the caption in
+    `report/act3b_prediction.md` §3. The titles came back because a panel that states its
+    result is readable away from the caption, which is how figures are actually met.
+
+    **Every number in a title is computed, never written in**, and each is additionally
+    guarded by an assertion: the gap fraction, the two R^2 against TIER0's published pair,
+    the VPT floor fraction and the sign of rho. So a title cannot drift from the data, and
+    neither can the caption, without the build failing.
     """
     frame = ctx.frame("jacobian")
     curvature = frame.mean_curvature.to_numpy(float)
@@ -97,6 +101,8 @@ def f12_curvature_is_bimodal(ctx):
         f"F12: {between} cells ({100 * between / n_cells:.2f}%) lie in "
         f"{CURVATURE_GAP} rad. The band is supposed to be near-empty; if it is not, the "
         "bimodality claim in the caption is wrong and the caption is what a reader sees.")
+    axes[0].set_title(f"bimodal: {100 * between / n_cells:.2f}% between the modes",
+                      fontsize=style.TITLE_SIZE - 1)
 
     # --- (b) the bit explains as much as the quantity ------------------------------
     bit = (curvature > COLLAPSE_BIT).astype(float)
@@ -115,12 +121,11 @@ def f12_curvature_is_bimodal(ctx):
     axes[1].axvspan(*CURVATURE_GAP, color=style.ANNOTATION_ACCENT, alpha=0.13, lw=0)
     axes[1].set_xlabel("mean curvature (rad)")
     axes[1].set_ylabel("VPT (Lyapunov times)")
-    # Both R^2 and the floor fraction go in the caption, not on the panel. They are still
-    # computed here so the assertion above can gate them and so the caption cannot drift
-    # from the data without the build failing.
     floor = float((vpt == 0).mean())
     assert ctx.placeholder or 0.35 < floor < 0.50, (
         f"F12: {100 * floor:.1f}% of cells sit at VPT = 0; the caption says 41%.")
+    axes[1].set_title(f"binary bit $R^2$ {r2_bit:.3f},  "
+                      f"curvature {r2_continuous:.3f}", fontsize=style.TITLE_SIZE - 1)
 
     # --- (c) within the straight cluster the residual runs the WRONG way -----------
     # Shown as curvature deciles, not as a scatter: 99% of the smooth cluster sits in a
@@ -142,8 +147,8 @@ def f12_curvature_is_bimodal(ctx):
     axes[2].plot(centres, medians, marker="o", ms=4, color=style.ANNOTATION_ACCENT, lw=1.6)
     axes[2].set_xlabel("mean curvature (rad), by decile")
     axes[2].set_ylabel("VPT (Lyapunov times)")
-    # rho, the cluster size and the reading of them are the caption's. What the panel has
-    # to do unaided is show a line that does not fall as curvature rises.
+    axes[2].set_title(r"smooth cluster: Spearman $\rho$ = " f"+{rho:.3f}",
+                      fontsize=style.TITLE_SIZE - 1)
 
     for ax, letter in zip(axes, "abc"):
         style.panel_label(ax, letter, dx=-0.16)

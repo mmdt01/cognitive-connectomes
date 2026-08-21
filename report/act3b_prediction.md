@@ -230,14 +230,20 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   computed on all 15,866 raw cells, **not** on the ten decile points; the deciles are the
   display, not the statistic.
 
-> **No titles, no in-panel annotations (author's decision, 20 August 2026).** The gap
-> count, the two R², the VPT floor fraction, Spearman ρ and the cluster size were all
-> written into the panels and are now **in the caption instead**. The panels keep only
-> what is structural: the shaded band, the dashed separator, and the axes. Every one of
-> those numbers is still computed in the builder and is now **guarded by an assertion**,
-> so the caption cannot drift away from the data without the build failing. That is the
-> trade a bare figure makes — it depends on its caption being right, so the caption's
-> numbers are the ones under test.
+> **One-line titles, no other in-panel text (author's decision, 20 August 2026, revised
+> the same day).** The five floating annotations — the two mode names, the gap count, the
+> VPT floor fraction and the "straighter is not better" verdict — were removed and have
+> **not** come back; they are in the caption. The **titles have**, one per panel, each
+> stating that panel's own finding: *bimodal: 0.56% between the modes* / *binary bit R²
+> 0.364, curvature 0.370* / *smooth cluster: Spearman ρ = +0.145*. The reasoning for the
+> reversal is that a panel which states its result stays readable away from its caption,
+> which is how a figure is actually met — skimmed first, read second. Panel (a) gained a
+> title it never had, so the three read as a set.
+>
+> **Every number in a title is computed, never typed**, and each is additionally guarded
+> by an assertion: the gap fraction, both R² against `TIER0`'s published pair, the VPT
+> floor fraction, and the sign of ρ. A title cannot drift from the data, and neither can
+> the caption, without the build failing.
 
 - **Caption (final wording):** *Predictive capacity is gated by a regime, not graded by
   curvature.* Each point is one **cell**: one Lorenz evaluation of one substrate at one
