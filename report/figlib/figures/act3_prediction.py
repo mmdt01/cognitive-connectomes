@@ -816,14 +816,15 @@ def s2_curvature_regimes(ctx):
         ax.set_xlabel("time step")
         ax.set_ylabel("unit activation $x_i$" if column == 0 else None)
         ax.set_ylim(-1.05, 1.05)
-        # The title takes the regime colour too, which ties panel to legend entry in (c)
-        # without spending a legend on panels that hold one series each.
+        # Titles stay black. Colouring them was tried and dropped: the title already
+        # NAMES its regime in words, so the colour was redundant with the text it sat on,
+        # and coloured body text reads as emphasis rather than as a key. The traces below
+        # carry the encoding, which is where it belongs.
         ax.set_title(f"{style.REGIME_LABEL[regime]}:  " r"$\sigma$ = "
                      f"{row.spectral_radius:g},  "
                      r"$\bar{c}$ = " f"{row.mean_curvature:.2f} rad\n"
                      f"VPT {row.vpt:.2f}, climate error {row.climate_error:.2f}",
-                     fontsize=style.TITLE_SIZE - 1,
-                     color=style.REGIME_COLOUR[regime])
+                     fontsize=style.TITLE_SIZE - 1)
 
     # --- (c) the distribution the mean is a mean OF ------------------------------------
     # This is the panel that earns the figure. F12 plots the mean curvature per cell and

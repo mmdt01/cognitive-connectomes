@@ -705,9 +705,10 @@ written by hand, not generated (see the roadmap §4b note on drafting).
     indigo-is-smooth and crimson-is-collapsed in F12 reads S2 without relearning
     anything. Within an S2 trace panel, **lightness separates the six units and carries
     no other meaning**, sampled over the saturated half of `regime_cmap` because the pale
-    end exists for F12b's density maps and is too faint for a line. The panel titles take
-    the regime colour as well, which ties each panel to its legend entry in (c) without
-    spending a legend on panels that hold one series each. Two small tidies came with it:
+    end exists for F12b's density maps and is too faint for a line. **The panel titles stay
+    black** — colouring them was tried and dropped, since a title that already names its
+    regime in words gains nothing from being tinted the same colour, and coloured body
+    text reads as emphasis rather than as a key. Two small tidies came with it:
     the legend was quoting the same n twice, so it moved to the y axis, and an assertion
     now guards that the two regimes really are read over the same window.
 
