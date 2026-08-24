@@ -122,6 +122,9 @@ Fixed in session 0 and held across every figure so the chapters sit together.
 
 ## House style
 
-British spelling. No em or en dashes. Guarded string-replacement edits with assertion
+British spelling. No em or en dashes **as punctuation**; a dash inside a proper noun is
+that name's own typography and stays, which is why **Erdős–Rényi** keeps its en dash
+everywhere, including in `style.VARIANT_TITLE` and therefore in every figure legend.
+Guarded string-replacement edits with assertion
 checks. Read source files before editing them. Variable names full and readable in code
 (`spectral_radius`, not `sr`).
