@@ -1,8 +1,29 @@
 # Master figure list
 
-**Fixed in session 0, 15 August 2026. Count 16.** No session creates a figure that is
+**Fixed in session 0, 15 August 2026. Count 17.** No session creates a figure that is
 not here; if one seems missing, report and stop. `W` marks the workshop subset (5pp, 4
 figures).
+
+> **AMENDED 24 August 2026 (floor-sensitivity session). Count 16 to 17, for F18.** The
+> reason, stated as the 19 August amendment requires. `CROSS_ACT_SPINE.md` sets out the
+> thesis as a six-step chain, and **step 3 is the Gram spectrum's position relative to
+> the ridge floor**: the link between Act II's common-mode account and the `d_eff` that
+> Act III's memory arm reads. It was the one step in the chain with no figure, because
+> the result sits in `TIER0` §3.6 filed under a **rejected** anisotropy hypothesis and
+> had never been drawn. Chapter 5's outline commits to a section on it, so the chapter
+> would otherwise have argued its central link in prose alone.
+>
+> **Verified before it was built, not after.** `report/checks/floor_sensitivity_check.md`
+> recomputed all sixteen published cells of §3.6's supercritical table from the frozen
+> artifacts (every one reproduces), established that `covariance_spectra.parquet` already
+> carries the four-variant, sigma-resolved coverage a figure needs (a complete 3 tasks x
+> 3 conditions x 7 variants x 13 spectral radii x 10 seeds factorial with `eig_gram` in
+> every one of 8,190 rows), and recorded the verdict as "a standalone figure is buildable
+> from frozen data alone". **No run happened and none was needed.**
+>
+> **It is Act II's own claim, so it lives in `act2_manifold.py`, but session 2 closed on
+> 17 August.** This session owns and renders it, and is named as its owner in the module
+> table below, which is the F3 and F16 arrangement rather than a new one.
 
 > **AMENDED 19 August 2026 (session 4), on the author's decision. The cap is now a soft
 > count, not a gate.** The rule this list carried was "one slot, first past the post":
@@ -44,15 +65,19 @@ per sweep session** — so a session edits its own module and nothing else:
 | module | session | figures |
 |---|---|---|
 | `act1_structure.py` | 1 | F1, F2, **F3**, S1 |
-| `act2_manifold.py` | 2 | F4, F5, F6 |
+| `act2_manifold.py` | 2, and the **floor-sensitivity session (24 Aug) for F18** | F4, F5, F6, **F18** |
 | `act3_memory.py` | 3 | F7, F9, F10, F11 |
 | `act3_prediction.py` | 4 | F12, F13, F14, **F16**, F17, **S2** |
 | `act4_anchor.py` | — | F15 |
 
 **The act decides the module, not the chapter**, and the two cross-act figures are why
 that matters: F3 prints in chapter 3 but is Act I's argument and Session 1 renders it;
-F16 prints in chapter 6 but needs both Act III arms, so Session 4 renders it. The
-per-figure ownership flags below remain canonical.
+F16 prints in chapter 6 but needs both Act III arms, so Session 4 renders it. **F18 is
+the third case and it is a different one**: it prints in chapter 5 *and* is Act II's
+argument, so the module is not in question, but Act II's session had already closed when
+the check that licenses it cleared. The rule that survives both cases is the same one:
+the module follows the act, and whoever renders a figure is named here. The per-figure
+ownership flags below remain canonical.
 
 **Cut made:** the draft's F3 and F8 both served contribution 5 and were merged into one
 two-panel F3 in chapter 3 where contribution 5 lives. **F8 is retired and its ID left
@@ -60,9 +85,12 @@ unused** rather than renumbering, so references elsewhere still resolve. **Sessi
 cut the merged-in panel too** (see the F3 flag): the two panels argued different things
 and read as two half-figures, so F3 is now a single panel and F8's content is methods
 prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
-contribution 2. **F17 added** in session 4 for E2. Rendered figures: F1 to F7, F9 to F17
-= 16. IDs are stable identifiers, not a reading order, so F16 and F17 sitting in chapter
-6 after chapter 7's F15 is intended.
+contribution 2. **F17 added** in session 4 for E2. **F18 added** on 24 August for the
+chain's step 3. Rendered figures: F1 to F7, F9 to F18 = 17. IDs are stable identifiers,
+not a reading order, so F16 and F17 sitting in chapter 6 after chapter 7's F15 is
+intended, and so is F18 returning to chapter 5 after both. **F8 stays retired**: the next
+free number was taken rather than the retired one reused, so every reference to F8
+elsewhere still resolves to "merged into F3".
 
 Status: `confirmed` = source verified and filter reproduces `TIER0`; `confirmed*` = source
 verified, see the flag below the table.
@@ -86,9 +114,15 @@ verified, see the flag below the table.
 | F15 | 7 | anchor | Which Yeo networks load the Perron mode (minimal Act IV) | **computed live, no frozen parquet**: leading eigenvector of the N=448 self-built consensus (`eigh`) x release RSN labels from `data/human/Suarez2021_Data`, restricted to cortical nodes. Seconds, not a run | confirmed* | |
 | F17 | 6 | 4 | **The free-running rollout, which no other artifact captures.** Every persisted state matrix is teacher-forced. Pre-stated claim: the connectome retains the true climate to higher `f` (**confirmed**: 0.43 of frozen cells against the nulls' 0.14 at `f` >= 0.30) and the collapse is a change of shape not of scale (**refuted**: `sd_ratio` is bimodal, 229 of 440 cells at a fixed point against 158 keeping the spread, 11 between) | `criticality_matched/results/e2_free_run_scale_448.parquet` (source `free_run`), 440 rows = 4 variants x 11 `f` x 10 seeds at sigma = 2, cols `climate_error, sd_ratio, trajectory`; **panel (d) reads the frozen `e01_jacobian_scale_448.parquet` instead**, which carries 30 cells per (variant, `f`) against this capture's 10 | confirmed* | |
 | F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
+| F18 | 5 | (Act II) | **The Gram spectrum against the ridge floor**, the chain's step 3. Supercritically the connectome holds **89.0%** of its directions more than a decade clear of the floor against Erdős–Rényi's **11.4%** (`d_eff` 412.9 against 74.8); floor sensitivity is strongly sigma-dependent and each substrate's **interior** dip sits at a different sigma (connectome 3.58, every null 1.58 or 2.00), which is where each one's measured ridge optimum migrates to as alpha rises | **(a, b)** `results/scale_448/covariance_spectra.parquet` (source `floor_mass`); filter `task == "mc"`, `condition == "human_empirical"`, `variant in LADDER`, **no sigma filter at load** (520 rows = 4 variants x 13 spectral radii x 10 seeds); cols `eig_gram`, `alpha`, reduced per cell to `d_eff, floor_sensitivity, n_within_decade, n_below_floor, frac_below_floor` plus the four position bins. Exact zeros STRIPPED first, alpha from the file's own column. Panel (a) then cuts to `spectral_radius >= 3.05` (50 cells per variant). **(c)** `criticality_matched/results/taskB_extended_sweep_scale_448.parquet` (source `alpha_peaks`); argmax over sigma of the seed-median `mc_alpha_*` column, 20 rows = 5 alpha x 4 variants | confirmed* | |
 
 Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
-carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6. Contribution 2's *out-of-sample*
+carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6.
+**F18 carries none of the six, deliberately.** It is `CROSS_ACT_SPINE.md`'s step 3, the
+measured link from weak common-mode domination to usable dimensionality, and it is the
+mechanism *behind* contribution 6 rather than a seventh claim. `TIER0` §3.6 files it under a
+**rejected** anisotropy hypothesis, and the rejection stands: what F18 draws is the refit at
+the correct end of the spectrum, not the hypothesis that refit replaced. Contribution 2's *out-of-sample*
 test remains the Mackey-Glass pre-registration rather than a panel; F16 carries the claim
 itself.
 
@@ -368,6 +402,64 @@ Break the line at the gaps; never interpolate across them.
 **F16 — ownership.** Chapter 6, contribution 2, the unifying section. It needs both arms,
 so **Session 4 renders it** (it has Session 3's memory arm already validated). Like F3, it
 is a cross-act figure and only one session may own it.
+
+**F18 - the zero-strip is undocumented in `TIER0` and load-bearing.**
+`criticality_matched/closeout.py:floor_mass`, which produced §3.6's table, drops exact
+zeros (`g = g[g > 0]`) before every one of the four statistics. `TIER0` §3.6 does not say
+so, and without that step the **fraction below alpha reproduces for no variant**: the
+connectome's published 6.6% reads 7.03% and Erdős–Rényi's 79.4% reads 83.59%, because the
+number of numerically rank-deficient directions grows down the ladder (median 1.0 against
+91.5). The other three statistics are untouched, since a zero contributes 0 to `d_eff` and
+0 to the sensitivity and is never within a decade of alpha; only the fraction has a
+denominator to move. The strip lives in `sources.py:_floor_statistics` with the reason
+beside it. **`TIER0` §3.6 now names it**: amendment (a) of 24 August 2026 puts the strip,
+the four full-denominator values and the per-variant zero counts into the rank-1 document,
+so this flag is the figure-side pointer to it rather than an outstanding request.
+
+**F18 - the dips in panel (b) are INTERIOR minima and the caption must never drop the
+word.** Floor sensitivity vanishes at **both** ends of the spectrum, because each term
+`g*alpha/(g+alpha)^2` peaks at 1/4 when `g == alpha` and falls away in either direction.
+So a substrate whose spectrum is far above the floor and one whose spectrum has already
+fallen far below it both read low, and every variant's curve goes to zero at sigma = 0
+where the reservoir is dead. On the median curve the connectome's **global** minimum over
+non-zero sigma is at **0.42** (2.687), below its interior dip at 3.58 (5.785). Read as a
+global minimum, §3.6's claim does not reproduce for the connectome; read as the interior
+dip, it reproduces exactly and in 8 of 10 seeds. **Panel (b) therefore draws the whole
+curve including sigma = 0 and shades the low-sigma limb** rather than cropping the axis,
+and the builder asserts both that each variant's sigma = 0 value is below its own dip and
+that the connectome's first non-zero point is too.
+
+**F18 - do not write that raising alpha costs Erdős–Rényi little.** Its floor sensitivity
+(10.26) is the second lowest on the ladder for a **degenerate** reason: 20.4% of its
+directions are exactly zero and a further 52.8% sit more than a decade below the floor, so
+73.2% of its spectrum is stripped before the floor is raised at all and only about 75 of
+448 directions survive. Per unit of surviving dimensionality it is the **most** sensitive
+substrate on the ladder, losing **29.1%** of its `d_eff` per decade of alpha against the
+connectome's **5.6%**. The stock is nearly exhausted; the rate is the highest here. A
+sentence conflating the two errs in the direction that flatters the connectome.
+
+**F18 - panels (a, b) and panel (c) are on two different sigma grids, and the caption says
+so.** (a) and (b) come from the probe capture's 13-point grid (0 to 6); (c) comes from
+Task B's 21-point grid (0 to 8, step 0.4). **3.5789 and 3.6 are two grids' nearest points
+to the same place, not the same number**, and neither are 1.5789 and 1.6. Panel (c)'s
+correspondence is **consistent-with, not fitted**: nothing regresses the optimum on the
+sensitivity curve or bounds a residual, which is `TIER0` §3.6's own wording and this
+figure does not improve on it. Two of the four land one grid step off their own dip, and
+the caption names them rather than rounding the claim up.
+
+**F18 - the three nulls coincide exactly in panel (c), so the markers nest.** Their
+ridge-optimal sigma is identical at every alpha (1.2, then 1.6 at all four higher alpha),
+so their curves superimpose and the panel would appear to draw two substrates rather than
+four. The marker shrinks down the legend order so the coincident points read as
+concentric rings. **Nothing is offset**: an offset would draw a disagreement the data does
+not contain. Weight-permuted's and Erdős–Rényi's dotted dip rules coincide at 2.00 for the
+same reason.
+
+**F18 - ownership.** Chapter 5, Act II's own claim, `act2_manifold.py`. Session 2 owns
+that module and closed on 17 August, so the **floor-sensitivity session of 24 August
+renders F18** and is named here, per the module table above. Session 2's three figures
+were not touched: a full `--all` re-render moved only F18, verified with `git status`
+rather than assumed.
 
 **F15 — no frozen parquet, and one soft assumption.** The leading eigenvector is not
 persisted anywhere, so this figure recomputes it. It also assumes the release node

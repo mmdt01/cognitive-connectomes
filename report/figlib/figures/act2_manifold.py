@@ -33,6 +33,35 @@ SWAP_K = 10
 # The bases, in the order the legends list them.
 BASES = ("harmonics", "wmodes", "random")
 
+# --------------------------------------------------------------- F18, the ridge floor
+# TIER0 §3.6's supercritical cut, applied by F18a. The probe capture's grid steps
+# unevenly, and >= 3.05 selects five points from 3.0526 up.
+FLOOR_SUPERCRITICAL_SR = 3.05
+# Where F18b's argmin window starts: past the low-sigma limb, which every variant is on
+# by 1.2632. The window exists because floor sensitivity vanishes at BOTH ends of the
+# spectrum -- a dead reservoir has almost nothing above the floor to lose -- so the
+# minimum the claim is about is the interior dip between the two humps and not the
+# global minimum, which for every variant is sigma = 0.
+# See `report/checks/floor_sensitivity_check.md` §3.2.
+FLOOR_INTERIOR_FROM_SR = 1.2632
+# TIER0 §3.6's published supercritical medians, which F18 asserts against.
+PUBLISHED_FLOOR_SENSITIVITY = {"connectome": 8.85, "connectome_weight_permuted": 18.09,
+                               "degree_rewire": 17.75, "erdos_renyi": 10.26}
+# The interior argmin the check file reproduces per variant. The connectome's is a
+# single grid point; each null's is one of two adjacent ones, which is where the
+# per-seed split sits (7/3, 7/3 and 5/5 over ten seeds).
+PUBLISHED_INTERIOR_ARGMIN = {"connectome": (3.5789,),
+                             "connectome_weight_permuted": (1.5789, 2.0),
+                             "degree_rewire": (1.5789, 2.0),
+                             "erdos_renyi": (1.5789, 2.0)}
+# F18a's four position bins, top of the panel first. Labelled in maths rather than in
+# prose because the bins ARE the inequalities: "more than a decade below the floor" is
+# four words for `g_i <= alpha/10` and reads less exactly. The caption gives the words.
+FLOOR_BINS = (("n_far_above", r"$g_i \geq 10\alpha$"),
+              ("n_within_decade", r"$\alpha/10 < g_i < 10\alpha$"),
+              ("n_far_below", r"$0 < g_i \leq \alpha/10$"),
+              ("n_zero", r"$g_i = 0$"))
+
 
 def _operating_point(alignment, condition, task):
     """Probe 2 captured a canonical and a supercritical point per condition; the
@@ -461,6 +490,208 @@ def f6_pr_misses_readout_structure(ctx):
                bbox_to_anchor=(0.02, -0.20), fontsize=style.LEGEND_SIZE)
     fig.legend(variant_handles, variant_labels, loc="lower right", ncol=3,
                bbox_to_anchor=(0.99, -0.22), fontsize=style.LEGEND_SIZE - 1)
+
+    for ax, letter in zip(axes, "abc"):
+        style.panel_label(ax, letter)
+    fig.tight_layout()
+    return fig
+
+
+# =============================================================================
+# F18 -- the Gram spectrum against the ridge floor
+# =============================================================================
+def _floor_sensitivity_curves(floor):
+    """Seed-median floor sensitivity against sigma, per variant, over the WHOLE grid.
+
+    No sigma filter: the panel has to show the curve falling to zero at sigma = 0, or
+    the interior dip it marks reads as a global minimum, which it is not.
+    """
+    return {variant: (floor[floor.variant == variant]
+                      .groupby("spectral_radius").floor_sensitivity.median())
+            for variant in style.ordered_variants(floor.variant.unique())}
+
+
+def _interior_minimum(curve):
+    """The dip between the two humps: the argmin taken past the low-sigma limb."""
+    interior = curve[curve.index >= FLOOR_INTERIOR_FROM_SR]
+    return float(interior.idxmin()), float(interior.min())
+
+
+def f18_gram_spectrum_against_the_floor(ctx):
+    """Where each substrate's design-Gram spectrum sits relative to the ridge floor.
+
+    (a) is the claim: the connectome holds almost all of its directions well clear of
+    the floor while Erdos-Renyi has already lost most of its own, which is what the two
+    `d_eff` values in the legend are counting. (b) puts the same quantity on the
+    operating axis, and (c) shows the measured ridge optimum landing on each substrate's
+    own interior dip.
+    """
+    floor = ctx.frame("floor_mass")
+    peaks = ctx.frame("alpha_peaks")
+    variants = style.ordered_variants(floor.variant.unique())
+
+    # ---- structural assertions: true of the arithmetic, so they run on both paths.
+    binned = floor[[column for column, _ in FLOOR_BINS]].sum(axis=1)
+    assert (binned == floor.n_directions).all(), (
+        "F18a: the four position bins do not partition the spectrum. They are the "
+        "complement of `n_within_decade` taken at the same boundaries, so a cell whose "
+        "bins do not sum to n_directions means a mode has been double counted or lost, "
+        f"and the panel's percentages are meaningless. Worst cell off by "
+        f"{int((binned - floor.n_directions).abs().max())}.")
+    assert (floor.floor_sensitivity >= 0).all(), (
+        "F18b: floor sensitivity is a sum of non-negative terms and cannot be negative.")
+    grid = sorted(floor.spectral_radius.unique())
+    assert grid[0] == 0.0, (
+        f"F18b draws the whole sigma curve and its caption rests on the curve reaching "
+        f"zero at sigma = 0, but the lowest radius present is {grid[0]}. Check the "
+        "`floor_mass` source has not acquired a sigma filter at load.")
+    assert len(peaks) == len(variants) * peaks.alpha.nunique(), (
+        f"F18c: expected one peak per (alpha, variant), got {len(peaks)} rows for "
+        f"{peaks.alpha.nunique()} alpha and {len(variants)} variants.")
+
+    # Widths 36 : 38 : 26. (a) carries four long maths tick labels and four bars per
+    # group; (b) is the only panel with thirteen x points and needs the room to keep the
+    # two humps apart; (c) is five points and a legend-free axis, so it gives width up.
+    #
+    # The gap is left to `tight_layout` rather than set on the gridspec, unlike F6. F6
+    # needs two DIFFERENT gaps because its (b) and (c) share a y axis and the gap between
+    # them carries no furniture, which a single `wspace` cannot express; here all three
+    # panels carry their own y label and tick labels, so one symmetric gap is right, and
+    # an explicit `wspace` would only be overridden by `tight_layout` with a warning.
+    fig, axes = plt.subplots(1, 3, figsize=(8.6, 3.1),
+                             gridspec_kw=dict(width_ratios=[36, 38, 26]))
+    axes = list(axes)
+
+    # ---- (a) where the spectrum sits, supercritically.
+    #
+    # GROUPED bars, not stacked, and the reason is arithmetic rather than taste. The
+    # bars are per-bin medians over the 50 supercritical cells, and four medians taken
+    # separately are not constrained to sum to their own total (the connectome's four
+    # come to 102.1%). A stacked bar would assert a sum that is not there; grouped bars
+    # assert nothing of the kind, and the exactness that IS true -- the bins partition
+    # every individual cell -- is asserted above instead of drawn.
+    supercritical = floor[floor.spectral_radius >= FLOOR_SUPERCRITICAL_SR]
+    positions = np.arange(len(FLOOR_BINS))[::-1]     # first bin at the TOP of the panel
+    bar_height = 0.78 / len(variants)
+    d_eff_median = {}
+    for index, variant in enumerate(variants):
+        cells = supercritical[supercritical.variant == variant]
+        d_eff_median[variant] = float(cells.d_eff.median())
+        shares = [100.0 * float((cells[column] / cells.n_directions).median())
+                  for column, _ in FLOOR_BINS]
+        offset = (index - (len(variants) - 1) / 2) * bar_height
+        # `d_eff` rides in the legend label rather than sitting beside a bar. It is a
+        # property of the whole spectrum, not of any one bin, and annotating it against
+        # the top bin would read as an identity: the connectome's 398.5 directions more
+        # than a decade clear are close to its d_eff of 413 but are not it.
+        axes[0].barh(positions - offset, shares, height=bar_height * 0.92,
+                     color=style.VARIANT_COLOUR[variant], zorder=3,
+                     edgecolor="white", linewidth=0.4,
+                     label=f"{style.VARIANT_TITLE[variant]}  "
+                           f"($d_{{\\rm eff}}$ = {d_eff_median[variant]:.0f})")
+    axes[0].set_yticks(positions)
+    axes[0].set_yticklabels([label for _, label in FLOOR_BINS])
+    axes[0].set_xlabel("% of the 448 directions")
+    axes[0].set_xlim(0, 100)
+    axes[0].set_ylim(positions.min() - 0.6, positions.max() + 0.6)
+    axes[0].grid(axis="y", visible=False)
+    # The title names the OBJECT as well as the filter. Nothing else on the panel says
+    # what `g_i` is, and the whole figure turns on its being the Gram the ridge solver
+    # inverts rather than the covariance PR is taken on.
+    axes[0].set_title(r"design-Gram spectrum, $\sigma \geq 3.05$",
+                      fontsize=style.TITLE_SIZE)
+
+    # ---- (b) the same quantity along the operating axis, whole curve.
+    curves = _floor_sensitivity_curves(floor)
+    interior = {}
+    for variant in variants:
+        curve = curves[variant]
+        axes[1].plot(curve.index, curve.values,
+                     **style.variant_kwargs(variant, label="_nolegend_"))
+        argmin_sr, minimum = _interior_minimum(curve)
+        interior[variant] = (argmin_sr, minimum)
+        axes[1].plot([argmin_sr], [minimum], ls="none", marker="v", ms=6.5, mfc="white",
+                     mec=style.VARIANT_COLOUR[variant], mew=1.4, zorder=6)
+    # The excluded limb is shaded rather than cropped away. Cropping would hide the one
+    # fact that stops the marked dips being read as global minima.
+    axes[1].axvspan(0, FLOOR_INTERIOR_FROM_SR, color=style.CEILING_COLOUR, alpha=0.10,
+                    zorder=0, lw=0)
+    # The label runs up the LEFT edge of the shaded strip, not its right edge: every
+    # curve is still near zero at sigma = 0.13 and all four peak against the strip's
+    # right edge, so a label there sits on the tallest thing in the panel. Measured on
+    # the first render, which had it exactly there.
+    axes[1].text(0.13, 0.97, r"low-$\sigma$ limb",
+                 transform=axes[1].get_xaxis_transform(), ha="center", va="top",
+                 rotation=90, fontsize=style.TICK_SIZE - 2, color=style.CEILING_COLOUR)
+    axes[1].set_xlabel(r"nominal $\sigma$   (probe grid)")
+    axes[1].set_ylabel("floor sensitivity\n"
+                       r"$-\,\mathrm{d}d_{\rm eff}/\mathrm{d}\log\alpha$")
+    axes[1].set_xlim(0, float(max(grid)))
+    axes[1].set_ylim(0, None)
+    # An OPEN triangle, matching the markers. A filled glyph here would name a marker the
+    # panel does not draw.
+    axes[1].set_title(r"$\triangledown$ interior minimum", fontsize=style.TITLE_SIZE)
+
+    # ---- (c) the measured ridge optimum against alpha, with (b)'s dips as rules.
+    # The three nulls' optima are IDENTICAL at every alpha, so their curves superimpose
+    # exactly and the panel would appear to draw two substrates rather than four. The
+    # marker shrinks down the legend order so the coincident points nest concentrically
+    # and all three remain visible. Nothing is offset: an offset would draw a
+    # disagreement that is not in the data, which is the one thing this panel must not do.
+    for index, variant in enumerate(variants):
+        axes[2].axhline(interior[variant][0], color=style.VARIANT_COLOUR[variant],
+                        lw=0.8, ls=":", alpha=0.55, zorder=1)
+        sub = peaks[peaks.variant == variant].sort_values("alpha")
+        axes[2].plot(sub.alpha, sub.peak_spectral_radius, marker="o",
+                     ms=6.6 - 0.9 * index, zorder=3 + index,
+                     **style.variant_kwargs(variant, label="_nolegend_"))
+    axes[2].set_xscale("log")
+    axes[2].set_xlim(4e-9, 3e-3)
+    axes[2].set_xticks([1e-8, 1e-6, 1e-4])
+    axes[2].set_xlabel(r"ridge $\alpha$")
+    axes[2].set_ylabel(r"ridge-optimal $\sigma$   (Task B grid)")
+    axes[2].set_title("dotted: (b)'s dip", fontsize=style.TITLE_SIZE)
+
+    # One figure-level legend for all three panels: (a)'s labels carry the `d_eff`
+    # values as well as the substrate names, so they are far too wide for any in-panel
+    # box, and (b) and (c) name the same four substrates. F2's treatment, F2's reason.
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=len(variants),
+               bbox_to_anchor=(0.5, -0.05), fontsize=style.LEGEND_SIZE - 1)
+
+    # ---- content assertions: claims about the frozen result, so frozen data only.
+    if not ctx.placeholder:
+        for variant, published in PUBLISHED_FLOOR_SENSITIVITY.items():
+            measured = float(supercritical[supercritical.variant == variant]
+                             .floor_sensitivity.median())
+            assert abs(measured - published) < 0.01, (
+                f"F18: supercritical median floor sensitivity for {variant} is "
+                f"{measured:.4f} against TIER0 §3.6's {published}. The figure no longer "
+                "reproduces the table it is captioned with.")
+        for variant, allowed in PUBLISHED_INTERIOR_ARGMIN.items():
+            argmin_sr = interior[variant][0]
+            assert any(abs(argmin_sr - value) < 1e-3 for value in allowed), (
+                f"F18b: {variant}'s interior minimum sits at sigma = {argmin_sr}, not at "
+                f"{allowed}. The panel's whole point is that the connectome's dip is at "
+                "3.58 and every null's at 1.58 or 2.00.")
+        # The honesty clause of the caption, checked rather than trusted: these are
+        # INTERIOR minima. Every curve is lower at sigma = 0 than at its own dip, and
+        # the connectome is already lower at the first non-zero grid point.
+        for variant in variants:
+            curve = curves[variant]
+            assert float(curve.loc[0.0]) < interior[variant][1], (
+                f"F18b: {variant}'s sensitivity at sigma = 0 is not below its interior "
+                "minimum, so 'interior' has stopped meaning anything and the caption's "
+                "qualification is wrong.")
+        connectome_first = float(curves["connectome"].iloc[1])
+        assert connectome_first < interior["connectome"][1], (
+            f"F18b: the connectome's sensitivity at the first non-zero radius "
+            f"({connectome_first:.3f}) is no longer below its interior minimum "
+            f"({interior['connectome'][1]:.3f}); the caption says it is.")
+        migration = peaks.sort_values("alpha").groupby("variant").peak_spectral_radius
+        assert migration.last()["connectome"] > migration.first()["connectome"], (
+            "F18c: the connectome's ridge-optimal sigma no longer rises with alpha, "
+            "which is the migration the panel exists to show.")
 
     for ax, letter in zip(axes, "abc"):
         style.panel_label(ax, letter)

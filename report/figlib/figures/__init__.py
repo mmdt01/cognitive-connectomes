@@ -26,7 +26,7 @@ from report.figlib.figures.act1_structure import (
     f1_spectrum, f2_gap_not_bulk, f3_two_axes, s1_spectrum_n1000)
 from report.figlib.figures.act2_manifold import (
     f4_perron_carries_the_mean, f5_sign_selects_the_basis,
-    f6_pr_misses_readout_structure)
+    f6_pr_misses_readout_structure, f18_gram_spectrum_against_the_floor)
 from report.figlib.figures.act3_memory import (
     f7_the_crossing, f9_scale_invariance, f10_peak_parity, f11_perron_rescue)
 from report.figlib.figures.act3_prediction import (
@@ -54,6 +54,8 @@ FIGURES = {
     "F15": (7, "which Yeo networks load the Perron mode", f15_yeo_loads_the_perron_mode),
     "F16": (6, "the crossing, with its axis and its coverage", f16_phase_boundaries),
     "F17": (6, "the free-running attractor, and how it fails", f17_free_run_attractors),
+    "F18": (5, "the Gram spectrum against the ridge floor",
+            f18_gram_spectrum_against_the_floor),
 }
 
 # The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
@@ -73,7 +75,18 @@ WORKSHOP = ("F1", "F2", "F7", "F12")
 # import time could be grown a figure at a time without anything noticing, and this is
 # the one place a session must edit -- and therefore justify -- to add one. What changed
 # is that the number is a fact to keep true, not a gate to argue past.
-assert len(FIGURES) == 16, f"registry holds {len(FIGURES)} figures, not 16"
+#
+# **16 to 17 on 24 August 2026, for F18.** `CROSS_ACT_SPINE.md` makes the Gram spectrum's
+# position relative to the ridge floor step 3 of the causal chain -- the link between the
+# common-mode account and `d_eff` -- and chapter 5's outline commits to a section on it.
+# The result was recorded in `TIER0` §3.6 under a REJECTED anisotropy hypothesis and had
+# never been drawn, so the chain's middle link was the one step with no figure.
+# `report/checks/floor_sensitivity_check.md` verified all sixteen published cells against
+# the frozen artifacts first and found the four-variant, sigma-resolved coverage already
+# in `covariance_spectra.parquet`, so F18 needed no run. It is Act II's own claim and
+# session 2's module, but session 2 closed on 17 August; `FIGURE_LIST` names this
+# session as its owner explicitly, which is the F3 and F16 arrangement.
+assert len(FIGURES) == 17, f"registry holds {len(FIGURES)} figures, not 17"
 
 # ---------------------------------------------------------------------------------
 # Supplementary figures -- appendix only, NOT part of the numbered main-text list.

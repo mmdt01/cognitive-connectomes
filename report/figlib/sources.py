@@ -145,11 +145,115 @@ def _gram_spectra() -> pd.DataFrame:
         T_effective=int(cell.T_effective)))
 
 
+def _floor_statistics(eig_gram, alpha: float) -> dict:
+    """`TIER0` §3.6's four floor statistics for one cell, plus the position bins.
+
+    ``d_eff = sum_i g_i/(g_i+alpha)`` and the exact sensitivity of that sum to the floor,
+    ``-d(d_eff)/d(log alpha) = sum_i g_i*alpha/(g_i+alpha)^2``, whose every term peaks at
+    1/4 when ``g_i == alpha`` and vanishes when ``g_i`` is far from it in **either**
+    direction. The derivative is with respect to the natural log, so the units are
+    ``d_eff`` units per e-fold.
+
+    **The zero-strip is load-bearing and lives here rather than in the figure.**
+    ``criticality_matched/closeout.py:floor_mass`` drops exact zeros before every one of
+    these statistics, and `TIER0` §3.6 does not say so. Without it the fraction below
+    alpha reproduces `TIER0` for **no** variant: the connectome's published 6.6% reads
+    7.03% and Erdos-Renyi's 79.4% reads 83.59%, because the number of numerically
+    rank-deficient directions grows down the ladder (median 1.0 for the connectome
+    against 91.5 for Erdos-Renyi) and only the fraction has a denominator to move. See
+    ``report/checks/floor_sensitivity_check.md`` §1.3.
+
+    The four position bins partition all ``n_directions`` exactly. ``n_within_decade`` is
+    strict at both ends, as ``closeout.py`` has it, and the two outer bins are closed at
+    the same boundaries so nothing is double counted or dropped.
+    """
+    gram = np.asarray(eig_gram, dtype=float)
+    n_directions = int(gram.size)
+    positive = gram[gram > 0]
+    assert positive.size, (
+        "floor statistics: a cell's design-Gram spectrum is entirely zero, so the "
+        "zero-stripped population is empty and the fraction below alpha is undefined. "
+        "closeout.py skips such a cell; no cell of the frozen MC ladder is one.")
+    return dict(
+        n_directions=n_directions,
+        n_positive=int(positive.size),
+        d_eff=float((positive / (positive + alpha)).sum()),
+        floor_sensitivity=float((positive * alpha / (positive + alpha) ** 2).sum()),
+        n_within_decade=int(((positive > alpha / 10) & (positive < alpha * 10)).sum()),
+        n_below_floor=int((positive < alpha).sum()),
+        frac_below_floor=float((positive < alpha).mean()),
+        n_zero=int(n_directions - positive.size),
+        n_far_below=int((positive <= alpha / 10).sum()),
+        n_far_above=int((positive >= alpha * 10).sum()))
+
+
+def _floor_mass() -> pd.DataFrame:
+    """Where each substrate's design-Gram spectrum sits relative to the ridge floor.
+
+    One row per cell, four ladder variants x 13 spectral radii x 10 seeds = 520 rows.
+    **No sigma filter at load**: F18 panel (b) draws the whole curve including sigma = 0,
+    because floor sensitivity vanishes at both ends of the spectrum and a figure that
+    started the axis past the low-sigma limb would show an interior dip as though it were
+    a global minimum (`report/checks/floor_sensitivity_check.md` §3.2). Panel (a) applies
+    `TIER0` §3.6's supercritical cut itself.
+
+    ``alpha`` is read from the file's **own column**, never a literal. The same parquet
+    carries NARMA-10 at 1e-8 and Lorenz at 1e-7 beside MC's 1e-6, so a hard-coded value
+    would be silently wrong the moment this source were pointed at either.
+    """
+    frame = pd.read_parquet(
+        PROBES / "scale_448/covariance_spectra.parquet",
+        filters=[("task", "==", "mc"), ("condition", "==", BASE_CONDITION)])
+    frame = frame[frame.variant.isin(LADDER)]
+    rows = [dict(variant=record.variant, seed=int(record.seed),
+                 spectral_radius=float(record.spectral_radius),
+                 alpha=float(record.alpha),
+                 **_floor_statistics(record.eig_gram, float(record.alpha)))
+            for record in frame.itertuples()]
+    return pd.DataFrame(rows)
+
+
 def _taskb() -> pd.DataFrame:
     """Task B: f = 0, MC, four variants, sigma to 8. Adds the matched axis x."""
     frame = pd.read_parquet(CRIT / "taskB_extended_sweep_scale_448.parquet").copy()
     frame["x"] = frame.spectral_radius * frame.bulk95
     return frame
+
+
+# The five ridge alpha Task B stored a paired (MC, d_eff) column for, as they are
+# spelled in the parquet's column names. Held here so the loader and its placeholder
+# cannot disagree about which grid is being read.
+ALPHA_GRID = ("1e-08", "1e-06", "1e-05", "7e-05", "0.001")
+
+
+def _alpha_peaks() -> pd.DataFrame:
+    """The measured ridge-optimal sigma per variant, at each ridge alpha.
+
+    Computed from ``taskB_extended_sweep_scale_448.parquet``'s own ``mc_alpha_*``
+    columns rather than read off ``taskB_mc_alpha_peaks.csv``, so the figure and the
+    frozen summary are two independent reductions of one capture; they agree to 0.0 on
+    the peak sigma and 1.8e-15 on the peak MC over all 20 rows
+    (``report/checks/floor_sensitivity_check.md`` §3.3).
+
+    The statistic is the argmax over sigma of the **seed-median** MC, on Task B's own
+    grid (0 to 8, step 0.4). That is a different grid from the probe capture the floor
+    statistics come from, and the two must never be presented as one axis without
+    saying so.
+    """
+    columns = ["variant", "seed", "spectral_radius"] + [f"mc_alpha_{a}" for a in ALPHA_GRID]
+    frame = pd.read_parquet(CRIT / "taskB_extended_sweep_scale_448.parquet",
+                            columns=columns)
+    frame = frame[frame.variant.isin(LADDER)]
+    rows = []
+    for label in ALPHA_GRID:
+        column = f"mc_alpha_{label}"
+        medians = frame.groupby(["variant", "spectral_radius"])[column].median()
+        for variant in LADDER:
+            curve = medians.loc[variant]
+            rows.append(dict(alpha=float(label), variant=variant,
+                             peak_spectral_radius=float(curve.idxmax()),
+                             peak_mc=float(curve.max())))
+    return pd.DataFrame(rows)
 
 
 def _e02_panel() -> pd.DataFrame:
@@ -394,6 +498,53 @@ def _ph_gram_spectra() -> pd.DataFrame:
     rank, eig_cov, eig_gram = _ph_gram_arrays()
     return pd.DataFrame(dict(rank=rank, eig_cov=eig_cov, eig_gram=eig_gram,
                              n_design_cols=N_NODES, T_effective=2500, **_PH_MECHANISM))
+
+
+# The probe capture's own sigma grid, including sigma = 0. F18b draws all thirteen
+# points and asserts that the zero is among them, so the placeholder has to carry it.
+PROBE_SIGMA_GRID = (0.0, 0.4211, 0.8421, 1.0526, 1.2632, 1.5789, 2.0,
+                    2.5263, 3.0526, 3.5789, 4.1053, 5.1579, 6.0)
+
+
+def _ph_floor_mass() -> pd.DataFrame:
+    """Synthetic Gram spectra pushed through the real ``_floor_statistics``.
+
+    Built from spectra rather than from made-up scalars so the **arithmetic** assertion
+    F18 runs -- that the four position bins partition every cell exactly -- is exercised
+    under ``--smoke`` as well as on the frozen data. That is F6a's precedent
+    (`act2_manifold.md` item 14): a placeholder carries no claim, but it should still
+    exercise the maths.
+    """
+    alpha = 1e-6
+    position = np.arange(N_NODES, dtype=float) / (N_NODES - 1)
+    rows = []
+    for index, variant in enumerate(LADDER):
+        for spectral_radius in PROBE_SIGMA_GRID:
+            for seed in range(10):
+                # A log-linear spectrum whose top rises with the drive and whose span in
+                # decades widens with the drive and with the rung, so the placeholder
+                # sweeps its spectrum past the floor the way a real one does: dead below,
+                # straddling in the middle, tail back under at the top. Nothing here is a
+                # claim; it exists so the layout and the bin arithmetic are exercised.
+                largest = 10.0 ** (-9.0 + 2.0 * spectral_radius)
+                span_decades = 1.0 + (1.2 + 0.9 * index) * spectral_radius + index
+                gram = largest * 10.0 ** (-span_decades * position)
+                gram[gram < 1e-20] = 0.0        # gives the rank-deficient bin something
+                rows.append(dict(variant=variant, seed=seed, alpha=alpha,
+                                 spectral_radius=spectral_radius,
+                                 **_floor_statistics(gram, alpha)))
+    return pd.DataFrame(rows)
+
+
+def _ph_alpha_peaks() -> pd.DataFrame:
+    rows = []
+    for index, variant in enumerate(LADDER):
+        for step, label in enumerate(ALPHA_GRID):
+            migrated = (2.4 + 0.3 * step) if index == 0 else (1.2 + 0.4 * min(step, 1))
+            rows.append(dict(alpha=float(label), variant=variant,
+                             peak_spectral_radius=migrated,
+                             peak_mc=15.0 - 0.7 * step))
+    return pd.DataFrame(rows)
 
 
 def _ph_taskb() -> pd.DataFrame:
@@ -692,6 +843,29 @@ SOURCES = {
         "spectral_radius == 3.0526; then the ONE seed whose d_eff is nearest the median "
         "of the ten. 448 rows, one per direction. F6a only.",
         _gram_spectra, _ph_gram_spectra),
+    "floor_mass": Source(
+        "floor_mass", PROBES / "scale_448/covariance_spectra.parquet",
+        ("variant", "spectral_radius", "seed", "alpha", "d_eff", "floor_sensitivity",
+         "n_within_decade", "n_below_floor", "frac_below_floor",
+         "n_zero", "n_far_below", "n_far_above", "n_directions"),
+        "task == 'mc', condition == 'human_empirical', variant in the four-rung ladder; "
+        "NO sigma filter at load, so panel b can draw the whole curve. 520 rows = 4 "
+        "variants x 13 spectral radii x 10 seeds. alpha comes from the FILE'S OWN "
+        "COLUMN (1e-6 for MC; the same file holds NARMA-10 at 1e-8 and Lorenz at 1e-7). "
+        "Exact zeros are STRIPPED before every statistic, as closeout.py:floor_mass "
+        "does: without that step the fraction below alpha reproduces TIER0 §3.6 for no "
+        "variant. TIER0 §3.6's published table is the MEDIAN OVER CELLS at "
+        "spectral_radius >= 3.05, which is 50 cells per variant.",
+        _floor_mass, _ph_floor_mass),
+    "alpha_peaks": Source(
+        "alpha_peaks", CRIT / "taskB_extended_sweep_scale_448.parquet",
+        ("alpha", "variant", "peak_spectral_radius", "peak_mc"),
+        "20 rows = 5 ridge alpha x 4 variants. peak_spectral_radius is the argmax over "
+        "sigma of the SEED-MEDIAN mc_alpha_* column, on Task B's own grid (0 to 8, step "
+        "0.4) -- a DIFFERENT grid from the probe capture behind `floor_mass`, so the two "
+        "are never put on one axis without saying so. Reproduces the frozen "
+        "taskB_mc_alpha_peaks.csv to 0.0 on the peak sigma.",
+        _alpha_peaks, _ph_alpha_peaks),
     "taskb": Source(
         "taskb", CRIT / "taskB_extended_sweep_scale_448.parquet",
         ("variant", "spectral_radius", "bulk95", "x", "d_eff", "mc"),
