@@ -634,23 +634,106 @@ Supercritical (σ ≥ 3.05) medians:
 | degree | 17.75 | 82 | 65.8% | 138.2 |
 | Erdős–Rényi | 10.26 | 48 | **79.4%** | 74.8 |
 
+**Verified 24 August 2026.** All sixteen cells of the table above were recomputed from the
+frozen `covariance_spectra.parquet` and every one reproduces at the precision published
+here; the derived `closeout_floor_mass.csv` also reproduces cell for cell over all 910
+rows. No run was involved. Record: `report/checks/floor_sensitivity_check.md` §1.
+
 **The "more directions at the floor" reading is also rejected**: supercritically the
 connectome has the *fewest* modes at the floor and by far the most well clear of it
 (6.6% below α against ER's 79.4%). ER's low sensitivity is degenerate — it has almost
-nothing left to strip.
+nothing left to strip. **That is a statement about the stock and not about the cost**:
+read as a rate, ER is the *most* floor-sensitive substrate on the ladder. See note (c).
 
 **But the σ-resolved version does explain the moving optimum.** Floor sensitivity is
-strongly σ-dependent, and each substrate's *minimum* sits at a different σ: the
-connectome's at σ ≈ 3.6 (5.8), every null's at σ ≈ 1.6–2.0 (1.8–3.9). Raising α
+strongly σ-dependent, and each substrate's *interior minimum* sits at a different σ: the
+connectome's at σ ≈ 3.6 (5.8), every null's at σ ≈ 1.6–2.0 (interior minima 1.8 to 2.4;
+the previously published 1.8–3.9 is a different quantity, see note (ii)). Raising α
 penalises high-floor-mass regions, so the optimum migrates toward each substrate's own
-floor-mass minimum — and the measured optima do exactly that (connectome 2.4 → 3.6 as α
-rises four orders, toward its minimum at 3.6; nulls 1.2 → 1.6, toward theirs at 1.6–2.0).
+interior floor-mass minimum — and the measured optima do exactly that (connectome
+2.4 → 3.6 as α rises five orders, toward its interior minimum at 3.6; nulls 1.2 → 1.6,
+toward theirs at 1.6–2.0).
 
 > **The loose end is closed, but not by anisotropy.** The connectome's α-sensitive
 > optimum is explained by *where along σ its Gram spectrum sits relative to the ridge
 > floor*, not by how anisotropic its covariance is. Stated as consistent-with rather
 > than proven: the migration direction and endpoint match for all four variants, but the
 > tracking has not been fitted quantitatively.
+
+> **Amended 24 August 2026 (a): the aggregation is now on the record.** All four
+> statistics in the refit table are computed on the **zero-stripped** design-Gram
+> spectrum, `g = g[g > 0]`, as `criticality_matched/closeout.py:floor_mass` implements it.
+> This section did not say so, and the omission is load-bearing: without the strip the
+> **fraction below α** reproduces for **no** variant. The error grows down the ladder
+> because the count of exactly-zero eigenvalues does (seed median 1.0 connectome, 11.5
+> weight-permuted, 44.5 degree, 91.5 ER), so on the full 448-direction denominator the
+> four read 7.03 / 50.00 / 69.53 / 83.59% against the published 6.6 / 48.8 / 65.8 / 79.4%.
+> **The other three statistics are unaffected**: a zero eigenvalue contributes exactly 0 to
+> `d_eff`, exactly 0 to the sensitivity, and is never within a decade of α, so only the
+> fraction has a denominator to move. This is the same class of gap as §3.12's pooled
+> median and §1.2's per-seed reindex, a published number that only one unstated
+> aggregation returns, and it is recorded for the same reason: a later recomputation has
+> no way to guess it. Source: `report/checks/floor_sensitivity_check.md` §1.3.
+
+> **Amended 24 August 2026 (b): "minimum" means the INTERIOR minimum, and the null band
+> was a different quantity.** Two corrections to the σ-resolved paragraph above; the
+> σ-locations and the connectome's 5.8 are unchanged and reproduce exactly.
+>
+> **(i) Interior, not global.** Floor sensitivity vanishes at **both** ends of the
+> spectrum, because each term `gᵢα/(gᵢ+α)²` peaks at 1/4 when `gᵢ = α` and falls away in
+> either direction. A substrate whose spectrum stands far above the floor and one whose
+> spectrum has already fallen far below it therefore both read low, the curve is
+> two-humped, and it goes to zero as σ goes to zero, where a dead reservoir has almost no
+> spectrum above the floor to lose. On the median curve the connectome's **global**
+> minimum over non-zero σ is consequently at **σ = 0.4211** (2.687), *below* its interior
+> dip at **σ = 3.5789** (5.785). Read as a global minimum the connectome's half of this
+> claim does **not** reproduce; read as the interior dip between the two humps, which is
+> what the argument needs and what the data supports, it reproduces exactly and in 8 of 10
+> seeds, with every null's interior dip at 1.5789 or 2.0000 in 10 of 10 seeds. Anything
+> quoting this section says **interior**.
+>
+> **(ii) The band 1.8–3.9 is withdrawn as the span of the null minima.** The three null
+> interior minima are **2.383** (weight-permuted), **1.837** (degree) and **1.815** (ER),
+> spanning **1.8 to 2.4**, which is what the paragraph above now carries. The published
+> **1.8–3.9** is a different quantity: the span of the *sensitivity across the minimum
+> region*, over the six values the three nulls take at σ = 1.5789 and σ = 2.0000 (lowest
+> 1.815, ER at 2.0000; highest 3.925, degree at 2.0000). Both are true statements about
+> different things, and **the second must not be used in a caption or read as the span of
+> the minima**. Source: `report/checks/floor_sensitivity_check.md` §3.2 and §3.4.
+
+> **Amended 24 August 2026 (c): ER's degeneracy has a second half, and the first half is
+> misread without it.** The sentence above is confirmed, not withdrawn: ER's low floor
+> sensitivity *is* degenerate, and 73.2% of its spectrum sits at or more than a decade
+> below the floor before α is raised at all (20.4% of its directions exactly zero, a
+> further 52.8% more than a decade under, against the connectome's 5.1% combined). But
+> **"10.26 is low" is a statement about a level, and what governs how much a substrate
+> loses when α rises is a rate.** Per unit of surviving dimensionality the ordering
+> inverts:
+>
+> | variant | `d_eff` | floor sensitivity | sensitivity / `d_eff` | `d_eff` lost per decade of α |
+> |---|---|---|---|---|
+> | connectome | 412.9 | 8.85 | **2.1%** | 23.3 (**5.6%**) |
+> | weight-permuted | 223.1 | 18.09 | 8.1% | 52.1 (23.3%) |
+> | degree | 138.2 | 17.75 | 12.8% | 37.6 (27.2%) |
+> | Erdős–Rényi | 74.8 | 10.26 | **13.7%** | 21.8 (**29.1%**) |
+>
+> The *absolute* loss per decade is nearly the same for the two ends of the ladder, 23.3
+> against 21.8; the connectome simply has 413 directions to lose it from and ER has 75.
+> **So "ER has almost nothing left to strip" must never be written as "raising α costs ER
+> little".** It costs ER 29.1% of everything it has, the most of any substrate here, and
+> the conflated reading is the one that flatters the connectome, which is the direction
+> this programme has already been caught in three times. Source:
+> `report/checks/floor_sensitivity_check.md` §5.3.
+
+> **Amended 24 August 2026 (d): "four orders" was the step count, not the order count.**
+> The paragraph above read *"as α rises four orders"* and now reads **five**. The α grid
+> is 1e-8, 1e-6, 1e-5, 7e-5, 1e-3, so it spans `log10(1e-3 / 1e-8)` = **5** orders of
+> magnitude in **4** steps, and the published figure was counting the steps. §3.4's own
+> α table lists the same five values, and `report/act3a_memory.md`'s F10 caption already
+> said "the five α span **five** orders", so the repository stated both counts for one
+> grid. **No result moves**: the optima 2.4 → 3.6 and 1.2 → 1.6 are unchanged, and
+> nothing is computed from the count. Corrected in `report/act2_manifold.md` (A2.7 and
+> §4.5) and `report/checks/floor_sensitivity_check.md` §3.3 in the same pass.
 
 ---
 
