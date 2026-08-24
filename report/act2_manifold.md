@@ -25,6 +25,8 @@ this register, not the other way round.
 | A2.3 | **Weight sign composition selects which structural basis the fluctuations occupy**: with non-negative weights the low-frequency graph harmonics lead, and once signs are balanced the `W` eigenmodes do. The claim is the *swap*, not the amount either basis captures. | F5 | §3.12(2) | `manifold_alignment.parquet` |
 | A2.4 | **Variance-weighted dimensionality misses readout-relevant structure.** Both measures are exact sums of a per-direction weight over the same 2500 × 448 state matrix; the ridge weight is above 0.5 for 438 of 448 directions while two directions carry 95% of PR. | F6a | §3.12(3) | `covariance_spectra.parquet` |
 | A2.5 | Against **measured MC** across seven substrates, `d_eff` orders the ladder at **+1.000** and PR at **+0.107**; pooled within-regime the pair is **+0.998** against **+0.308**. `d_eff` moves 5.5-fold over the same substrates while PR moves 16%. *(contribution 6)* | F6b, F6c | §3.12(3) | `probe3_deff.parquet` |
+| A2.6 | **Where a substrate's design-Gram spectrum sits relative to the ridge floor is what sets its usable dimensionality.** Supercritically the connectome holds 89.0% of its directions more than a decade clear of the floor while Erdős–Rényi holds 11.4%, with 73.2% of Erdős–Rényi's spectrum at or more than a decade below it before alpha is raised at all. That is what `d_eff` 412.9 against 74.8 counts. | F18a | §3.6 | `covariance_spectra.parquet` |
+| A2.7 | **The floor account is radius-dependent, so it is a property of a substrate at an operating point rather than of the substrate.** Floor sensitivity is two-humped in sigma with each substrate's interior minimum at a different radius (connectome 3.58, every null 1.58 to 2.00, seed by seed), and each substrate's measured ridge optimum migrates toward its own interior minimum as alpha rises five orders (connectome 2.4 to 3.6, nulls 1.2 to 1.6). Consistent-with, not fitted. | F18b, F18c | §3.6 | `covariance_spectra.parquet`, `taskB_extended_sweep_scale_448.parquet` |
 
 **Claims deliberately NOT made here** (and why):
 
@@ -70,6 +72,20 @@ this register, not the other way round.
 - **A mechanism for *why* the low-variance directions carry memory.** F6a shows that they
   clear the ridge floor and that MC tracks how many do. Nothing here explains what the
   information in them is.
+- **That the floor account is a derivation from `W`'s spectrum.** It is not. Every
+  quantity in §4 is measured on the **design-Gram spectrum of the state matrix**, which is
+  a property of the reservoir *driven by this task at this operating point*, not of `W`
+  alone. Nothing here derives where the Gram spectrum sits from the spectral gap, and no
+  such derivation is attempted. **The link from the gap to the floor therefore still runs
+  through A2.2's common-mode argument**: §4 measures where the spectrum ends up, and A2.2
+  is what connects that to the gap. Reading §4 as "the gap puts the spectrum clear of the
+  floor" skips the step that is actually doing the work.
+- **That panel (c)'s migration is fitted.** It is not. Nothing regresses the measured
+  ridge optimum on the floor-sensitivity curve, and no residual is bounded. What is shown
+  is that the direction and the endpoint match for all four substrates, which `TIER0`
+  §3.6 states as **consistent-with rather than proven** and which this act does not
+  improve on. The two halves also sit on two different spectral-radius grids, so the
+  agreement is between two grids' nearest points and not between two identical numbers.
 
 ---
 
@@ -479,6 +495,94 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   > correlations are against measured MC, never against the rung index, which is a
   > different quantity and is not the claim.
 
+### F18 — the Gram spectrum against the ridge floor
+
+- **Claim carried:** A2.6, A2.7. The chain's **step 3**
+  (`report/CROSS_ACT_SPINE.md`): the measured link from weak common-mode domination to
+  usable dimensionality, which Act II asserted and did not measure until 24 August 2026.
+  **It prints between F4 and F6** (outline §4); it sits after F6 here only because this
+  section is ordered by figure ID.
+- **Source:** (a, b) source `floor_mass` = `results/scale_448/covariance_spectra.parquet`,
+  filtered at load to `task == "mc"`, `condition == "human_empirical"` and
+  `variant in LADDER`, with **no spectral-radius filter at load**: 520 rows = 4 variants x
+  13 radii x 10 seeds. Each row is reduced per cell to `d_eff`, `floor_sensitivity`,
+  `n_within_decade`, `n_below_floor`, `frac_below_floor` and the four position bins, all
+  computed on the **zero-stripped** spectrum and at the alpha in the file's **own column**
+  (1e-6 for MC). Panel (a) applies `TIER0` §3.6's supercritical cut itself, giving 50
+  cells per variant. (c) source `alpha_peaks` =
+  `criticality_matched/results/taskB_extended_sweep_scale_448.parquet`: the argmax over
+  sigma of the seed-median `mc_alpha_*` column at each of the five stored alpha, 20 rows.
+- **Panels:** (a) grouped horizontal bars, four position bins by four substrates, as a
+  percentage of the 448 directions, with `d_eff` carried in the legend label; (b) floor
+  sensitivity against nominal sigma over all 13 grid points, four curves, each variant's
+  interior minimum marked and the low-sigma limb shaded; (c) ridge-optimal sigma against
+  alpha on a log axis, four curves, each variant's interior dip drawn as a dotted rule in
+  its own colour.
+- **(a) is grouped, not stacked, and the reason is arithmetic rather than taste.** The
+  bars are per-bin medians over the 50 supercritical cells, and four medians taken
+  separately are not constrained to sum to their own total: the connectome's four come to
+  **102.1%**. A stacked bar would assert a partition the medians do not form. The
+  exactness that *is* true, that the four bins partition every **individual** cell, is
+  asserted in the builder instead of drawn.
+- **The zero-strip is in the source, not the figure, and it is load-bearing.**
+  `criticality_matched/closeout.py:floor_mass` drops exact zeros before all four
+  statistics and `TIER0` §3.6 did not say so until amendment (a) of 24 August. Without it
+  the fraction below alpha reproduces for **no** variant (the connectome's 6.6% reads
+  7.03%, Erdős–Rényi's 79.4% reads 83.59%), because the count of rank-deficient directions
+  grows down the ladder from a median of 1.0 to 91.5. Panel (a) shows those zeros as their
+  own bin rather than folding them into "below the floor", which is what makes the
+  exclusion visible instead of merely stated.
+- **(b) draws the whole curve, including sigma = 0, and that is not optional.** Floor
+  sensitivity vanishes at **both** ends of the spectrum, so a substrate far above the
+  floor and one already far below it both read low. Cropping the axis past the low-sigma
+  limb would present an interior dip as a global minimum, which for the connectome it is
+  not: on the median curve it reads 2.687 at sigma = 0.4211 against 5.785 at its dip. The
+  shaded limb is the argmin window's exclusion made visible, and the builder asserts both
+  that every variant's sigma = 0 value sits below its own dip and that the connectome's
+  first non-zero point does too.
+- **The three nulls coincide exactly in (c), so their markers nest.** Their ridge-optimal
+  sigma is identical at every alpha (1.2, then 1.6 at all four higher values), so their
+  curves superimpose and the panel would appear to draw two substrates rather than four.
+  The marker shrinks down the legend order so coincident points read as concentric rings.
+  **Nothing is offset**: an offset would draw a disagreement the data does not contain.
+  Weight-permuted's and Erdős–Rényi's dotted dip rules coincide at 2.00 for the same
+  reason.
+- **Two of the four optima land on their own dip and two land one grid step below it.**
+  The connectome's ends at 3.6 against a dip at 3.5789 and degree-matching's at 1.6
+  against 1.5789, but weight-permuted's and Erdős–Rényi's dips are at 2.00 while their
+  optima end at 1.6. The caption says "migrates **toward**" for that reason and does not
+  say "onto".
+- **`d_eff` rides in the legend label rather than beside a bar.** It is a property of the
+  whole spectrum and not of any one bin, and annotating it against the top bar would read
+  as an identity: the connectome's 398.5 directions more than a decade clear are close to
+  its `d_eff` of 413 but are not it. **The caption calls this "annotated"** and a reader
+  may look for it on the panel; see §5 item 18.
+- **The builder asserts against `TIER0` §3.6 rather than trusting the render**: the four
+  published floor sensitivities to 0.01, the connectome's interior argmin at 3.5789, every
+  null's at 1.5789 or 2.0000, and the migration's direction. Content assertions are gated
+  off under `--smoke`; the bin-partition arithmetic is not, so a placeholder still
+  exercises it. All were injection-tested, 13 of 13 firing.
+- **Caption (final wording):**
+
+  > **Figure F18: Where the Gram spectrum sits relative to the readout floor sets usable dimensionality.**
+  > (a) Design-Gram eigenvalues by position relative to the ridge floor, supercritical (sigma >= 3.05), 
+  > memory-capacity task, non-negative weights, median over the 50 cells per substrate. The connectome 
+  > holds 89.0% of its directions more than a decade clear of the floor against Erdős–Rényi's 11.4%; 
+  > effective rank (in the legend) counts the same fact. Exact zeros are shown separately and excluded 
+  > from the fraction-below-floor statistic, without which the published fractions reproduce for no substrate. 
+  > Bins partition each individual cell exactly; the four per-bin medians are not constrained to sum to 100. 
+  > (b) Sensitivity of effective rank to the floor, -d(d_eff)/d(log alpha), against spectral radius, median 
+  > over ten seeds, whole curve drawn. Each term peaks where a direction sits at the floor and vanishes on 
+  > either side, so the curve is two-humped and falls to zero at sigma = 0 where the reservoir is dead: 
+  > the minima that matter are the interior dips, at 3.58 for the connectome and 1.58 to 2.00 for every null. 
+  > A low value therefore never interprets itself, and (a) is what tells the two cases apart: relative to 
+  > surviving dimensionality Erdős–Rényi is the most floor-sensitive substrate here, losing 29.1% of its 
+  > effective rank per decade of alpha against the connectome's 5.6%. (c) The measured ridge-optimal radius 
+  > migrates toward each substrate's own interior dip as alpha rises; the three nulls coincide exactly at every 
+  > alpha, so their markers nest rather than being offset. Panels (a, b) use the probe radius grid and (c) 
+  > the Task B grid, so 3.58 and 3.6 are two grids' nearest points to one place and not the same number. 
+  > The correspondence is consistent-with; it is not fitted.
+
 ---
 
 ## 4. Section outline
@@ -486,68 +590,135 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
 Structure only, at the level of section headings and the argument each carries. Prose is
 written by hand, not generated (see the roadmap §4b note on drafting).
 
+> **Restructured 24 August 2026.** Seven sections rather than six: §4 is new, and the
+> order now follows `report/CROSS_ACT_SPINE.md`, which is canonical for cross-act
+> structure. See audit item 17 for what changed and why.
+
 **Chapter 5 — Act II proper.** The act sits between the two halves of the thesis: Act I
 established what the spectrum *is*, Act III asks what it *buys*. Act II's job is the
 bridge — to take the object Act I handed over, the Perron mode standing clear of a bulk,
 and show what each half of that spectrum does to the activity the readout sees. It ends
 by replacing the measure Act III will use.
 
-1. **What Act I handed over, and the question it leaves.** One paragraph. `sr_crit` as
-   the criticality scale each substrate carries with it; the Perron mode as the object to
-   be decomposed. The question: a reservoir's readout sees a `T x N` state matrix, so
-   which part of the spectrum ends up where in that matrix? No results.
+1. **What Act I handed over, and the question it leaves.** One paragraph, no results.
+   `sr_crit` as the criticality scale each substrate carries with it; the Perron mode as
+   the object to be decomposed. The question: a reservoir's readout sees a `T x N` state
+   matrix, so which part of the spectrum ends up where in that matrix?
 2. **The probes, and what each can and cannot support.** Methods. The three captures
-   (basis alignment, saturation diagnostics, covariance/Gram spectra), the operating
-   points, and — stated up front, not in a limitations section — that Probe 2 covers
-   **two** substrates at **four** spectral radii and therefore cannot speak to the ladder.
+   (basis alignment, saturation diagnostics, covariance/Gram spectra) and the operating
+   points, with **Probe 2's scope stated up front rather than in a limitations section**:
+   two substrates at four spectral radii, so nothing in §6 may be read as a ladder result.
+   The `mean_state` sign convention, stated once here: it is signed with an arbitrary
+   sign set by the input realisation, so the absolute value is taken **before** any
+   aggregation. **`d_eff` is defined here and justified in §5**: the definition is a
+   methods fact and the reason to prefer it is a result, and running them together is what
+   makes the measure look assumed.
 3. **The Perron mode carries the mean.** *Carries A2.1, A2.2.* Figure F4.
-   1. Time-centring as the operation that separates the two, and what is left after it.
-   2. The dominant modes against chance (F4a): below it to `k` = 5, at it by `k` = 20.
-      The harmonics curve as the control that makes the shortfall mean something.
-   3. The common-mode amplitude (F4b), and the inversion that is the real finding: the
-      largest Perron root gives the *least* dominated substrate. Forward-reference to
-      Act III, where this becomes the memory mechanism — the number is the same, the
-      axis is not.
-   4. The aggregation warning, stated once in methods: `mean_state` is signed.
-4. **Sign composition selects the basis.** *Carries A2.3.* Figure F5. Deliberately short.
-   1. The swap, in one paragraph and one figure.
-   2. What it is not: neither basis captures much where weights are non-negative, and no
-      claim is made about the ladder.
-   3. Krauss 2019, and why this is here anyway — the basis has to be fixed before §5 can
-      ask how many directions the readout uses.
-   4. The agreement with Probe 3 that neither probe was fitted to: low `d_eff` goes with
-      high capture. One paragraph, and it is the strongest thing in this section.
-5. **How many directions can the readout use?** *Carries A2.4, A2.5 — contribution 6.*
-   Figure F6. The chapter's argumentative peak.
-   1. The two measures, defined as what they are: weighted counts over the same matrix.
-      PR's identity `Σpᵢ/Σpⱼ² = PR` written out, because it is what licenses F6a.
-   2. Why the difference is not academic (F6a): the ridge floor sits ten orders of
-      magnitude below the leading variance, so hundreds of directions clear it while
-      carrying almost none of the variance.
-   3. The test (F6b, c): ordering against **measured** MC, at both aggregation units,
-      with the rung-index control named and set aside.
-   4. The range, which is the mechanism: 5.5-fold against 16%.
-   5. Scope, stated in the text and not deferred: one task, one substrate family, one
-      readout. Dambre 2012 as the parent bound; Clark 2025 as a terminology collision to
-      be distinguished rather than a result to be claimed against.
-6. **What Act II hands to Act III.** One paragraph, and it hands over **three** things,
-   the third being a boundary rather than a result.
+   1. Time-centring as the operation that separates the two halves, and what is left
+      after it.
+   2. The dominant modes against chance (F4a): **0.0001** of the time-centred variance
+      against the random-orthonormal baseline of **0.0023**, below it in 10 of 10 seeds
+      at every `k` <= 5 and only at chance by `k` ~ 20. The harmonics curve as the
+      control that makes the shortfall mean something.
+   3. The common-mode amplitude (F4b) and the inversion that is the real finding:
+      `|mean_state|` **0.759** against the nulls' **0.949 to 0.989**, so the substrate
+      with much the largest Perron root is the least dominated by it.
+   4. **Entirely at `f` = 0.** No sign manipulation appears in this section, or anywhere
+      in this chapter; `f` enters once, in chapter 6 §6.3, as an intervention.
+4. **The Gram spectrum against the ridge floor.** *NEW.* The chain's **step 3**, the
+   measured link from weak common-mode domination to usable dimensionality. Figure F18.
+   1. **The position table as the headline**, before any rate is quoted: supercritically
+      the connectome holds **89.0%** of its directions more than a decade clear of the
+      floor against Erdős–Rényi's **11.4%**, and **73.2%** of Erdős–Rényi's spectrum is
+      already at or below the floor (20.4% of its directions exactly zero and a further
+      52.8% more than a decade under). That is what `d_eff` 412.9 against 74.8 counts.
+      **The aggregation, stated with the numbers**: these are per-bin medians over the 50
+      supercritical cells, so the four bins partition each individual cell exactly but the
+      four medians are not constrained to sum to 100 (the connectome's come to 102.1%).
+   2. **The zero-strip convention**, stated where the numbers are: the four statistics are
+      computed on the design-Gram spectrum with exact zeros removed, and without that step
+      the fraction below α reproduces for no variant (`TIER0` §3.6, amendment (a)).
+   3. **Floor sensitivity as a RATE, with the both-ends warning stated before the
+      numbers.** `−d(d_eff)/d(log α)` is `d_eff` units lost per e-fold of α. Every term
+      vanishes when a direction is far from the floor **in either direction**, so a low
+      value means either "clear of the floor" or "already below it" and the two must be
+      told apart by the position table above. **Erdős–Rényi's low 10.26 is the second
+      case**: per unit of surviving dimensionality it is the *most* floor-sensitive
+      substrate on the ladder, 29.1% per decade against the connectome's 5.6%.
+   4. **The radius-resolved interior minima.** The curve is two-humped and goes to zero at
+      σ = 0, so the minima that matter are **interior**: the connectome's at σ ~ 3.58 and
+      every null's at σ ~ 1.58 to 2.00, a separation that holds seed by seed rather than
+      only on the median. The word "interior" is not droppable; see `TIER0` §3.6,
+      amendment (b).
+   5. **The migration, as the loose end closed.** The measured ridge optimum moves
+      **2.4 to 3.6** for the connectome as α rises five orders while every null moves once,
+      **1.2 to 1.6**, each toward its own interior dip. Two caveats travel with it: the
+      two halves sit on **two different σ grids**, so 3.58 and 3.6 are two grids' nearest
+      points to the same place rather than the same number, and the correspondence is
+      **consistent-with, not fitted**.
+   6. **The anisotropy retraction**, stated in the direction the data supports. The
+      hypothesis that the connectome's moving optimum comes from a more anisotropic
+      covariance is rejected: it has the *shallowest* decay, and the account that survives
+      is about **where along σ its Gram spectrum sits relative to the floor**, refitted at
+      the correct end of the spectrum.
+5. **Which counting scheme sees it.** *Carries A2.4, A2.5 — contribution 6.* Figure F6.
+   1. **The range first, because the range is the mechanism**: across the same seven
+      substrates `d_eff` moves **5.5-fold** (75 to 413 of N = 448) while PR moves **16%**
+      (1.19 to 1.38).
+   2. The two measures defined as what they are, weighted counts over one and the same
+      2500 x 448 matrix, with PR's identity `Σpᵢ/Σpⱼ² = PR` written out because it is what
+      licenses F6a's area-as-count reading.
+   3. **PR's failure as a consequence of §4, not a separate finding.** The ridge floor
+      sits ten orders of magnitude below the leading variance, so hundreds of directions
+      clear it while carrying almost none of the variance; a variance-weighted count
+      cannot see them **because of where the spectrum sits**, which §4 has just measured.
+   4. The test against **measured MC**, at **one aggregation unit per sentence**: +1.000
+      against +0.107 over seven per-variant medians, or +0.998 against +0.308 over 350
+      cells, never one number from each. The rung-index control named and set aside.
+   5. **Observer-relativity owned rather than caveated.** Neither measure is more correct;
+      they answer different questions, and the one that matters is the one the ridge
+      readout can act on. Say that as the claim rather than appending it as a limitation.
+   6. Scope, in the text: one task, one substrate family, one readout. **Dambre 2012** as
+      the parent bound; **Clark 2025** as a terminology collision to be distinguished
+      rather than a result to be claimed against.
+6. **Sign selects the basis.** *Carries A2.3.* Figure F5. Deliberately short, and framed
+   as a statement about the decomposition rather than about sign.
+   1. With non-negative weights the `W`-eigenmode alignment has already been **absorbed
+      into the mean** (§3), so what is left for the fluctuations to be organised by is
+      graph structure; balancing the signs hands it back. That is the decomposition
+      talking, not a separate phenomenon.
+   2. **State the swap, not the capture.** On the all-positive substrate neither basis
+      captures much at `k` = 10 (0.04 to 0.17), which is exactly what §5 predicts, so
+      "the manifold lives in graph harmonics" overstates it. What is claimed is the
+      ordering.
+   3. **The agreement with §5 that neither probe was fitted to.** Where `d_eff` is high
+      the capture is low and where `d_eff` is low the capture is high: on the all-positive
+      substrate supercritical `d_eff` is ~413 of 448 and the `k` = 10 capture is 0.04 to
+      0.17, while gaussian NARMA-10 reaches **0.886**. Two probes, no shared fit, and they
+      agree. One paragraph, and it is the strongest thing in this section.
+   4. **Confirmatory of Krauss (2019)**, and said so in the text. It is here because the
+      basis has to be fixed before §5 can ask how many directions the readout uses.
+   5. One clause forward-referencing **chapter 6 §6.3**, where the signed condition stops
+      being a comparison and becomes an intervention.
+7. **What Act II hands to Act III.** One paragraph, and it hands over **four** things, the
+   fourth being a boundary rather than a result.
    1. The **common-mode account** of what supercriticality does to a non-negative
       substrate, which Act III's memory arm turns into a mechanism.
-   2. **`d_eff`** as the dimensionality measure every later figure uses, now earned
-      rather than assumed.
-   3. **The temporal axis, and the fact that it is flat here.** This has to be said
-      explicitly, in this chapter, and it is the one part of the hand-over that is easy
-      to leave out. The manifold was defined on two axes and this act measured both;
-      only the spatial one varies at `f` = 0, where curvature sits at 0.26 rad for every
-      substrate across the whole σ sweep. Saying so converts a silent omission into a
-      stated scope boundary, and it pre-loads Act III's prediction arm — which otherwise
-      has to introduce curvature cold in chapter 6 *and* deliver two caveats at once
-      ("it is a switch, not a dose" and "and at `f` = 0 it does not apply"). A reader
-      who finished this chapter believing the manifold had been fully characterised
-      would read that as a reversal instead of as a boundary they were warned about.
-      **Do not let this become an appendix sentence**: it is the seam between the two
-      halves of the thesis and it belongs at the end of chapter 5.
+   2. The **floor account** that makes it spectral, and therefore **radius-dependent**:
+      not a fixed property of a substrate but a property of a substrate at an operating
+      point, which is what lets Act III read the same axis twice.
+   3. **`d_eff`** as the dimensionality measure every later figure uses, now earned rather
+      than assumed.
+   4. **The temporal axis, and the fact that it is flat here.** The manifold was defined
+      on two axes and this act measured both; only the spatial one varies at `f` = 0,
+      where curvature sits at 0.26 rad for every substrate across the whole σ sweep.
+      Saying so converts a silent omission into a stated scope boundary and pre-loads the
+      prediction arm, which otherwise has to introduce curvature cold in chapter 6 *and*
+      deliver two caveats at once ("it is a switch, not a dose" and "at `f` = 0 it does
+      not apply"). A reader who finished this chapter believing the manifold had been
+      fully characterised would read that as a reversal instead of as a boundary they
+      were warned about. **Do not let this become an appendix sentence**: it is the seam
+      between the two halves of the thesis and it belongs at the end of chapter 5.
 
 ---
 
@@ -867,3 +1038,102 @@ and anything a later session needs to know.
 
     Roadmap §4d carries both this and E2; E2's full specification is in
     `report/act3b_prediction.md` §6, addressed to session 4.
+
+17. **§4's section outline was restructured on 24 August 2026, and §4 of the chapter is
+    new.** The outline now runs to **seven** sections rather than six, and the addition is
+    **"The Gram spectrum against the ridge floor"**, placed between the common-mode
+    section and the counting-scheme section.
+
+    **What it is.** `report/CROSS_ACT_SPINE.md` sets the thesis out as a six-step
+    chain, and **step 3 is this**: the measured link from weak common-mode domination
+    to usable dimensionality. Act II previously went straight from `|mean_state|` to `d_eff` with
+    nothing measured in between, so the chapter asserted its own central link. That gap
+    was not visible while the outline was read on its own; it became visible only once the
+    chain was written down.
+
+    **Where it comes from, and what it is not.** It is sourced from **`TIER0` §3.6's
+    refit** at the correct end of the spectrum, **not from a new run**. Nothing was
+    captured, recomputed into a new artifact, or unfrozen: the numbers were already in
+    §3.6, filed under a **rejected** anisotropy hypothesis, which is why nobody had read
+    them as a positive result. The rejection stands and is retracted explicitly inside the
+    new §4.6; what the section uses is the refit that replaced it.
+
+    **The two wording constraints that travel with it**, both from
+    `report/checks/floor_sensitivity_check.md` and both now recorded in `TIER0` §3.6 as
+    dated amendments: the per-substrate minima are **interior** minima of a two-humped
+    curve and the word is not droppable, and **Erdős–Rényi's low absolute floor
+    sensitivity is degenerate**, since per unit of surviving dimensionality it is the most
+    floor-sensitive substrate on the ladder. Both are the same trap in two places: the
+    sensitivity vanishes at *both* ends of the spectrum, so a low number never interprets
+    itself.
+
+    **The other six sections kept their claims and their figures.** §5 gained the range as
+    its opening rather than its conclusion and now names PR's failure as a consequence of
+    §4; §6 was shortened and reframed as a statement about the decomposition, **keeping
+    the agreement with Probe 3 that the old outline called the strongest thing in that
+    section**; §7's hand-over went from three items to four, the new one being the floor
+    account.
+    §§1 to 3 are unchanged in substance. The claims register, the reproduction gate and
+    the figure blocks were **not** touched by this session.
+
+18. **F18's caption is transcribed verbatim, and two things about it are open. FOR THE
+    AUTHOR'S DECISION.** The caption was supplied by the author on 24 August 2026 and is
+    reproduced word for word in §3.
+
+    **(i) RESOLVED 24 August 2026: the caption now reads "in the legend".** As supplied it
+    read *"effective rank (annotated) counts the same fact"*, and `act2_manifold.py:587`
+    carries `d_eff` in the legend label (`Connectome  ($d_{\rm eff}$ = 413)`) rather than
+    as an annotation on panel (a). The two disagreed about **where the reader should
+    look**, not about the value. **The caption moved rather than the figure**, on the
+    author's instruction, because the legend placement is deliberate: `d_eff` is a
+    property of the whole spectrum and not of any one bin, and a number set against the
+    top bar would read as an identity when it is not (398.5 directions more than a decade
+    clear against a `d_eff` of 413). One word changed; no code, no re-render, and the rest
+    of the caption is still the supplied text verbatim.
+
+    **(ii) The house bolding is not applied.** Every other caption in this act bolds its
+    lead sentence and its panel letters. Adding that markup would not change a word, but
+    "transcribe, do not rewrite" was the instruction and the text is left exactly as
+    given. Applying the house pattern is a formatting pass whenever the author wants it.
+
+19. **RESOLVED 24 August 2026: "four orders of magnitude" was one too few, and four
+    documents said it.** The ridge alpha grid behind F18c and
+    `TIER0` §3.3 is **1e-8, 1e-6, 1e-5, 7e-5, 1e-3**. That is `log10(1e-3 / 1e-8)` = **5**
+    orders of magnitude, spanned in **4** steps, so "four orders" appears to be the step
+    count written as an order count.
+
+    | document | what it says | |
+    |---|---|---|
+    | `TIER0` §3.6 | "as α rises four orders" | rank 1 |
+    | `report/act2_manifold.md` A2.7 and §4.5 | "four orders" | this file |
+    | `report/checks/floor_sensitivity_check.md` §3.3 | "across four orders of magnitude" | |
+    | `report/act3a_memory.md`, F10's caption | "The five α span **five** orders" | same grid |
+
+    The repository stated both counts for the same five alpha, and the memory arm had it
+    right. **All three wrong instances now read "five"**, corrected together so none is
+    left disagreeing with `TIER0`: §3.6 carries the change as **amendment (d)** with the
+    arithmetic and a note that no result moves, and A2.7 and §4.5 moved with it.
+    **Nothing is computed from the count**, so the optima 2.4 to 3.6 and 1.2 to 1.6 are
+    untouched. F18's own caption carries no count and was not involved; the F18 block
+    above says "the five stored alpha" for the same reason.
+
+20. **RESOLVED 24 August 2026: the substrate's name had three spellings and now has one.**
+    `Erdős–Rényi` (en dash), `Erdős-Rényi` (hyphen) and `Erdos-Renyi` (ASCII) were all in
+    use, the last two introduced by sessions applying `CONVENTIONS`' "no em or en dashes"
+    rule to a **proper noun**. The rule governs punctuation; the dash in `Erdős–Rényi`
+    joins two surnames and is that name's own typography, which is also why
+    `style.VARIANT_TITLE` renders it and therefore why it appears in every figure legend.
+
+    **Normalised to `Erdős–Rényi` thesis-wide**, 37 occurrences across this file (7),
+    `report/CROSS_ACT_SPINE.md` (2), `report/FIGURE_LIST.md` (4) and
+    `report/checks/floor_sensitivity_check.md` (24). `TIER0` and the other three act files
+    were already on it, `style.py` was not touched and **no figure was re-rendered**. The
+    alternative direction, normalising to ASCII, would have cost 52 edits including a
+    rank-1 document and the figure contract, and would have put every caption out of step
+    with its own legend. `CONVENTIONS`' house-style line now carries the distinction so
+    the next session does not re-derive it.
+
+    **Two of the seven sit inside F18's author-supplied caption.** They were hyphens as
+    supplied and are en dashes now. That is the only respect in which the caption departs
+    from the text handed over; the wording is otherwise verbatim, and reverting those two
+    characters is a one-command change.
