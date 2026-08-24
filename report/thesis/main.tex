@@ -1,0 +1,129 @@
+\documentclass{layout/tudelft-report}
+
+% Bibliography Sources
+\addbibresource{bibliography/references.bib}
+% \addbibresource{bibliography/newbib.bib}
+
+% additional packages
+\usepackage{amsmath}
+\usepackage{dirtytalk}
+\usepackage{graphicx}
+% \usepackage{subfigure}
+\usepackage{subcaption}
+\usepackage{subfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{rotating}
+\usepackage{moresize}
+\usepackage{lscape} 
+\usepackage[table]{xcolor}
+\usepackage{color, soul}
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+\definecolor{lightgray}{gray}{0.9}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% Define Notation commands
+\input{notation}
+
+% Nomenclature
+\makenomenclature
+\begin{document}
+
+    \frontmatter
+
+    % Thesis Parameters
+    \title{From Connectome \\to Computation}
+    % Connectome-Constrained Reservoirs
+    % \subtitle{How weight placement on neural topology shapes activity-manifold geometry and sets computational capacity}
+    % \subtitle{How neural topology shapes activity-manifold geometry and influences computation in connectome-constrained networks}
+    \subtitle{Tracing Connectivity to Computation in Connectome-Constrained Recurrent Networks}
+    \author{Matthys du Toit }
+    \subject{Thesis Report}
+
+    % Cover Page
+    \makecover
+    \afterpage{\blankpage}
+    
+    % Title Page
+    \input{frontmatter/title}
+    
+    % Copyright Page
+    \input{frontmatter/copyrightpage}
+
+    \input{frontmatter/declaration}
+    \input{frontmatter/copyrightpage}
+
+    % Make a exec summary page
+    \input{frontmatter/summary}
+    \input{frontmatter/copyrightpage}
+    
+    % TOC, Nomenclature, List of stuff
+    \tableofcontents    
+    \listoffigures
+    \listoftables
+
+    %% Report
+    %TC:ignore
+    %TC:endignore
+    \mainmatter
+    \input{nomenclature}
+    
+    % \input{mainmatter/chapter-0-figures}
+    \input{mainmatter/chapter-1-introduction}              
+    \input{mainmatter/chapter-2-related-work}   
+    \input{mainmatter/chapter-4-act-I}
+    \input{mainmatter/chapter-5-act-II}
+    \input{mainmatter/chapter-6-act-III} 
+    \input{mainmatter/chapter-7-act-IV}
+    \input{mainmatter/chapter-3-methods}
+    \input{mainmatter/chapter-8-discussion}
+    \input{mainmatter/chapter-9-conclusion}
+    
+    % Bibliography with numeric style
+    \printbibliography[title=References]
+    \addcontentsline{toc}{chapter}{References}
+
+    % %% Add bibliography
+    % \printbibliography[heading=bibintoc,title=References]
+    
+    % __ Appendix ___
+    \appendix
+    \input{appendix/appendix-data}
+    \input{appendix/appendix-code}
+
+    
+    
+\end{document}

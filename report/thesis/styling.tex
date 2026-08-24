@@ -1,0 +1,131 @@
+%% TU Delft House Colors
+\definecolor{tudelft-blue}{cmyk}{0.75,0.16,0.05,0}
+\definecolor{tudelft-white}{cmyk}{0,0,0,0}
+\definecolor{tudelft-black}{cmyk}{0,0,0,1}
+
+% TU Delft Secondary colors
+\definecolor{tudelft-darkblue}{cmyk}{1.0,0.8,0.08,0.7}
+\definecolor{tudelft-lightcyan}{cmyk}{0.72,0, 0.24,0.0}
+\definecolor{tudelft-lightblue}{cmyk}{0.98,0.4,0,0}
+\definecolor{tudelft-purple}{cmyk}{0.65,1.0,0,0.12}
+\definecolor{tudelft-pink}{cmyk}{0,0.7,0,0}
+\definecolor{tudelft-red}{cmyk}{0.05,1,0.48,0.3}
+\definecolor{tudelft-darkorange}{cmyk}{0,0.85,0.75,0}
+\definecolor{tudelft-orange}{cmyk}{0,0.7,0.75,0}
+\definecolor{tudelft-yellow}{cmyk}{0,0.31,0.98,0}
+\definecolor{tudelft-lightgreen}{cmyk}{0.63,0,0.84,0}
+\definecolor{tudelft-darkgreen}{cmyk}{1,0,0.68,0.04}
+
+% Choose primary color
+\colorlet{primary}{tudelft-darkblue}
+
+% Choose secondary color
+\colorlet{secondary}{tudelft-blue}
+
+% Choose accent color
+\colorlet{accent}{tudelft-red}
+
+% _____ PRIMITIVE STYLES _____
+
+\tikzstyle{block} = [
+    draw,
+    minimum width=2.5cm,
+    minimum height=1.5cm,
+    rectangle, 
+    rounded corners=4, 
+    line width=1.2,
+    text=black,
+    align=center,
+]
+
+\tikzstyle{line} = [
+    draw, 
+    -latex'
+]
+
+\tikzstyle{line-primary} = [
+    draw=primary, 
+    -latex'
+]
+
+\tikzstyle{line-secondary} = [
+    draw=secondary, 
+    -latex'
+]
+
+\tikzstyle{line-accent} = [
+    draw=accent, 
+    -latex'
+]
+
+\tikzstyle{thickline} = [
+    line,
+    ultra thick
+]
+
+% ____ Colored primitives ____
+
+\tikzstyle{block-primary} = [
+    block,
+    draw=primary
+]
+
+\tikzstyle{block-secondary} = [
+    block,
+    draw=secondary
+]
+
+\tikzstyle{block-accent} = [
+    block,
+    draw=accent
+]
+
+\tikzstyle{line-primary} = [
+     line,
+     draw=primary
+]
+
+
+\tikzstyle{line-secondary} = [
+     line,
+     draw=secondary
+]
+
+
+\tikzstyle{line-accent} = [
+     line,
+     draw=accent
+]
+
+% ____ Shaded primitives _____
+
+\tikzstyle{shaded-pattern} = [
+    pattern = north east lines
+]
+
+\tikzstyle{shaded-primary} = [
+    block-primary,
+    shaded-pattern,
+    pattern color=primary!30,
+]
+
+\tikzstyle{shaded-secondary} = [
+    block-secondary,
+    shaded-pattern,
+    pattern color=secondary!40,
+]
+
+\tikzstyle{shaded-accent} = [
+    block-accent,
+    shaded-pattern,
+    pattern color=accent!40,
+]
+
+% Branch and junction points
+
+\tikzstyle{branch} = [
+    fill,
+    shape=circle,
+    minimum size=3pt,
+    inner sep=0pt,
+]

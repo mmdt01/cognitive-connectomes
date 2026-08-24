@@ -1,0 +1,73 @@
+% ____ Cover Page _____
+
+% Color parameters
+\colorlet{title}{white}
+\definecolor{backgroundColor}{HTML}{23395d}
+% \definecolor{backgroundColor}{HTML}{1B262C}
+\definecolor{bannerColor}{HTML}{1B262C}
+
+% Banner parameters
+\def\bannerOpacity{0.9}
+\def\bannerWidth{0.8}
+\def\bannerPadding{60pt}  
+\def\bannerTopMargin{0cm}  
+
+% Banner style
+\tikzstyle {banner} = [
+    below = \bannerTopMargin,
+    fill=bannerColor,
+    minimum width={\paperwidth},
+    inner ysep = \bannerPadding,
+    opacity = \bannerOpacity,
+    text opacity = 1.0
+]
+
+% Make a coverpage command
+\newcommand*{\makecover}{
+
+    % Clear page styling
+    \thispagestyle{empty}
+
+    % Make a tikz picture
+    \begin{tikzpicture}[
+        overlay,
+        background rectangle/.style={fill=backgroundColor}, 
+        show background rectangle,
+        remember picture
+    ]
+
+        % Add graphics to the background
+        
+        % \node[anchor=south, yshift=-0.5in] at (current page.south) {
+        %     \includesvg[width=1.4\paperwidth]{<some_picture>.svg}
+        % };
+        
+        % % More graphics
+        % \node[below=-3cm] at (current page.center) {
+        %     \includegraphics[width=\textwidth]{figures/placeholder_white.png}
+        % };
+
+        % Add the logo in the bottom left
+        \node[above right=15mm] at (current page.south west) {%
+            \includegraphics[width=0.3\linewidth]{layout/Imperial/Imperial_College_London_Logo_White.png}};
+
+        % Add the banner with the title, subtitle, subject and author(s)
+        \node[banner] at (current page.north) {%
+        
+            \begin{minipage}{0.8\paperwidth}
+                % [0.5ex]
+                %% Format and add the title
+                \color{title}\raggedright\largetitlestyle\fontsize{40}{40}\selectfont%
+                    \@title \\[1ex]
+                %% Format and add (optional) subtitle and subject
+                \color{white}\titlestyle\fontsize{22}{22}\selectfont%
+                    \ifdefvoid{\@subtitle}{}{\@subtitle \\[1.6ex]}%
+                    
+                %% Format and add author or table of authors
+                \largetitlestyle\fontsize{20}{20}\selectfont%
+                    \ifdefvoid{\@covertable}{\@author}{\@covertable}
+            \end{minipage}};
+
+    \end{tikzpicture}
+    \newpage
+}
