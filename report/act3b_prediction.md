@@ -465,63 +465,36 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
 
 ---
 
-## 4. Section outline
+## 4. Chapter 6's section ordering lives in the spine, not here
 
-Structure only, at the level of section headings and the argument each carries. Prose is
-written by hand, not generated (see the roadmap §4b note on drafting).
+> **Replaced 24 August 2026.** The chapter 6 outline that stood here has been removed
+> rather than edited, and **`report/CROSS_ACT_SPINE.md` is now canonical for
+> chapter 6's section ordering**. The restructure interleaves the prediction and memory
+> arms, so no single act file can hold the ordering and two partial copies would drift
+> apart; keeping half of it here is how they would.
 
-1. **What the closed loop asks that the driven tasks do not.** One paragraph plus methods.
-   In generation the reservoir's own prediction is fed back, so errors compound and a
-   mildly unstable substrate diverges; that fragility is what VPT and `climate_error`
-   measure. State the two metrics, the horizon (600 steps = 16.3 Lyapunov times, never
-   reached) and the floor (41% of cells at exactly 0), and state up front that curvature
-   and `σ_eff` are measured on the **teacher-forced** states while VPT and climate come
-   from the **free run**.
+**What changed, in three lines.** Memory and prediction are each reported along the
+**spectral radius** axis at `f` = 0 first. **`f` is then introduced once**, in §6.3, as an
+intervention that removes the common mode and delivers both consequences from one
+manipulation. **The unifying claim moved to the end of the chapter**, where it is the
+conclusion of a causal test rather than a frame the reader must accept in advance.
 
-2. **Generation is a switch.** *Carries A3P.1, A3P.2.* Figure F12, with S2 as the
-   chapter-5 run-up a reader will already have met. The chapter's opening result and the
-   one that licenses everything after it: curvature is not a graded quantity on this
-   substrate, so the question is never "how curved" but "which side". Close with the
-   wrong-signed within-cluster residual, because that is what forbids the graded reading
-   rather than merely failing to support it.
+**Why, since this is the reasoning the discussion chapter and the viva will need.**
+**Spectral radius is the operating-point axis and the primary axis of the thesis**: it is
+what neuromodulation, arousal and plasticity move in a real brain, and it is the axis
+along which every headline claim is made. **`f` is a structural axis a brain does not
+traverse.** Presenting the two as peers made the sign axis appear without motivation and
+cost the chapter its neuroscience plausibility, because a reader met a manipulation before
+being told why anything would do it. And the framing has to be stated the right way round:
+**`f` = 0 is the substrate the instrument produces**, since tractography cannot represent
+sign, **not the biological ground truth against which `f` > 0 is a departure**. Real
+cortical circuits have inhibition; the measurement does not. So `f` > 0 asks what the
+missing half of the biology would do, and `f` = 0 is the artefact of the method.
 
-3. **Read it as prediction and the advantage is there.** *Carries A3P.3.* Figure F13a, b.
-   The order parameter was wrong, not the phenomenon: against the 0.032 rad curvature
-   residual the matched-axis panel was contouring, VPT gives +1.0 to +2.2 Lyapunov times.
-   Name the σ every time. Clearing the weight-permuted control is what makes it placement
-   rather than topology.
-
-4. **And it is there at the biologically real cut.** *Carries A3P.4.* Figure F13c. Short
-   and load-bearing: macro dMRI weights are non-negative, so `f` = 0 is the substrate that
-   exists. The advantage is a collapse-resistance asymmetry far supercritically, not a
-   near-critical capacity gain — attach σ ≈ 7.6–8.0, and say in the same breath that near
-   criticality at `f` = 0 there is no advantage at all.
-
-5. **What locates the transition, and what does not.** *Carries A3P.5.* Figure F14. Give
-   the pre-registration first, in the form it had before fitting, then the outcome: the
-   offset was predicted and found, the value was predicted and falsified. The section
-   exists as much to retire a criterion as to establish a locator.
-
-6. **The free-running attractor.** *Carries A3P.7, A3P.8.* Figure F17. New evidence, so
-   it gets its own section rather than a footnote to §3. Pre-registration, then both
-   clauses, then the refuted one at length: the failure is a collapse to a fixed point,
-   which is the branch §3.9's map argument names, observed in the closed loop. This is
-   also where the reproducibility limit on `climate_error` is stated plainly.
-
-7. **One axis, read with opposite sign.** *Carries A3P.6.* Figure F16. The unifying
-   section, and the only place contribution 2 is argued. Memory's advantage is
-   supercritical and maximal at `f` = 0; generation's is near-critical and emerges from
-   `f` ≈ 0.20–0.25. They had to occupy opposite regions because they are the same
-   quantity read from both ends. Quote the crossing with its axis, draw the coverage, and
-   say that contribution 2 has **no out-of-sample test** in this thesis.
-
-8. **The bridge: MC → NARMA-10 → Lorenz.** *Carries no new claim.* One paragraph (§5
-   item 7), placed here because it is what makes the dissociation look like an axis rather
-   than two tasks.
-
-9. **What sets generation at `f` = 0 — a named open problem.** *Carries A3P.9.* Closing
-   section of the half. Three candidate explanations, all ruled out on the data, and no
-   fourth offered.
+**What is unaffected.** This file's **claims register** (§1), its **figure entries and
+flags** (§3), its **reproduction gate** (§2) and its **audit log** (§5) are untouched and
+remain canonical for this act's claims and figures. Only the chapter-level section
+ordering left this file.
 
 ---
 
@@ -752,6 +725,33 @@ written by hand, not generated (see the roadmap §4b note on drafting).
     out-of-sample test; F16 plus the joint reading of F7 and F13 is what it rests on, and
     closed-loop Mackey-Glass is deferred work rather than a gap MG's presence in the task
     list quietly fills.
+
+14. **The chapter 6 restructure of 24 August 2026, and why, recorded here because the
+    reasoning exists nowhere else in the repository.** §4's outline was replaced by a
+    pointer to `report/CROSS_ACT_SPINE.md`; the rationale is the part a later reader
+    actually needs, and it is what the discussion chapter and the viva will be asked for.
+
+    **What changed.** Memory and prediction are each reported along the **spectral radius**
+    axis at `f` = 0 first; **`f` enters once**, in §6.3, as the intervention that removes
+    the common mode and delivers both consequences from one manipulation; and the unifying
+    claim moved to the **end** of the chapter.
+
+    **Why.** Spectral radius is the operating point, the thing a brain actually moves, and
+    the axis every headline claim is made along. `f` is a structural axis a brain does not
+    traverse. Under the old ordering the two read as peers, so the sign axis arrived
+    unmotivated and the chapter lost its neuroscience plausibility: the reader met the
+    manipulation before any reason to make it. Reordering also makes the unifying claim a
+    **conclusion of a causal test** rather than a frame to be granted up front.
+
+    **The framing, stated the right way round.** `f` = 0 is what the **instrument**
+    produces, because tractography cannot represent sign; it is not the biological ground
+    truth. Real cortex is not sign-free. So `f` > 0 is the missing half of the biology
+    rather than a departure from it, and the old phrasing that made `f` = 0 "the
+    biological cut" is withdrawn (`report/CROSS_ACT_SPINE.md`, withdrawn-language table).
+
+    **Scope of this edit.** §4 only. The claims register, the reproduction gate, every
+    figure block and this log are unchanged, and remain canonical for the prediction arm's
+    claims and figures.
 
 ---
 

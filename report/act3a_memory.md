@@ -549,81 +549,36 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
 
 ---
 
-## 4. Section outline
+## 4. Chapter 6's section ordering lives in the spine, not here
 
-Structure only, at the level of section headings and the argument each carries. Prose is
-written by hand, not generated (see the roadmap §4b note on drafting).
+> **Replaced 24 August 2026.** The chapter 6 outline that stood here has been removed
+> rather than edited, and **`report/CROSS_ACT_SPINE.md` is now canonical for
+> chapter 6's section ordering**. The restructure interleaves the memory and prediction
+> arms, so no single act file can hold the ordering and two partial copies would drift
+> apart; keeping half of it here is how they would.
 
-**Chapter 6, first half — Act III's memory arm.** The chapter Act II hands to. Act I
-established that the substrates differ in exactly one spectral quantity; Act II
-established what each half of the spectrum does to the state matrix and handed over
-`d_eff` as the measure. This half asks what the gap buys on a task, and its answer is a
-correction to the obvious one: not more memory, but memory that survives further.
+**What changed, in three lines.** Memory and prediction are each reported along the
+**spectral radius** axis at `f` = 0 first. **`f` is then introduced once**, in §6.3, as an
+intervention that removes the common mode and delivers both consequences from one
+manipulation. **The unifying claim moved to the end of the chapter**, where it is the
+conclusion of a causal test rather than a frame the reader must accept in advance.
 
-1. **What is being asked, and the two ways of asking it.** One paragraph plus methods.
-   The memory-capacity task; the two matching axes and what each holds fixed, carried
-   forward from chapter 3 rather than re-derived. State up front that **neither axis is
-   neutral toward the Perron-mode hypothesis** and that every claim in the chapter is
-   reported on both. No results.
-2. **The crossing.** *Carries A3M.1, A3M.2.* Figure F7. The chapter's opening result and
-   the one the rest is scaffolding for.
-   1. The four curves on the matched axis: they rise together, they all reach the
-      ceiling, they separate on the way down.
-   2. **The peak is unresolvable at N = 448, stated before anything is claimed about
-      it.** Every variant within 3.5% of `d_eff = N`. This is a limitation converted
-      into a design constraint: it is *why* the chapter reads the decay region.
-   3. The retention: 47% against 28 / 22 / 11%. A ceiling can clip curves; it cannot
-      manufacture a crossing.
-   4. The same ordering on the nominal axis, where the Perron root is matched — so the
-      result is not bought by the axis that hands the connectome the larger gap.
-3. **Parity at the peak, said with an interval.** *Carries A3M.3.* Figure F10.
-   Deliberately placed immediately after §2, not in a limitations section.
-   1. The paired statistic and why it is paired (same `Win`, same input series).
-   2. 2 to 6%, reliable against two nulls of three. The wording this licenses and the
-      wording it forbids.
-   3. The α axis as a robustness check that the +0.999 correspondence earns.
-   4. **Aceituno, Yan & Liu reconciled here rather than in a related-work paragraph**,
-      because this is the panel that reproduces their ordering. Spread wins at the peak,
-      a large gap wins across the range — the two results answer different questions
-      about different parts of the σ axis.
-4. **Does it survive N?** *Carries A3M.4.* Figure F9. Short, and it has to be here
-   rather than in an appendix, because §2's claim is a claim about a finite-size regime.
-   1. The protocol: `T` scaled to hold `T_eff/N`, the ridge reparameterised, and the
-      N = 448 control that isolates the parameterisation from N.
-   2. The margin under both thresholds, and why both are reported.
-   3. **The ceiling is not escaped, as predicted in advance** — so §2's framing stands
-      rather than being rescued.
-   4. **The falsification test that came back inconclusive, and why it was a flawed
-      test.** Reported in the text, not buried: the predictor's own degree/ER ordering is
-      not established at N = 1000, so the test could not discriminate. This is the
-      chapter's one pre-registered test that did not resolve, and saying so is what
-      licenses the rest.
-5. **What the gap actually buys.** *Carries A3M.5, A3M.6.* Figure F11. The mechanism
-   section, and the chapter's argumentative peak.
-   1. Perron-Frobenius on a non-negative operator: the hub-loaded all-positive leading
-      eigenvector, synchronisation, saturation, and the crushed fluctuation subspace.
-      This is Act II's common-mode result, now used rather than established.
-   2. The inversion that is the finding: the largest Perron root gives the **least**
-      dominated substrate.
-   3. Balanced signs remove the common mode for everyone, so **nobody degrades with `f`**
-      — the advantage narrows because the nulls gain about four times what the connectome
-      gains from a much lower start. Name this as the same "the null moved" failure
-      twice more in this programme, because the chapter has just used the same discipline
-      on its own delta in §2.
-   4. `bulk95` as a **partial** controller: 26% absorbed at `f` = 0, ~0.5 residual by
-      `f` ≥ 0.2. State that the correlation version of this test is confounded and is not
-      reported.
-   5. **Hub-targeted inhibition, as a consequence and not a separate result.** One
-      paragraph: hub-first is the most efficient way to destroy the common mode, so it
-      closes the advantage fastest; nothing collapses, and the connectome's own memory
-      *rises* most under it. The `f*` ordering is real and is reported without the
-      mechanistic story that was falsified.
-6. **The one-line version, and what it costs to say.** Closing paragraph of the half.
-   The connectome does not make memory better; non-negativity makes it worse for
-   everyone, and the connectome's gap makes it least worse. Since a structural connectome
-   is non-negative by construction, resistance to Perron domination is the only property
-   available to select on — evolution cannot choose `f`. Forward-reference to the
-   prediction arm, where the *same* axis is read with the opposite sign.
+**Why, since this is the reasoning the discussion chapter and the viva will need.**
+**Spectral radius is the operating-point axis and the primary axis of the thesis**: it is
+what neuromodulation, arousal and plasticity move in a real brain, and it is the axis
+along which every headline claim is made. **`f` is a structural axis a brain does not
+traverse.** Presenting the two as peers made the sign axis appear without motivation and
+cost the chapter its neuroscience plausibility, because a reader met a manipulation before
+being told why anything would do it. And the framing has to be stated the right way round:
+**`f` = 0 is the substrate the instrument produces**, since tractography cannot represent
+sign, **not the biological ground truth against which `f` > 0 is a departure**. Real
+cortical circuits have inhibition; the measurement does not. So `f` > 0 asks what the
+missing half of the biology would do, and `f` = 0 is the artefact of the method.
+
+**What is unaffected.** This file's **claims register** (§1), its **figure entries and
+flags** (§3), its **reproduction gate** (§2) and its **audit log** (§5) are untouched and
+remain canonical for this act's claims and figures. Only the chapter-level section
+ordering left this file.
 
 ---
 
@@ -765,3 +720,30 @@ and anything a later session needs to know.
     `VARIANT_LABEL` at lines 77 and 96 and `variant_kwargs`' default at 67 and 134 — so
     F12, F13, F14 and F16 will name the substrates differently from every other figure in
     the thesis until session 4 makes the same change item 12 records here.
+
+13. **The chapter 6 restructure of 24 August 2026, and why, recorded here because the
+    reasoning exists nowhere else in the repository.** §4's outline was replaced by a
+    pointer to `report/CROSS_ACT_SPINE.md`; the rationale is the part a later reader
+    actually needs, and it is what the discussion chapter and the viva will be asked for.
+
+    **What changed.** Memory and prediction are each reported along the **spectral radius**
+    axis at `f` = 0 first; **`f` enters once**, in §6.3, as the intervention that removes
+    the common mode and delivers both consequences from one manipulation; and the unifying
+    claim moved to the **end** of the chapter.
+
+    **Why.** Spectral radius is the operating point, the thing a brain actually moves, and
+    the axis every headline claim is made along. `f` is a structural axis a brain does not
+    traverse. Under the old ordering the two read as peers, so the sign axis arrived
+    unmotivated and the chapter lost its neuroscience plausibility: the reader met the
+    manipulation before any reason to make it. Reordering also makes the unifying claim a
+    **conclusion of a causal test** rather than a frame to be granted up front.
+
+    **The framing, stated the right way round.** `f` = 0 is what the **instrument**
+    produces, because tractography cannot represent sign; it is not the biological ground
+    truth. Real cortex is not sign-free. So `f` > 0 is the missing half of the biology
+    rather than a departure from it, and the old phrasing that made `f` = 0 "the
+    biological cut" is withdrawn (`report/CROSS_ACT_SPINE.md`, withdrawn-language table).
+
+    **Scope of this edit.** §4 only. The claims register, the reproduction gate, every
+    figure block and this log are unchanged, and remain canonical for the memory arm's
+    claims and figures.

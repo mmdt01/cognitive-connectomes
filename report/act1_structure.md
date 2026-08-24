@@ -735,3 +735,26 @@ and anything a later session needs to know.
     `HumanSubstrateBuilder` reproduces the frozen parquet to **0.000e+00** on `bulk95`,
     `lambda_max_raw` and `perron_root`. Worth a line in `TIER0` §2.1 next time it is
     edited.
+
+16. **Outline compression, recorded 24 August 2026 so it is not rediscovered as an open
+    question during drafting.** **Chapter 4's third and fourth sections merge into one
+    when the chapter is written**: *"The bulk is everyone's; the gap is not"* and *"It is
+    placement"*. Between them they carry **one decomposition and one control**, the
+    bulk-against-gap split and the weight-permuted contrast that says the split is
+    placement, and a section break inside a single argument buys nothing.
+
+    **The two numberings differ by one, so both are given.** §4's outline runs 1 to 7
+    across two chapters: item 1 is the chapter 3 methods section Act I owns, and items 2
+    to 7 are chapter 4. Counted **within chapter 4** the merging pair is its **3rd and
+    4th** sections; counted **in the outline** they are items **4 and 5**. Both
+    descriptions name the same pair, and a reader who takes "sections 3 and 4" as outline
+    items would merge the wrong two, since outline item 3 is *"The spectrum is real, and
+    it has one outlier"*, which is decomposition without a control and stays where it is.
+
+    Nothing moves with the merge. **A1.2, A1.3 and A1.5** are carried by the merged
+    section exactly as the outline carries them now, F1 and F2 are unchanged, and the
+    limit A1.5 is always quoted with, placement rather than *which feature* of placement,
+    travels intact. **The outline itself is left as it stands**, because this is a
+    drafting decision rather than a structural one and the register is what the chapter is
+    written to. No other act file changed structurally in this pass except Act II's, whose
+    §4 gained a section (`act2_manifold.md` item 17).
