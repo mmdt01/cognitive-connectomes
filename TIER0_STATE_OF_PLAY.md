@@ -560,6 +560,48 @@ N=448. Taking the median of the per-seed products instead gives the identical 4.
 N=448 but **6.9%** at N=1000. Quote the aggregation with the number at N=1000, where the
 two differ.
 
+> **Amended 25 August 2026 (a): the N = 1000 table behind the 6.4% spread.** §3.1 has
+> published the N = 1000 spreads and gap ratios since 15 August 2026 but never the
+> per-variant `|λ₁|` and absolute bulk they are computed from, so the scale row of the
+> comparison table above rested on numbers in no document. They are given here.
+> **Aggregation: absolute bulk is `median_over_seeds(bulk95) × median_over_seeds(|λ₁|)`**,
+> the same product-of-medians convention as the N = 448 table above, which is the
+> convention under which the identity `|λ₁| / abs_bulk = 1/bulk95 = sr_crit` holds. It
+> holds to machine precision on all four rows below.
+>
+> | variant | `bulk95` | `abs(λ₁)` | absolute bulk |
+> |---|---|---|---|
+> | connectome | 0.2509 | **0.2333** | 0.0585 |
+> | weight-permuted | 0.4176 | 0.1398 | 0.0584 |
+> | degree | 0.4346 | 0.1358 | 0.0590 |
+> | Erdős–Rényi | 0.4102 | 0.1348 | 0.0553 |
+>
+> Under the other aggregation, `median_over_seeds(bulk95 × |λ₁|)`, the absolute bulks are
+> 0.0585 / 0.0594 / 0.0577 / 0.0554 and the spread is the **6.9%** already quoted. **The
+> two columns must never be mixed within one table**: only the product-of-medians column
+> satisfies the gap-ratio identity. The connectome's two values coincide exactly because
+> its rung is seed-invariant in `scale_1000/spectra_per_seed.parquet`; the aggregations
+> diverge only on the three stochastic nulls.
+>
+> **Two things the four numbers say that the 6.4% alone does not.** (i) **The absolute-bulk
+> ordering is not the N = 448 ordering.** At N = 448 it falls monotonically down the ladder
+> (connectome 0.0614 > weight-permuted 0.0599 > degree 0.0595 > ER 0.0587); at N = 1000 the
+> largest absolute bulk is **degree's** (0.0590), with the connectome third-largest. This is
+> the same between-scale instability §2.1 already records for the `bulk95` null ordering, and
+> it is a further reason no claim may be built on the ladder's ordering *within* the nulls.
+> (ii) **The loosened spread is one variant, not a general spreading.** The top three sit
+> within **1.1%** of each other; the whole 6.4% is Erdős–Rényi sitting low. "Merely close at
+> N = 1000" is right for the set, but the near-identity of the non-ER bulks is intact.
+>
+> The Perron statement rescales too: the connectome's `|λ₁|` is **1.73×** ER's at N = 1000
+> against the **1.78×** quoted below for N = 448. Where the restatement paragraph's ratio is
+> quoted, the scale must be quoted with it.
+>
+> Source: `experiments/human/analysis/eigenspectrum/results/scale_1000/spectra_per_seed.parquet`,
+> `condition == "human_empirical"`, the four ladder rungs, 40 rows at 10 seeds each. Read-only;
+> nothing was regenerated. Reproduction gates: §2.1's four `bulk95` medians and four gap ratios
+> return exactly, and §3.1's two published spreads return as 6.430% and 6.886%.
+
 > **Restate Act I:** connectome weight placement does not compress the bulk. It raises
 > the Perron root (1.78× ER's) over a bulk that is essentially everyone's.
 > **"anomalously compact bulk" → "anomalously large spectral gap"**, gap ratio 3.08 vs
