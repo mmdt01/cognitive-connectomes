@@ -11,7 +11,7 @@
 % \usepackage{subfigure}
 \usepackage{subcaption}
 \usepackage{subfig}
-\usepackage{algorithm}
+% \usepackage{algorithm}   % clashes: the class already loads algorithm2e (cls:55)
 \usepackage{algpseudocode}
 \usepackage{listings}
 \usepackage{xcolor}
@@ -22,11 +22,7 @@
 \usepackage{color, soul}
 \usepackage{afterpage}
 
-\newcommand\blankpage{%
-    \null
-    \thispagestyle{empty}%
-    \addtocounter{page}{-1}%
-    \newpage}
+% \blankpage is already defined by the class (cls:208) -- duplicate removed.
 
 \definecolor{lightgray}{gray}{0.9}
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -104,11 +100,11 @@
     % \input{mainmatter/chapter-0-figures}
     \input{mainmatter/chapter-1-introduction}              
     \input{mainmatter/chapter-2-related-work}   
+    \input{mainmatter/chapter-3-methods} 
     \input{mainmatter/chapter-4-act-I}
     \input{mainmatter/chapter-5-act-II}
     \input{mainmatter/chapter-6-act-III} 
     \input{mainmatter/chapter-7-act-IV}
-    \input{mainmatter/chapter-3-methods}
     \input{mainmatter/chapter-8-discussion}
     \input{mainmatter/chapter-9-conclusion}
     

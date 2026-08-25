@@ -273,3 +273,6 @@ experiments/human/analysis/criticality_matched/results/*.json
 # Local artifact snapshots (tools/snapshot_results.sh). Tens of MB, and the point of
 # them is to live somewhere that is not this repo.
 snapshots/
+
+# LaTeX build output (report/thesis)
+report/thesis/build/
