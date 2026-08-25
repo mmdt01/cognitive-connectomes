@@ -132,10 +132,22 @@ itself.
 
 **Added 15 August 2026 (session 1), at the author's request.** These are **not** part of
 the numbered main-text list and do **not** consume a main-text slot: `FIGURES` in
-`report/figlib/figures/__init__.py` still holds exactly 15 and still carries the
-assertion that enforces it. S-figures live in a separate `SUPPLEMENTARY` registry, and
-`python -m report.figlib` renders both. The rule that no figure exists outside this file
-still binds, which is why they are listed here.
+`report/figlib/figures/__init__.py` holds exactly **17** and still carries the
+assertion that records the count. S-figures live in a separate `SUPPLEMENTARY`
+registry, and `python -m report.figlib` renders both. The rule that no figure exists
+outside this file still binds, which is why they are listed here.
+
+> **Count corrected 25 August 2026.** This paragraph read "still holds exactly 15 and
+> still carries the assertion that **enforces** it", which was true when it was written
+> and is a present-tense claim, so it is corrected outright rather than annotated. The
+> registry has since gone 15 to 16 (19 August, F17) and 16 to 17 (24 August, F18), and
+> `report/figlib/figures/__init__.py` now reads
+> `assert len(FIGURES) == 17, f"registry holds {len(FIGURES)} figures, not 17"`,
+> **verified by reading it on 25 August 2026; the file was not edited.** "Enforces"
+> also became wrong on 19 August, when the cap became a soft count: the assertion
+> records the number rather than gating it, which is what the amendment at the head of
+> this file says. The S-figure separation is unaffected, which is the point the
+> paragraph was making.
 
 **The bar for an S-figure, so this does not become a way around the count:** it makes
 **no claim the main text does not already make**.
@@ -282,6 +294,15 @@ by redrawing (c) as the difference of medians — that would abandon the publish
 is largely how far below ceiling the connectome sits and where. `CONVENTIONS` requires
 the ceiling on every memory figure; here it is also the reason panels (a) and (b) earn
 their space.
+
+**F3 — 0.997 / 0.965 is this panel's pair, and `TIER0` §3.2 has a different one. Added
+25 August 2026.** `TIER0` §3.2 reports peak `d_eff/N` as **≥0.993 for every null and
+0.961 for the connectome**, at α = 1e-6 over the taskA α sweep, per-variant peak over
+σ. The 0.997 / 0.965 above is read off **this figure's own source**,
+`e02_panel.parquet`, as per-substrate medians over seeds on the nominal axis. Different
+source, different filter, **neither is wrong**, and neither is edited. **The thesis
+quotes `TIER0`'s pair**; 0.997 / 0.965 appears only in F3's caption, where its filter is
+stated, and must not be carried into body prose as though it were the published value.
 
 **F3 — the one cross-act figure.** The data is E0.2's, but the figure sits in chapter 3
 and Session 1 owns contribution 5. **Session 1 renders it; Session 3 must not re-render

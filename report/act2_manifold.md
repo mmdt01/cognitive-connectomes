@@ -754,7 +754,9 @@ and anything a later session needs to know.
    placeholder; the `FIGURE_LIST` F6 source cell now names both files and which panels
    use which. The additions to `sources.py` and `style.py` are additive, and a full
    re-render of all 16 figures moved **only F4, F5 and F6** — verified by `git status`,
-   not assumed.
+   not assumed. [16 was the count on that date; it is **17** as of 25 August 2026, F18
+   having been added on 24 August. Left as the historical record of what that
+   re-render covered.]
 3. **`TIER0` §3.12 and `FIGURE_LIST`'s F6 flag shared a sign error — CORRECTED.**
    Both wrote the rung-index control as "-0.18 and +0.54". Recomputed it is **-0.180 and
    -0.541**; PR is negatively rank-correlated with the index under every index definition
@@ -1024,9 +1026,19 @@ and anything a later session needs to know.
     are not persisted, so it needs a regeneration pass. It needs its own builder, which
     means it goes **through the cap** rather than qualifying as a supplementary figure
     under `FIGURE_LIST`'s bar ("no claim the main text does not already make, and an
-    existing builder at different parameters") — and the cap is 15 and full. And the
-    claim it would carry, that curvature is bimodal, is F12's and belongs to contribution
-    4, so an Act II version is an illustration of someone else's result unless it is
+    existing builder at different parameters") — and the cap is 15 and full.
+    [**Superseded 25 August 2026, and the reasoning above did not survive.** This item
+    was written at session 2's close on 17 August against the **two-clause** bar. On
+    **19 August 2026** `FIGURE_LIST`'s amendment **dropped the second clause**, leaving
+    "no claim the main text does not already make" as the whole bar, precisely because
+    the builder clause was a proxy that excluded the useful case. E1 was then built as
+    **S2**: it needed its own builder, and it was admitted as **supplementary** rather
+    than through the cap. So the cost named here is no longer a cost. The count is
+    **17** as of 25 August 2026, not 15, and the cap is a soft count rather than a gate.
+    The sentence is left standing as session 2's record of what it decided against and
+    why.] And the claim it would carry, that curvature is bimodal, is F12's and belongs
+    to contribution 4, so an Act II version is an illustration of someone else's result
+    unless it is
     scoped to the *manifold* reading rather than the VPT one.
 
     **Constraint inherited from the E2 work-up** (roadmap §4d): a top-3 PCA trajectory is

@@ -131,10 +131,34 @@ held to.
 ### 1.3 CONVENTION — `sr_crit = 1 / median_over_seeds(bulk95)`
 
 `1/x` is convex, so `mean(1/bulk95) > 1/mean(bulk95)` (Jensen) and **the per-seed mean
-is biased upward** — by up to 0.087 at N=1000. The median commutes with monotone
-transforms, so the two computation orders agree to ≤0.0014 and `sr_crit` can be
-reproduced by inverting the reported central `bulk95`. Implemented in
+is biased upward**, by up to **0.0431** within the four-rung ladder (Erdős–Rényi,
+N=1000). The median commutes with monotone transforms, so the two computation
+orders agree to ≤0.0014 and `sr_crit` can be reproduced by inverting the reported
+central `bulk95`. Implemented in
 `eigenspectrum.common.SR_CRIT_CONVENTION`; both scales re-run.
+
+> **Amended 25 August 2026 (a): the Jensen figure is the ladder's, and 0.087 is named
+> as `random_gaussian`'s.** This section read *"by up to 0.087 at N=1000"*. That value
+> is right and reproduces exactly, as `mean(1/bulk95) − 1/mean(bulk95)` = **0.0868**
+> for **`random_gaussian` at N=1000** on `human_empirical`, which is the rung
+> `common.SR_CRIT_CONVENTION`'s own source comment names ("for random_gaussian, whose
+> bulk95 is the most dispersed"). But `random_gaussian` is **not a rung of the
+> four-variant ladder**, so the figure overstated the bias for every substrate this
+> document otherwise reports. Within the ladder the true Jensen gap tops out at
+> **0.0431** (Erdős–Rényi, N=1000), which is what the paragraph above now carries.
+>
+> **Two further qualifications from the same recomputation, since the gloss was loose
+> in a second way.** Against the *median* rather than the mean the ladder maximum is
+> **0.0727** (Erdős–Rényi, N=1000), and the sign is **negative** for all three N=1000
+> nulls: the per-seed mean of `1/bulk95` sits *below* `1/median(bulk95)` there. So
+> "biased upward" is a statement about **mean-vs-mean, not mean-vs-median**.
+>
+> **The convention does not change**: the median is still the right aggregator, it is
+> the one in use, and nothing downstream moves; only the number justifying it. It is
+> on the record because a justification that names a rung outside the ladder cannot be
+> checked by a reader who has only the ladder. Source: `report/act1_structure.md` §5
+> item 4. `report/CONVENTIONS.md` carried the same figure and was corrected in the
+> same pass.
 
 ### 1.4 ANSWERED — the N=1000 question
 
@@ -546,6 +570,16 @@ two differ.
 At α = 1e-6, peak `d_eff/N` is ≥0.993 for every null and 0.961 for the connectome, so
 the peak is ceiling-limited. But the ladder ordering lives elsewhere entirely:
 
+> **Cross-note, 25 August 2026: a second pair of peak `d_eff/N` values exists and
+> neither is wrong.** `report/FIGURE_LIST.md`'s F3 flag and `report/act1_structure.md`'s
+> F3 block quote **0.997** for Erdős–Rényi against the connectome's **0.965**, read off
+> the **E0.2 panel** (`e02_panel.parquet`, per-substrate medians over seeds on the
+> nominal axis). The pair above is this section's own: the **taskA α sweep** at
+> α = 1e-6, per-variant peak over σ. Different source, different filter, same argument,
+> and until now neither document named the other. **The thesis quotes this section's
+> pair**; 0.965 / 0.997 appears only inside F3's own caption, where its filter is
+> stated. Nothing is edited on either side.
+
 | σ region | ordering (+1 = connectome highest) | spread |
 |---|---|---|
 | subcritical (σ < 1.5) | **−1.00** (inverted) | 83 |
@@ -734,6 +768,49 @@ toward theirs at 1.6–2.0).
 > grid. **No result moves**: the optima 2.4 → 3.6 and 1.2 → 1.6 are unchanged, and
 > nothing is computed from the count. Corrected in `report/act2_manifold.md` (A2.7 and
 > §4.5) and `report/checks/floor_sensitivity_check.md` §3.3 in the same pass.
+
+> **Amended 25 August 2026 (e): the four-bin position table is now on the record.**
+> The refit table above is a table of *statistics*; what chapter 5's §4 actually opens
+> on is a table of **positions**: where each substrate's design-Gram spectrum sits
+> relative to the ridge floor, bin by bin. Until now that table existed only in
+> `report/checks/floor_sensitivity_check.md` §5.1, so the headline of a chapter section
+> was not in the document canonical for results. Every value below is taken from that
+> file; no run was involved and nothing was recomputed here.
+>
+> **Per-bin medians over the 50 supercritical cells, as a percentage of all 448
+> directions.** Same filter as the refit table: `task == "mc"`,
+> `condition == "human_empirical"`, `spectral_radius >= 3.05`, α = 1e-6, on the
+> **zero-stripped** spectrum of amendment (a).
+>
+> | variant | exactly zero | more than a decade below α | within a decade of α | more than a decade above α |
+> |---|---|---|---|---|
+> | connectome | 0.2% | 4.9% | 8.0% | **89.0%** |
+> | weight-permuted | 2.6% | 36.0% | 18.6% | 38.1% |
+> | degree | 9.9% | 49.3% | 18.3% | 22.0% |
+> | Erdős–Rényi | **20.4%** | **52.8%** | 10.6% | **11.4%** |
+>
+> **The connectome holds 89.0% of its directions more than a decade clear of the floor
+> against Erdős–Rényi's 11.4%**, and that is what `d_eff` 412.9 against 74.8 counts.
+> Read the other way, **73.2% of Erdős–Rényi's spectrum is at or more than a decade
+> below the floor before α is raised at all** (20.4% exactly zero, a further 52.8% more
+> than a decade under) against the connectome's **5.1%** combined, which is the level
+> half of amendment (c) and the reason its rate half is needed.
+>
+> **Two qualifiers travel with the table and the section cannot be written without
+> them.** (i) **The four bins partition each *individual* cell exactly, but four
+> medians taken separately are not constrained to sum to 100, and they do not**: the
+> connectome's four come to **102.1%**. Anything drawing these bins therefore groups
+> rather than stacks, since a stacked bar asserts a partition the medians do not form.
+> (ii) **The zero-strip of amendment (a) applies here too**, which is why "exactly
+> zero" is its own bin rather than folded into "below the floor": the strip is what
+> the fraction-below-α statistic is computed on, and showing the zeros separately is
+> what makes the exclusion visible instead of merely stated.
+>
+> Source: `report/checks/floor_sensitivity_check.md` §5.1. This is the **headline of
+> chapter 5's §4** (`report/CROSS_ACT_SPINE.md`'s chain step 3, drawn as F18a), and it
+> is promoted for that reason: a caption-first rule cannot be applied to a number that
+> is not in a rank-1 document. The σ-resolved sensitivity curve and the five per-α
+> migration rows stay in the check file; they are figure data, not published results.
 
 ---
 

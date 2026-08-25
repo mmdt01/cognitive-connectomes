@@ -353,6 +353,15 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   "connectome advantage" in (c) is largely *how far below ceiling the connectome sits and
   where*, which the delta panel alone cannot show. This is the reason the split was
   worth making.
+- **0.997 / 0.965 is this panel's pair; `TIER0` §3.2 has a different one, and neither is
+  wrong. Added 25 August 2026.** `TIER0` §3.2 gives peak `d_eff/N` as **≥0.993 for every
+  null and 0.961 for the connectome**, at α = 1e-6 over the taskA α sweep, per-variant
+  peak over σ. The values above come from **this figure's own source**,
+  `e02_panel.parquet`, as per-substrate medians over seeds on the nominal axis. Same
+  argument, two filters, and neither document named the other until now. **The thesis
+  quotes `TIER0`'s pair**; 0.997 / 0.965 stays inside F3's caption with its filter
+  stated, and is not carried into body prose. `FIGURE_LIST`'s F3 flag carries the same
+  cross-note.
 - **(a) and (b) do not subtract to (c), by construction.** `dD_median` is the median over
   seeds of the **per-seed difference**; `d_eff_connectome` and `d_eff_erdos_renyi` are
   the medians of each substrate **separately**, and the median of differences is not the
@@ -405,13 +414,23 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   median-`|lambda_1|` scaling, the per-row `[-lambda_1, +lambda_1]` binning and both
   assertions live in the shared path.
 - **Governance.** `CONVENTIONS` working rule 3 is "no figure that is not on
-  `FIGURE_LIST.md` — if one seems missing, report and stop", and `FIGURE_LIST` caps the
-  main text at 15 with `figures/__init__.py` asserting it. A scale replicate is exactly the case
+  `FIGURE_LIST.md` — if one seems missing, report and stop", and `FIGURE_LIST` records
+  the main-text count with `figures/__init__.py` asserting it. A scale replicate is
+  exactly the case
   that would erode a cap by increments, so it went into a **separate `SUPPLEMENTARY`
-  registry** instead: `FIGURES` still holds 15 and still carries its assertion. The bar
-  recorded in `FIGURE_LIST` is that an S-figure makes no claim the main text does not
-  already make and reuses an existing builder at different parameters; anything needing
-  its own builder goes through the cap.
+  registry** instead. **The bar recorded in `FIGURE_LIST` is that an S-figure makes no
+  claim the main text does not already make.** That is the whole bar.
+  **Updated 25 August 2026.** As written on 15 August this bullet stated a **two-clause**
+  bar, the second clause being "and reuses an existing builder at different parameters",
+  and said `FIGURES` "still holds 15". `FIGURE_LIST`'s amendment of **19 August 2026**
+  (session 4) **dropped the second clause**: it was a *proxy* for the test that matters
+  and it excluded exactly the case a supplementary figure is most useful for, supplying
+  intuition for a claim the main text asserts but cannot illustrate. S1 satisfied both
+  clauses and made the proxy look free; **S2 is the case that showed it was not**, since
+  E1 needs its own builder and was admitted as supplementary anyway. The count is **17**
+  as of 25 August 2026, and the assertion **records** the count rather than gating it,
+  per the same 19 August amendment. S1's own standing is unchanged: it reuses F1's
+  builder and makes no new claim, so it clears the bar under either version.
 - **Two axis assumptions were hard-coded to N=448 and are now derived.** The x ticks were
   a fixed `[-0.2 ... 0.2]` and the y ticks a fixed `[1, 10]`. Both happen to remain valid
   at N=1000 — the spectrum runs to ±0.266 rather than ±0.215, and the density range is
@@ -448,8 +467,14 @@ written by hand, not generated (see the roadmap §4b note on drafting).
    *Carries A1.6.* Figure F3.
    1. The two axes, and what each holds fixed.
    2. The same data on both (F3a): the deficit is 89% axis, the advantage 57% robust.
-   3. The normaliser's own noise (F3b): non-concentrating order statistic, and the
-      permutation control that separates weight draw from placement. *Carries A1.7.*
+   3. The normaliser's own noise, **in prose, no panel**: non-concentrating order
+      statistic, and the permutation control that separates weight draw from
+      placement. *Carries A1.7.* **Corrected 25 August 2026**: this item read
+      "(F3b)". That panel was cut on 15 August 2026 when the merged-in F8 was
+      removed, and A1.7 moved to methods prose. §1 marks it "none — prose" and
+      `FIGURE_LIST`'s F3 flag carries the numbers it must state. The pointer was
+      worse than dead: F3's current panel (b) exists and shows the σ·bulk95 axis,
+      not the normaliser's noise. The numbers survive in §5 items 6 and 7.
    4. The rule adopted for the rest of the thesis: report both, state what each fixes,
       rest the claim on surviving both.
 
@@ -559,6 +584,15 @@ and anything a later session needs to know.
    rather than 6.9%; both are in §3.1 and the caption names which. `FIGURE_LIST`'s F2 row
    specifies the median-of-products form and is now inconsistent with the builder —
    **the row should be updated to `median(bulk95) x median(lambda_max_raw)`.**
+
+   **RESOLVED 25 August 2026.** Verified by reading `FIGURE_LIST`'s F2 row, whose source
+   cell now reads `abs_bulk = median(bulk95) * median(lambda_max_raw)`, the
+   product-of-medians form this item asked for, and the one the builder and `TIER0`
+   §3.1's table both use. The row is therefore consistent with the builder and nothing
+   was edited to make it so. The item is marked resolved in place rather than deleted,
+   because the reasoning in its first half (why panel c is not panel b over panel a
+   unless both are on the product of medians, and the 0.055 gap at N=1000 that shows it)
+   is still the reason the row has to read that way.
 6. **`FIGURE_LIST`'s F3 flag contains a false statement, corrected in place.** It reads
    "The permuted-multiset control (relative s.d. exactly 0) is the evidence and belongs in
    the panel." The permuted control's relative s.d. of **|λ₁|** is **0.0628** at N=448 and
@@ -599,7 +633,9 @@ and anything a later session needs to know.
     entry point runs it. `CONVENTIONS`' colour clause carries a dated amendment marking
     this as a deliberate one-time change and not a precedent. Okabe-Ito was already the
     palette of the committed E0.4 figures, so the move also ended a split between those
-    and the sweep. All 15 sweep figures were re-rendered.
+    and the sweep. All 15 sweep figures were re-rendered. [15 was the count on that
+    date; it is **17** as of 25 August 2026, F17 added 19 August and F18 added
+    24 August. Left as the historical record of what the palette change touched.]
 11. **Re-rendering the per-task figures cost no compute, and needed a new tool.** Each
     task's `run.py:main` calls `runner.run_matrix` before `plots.run`, so invoking it
     would re-run the experiment — against `CONVENTIONS` working rule 4. But `plots.run`

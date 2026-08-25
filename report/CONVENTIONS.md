@@ -33,7 +33,12 @@ checked against `TIER0`.
 ## Numerical conventions
 
 - **`sr_crit` = 1 / median_over_seeds(`bulk95`).** Median, not mean (Jensen: the per-seed
-  mean of `1/bulk95` is biased upward by up to 0.087 at N=1000).
+  mean of `1/bulk95` is biased upward, by up to **0.0431** within the four-rung ladder,
+  at Erdős–Rényi N=1000). **Corrected 25 August 2026:** this clause read "up to 0.087 at
+  N=1000", which is the gap for **`random_gaussian`** (0.0868), a rung *outside* the
+  ladder and the one `common.SR_CRIT_CONVENTION`'s own source comment names. The
+  convention does not change, only the number justifying it. Source:
+  `report/act1_structure.md` §5 item 4; `TIER0` §1.3 carries the same correction.
 - **Two axes, always both.** `sigma·W/|lambda_1|` has spectral radius exactly sigma, so
   nominal matching fixes the Perron root and `sigma·bulk95` matching fixes the bulk.
   Neither is neutral toward the Perron-mode hypothesis. Report both, state what each holds
@@ -62,7 +67,10 @@ Fixed in session 0 and held across every figure so the chapters sit together.
   so the change also ended a split between those and the sweep. `figlib/style.py` and
   `src/experiment/plots._VARIANT_STYLE` moved together in one commit and all 15 sweep
   figures plus the variant-styled per-task figures were re-rendered from frozen
-  parquets. **This was a deliberate one-time amendment and is not a precedent**: the
+  parquets. [There were 15 sweep figures on that date; the count is **17** as of
+  25 August 2026, F17 added 19 August and F18 added 24 August. The sentence is left as
+  the record of what was re-rendered then.] **This was a deliberate one-time amendment
+  and is not a precedent**: the
   contract below still holds, and a session that wants a different colour reports and
   stops.
   **Four rungs carry almost everything**: `connectome`, `connectome_weight_permuted`,
