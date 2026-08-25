@@ -607,6 +607,94 @@ two differ.
 > **"anomalously compact bulk" → "anomalously large spectral gap"**, gap ratio 3.08 vs
 > 1.81–1.92. Same fact, stated in the direction the data supports.
 
+### 3.1(b) The three off-ladder variants — `random_gaussian`, `clustering_rewire`, `modularity_rewire`
+
+**Added 25 August 2026 (b).** §2.1 and §3.1 report **four** variants; the frozen spectra
+carry **seven**. The three that have never been published anywhere in this document are
+given here: `random_gaussian` (rung 0), `clustering_rewire` (rung 3) and
+`modularity_rewire` (rung 4). They were not missing data — every one is present at both
+scales, at all three conditions, at 10 seeds, with full eigenvalue arrays. They were
+simply never written down, and §1.3 has been citing `random_gaussian`'s Jensen gap since
+25 August 2026 (a) without its `bulk95` appearing in any table a reader could check.
+
+**Aggregation: absolute bulk is `median_over_seeds(bulk95) × median_over_seeds(|λ₁|)`**,
+the product-of-medians convention of §3.1 and its (a) amendment, under which the identity
+`|λ₁| / abs_bulk = 1/bulk95 = sr_crit` holds. It holds to machine precision on all six
+rows. `condition == "human_empirical"`, as in §3.1.
+
+| variant | `bulk95` | `abs(λ₁)` | absolute bulk | gap ratio |
+|---|---|---|---|---|
+| `random_gaussian` | 0.5374 | 0.1104 | 0.0593 | 1.861 |
+| `clustering_rewire` | 0.4806 | 0.1212 | 0.0582 | **2.081** |
+| `modularity_rewire` | 0.5123 | 0.1167 | 0.0598 | 1.952 |
+
+N = 448 above; N = 1000 below.
+
+| variant | `bulk95` | `abs(λ₁)` | absolute bulk | gap ratio |
+|---|---|---|---|---|
+| `random_gaussian` | 0.4113 | 0.1357 | 0.0558 | 2.432 |
+| `clustering_rewire` | 0.4218 | 0.1377 | 0.0581 | 2.371 |
+| `modularity_rewire` | 0.4462 | 0.1353 | 0.0604 | 2.241 |
+
+Under the other aggregation, `median_over_seeds(bulk95 × |λ₁|)`, the absolute bulks are
+0.0583 / 0.0603 / 0.0604 (N = 448) and 0.0560 / 0.0573 / 0.0589 (N = 1000). **The two
+columns must never be mixed within one table** — only product-of-medians satisfies the
+gap-ratio identity. Unlike the connectome, all three of these rungs are stochastic, so
+the two aggregations diverge on every row at both scales.
+
+**Three things these numbers change, and one they do not.**
+
+1. **The connectome's margin over the best null is smaller than the ladder alone shows,
+   at N = 448.** `clustering_rewire` has a gap ratio of **2.081** — higher than every
+   ladder null (1.807–1.922) and the strongest null at either scale. The connectome's
+   margin over the best *ladder* null is **1.602×** (N = 448) and **1.635×** (N = 1000);
+   over the best null *of all six* it is **1.479×** (N = 448) and, since Erdős–Rényi
+   remains top at N = 1000, an unchanged **1.635×** there. **The separation survives at
+   both scales — the connectome is clear of all six nulls — but its size is
+   ladder-dependent and must be quoted with the null set it was measured against.**
+   (§3.1's "~1.7x clear of every null" is a gloss that reads high against both computed
+   ladder margins; it is flagged here, not edited, and §3.1 stands as written.)
+
+2. **The absolute-bulk spread widens at both scales.** On `(max − min)/mean`, the
+   definition that reproduces §3.1's published figures, the four-rung spread of 4.426%
+   (N = 448) and 6.430% (N = 1000) becomes **5.254%** and **8.696%** across all seven.
+   The N = 448 near-identity is dented but intact; the N = 1000 figure is not.
+
+3. **The (a) amendment's "the whole 6.4% is Erdős–Rényi sitting low" no longer holds as
+   stated.** At N = 1000 `random_gaussian` (0.0558) sits with ER (0.0553) at the bottom:
+   **two** of seven sit low, not one. The between-scale ordering instability §2.1 and (a)
+   both record gets worse, not better — at N = 448 the *smallest* absolute bulk of all
+   seven is `clustering_rewire`'s, below ER's; at N = 1000 the *largest* is
+   `modularity_rewire`'s, above degree's, with the connectome only third. **No claim may
+   rest on the ordering within the nulls, at either scale, on either null set.**
+
+What does not change: the Perron reading of Act I. These three rungs sit in the null band
+on `|λ₁|` (0.110–0.121 at N = 448 against the connectome's 0.189; 0.135–0.138 at N = 1000
+against 0.233). The connectome's large gap ratio is still a large Perron root over a bulk
+close to everyone's, and no null in the seven approaches it.
+
+**Scope guard: these three are not rungs of the four-variant ladder.** Do not merge these
+rows into §2.1's or §3.1's tables, and do not recompute a published spread by adding them
+— the ladder figures are the ladder's. This section exists so the numbers are on the
+record and checkable, not to widen the ladder.
+
+**Gotcha — the frozen `sr_crit` column is per-seed.** `spectra_per_seed.parquet` carries
+`sr_crit` as row-wise `1/bulk95`, **not** §1.3's `1/median_over_seeds(bulk95)`. Reading it
+off a single row gives, e.g., 3.335 for `random_gaussian` at N = 1000 where the convention
+value is 2.432. Every gap ratio in this section is the convention value.
+
+> Source: `experiments/human/analysis/eigenspectrum/results/scale_448/spectra_per_seed.parquet`
+> and `.../scale_1000/spectra_per_seed.parquet`, `condition == "human_empirical"`, three
+> variants, 30 rows at 10 seeds each per scale. All three also exist at
+> `human_empirical_signed` and `human_gaussian` at 10 seeds, not tabulated here.
+> Read-only; nothing was regenerated. Reproduction gates: §2.1's four `bulk95` medians and
+> four gap ratios return exactly at both scales, §3.1's N = 448 absolute bulks and its two
+> published spreads return as 4.426% / 6.430% / 6.886%, and (a)'s N = 1000 table returns
+> exactly. The only other frozen file holding these variants' eigenvalues is
+> `analysis/results/scale_448/w_spectra.parquet` (N = 448 only, and it carries no `bulk95`
+> or `lambda_max_raw` column); `probe3_deff.parquet` carries no spectral column at all —
+> its `spectral_radius` is the σ sweep parameter.
+
 ### 3.2 `d_eff(α)` — the ordering is not a ridge artifact
 
 At α = 1e-6, peak `d_eff/N` is ≥0.993 for every null and 0.961 for the connectome, so
