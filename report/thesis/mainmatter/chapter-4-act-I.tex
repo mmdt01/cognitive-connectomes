@@ -1,19 +1,477 @@
-\chapter{\textbf{Act I:} Network Structure Shapes The Spectrum}
+\chapter{\textbf{Act I:} Structure Shapes The Spectrum}
 \label{chapter:act-I}
 
 
+\section{The substrate and the null ladder}
+\label{sec:act1-substrate}
+\bigskip
+% Outline item 2. No results: every numeral below is a design fact, a count or a
+% null validation. Sources: METHODS_SUBSTRATE.md (code), A1 section 5 (checks).
+
+% P1: the substrate, the scales, and which modality is used.
+The substrate is a group-consensus human structural connectome, built for this
+thesis rather than taken from a published matrix.
+The individual data are the 70 % METH A.1
+diffusion-weighted datasets of a publicly released healthy-adult
+cohort \cite{griffa2019structural}, in the form distributed with the
+connectome-reservoir release of Suárez et al. \cite{suarez2021learning}.
+The release provides the same cohort at several parcellation resolutions of the
+Lausanne atlas, and at each resolution it provides a structural and a functional
+connectome defined on the same anatomical parcels. This thesis works at the two
+highest-resolution scales, $N = 448$ and $N = 1000$ (number of nodes in the network). % METH A.4
+Both of the measures this chapter reports are percentiles taken over a spectrum,
+and the reservoir measures in later chapters are ranks of an $N$-dimensional
+state space, so each needs enough nodes to be informative; the coarser scales do
+not supply them. Everything up to Chapter~\ref{chapter:act-III} is built on the
+structural connectome alone, which is what instantiates the reservoir's
+recurrent connectivity throughout. The functional connectomes are used only in
+Chapter~\ref{chapter:act-IV}, and it is their being defined on the same parcels
+as the structural matrix that makes that comparison possible at all.
+Each individual structural matrix is restricted to cortical parcels, and its
+edge weights are streamline fibre densities.
+The group matrix is formed by a distance-dependent consensus
+rule \cite{betzel2019distance}: candidate edges are grouped into bins by the
+Euclidean distance between parcel centroids, with inter-hemispheric and
+intra-hemispheric connections treated separately, and one edge is retained per
+bin, the one present in the largest number of individuals. A retained edge takes
+as its weight the mean of that connection across all subjects. The result is
+symmetric, has a zero diagonal, and is non-negative throughout, since
+tractography counts streamlines and cannot represent an inhibitory connection.
+At $N = 448$ it holds
+5{,}323 % METH A.6
+undirected edges, a density of 5.32\%; % METH A.6
+the same build at $N = 1000$ gives
+10{,}784 % METH A.6
+edges and 2.16\%. % METH A.6
+
+% P2: the full null family, what each holds fixed, and which rungs carry the chapter.
+Against the connectome stand five null models, each destroying some part of the connectome's
+organisation and holding the rest fixed. In order of how much they keep: a
+random gaussian matrix, which shares only the node count and whose weights are
+signed; an Erdős–Rényi graph, matching the node count, edge count and density
+exactly rather than in expectation; a degree-preserving rewire, which adds the
+degree sequence and so carries the connectome's heavy-tailed degree
+distribution intact; and clustering-preserving and modularity-preserving
+rewires, each holding fixed everything the degree rewire does and one further
+property of the topology besides.
+Table~\ref{tab:act1-preservation} sets out what each rung preserves and what it
+destroys; the generation procedures are given in
+Chapter~\ref{chapter:methods}. Weights are painted onto every randomised graph
+by drawing, with replacement, from the connectome's own multiset of edge
+weights, % METH B.0
+so the ladder varies where weight sits without changing what weights are
+available. Each null is generated at ten seeds; % METH B.0
+the connectome is one fixed graph and returns the same matrix every time.
+
+% Null model preservation table
+\begin{table}[ht]
+    \centering
+    \caption[What each substrate preserves]{\textbf{What each substrate
+    preserves and what it destroys.} Rows are ordered by how much of the
+    connectome each keeps, least at the top. The ordering is not a strict
+    nesting: the clustering-preserving and modularity-preserving rewires each
+    add one constraint to the degree rewire, but neither contains the other, so
+    their relative position is arbitrary. The weight-permuted variant is a control rather than a null: it
+    preserves everything, including the exact weight multiset, and destroys
+    only the assignment of weights to edges. Generation procedures are in
+    Chapter~\ref{chapter:methods}.}
+    \label{tab:act1-preservation}
+    \begin{tabular}{lccccccc}
+        \toprule
+        & no. of & edges, & non-neg. & degree & clustering & modularity & weight \\
+        & nodes & density & weights & sequence &  &  & placement \\
+        \midrule
+        random gaussian & \checkmark & --- & --- & --- & --- & --- & --- \\
+        Erdős–Rényi & \checkmark & \checkmark & \checkmark & --- & --- & --- & --- \\
+        degree rewire & \checkmark & \checkmark & \checkmark & \checkmark & --- & --- & --- \\
+        modularity rewire & \checkmark & \checkmark & \checkmark & \checkmark & --- & \checkmark & --- \\
+        clustering rewire & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & --- & --- \\
+        weight-permuted & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & --- \\
+        \textbf{connectome} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% P3: the placement control.
+In addition to the nulls, a control model of the connectome is used to investigate 
+the effect that weight placement has on the connectome's topology.
+The weight-permuted variant takes the connectome's own graph and its own weights and
+permutes the weights across the edges: same edge set, same degrees, and the same
+weight multiset exactly rather than in distribution, since the values are
+reordered rather than resampled. % METH B.1
+The only thing that differs from the connectome is which edge carries which
+weight. That makes it the sharpest of the three comparisons available here.
+Against the connectome it isolates weight placement, holding topology and weight
+statistics fixed together; against the degree-preserving rewire it isolates
+topology, since the two share a weight multiset and differ in the graph. Every
+figure in this chapter carries it for that reason.
+
+% P4: what the construction checks establish, and what the convergence evidence is.
+Each rung asserts its own defining property at construction, and those
+assertions are weaker than they look. All of them test a property the generator
+preserves by construction, % METH B.6
+so they will catch a mis-wired pipeline, a transposed mask or a generator called
+on the wrong graph, and none of them can report whether a randomisation has
+actually explored anything. The distinction matters for the degree-preserving
+rewire, the one rung whose randomisation is iterative: its assertion holds after
+any number of swaps, including none at all. That the chain has in fact mixed is
+a separate measurement. At the production setting of ten accepted swaps per
+edge, the rewired graph retains 3.6\% % A1 5.3
+of the connectome's edges against a chance floor of roughly
+2.2\% % A1 5.3
+at this density, and retention is flat from five swaps per edge through to
+forty, % A1 5.3
+so the chain has settled well before the setting these results use.
+
+% P5: Reasoning why 3 nulls are not included in the figures
+The figures in this chapter draw four substrates: the connectome, the weight-permuted 
+control, and two of the nulls, Erdős–Rényi and the degree-preserving
+rewire, which is forty cells at each parcellation. The clustering- and
+modularity-preserving rewires enter as numbers rather than as panels, in
+section~\ref{sec:act1-bulk-gap-placement}, for the reason given there. The
+random gaussian rung takes no part in the comparison at all: its weights are
+signed, so it is not a non-negative matrix, and the statistic this chapter
+reports is defined around a Perron root that a signed matrix does not have.
+
+
+\section{The spectrum is real, and it has one outlier}
+\label{sec:act1-spectrum-real}
+\bigskip
+% Outline item 3. Carries A1.1. Figure F1a.
+
+% P1: the spectrum is real, and what follows for the figure.
+That build makes the substrate symmetric, and symmetry has a consequence for the
+spectrum that the whole chapter rests on: a symmetric matrix is normal, so its
+eigenvalues are real. This is not an approximation that holds well enough to
+work with. Across all forty ladder cells at $N = 448$ the largest imaginary part
+in the stored spectra is exactly zero, % A1 2.5
+and the symmetry check holds in every row. % A1 2.5
+It is also why Figure~\ref{fig:F1} takes the form it does: the eigenvalues are
+drawn as a density on the real line rather than as a cloud in the complex plane,
+where they would all lie on a single line and the second dimension would carry
+nothing.
+
+% P2: one outlier, and the vocabulary the rest of the chapter uses.
+What that density looks like on the connectome is panel~(a) of that figure.
+Almost all of the mass sits in a dense band about the origin, and one eigenvalue
+stands well clear of it at the right-hand edge. The separation is not an
+accident of this particular graph, and non-negativity is why. The
+Perron--Frobenius theorem guarantees a non-negative matrix a real, positive
+leading eigenvalue, largest in modulus, whose eigenvector is non-negative
+throughout; the only question a given substrate answers is how far clear of
+everything else that eigenvalue sits. Three terms follow from the picture and
+are used for the rest of this thesis. The \emph{Perron root} $\lambda_1$ is that
+leading eigenvalue. The \emph{bulk} is the band holding the remainder. The
+\emph{gap} is the distance between them. All three are properties of a single
+substrate, measured before any comparison is made.
+
+% P3: how the bulk edge is measured, and the one thing to know about it.
+The bulk needs an edge if it is to be measured, and the one used throughout is
+$\mathrm{bulk95}$: the 95th percentile of $|\lambda|$ over the spectrum, divided
+by $|\lambda_1|$, so that it is expressed as a fraction of the Perron root
+rather than in the units of the weights. % A1 2.6 finding 1
+The word outlier then invites one assumption that the definition does not
+license. The Perron eigenvalue is inside the population the percentile is taken
+over. % A1 2.6 finding 1
+It is an outlier in where it sits, not one the statistic sets aside, and the
+bulk edge is therefore a percentile of the whole spectrum rather than of the
+spectrum with its largest element removed.
 
 % Structure sets spectrum
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{F1.png}
-    \caption[Structure sets spectrum]{\textbf{Connectome weight placement buys a large spectral gap:} ....}
-    \label{fig:structure-sets-function-1}
+    \caption[Connectome weight placement buys a large spectral gap]{%
+    \textbf{Connectome weight placement buys a large spectral gap, not a compact
+    bulk.} Eigenvalues of the un-rescaled recurrent matrix $W$ on the
+    all-positive human substrate ($N = 448$ % TIER0 2.1
+    self-built consensus, empirical weights). The substrate is symmetric and the
+    spectrum entirely real, so it is drawn on the real axis; a complex-plane
+    scatter would be degenerate. \textbf{(a--d)} One substrate per row in raw
+    units of $W$ on a shared axis, the bulk shaded to $\pm$ the absolute bulk
+    radius and the gap out to $\pm\lambda_1$ in grey. Sighting down the column,
+    the four bulk edges sit at the same place while $\lambda_1$ (dotted)
+    separates, so the grey gap grows from row d to row a; values in
+    Table~\ref{tab:act1-ladder}. The weight-permuted control (b) sits with
+    the nulls. Each row draws a single spectrum, for the nulls the seed whose
+    $\mathrm{bulk95}$ is nearest the median, so all four carry equal sampling
+    noise. \textbf{(e)} The same spectra as cumulative distributions after each
+    is divided by its own $\lambda_1$, the normalisation every
+    spectral-radius-matched comparison in this thesis uses: the curves separate
+    everywhere, and the crossings of the 95\% line are $\mathrm{bulk95}$ itself.
+    \textbf{(f)} The gap ratio per seed, with $\mathrm{bulk95}$ on the
+    right-hand axis. The connectome's ten seeds coincide exactly.}
+    \label{fig:F1}
 \end{figure}
+
+
+
+\section{The bulk is everyone's, the gap is not, and it is placement}
+\label{sec:act1-bulk-gap-placement}
+\bigskip
+% Outline items 4 and 5, merged per act1_structure.md section 5 item 16.
+% Carries A1.2, A1.3, A1.5. Figures F1, F2.
+
+% P1: the decomposition, in raw units. Carries A1.2.
+The four spectra differ in one place only, and it is not the bulk.
+Figure~\ref{fig:F1} draws the eigenvalues of the un-rescaled matrix $W$, one
+substrate per row, on a shared axis in the raw units of the weights, and the
+first thing to do with it is to sight down the column. The four bulk bands sit
+at the same place: their edges fall between
+0.0587 % TIER0 3.1
+and 0.0614, % TIER0 3.1
+a spread of 4.4\% % TIER0 3.1
+of their mean at $N = 448$, % TIER0 2.1
+taking a spread throughout as the range over the mean. % A1 5.2
+What moves is the outlier. The Perron root runs from
+0.1061 % TIER0 3.1
+at the Erdős–Rényi rung to 0.1889 % TIER0 3.1
+at the connectome, so the grey region separating the bulk from $\lambda_1$ grows
+steadily up the column while the coloured band beneath it stays put.
+Figure~\ref{fig:F2} makes the same decomposition as medians across the whole
+ladder rather than as drawn spectra: the absolute bulk in panel~(a), the Perron
+root in panel~(b), and Table~\ref{tab:act1-ladder} gives the full set at both
+parcellations. 
+Nothing about the bulks has moved between those two numbers. Only the divisor
+has.
+
+% P2: what the normalisation manufactures. Carries A1.2, second half.
+That divisor is what panel~(e) makes visible. It redraws the same spectra as
+cumulative distributions after each substrate has been divided by its own
+$|\lambda_1|$, 
+which is the conventional normalisation approach every spectral-radius-matched
+comparison in connectome-reservoir literature uses 
+\cite{suarez2021learning, suarez2024connectome, milisav2026neuromorphic}. 
+In these units the curves separate everywhere and the connectome's reads as the compressed one. 
+The crossings of the 95\% level are $\mathrm{bulk95}$ itself and can be read 
+off the axis:
+0.325 % A1 3, F1 caption
+for the connectome against 0.52 to 0.55 % A1 3, F1 caption
+for the nulls. The two halves of the figure are the same spectra one division
+apart. Dividing by the single quantity on which these substrates differ turns a
+common bulk and a separated outlier into a separated bulk, and that is the whole
+of the difference between the two panels.
+
+% P3: the gap ratio and the identity. Carries A1.3.
+The statistic worth reporting is therefore the ratio of the two, $|\lambda_1|$
+over the absolute bulk radius, which panel~(f) draws per seed. It is
+3.078 % TIER0 3.1
+for the connectome against 1.81 to 1.92 % TIER0 3.1
+for the three nulls, so the connectome stands roughly
+$1.7\times$ % TIER0 3.1
+clear of every one of them. This is not a further measurement. The gap ratio,
+the inverse bulk and the critical scale are the same number,
+$|\lambda_1| / \mathrm{abs\_bulk} = 1/\mathrm{bulk95} = \mathrm{sr\_crit}$, % TIER0 3.1
+which is why panel~(f) can carry $\mathrm{bulk95}$ on its right-hand axis, and
+why the name $\mathrm{sr\_crit}$ costs nothing to adopt: it names the quantity
+after what it measures, the nominal spectral radius at which the median seed's
+bulk edge reaches one.\footnote{The edge in question is the 95th percentile of
+$|\lambda|$, % A1 2.6 finding 1
+so at $\sigma = \mathrm{sr\_crit}$ five per cent % A1 2.6 finding 1
+of modes already exceed unity. $\mathrm{sr\_crit}$ is a criticality scale each
+substrate carries with it, not the point at which that substrate becomes
+supercritical. The identity above holds under the product-of-medians
+aggregation used throughout; taking the median of the per-seed products instead
+breaks it by up to 0.055. % A1 2.3
+}
+
+% P4: the retraction, stated once, in the direction the data supports.
+It is worth saying plainly what this replaces. An earlier reading of these same
+spectra, and the one the connectome-reservoir literature invites, is that
+biological weight placement produces an anomalously compact bulk. It does not.
+The bulk is essentially everyone's, and what placement raises is the Perron
+root, by a factor of 1.78 % TIER0 3.1
+over the Erdős–Rényi rung at $N = 448$. % TIER0 3.1(a)
+The compactness is an artefact of reporting the spectrum in units of
+$|\lambda_1|$, which is to say in units of the one quantity that differs. The
+finding is the same fact stated in the direction the data supports: an
+anomalously large spectral gap.
+
+% P5: it is placement, and what that does not license. Carries A1.5.
+What produces that gap is answered by the second row of the figure. The
+weight-permuted control differs from the connectome in nothing but which edge
+carries which weight, and it lands with the nulls, at a gap ratio of
+1.922 % TIER0 3.1
+against the connectome's 3.078. % TIER0 3.1
+Neither the topology nor the weight distribution is sufficient on its own, and
+the alignment between the two is what buys the gap. That conclusion has a limit,
+and leaving it to be inferred would overstate it. The contrast localises the
+effect to placement; it does not say which feature of the placement is
+responsible, and no mechanism for why placement produces the gap is claimed here
+or anywhere in this thesis.
+
+% P6: the wider ladder, as corroboration of A1.5.
+The control settles that; the wider ladder shows it by degrees. Two further
+rungs hold more of the connectome's topology fixed than the degree-preserving
+rewire does, one preserving its community structure and one its clustering, and
+neither recovers the gap. Their gap ratios are 1.95 % TIER0 3.1(b)
+and 2.08 % TIER0 3.1(b)
+at $N = 448$, against the connectome's 3.078, and at the larger parcellation
+they fall inside the same band as the two nulls the figures draw. Taking all
+six non-negative substrates together, the smallest margin anywhere is
+1.48-fold % TIER0 3.1(b), derived
+at $N = 448$ and 1.63-fold % TIER0 3.1(b), derived
+at $N = 1000$. Preserving the degree sequence, then the community structure,
+then the clustering coefficient recovers none of what placement supplies, so the
+gap is not a property of the connectome's degree distribution or of its
+modular organisation, and holding progressively more of its topology fixed does
+not approach it. These rungs corroborate the claim; the claim itself rests on
+the control, which holds the topology exactly rather than one statistic of it
+at a time.
+
+% Structure sets spectrum table
+\begin{table}[ht]
+    \centering
+    \caption[The substrate ladder at both scales]{\textbf{The substrate ladder
+    at both scales.} Medians over ten seeds; the connectome is one fixed graph,
+    so its seeds coincide exactly and only the nulls are resampled.
+    $|\lambda_1|$ and the absolute bulk radius are in raw units of $W$; the
+    absolute bulk is the product of the medians,
+    $\mathrm{median}(\mathrm{bulk95}) \times \mathrm{median}(|\lambda_1|)$, and
+    $\mathrm{bulk95}$ is the ratio of the two. Spread is the range over the
+    mean, taken over the four ladder rungs the figures draw; the two rungs
+    marked \textsuperscript{\textdagger} appear in no figure and are excluded
+    from it, so that the spread remains the published four-rung statistic. The
+    entire between-variant difference sits in $|\lambda_1|$, which is why the
+    two spreads differ by an order of magnitude. At $N = 1000$ the alternative
+    aggregation, the median of the per-seed products, would instead give an
+    absolute-bulk spread of 6.9\% and would not satisfy the gap-ratio identity,
+    so the two are never mixed within one table. Rows are ordered by how much
+    of the connectome each substrate preserves, as in
+    Table~\ref{tab:act1-preservation}, and not by value: the gap-ratio column
+    is not monotone at $N = 1000$, and what the table reports is the
+    connectome's separation from every other substrate, never an arrangement
+    among them.}
+    \label{tab:act1-ladder}
+    \begin{tabular}{lrrrr}
+        \toprule
+        substrate & $\mathrm{bulk95}$ & $|\lambda_1|$ & absolute bulk & gap ratio \\
+        \midrule
+        \multicolumn{5}{l}{\emph{$N = 448$}} \\
+        connectome & 0.3249 & 0.1889 & 0.0614 & \textbf{3.078} \\ % TIER0 3.1
+        weight-permuted & 0.5203 & 0.1152 & 0.0599 & 1.922 \\ % TIER0 3.1
+        clustering rewire\textsuperscript{\textdagger} & 0.4806 & 0.1212 & 0.0582 & 2.081 \\ % TIER0 3.1(b)
+        modularity rewire\textsuperscript{\textdagger} & 0.5123 & 0.1167 & 0.0598 & 1.952 \\ % TIER0 3.1(b)
+        degree-preserving rewire & 0.5338 & 0.1115 & 0.0595 & 1.873 \\ % TIER0 3.1
+        Erdős–Rényi & 0.5535 & 0.1061 & 0.0587 & 1.807 \\ % TIER0 3.1
+        \addlinespace
+        spread (range / mean) & 47.3\% & --- & 4.4\% & --- \\ % TIER0 3.1
+        \midrule
+        \multicolumn{5}{l}{\emph{$N = 1000$}} \\
+        connectome & 0.2509 & 0.2333 & 0.0585 & \textbf{3.985} \\ % TIER0 3.1(a)
+        weight-permuted & 0.4176 & 0.1398 & 0.0584 & 2.395 \\ % TIER0 3.1(a)
+        clustering rewire\textsuperscript{\textdagger} & 0.4218 & 0.1377 & 0.0581 & 2.371 \\ % TIER0 3.1(b)
+        modularity rewire\textsuperscript{\textdagger} & 0.4462 & 0.1353 & 0.0604 & 2.241 \\ % TIER0 3.1(b)
+        degree-preserving rewire & 0.4346 & 0.1358 & 0.0590 & 2.301 \\ % TIER0 3.1(a)
+        Erdős–Rényi & 0.4102 & 0.1348 & 0.0553 & 2.438 \\ % TIER0 3.1(a)
+        \addlinespace
+        spread (range / mean) & 48.5\% & --- & 6.4\% & --- \\ % TIER0 3.1
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\section{The gap survives a change of scale}
+\label{sec:act1-scale}
+\bigskip
+% Outline item 6. Carries A1.4. Figures F2 (both scales), S1 (appendix).
+
+% P1: what carries, the separation.
+Every result so far has been a statement about one parcellation. The whole
+ladder was rebuilt at $N = 1000$, % TIER0 2.1
+a 2.2-fold % TIER0 1.4
+change in the number of nodes, and the question this section asks is which of
+the chapter's findings survive it. Two parcellations are one step and there is
+no third, so what follows is a robustness check across a single change of scale
+rather than a demonstration of invariance. The separation survives it, which is
+what panel~(c) of Figure~\ref{fig:F2} shows: at the
+against 2.30 to 2.44 % TIER0 3.1
+for the three nulls, which is the same clearance it had at the smaller one. That
+is the sense in which the gap, and only the gap, is the scale-robust finding of
+this chapter.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{F2.png}
-    \caption[Structure sets spectrum]{\textbf{The difference between the connectome and its nulls is a spectral gap, not a compact bulk, and what carries across scale is the gap.:} ....}
-    \label{fig:structure-sets-function-2}
+    \caption[The difference is a gap, and the gap is what carries across
+    scale]{%
+    \textbf{The difference between the connectome and its nulls is a spectral
+    gap, and what carries across scale is the gap.} Per-seed spectra of the
+    un-rescaled $W$, four variants by ten seeds, at both parcellation scales
+    (solid $N = 448$, % TIER0 2.1
+    translucent $N = 1000$). % TIER0 2.1
+    All three panels are zero-based and use one aggregation throughout, the
+    median over seeds of $\mathrm{bulk95}$ and of $|\lambda_1|$, so (c) is
+    exactly (b) divided by (a). \textbf{(a)} The absolute bulk radius,
+    near-identical across variants at $N = 448$ and merely close at $N = 1000$.
+    \textbf{(b)} $|\lambda_1|$ in raw units, where the variants do separate.
+    \textbf{(c)} The gap ratio, identically
+    $1/\mathrm{median}(\mathrm{bulk95})$ and identically the critical scale
+    $\mathrm{sr\_crit}$. Across a 2.2-fold % TIER0 1.4
+    change in $N$ the connectome's separation from every null holds while the
+    near-identity in (a) loosens, so the scale-robust statement is the
+    separation and not the coincidence of the bulks. The ordering among the
+    three nulls by $\mathrm{bulk95}$ reverses between scales and is not read
+    across them.}
+    \label{fig:F2}
 \end{figure}
+
+
+% P2: what loosens, the near-identity of the bulks.
+The near-identity of the bulks does not survive in the same way, and the two
+must be kept apart in every sentence that mentions either. In panel~(a) of the
+same figure the four bars at the two scales tell different stories: at
+$N = 448$ the four absolute bulk radii agree to 4.4\% % TIER0 3.1
+of their mean; at $N = 1000$ they spread 6.4\%, % TIER0 3.1
+or 6.9\% % TIER0 3.1
+if the per-seed products are taken before the median rather than after, so at
+this scale the aggregation has to be quoted with the number. The loosening is
+also narrower than that summary suggests: three of the four substrates still sit
+within 1.1\% % TIER0 3.1(a)
+of one another, and the whole of the difference among the four is the is the Erdős–Rényi rung sitting
+low. \emph{Merely close} is the right description of the set at the larger
+parcellation and \emph{near-identical} is a description of $N = 448$, which is
+why the agreement of the bulks and the robustness of the separation are never
+carried by one sentence.
+
+% P3: what reverses, the ordering among the nulls.
+The third thing scale does is reverse an ordering. Ranked by $\mathrm{bulk95}$,
+the three nulls do not fall in the same order at the two parcellations, and the
+same instability appears in the absolute bulk, whose largest value belongs to
+the connectome at $N = 448$ and to the degree-preserving rewire at
+$N = 1000$. % TIER0 3.1(a)
+Nothing in this thesis rests on either ordering, and the reason to record the
+reversal is to justify a discipline the chapter has been observing throughout:
+an ordering among the nulls is quoted at a named scale, or it is not quoted.
+Figure~\ref{fig:S1} rebuilds Figure~\ref{fig:F1} at the larger parcellation and
+is where the consequence is visible. Its rows are in ladder order, as F1's are,
+and at $N = 1000$ their gap ratios are consequently not monotone down the
+column. What the figure shows is the connectome's separation from all three
+nulls; the arrangement among them is not to be read off it.
+
+
+
+\section{What carries forward: a critical scale and a mode}
+\label{sec:act1-handover}
+\bigskip
+% Outline item 7. No new claims. One paragraph. No numerals by design.
+
+Two things leave this chapter and are used in the next. The first is
+$\mathrm{sr\_crit}$; the nominal spectral radius at which the median
+seed’s bulk edge reaches one. Because the gap ratio is also the inverse bulk, every
+substrate arrives carrying its own critical scale, the spectral radius at which
+its bulk edge reaches one, and the four substrates do not carry the same one.
+That is what makes a second matching axis possible at all: alongside the nominal
+spectral radius, which holds the Perron root fixed, the product
+$\sigma \cdot \mathrm{bulk95}$ holds the bulk fixed instead. What this chapter
+supplies is the quantity that second axis is built from, and no more than that.
+It does not make the axis neutral, and for the reason
+Chapter~\ref{chapter:methods} gave: the substrates differ in one quantity only,
+so each axis fixes exactly what the other lets vary. The second thing handed on
+is the Perron mode itself. This chapter has established that it stands clear of
+the bulk, and that weight placement is what puts it there; it has established
+nothing at all about what the mode does. The spectrum is a description of the
+operator, and the question the next chapter asks is where each part of it ends
+up in the activity that operator generates. The mode arrives there as an object
+to be decomposed rather than as an explanation, and it arrives with the limit
+set out above still attached to it. 
