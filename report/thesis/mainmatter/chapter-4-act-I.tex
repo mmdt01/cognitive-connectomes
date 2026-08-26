@@ -100,7 +100,7 @@ permutes the weights across the edges: same edge set, same degrees, and the same
 weight multiset exactly rather than in distribution, since the values are
 reordered rather than resampled. % METH B.1
 The only thing that differs from the connectome is which edge carries which
-weight. That makes it the sharpest of the three comparisons available here.
+weight. That makes it the sharpest comparison available here.
 Against the connectome it isolates weight placement, holding topology and weight
 statistics fixed together; against the degree-preserving rewire it isolates
 topology, since the two share a weight multiset and differ in the graph. Every
@@ -140,7 +140,7 @@ reports is defined around a Perron root that a signed matrix does not have.
 % Outline item 3. Carries A1.1. Figure F1a.
 
 % P1: the spectrum is real, and what follows for the figure.
-That build makes the substrate symmetric, and symmetry has a consequence for the
+The consensus build makes the substrate symmetric, and symmetry has a consequence for the
 spectrum that the whole chapter rests on: a symmetric matrix is normal, so its
 eigenvalues are real. This is not an approximation that holds well enough to
 work with. Across all forty ladder cells at $N = 448$ the largest imaginary part
@@ -231,7 +231,8 @@ steadily up the column while the coloured band beneath it stays put.
 Figure~\ref{fig:F2} makes the same decomposition as medians across the whole
 ladder rather than as drawn spectra: the absolute bulk in panel~(a), the Perron
 root in panel~(b), and Table~\ref{tab:act1-ladder} gives the full set at both
-parcellations. 
+parcellations. Reported instead as a fraction of each substrate's own Perron
+root, those same four bulk radii spread 47.3\%. % TIER0 3.1
 Nothing about the bulks has moved between those two numbers. Only the divisor
 has.
 
@@ -257,9 +258,8 @@ The statistic worth reporting is therefore the ratio of the two, $|\lambda_1|$
 over the absolute bulk radius, which panel~(f) draws per seed. It is
 3.078 % TIER0 3.1
 for the connectome against 1.81 to 1.92 % TIER0 3.1
-for the three nulls, so the connectome stands roughly
-$1.7\times$ % TIER0 3.1
-clear of every one of them. This is not a further measurement. The gap ratio,
+for the three rungs the figures draw beside it, so the connectome stands at least 1.6 times clear of every one of them.
+This is not a further measurement. The gap ratio,
 the inverse bulk and the critical scale are the same number,
 $|\lambda_1| / \mathrm{abs\_bulk} = 1/\mathrm{bulk95} = \mathrm{sr\_crit}$, % TIER0 3.1
 which is why panel~(f) can carry $\mathrm{bulk95}$ on its right-hand axis, and
@@ -306,10 +306,11 @@ rungs hold more of the connectome's topology fixed than the degree-preserving
 rewire does, one preserving its community structure and one its clustering, and
 neither recovers the gap. Their gap ratios are 1.95 % TIER0 3.1(b)
 and 2.08 % TIER0 3.1(b)
-at $N = 448$, against the connectome's 3.078, and at the larger parcellation
-they fall inside the same band as the two nulls the figures draw. Taking all
-six non-negative substrates together, the smallest margin anywhere is
-1.48-fold % TIER0 3.1(b), derived
+at $N = 448$, against the connectome's 3.078, and 2.24 % TIER0 3.1(b)
+and 2.37 % TIER0 3.1(b)
+at $N = 1000$, which is the same range the rungs the figures draw occupy.
+Taking all six non-negative substrates together, the smallest margin anywhere
+is 1.48-fold % TIER0 3.1(b), derived
 at $N = 448$ and 1.63-fold % TIER0 3.1(b), derived
 at $N = 1000$. Preserving the degree sequence, then the community structure,
 then the clustering coefficient recovers none of what placement supplies, so the
@@ -384,11 +385,14 @@ change in the number of nodes, and the question this section asks is which of
 the chapter's findings survive it. Two parcellations are one step and there is
 no third, so what follows is a robustness check across a single change of scale
 rather than a demonstration of invariance. The separation survives it, which is
-what panel~(c) of Figure~\ref{fig:F2} shows: at the
+what panel~(c) of Figure~\ref{fig:F2} shows: at the larger parcellation the
+connectome's gap ratio is 3.99 % TIER0 3.1
 against 2.30 to 2.44 % TIER0 3.1
-for the three nulls, which is the same clearance it had at the smaller one. That
-is the sense in which the gap, and only the gap, is the scale-robust finding of
-this chapter.
+for the three rungs the figures draw beside it, again at least
+1.6-fold % TIER0 3.1
+clear of every one of them. That is the sense in which the gap, and only the
+gap, is the scale-robust finding of this chapter.
+
 
 \begin{figure}[ht]
     \centering
@@ -410,8 +414,8 @@ this chapter.
     $\mathrm{sr\_crit}$. Across a 2.2-fold % TIER0 1.4
     change in $N$ the connectome's separation from every null holds while the
     near-identity in (a) loosens, so the scale-robust statement is the
-    separation and not the coincidence of the bulks. The ordering among the
-    three nulls by $\mathrm{bulk95}$ reverses between scales and is not read
+    separation and not the coincidence of the bulks. The ordering among the 
+    three non-connectome rungs by $\mathrm{bulk95}$ reverses between scales and is not read
     across them.}
     \label{fig:F2}
 \end{figure}
@@ -428,7 +432,7 @@ if the per-seed products are taken before the median rather than after, so at
 this scale the aggregation has to be quoted with the number. The loosening is
 also narrower than that summary suggests: three of the four substrates still sit
 within 1.1\% % TIER0 3.1(a)
-of one another, and the whole of the difference among the four is the is the Erdős–Rényi rung sitting
+of one another, and the whole of the difference among the four is the Erdős–Rényi rung sitting
 low. \emph{Merely close} is the right description of the set at the larger
 parcellation and \emph{near-identical} is a description of $N = 448$, which is
 why the agreement of the bulks and the robustness of the separation are never
@@ -436,7 +440,7 @@ carried by one sentence.
 
 % P3: what reverses, the ordering among the nulls.
 The third thing scale does is reverse an ordering. Ranked by $\mathrm{bulk95}$,
-the three nulls do not fall in the same order at the two parcellations, and the
+the three variants do not fall in the same order at the two parcellations, and the
 same instability appears in the absolute bulk, whose largest value belongs to
 the connectome at $N = 448$ and to the degree-preserving rewire at
 $N = 1000$. % TIER0 3.1(a)
@@ -457,12 +461,11 @@ nulls; the arrangement among them is not to be read off it.
 % Outline item 7. No new claims. One paragraph. No numerals by design.
 
 Two things leave this chapter and are used in the next. The first is
-$\mathrm{sr\_crit}$; the nominal spectral radius at which the median
-seed’s bulk edge reaches one. Because the gap ratio is also the inverse bulk, every
-substrate arrives carrying its own critical scale, the spectral radius at which
-its bulk edge reaches one, and the four substrates do not carry the same one.
-That is what makes a second matching axis possible at all: alongside the nominal
-spectral radius, which holds the Perron root fixed, the product
+$\mathrm{sr\_crit}$, the nominal spectral radius at which a substrate's own bulk
+edge reaches one. Because the gap ratio is also the inverse bulk, every
+substrate arrives carrying its own, and the four the figures draw do not carry
+the same one. That is what makes a second matching axis possible at all:
+alongside the nominal spectral radius, which holds the Perron root fixed, the product
 $\sigma \cdot \mathrm{bulk95}$ holds the bulk fixed instead. What this chapter
 supplies is the quantity that second axis is built from, and no more than that.
 It does not make the axis neutral, and for the reason
