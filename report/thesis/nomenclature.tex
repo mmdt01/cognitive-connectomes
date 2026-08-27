@@ -1,5 +1,81 @@
-\chapter*{Nomenclature}
-\addcontentsline{toc}{chapter}{Nomenclature}
+\chapter*{Glossary \& Notation}
+\addcontentsline{toc}{chapter}{Glossary \& Notation}
+
+
+\section*{Glossary:}
+\bigskip
+
+\begin{longtable}{p{2.5cm}p{12cm}}
+    \toprule
+    Term & Definition \\
+    \midrule\endhead % Add abbreviations alphabetically here:
+
+    \textbf{Common mode} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
+
+    \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity~\cite{atasoy2016human}. \\
+
+    \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates used here are symmetric, so their eigenvalues are real and the spectrum is a distribution on the real line. \\
+
+    \textbf{Gram matrix} & For a state matrix $A$, the un-centred second moment $A^{\top}A$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
+
+    \textbf{Null ladder} & The family of randomised substrates the connectome is compared against, each destroying some part of its organisation and holding the rest fixed. \\
+
+    \textbf{Operating point} & The nominal spectral radius at which a network is run, which sets how strongly its recurrent dynamics are driven. Every claim in this thesis is made along it. \\
+
+    \textbf{Participation ratio} & A dimensionality measure that counts the directions of the state covariance, each weighted by its share of the variance; it is small when a few directions hold most of the variance. \\
+
+    \textbf{Perron mode} & The eigenvector belonging to the leading eigenvalue of a non-negative matrix. The Perron--Frobenius theorem guarantees that this eigenvalue is real, positive and largest in modulus, and that its eigenvector is non-negative throughout, so the mode is a pattern in which every unit has the same sign. \\
+
+    \textbf{Ridge effective rank} & The number of directions of the state matrix that survive ridge regularisation, each counted by how far its Gram eigenvalue stands above the regularisation strength; equivalently, the effective degrees of freedom of the fitted readout. \\
+
+    \textbf{Ridge floor} & The ridge regularisation strength seen as a level within the Gram spectrum: directions whose eigenvalues stand well above it are available to the readout, and those well below it are suppressed. \\
+
+    \textbf{Spectral gap} & The separation between the Perron root and the bulk of the eigenspectrum. \\
+
+    $\mathrm{\textbf{sr\_crit}}$ & The nominal spectral radius at which a substrate's own bulk edge reaches one, identically $1/\mathrm{bulk95}$ and identically the gap ratio. It is a criticality scale each substrate carries with it, not the point at which that substrate becomes supercritical. \\
+
+    \textbf{Time-centring} & Subtraction of each unit's mean over time from the state matrix, which separates the fixed pattern of activity a network holds throughout a run from the fluctuations about it. \\
+
+
+    \bottomrule
+\end{longtable}
+
+
+\newpage
+\section*{Notation:}
+\bigskip
+
+\begin{longtable}{p{2.5cm}p{12cm}}
+    \toprule
+    Symbol & Meaning \\
+    \midrule\endhead
+
+    $W$ & Recurrent weight matrix of the reservoir, before rescaling \\
+    $N$ & Number of units, equal to the number of parcels of the connectome \\
+    $\sigma$ & Nominal spectral radius, the operating point \\
+    $\lambda_1$ & Perron root, the leading eigenvalue of $W$ \\
+    $\mathrm{bulk95}$ & 95th percentile of $|\lambda|$ over the spectrum, as a fraction of $|\lambda_1|$ \\
+    $f$ & Sign fraction, the proportion of weights made negative \\
+    \addlinespace
+    $A$ & State matrix, one row per retained timestep and one column per unit \\
+    $T_{\mathrm{eff}}$ & Number of timesteps retained after the warmup is discarded \\
+    $m$ & Vector of per-unit means over time \\
+    $\tilde{A}$ & Time-centred state matrix, $A - \mathbf{1}m^{\top}$ \\
+    $\bar{x}$ & Common-mode amplitude, the grand mean of $A$ over time and units \\
+    \addlinespace
+    $G$ & Gram matrix, $A^{\top}A$ \\
+    $g_i$ & Eigenvalues of $G$, in descending order \\
+    $\lambda_i$ & Eigenvalues of the state covariance \\
+    $\alpha$ & Ridge regularisation strength \\
+    $d_{\mathrm{eff}}$ & Ridge effective rank \\
+    $\mathrm{PR}$ & Participation ratio \\
+    $k$ & Number of leading basis vectors in a projection \\
+
+    \bottomrule
+\end{longtable}
+
+
+
 
 \section*{Abbreviations:}
 \bigskip
@@ -18,23 +94,4 @@
 
     \bottomrule
 \end{longtable}
-
-
-\section*{Glossary:}
-\bigskip
-
-\begin{longtable}{p{2.5cm}p{12cm}}
-    \toprule
-    Term & Definition \\
-    \midrule\endhead % Add abbreviations alphabetically here:
-
-    \textbf{Eigenspectrum} & the set of eigenvalues of a matrix \\
-
-    \textbf{Gram matrix} & a square matrix whose entries are the inner products 
-    of a set of vectors, capturing their geometric relationships and similarities \\
-
-
-    \bottomrule
-\end{longtable}
-
 

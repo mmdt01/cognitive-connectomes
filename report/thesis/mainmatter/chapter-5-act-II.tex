@@ -12,33 +12,28 @@
 % "the gap keeps the Gram spectrum clear of the floor" as something Act I showed;
 % "compact bulk".
 
-% P1: the two objects received, the scope of the chapter, and the question.
-Two objects arrive from Chapter~\ref{chapter:act-I}, and neither of them is a
-statement about activity. The first is $\mathrm{sr\_crit}$, the nominal spectral
-radius at which a substrate's own bulk edge reaches one. Because the gap ratio is
-also the inverse bulk, every substrate carries its own, and the four the figures
-draw do not carry the same one (Table~\ref{tab:act1-ladder}). That is what makes
-the second matching axis available at all, and it is also why that axis is not
-neutral: the substrates differ in one quantity only, so each axis holds fixed
-exactly what the other lets vary. The second object is the Perron mode. The
-previous chapter established that it stands clear of the bulk and that weight
-placement is what puts it there, and it established nothing else about it, offering
-no mechanism for why placement produces the gap and making no claim about capacity
-or about any task. The mode arrives here as an object to be decomposed rather than
-as an explanation, and that limit travels with it. Everything in this chapter sits
-at the $N = 448$ % TIER0 3.12
-parcellation and on non-negative weights, at $f = 0$; % SPINE, primary variable; A2 4.3.4
-the sign fraction $f$ is an intervention rather than a second variable, and it
-enters once, in Chapter~\ref{chapter:act-III}, where it is used to remove the
-proposed cause.% TODO: repoint to the section label for 6.3 once chapter 6 exists.
-The variable along which every claim below is made is the nominal spectral radius
-$\sigma$, the operating point. What the reservoir's readout sees, however, is neither the
-spectrum nor the operator that generates it. It is a state matrix: on the
-memory-capacity task, $2500 \times 448$ % A2 2.5
-real numbers, the states the reservoir passes through after its warmup is
-discarded, which a ridge solver then inverts
-(Chapter~\ref{chapter:methods}). So the question this chapter asks is which part
-of the spectrum ends up where in the reservoir's state matrix.
+% P1: what arrives from chapter 4, and the limits that come with it.
+Two things arrive from Chapter~\ref{chapter:act-I}, and neither is a statement
+about activity. The first is $\mathrm{\textbf{sr\_crit}}$, the spectral radius at which a
+substrate's own bulk edge reaches one. Every substrate carries its own value
+(Table~\ref{tab:act1-ladder}), which is what makes a second matching axis
+available, and also why that axis is not neutral: the substrates differ in one
+quantity only, so each axis holds fixed exactly what the other lets vary. The
+second is the \textbf{Perron mode}. The previous chapter established that it stands clear of
+the bulk and that weight placement is what puts it there. It arrives as
+an object to be decomposed rather than as an explanation.
+
+% P2: what the readout sees, the scope, and the question.
+What a reservoir's readout sees, however, is not the spectrum but the activity it produces.
+Driving a network with an input signal and recording every unit at every timestep
+gives an activity state matrix, and everything in this chapter is measured on that matrix. It is the
+joint product of two things, the recurrent connectivity that the null ladder varies
+and the input signal the network is driven by, and both are held fixed throughout.
+Except where Section~\ref{sec:act2-sign} states otherwise, every result below is
+measured on the memory-capacity task, in which the input is white
+noise, % A2 1
+on non-negative weights and at the $N = 448$ parcellation. The question the chapter
+asks is which part of the spectrum ends up where in that matrix.
 
 
 \section{Three captures, and what each can be asked}
@@ -53,155 +48,173 @@ of the spectrum ends up where in the reservoir's state matrix.
 % is section 5's; median-then-absolute-value on mean_state; "alpha was chosen at
 % 1e-6 for d_eff"; "the Gram spectrum is a property of W"; "compact bulk".
 
-% P1: the object, and the identity that poses the chapter's questions.
-Everything in this chapter is measured on one object. Write the post-warmup states
-as a matrix $A \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$, one row per retained
-timestep and one column per unit, assembled as Chapter~\ref{chapter:methods}
-describes. What a linear readout can use is not $A$ itself but its second moment,
-and there are two of those. The ridge solver inverts the un-centred Gram matrix
-$G = A^{\top}A$; the covariance of the states about their own time-average is
-formed instead from $\tilde{A} = A - \mathbf{1}m^{\top}$, where
-$m = T_{\mathrm{eff}}^{-1}A^{\top}\mathbf{1}$ collects each unit's mean over time.
-These are not the same object, and the difference between them is exact:
+
+
+% P1a: what the object is, and why it is the right one to measure.
+Everything in this chapter is measured on one object, and it is worth being
+concrete about what it is. Drive the reservoir with an input signal and record
+every unit at every timestep, and the result is the state matrix
+$A \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$ of the previous section: a
+trajectory through an $N$-dimensional space, one point per timestep, whose shape
+is what the phrase \emph{activity manifold} refers to. A linear readout does not
+see that trajectory directly. What it sees is the matrix of pairwise inner
+products between the units' time series, the \textbf{Gram matrix}
+$G = A^{\top}A$, whose entry $(i,j)$ is unit $i$'s time series dotted with unit
+$j$'s. That matrix records how the units co-vary and nothing else. It fixes the
+shape of the trajectory up to a rotation, discarding the coordinate frame and
+keeping the geometry, which is exactly the right thing to keep here: two networks
+whose states have the same Gram matrix have the same activity manifold in every
+respect a readout could detect, however differently the two are wired. $G$ is also,
+literally, the matrix a readout inverts, since fitting a ridge readout means
+solving $\hat{w} = (G + \alpha I)^{-1}A^{\top}y$. Its eigenvectors are the
+directions the population activity actually explores and its eigenvalues are how
+much of the trajectory lies along each of them, so the spectrum of $G$ is two
+things at once: a description of the manifold's shape, and the budget a linear
+readout has to spend on it. Every measure used below is a function of that
+spectrum.\footnote{$A^{\top}A$ describes the geometry over units. The companion
+object $AA^{\top}$ describes the geometry over time, and is where the shape of the
+trajectory as a path lives; the two share their non-zero eigenvalues, so
+\emph{the Gram spectrum} is unambiguous. This chapter measures the first.
+Section~\ref{sec:act2-toact3} returns to why the second is not measured here.}
+
+% P1b: the centring choice, the identity, and the guard.
+One choice inside that construction is not a preprocessing detail. As written $G$
+is un-centred, so it is dominated by wherever the activity sits on average rather
+than by how it moves, and a readout is handed both together. Writing
+$m = T_{\mathrm{eff}}^{-1}A^{\top}\mathbf{1}$ for each unit's mean over time and
+$\tilde{A} = A - \mathbf{1}m^{\top}$ for the time-centred states, the two are
+related exactly:
+
+\bigskip
 \begin{equation}
-    A^{\top}A \;=\; \tilde{A}^{\top}\tilde{A} \;+\; T_{\mathrm{eff}}\,m\,m^{\top}.
+    \underbrace{A^{\top}A \bracegap}_{\text{Gram matrix}}
+    \;=\;
+    \underbrace{\tilde{A}^{\top}\tilde{A} \bracegap}_{\substack{\text{fluctuations} \\ \text{about the mean}}}
+    \;+\;
+    \underbrace{T_{\mathrm{eff}}\,m\,m^{\top} \bracegap}_{\substack{\text{rank one:} \\ \text{the time-average}}}
     \label{eq:gram-split}
 \end{equation}
-Read the two terms on the right physically. The second is built from one number
-per unit, the level that unit sits at on average, so it has \emph{rank one}: it
-describes a single fixed pattern of activity that the network holds throughout the
-run, and it says nothing about how the activity moves. The first is everything
-that is left once that fixed pattern is subtracted, which is the part that varies
-from one timestep to the next and therefore the only part that can carry
-information about a changing input. Time-centring is the one subtraction that
-separates them. The identity settles nothing on its own: it says the time-average
-lives in a rank-one term, not that the Perron mode is that term, which is a
-measurement and is made in Section~\ref{sec:act2-perron}.
 
-% P2: the three questions the identity poses, and one capture per question.
-Equation~\ref{eq:gram-split} poses three questions, and this chapter answers them
-with three frozen captures, one apiece. \textbf{How large is the rank-one term?}
-That is a question about a single scalar per run, and the
-\emph{saturation-diagnostics} capture records it, along with the related quantities
-describing where the units are sitting: how far the network has been driven into
-the flat regions of its nonlinearity, and how strongly it has synchronised.
-\textbf{What is the remaining, fluctuating term organised by?} A cloud of activity
-in $N$ dimensions can be described in any orthonormal coordinate system, and asking
-which one lines up with the fluctuations is asking which structural feature of the
-network they follow. The \emph{basis-alignment} capture answers it by projecting
-the time-centred states onto the leading $k$ vectors of three candidate bases and
-recording the fraction of variance each holds: the eigenvectors of $W$, so the
-dynamical modes themselves; the low-frequency harmonics of the graph Laplacian,
-which are the smoothest patterns the wiring supports and are the network's
-analogue of low-frequency Fourier modes \cite{atasoy2016human}; and a random orthonormal basis, which
-supplies the chance level, since $k$ arbitrary directions out of $N$ capture about
-$k/N$ of the variance by construction and a basis that fails to beat that has told
-us nothing. \textbf{And how many directions of the fluctuating term does the
-readout actually have available?} That is set by where the eigenvalues of $G$ sit
-relative to the regularisation, so the \emph{Gram-spectra} capture stores the whole
-spectrum, all $N$ eigenvalues per run, rather than any summary of it. Storing the
-spectrum rather than the states is deliberate and is what makes the later sections
-possible: a state matrix runs to tens of megabytes per cell where a spectrum is
-$N$ floating-point numbers, % CONV working rule 5
-and every dimensionality measure this chapter uses is a function of the spectrum
-alone, so it can be recomputed afterwards at any regularisation strength without
-re-running anything.
 
-% P3: the scope limit on the narrowest capture, and the supercritical filter.
-The basis-alignment capture is much the narrowest of the three, and its limits are
-stated here rather than in a limitations section because they bind every sentence
-drawn from it. It holds two substrates, the connectome and the degree-preserving
-rewire, % COV 3.1
-and each weight condition was captured at two spectral radii only: one low point
-shared across conditions and one higher point of its own, which for the
-all-positive weights used throughout this chapter is
-3.0526. % COV 3.4
-So nothing drawn from it may be read as a result about the null ladder, since it
-carries neither an Erdős–Rényi rung nor the weight-permuted control, and the panels
-of Figure~\ref{fig:F5} each sit at their own condition's operating point rather
-than at one shared radius. Where anything below is called \emph{supercritical} it
-means a nominal spectral radius of at least
-3.05, % TIER0 3.2
-the connectome's own critical scale of
-3.078 % TIER0 2.1
-rounded down to the nearest point of the capture grid; the threshold is structural
-rather than tuned, and Section~\ref{sec:act2-counting} gives the evidence that it
-is conservative.
+% \begin{equation}
+%     \underbrace{A^{\top}A \vphantom{\rule[-1.0ex]{0pt}{0pt}}}_{\text{the Gram matrix}}
+%     \;=\;
+%     \underbrace{\tilde{A}^{\top}\tilde{A} \vphantom{\rule[-1.2ex]{0pt}{0pt}}}_{\substack{\text{fluctuations} \\ \text{about the mean}}}
+%     \;+\;
+%     \underbrace{T_{\mathrm{eff}}\,m\,m^{\top} \vphantom{\rule[-1.2ex]{0pt}{0pt}}}_{\substack{\text{rank one:} \\ \text{the time-average}}}.
+%     \label{eq:gram-split}
+% \end{equation}
 
-% P4: the common-mode proxy and its sign convention. Stated once, travels everywhere.
-The scalar that measures the rank-one term is the grand mean of the state matrix
-over both time and units, $\bar{x} = N^{-1}\mathbf{1}^{\top}m$, which is simply the
-mean of the same per-unit averages Equation~\ref{eq:gram-split} isolates; it is
-large when every unit sits far from zero together, which is what a network
-dominated by one common mode does. Its sign, however, is arbitrary, set by the
-particular input realisation a seed draws, and measurably so:
-48.8\% % COV 3.2
-of cells in the saturation capture carry a negative value. The absolute value is
-therefore taken per seed, \emph{before} any aggregation across seeds, and the order
-is not a matter of taste. Since
-$\bigl|\operatorname{med}_{s}(\bar{x}_{s})\bigr| \le
-\operatorname{med}_{s}\bigl|\bar{x}_{s}\bigr|$ for any sample, taking the median
-first can only understate the amplitude, and it understates it by an amount that
-depends on how many of a substrate's seeds fall either side of zero, which differs
-between substrates. The effect is a reordering rather than a common shift: in the
-wrong order the connectome's value at $\sigma = 6$ falls from
+The second term on the right of Equation \ref{eq:gram-split} is built from one number per unit, 
+the level that unit sits at on average. Consequently, the term has \textbf{rank one}: it
+describes a single fixed pattern of activity the network holds throughout the run,
+and says nothing about how the activity moves. The first term is everything left once
+that fixed pattern is subtracted, the part that changes from timestep to timestep
+and therefore the only part that can carry information about a changing input.
+Centring is the one subtraction that separates them, and it changes what the
+leading eigenvector means, which is why this chapter reports both objects and
+always says which is in use. The identity settles nothing on its own: it says the
+time-average lives in a rank-one term, not what that term consists of, and that is
+a measurement, made in Section~\ref{sec:act2-perron}. 
+
+% P1c: what determins the Gram matrix
+$G$ is determined jointly by three things: the recurrent matrix, the operating
+point it is scaled to, and the input driving it. Tracing how the first of those
+shows up in $G$ is what this chapter is for, and the other two are held fixed
+throughout so that it can. One thing will not be attempted, however. Nowhere below
+is the position of the Gram spectrum obtained analytically from the eigenvalues of
+$W$: the nonlinearity and the statistics of the input both intervene, and the link
+this chapter draws between the spectral gap and the number of usable directions is
+measured, one step at a time, rather than derived. Section~\ref{sec:act2-floor}
+supplies a direct reason why no such derivation could work from $W$'s spectrum
+alone, since the same recurrent matrix driven at different operating points puts
+its Gram spectrum in materially different places.
+
+
+% P2: the three questions the identity poses.
+Equation~\ref{eq:gram-split} poses three questions, and this chapter answers each
+from a separate set of measurements, made once and stored, so that nothing below
+required a network to be run again. \textbf{How much of the activity sits in the
+rank-one term?} That is one number per run: how far the units have all been driven
+from zero together. \textbf{What organises the part that is left?} Subtract the
+fixed pattern and what remains is a cloud of points in $N$ dimensions, which any
+set of $N$ perpendicular axes describes equally well. The informative question is
+whether axes read off the network's own structure happen to line up with it, and
+two candidates suggest themselves: the eigenvectors of $W$, which are the dynamical
+modes themselves, and the low-frequency harmonics of the graph Laplacian, the
+smoothest patterns the wiring supports and the network's analogue of low-frequency
+Fourier modes~\cite{atasoy2016human}. A third set of axes, drawn at random, sets
+the bar that makes the other two readable, since a structural basis that fails to
+beat chance has told us nothing. \textbf{And how many directions of that cloud can
+the readout use?} That depends on where the eigenvalues of $G$ sit relative to the
+regularisation, and it is the question the second half of this chapter turns on.
+
+% P3: the two scope limits that bind later sentences, and the sign fraction.
+Two limits on what those measurements can be asked bind everything that follows,
+and both are stated here rather than in a limitations section. The first is scope.
+The basis comparison was made on two substrates only, the connectome and the
+degree-preserving rewire, at two operating points per weight
+condition, % COV 3.1, 3.4
+so nothing drawn from it can be read as a result about the null ladder, and the
+panels of Figure~\ref{fig:F5} each sit at their own condition's operating point
+rather than at a shared one. The second is the sign convention. The common-mode
+amplitude carries an arbitrary sign, since which way the pattern points is settled
+by the input a given run happens to draw, so each run's value is made positive
+before runs are combined, never after.\footnote{The order is not a matter of taste.
+Combining first can only understate the amplitude, and by an amount that depends on
+how many of a substrate's runs straddle zero, which differs between substrates. In
+the wrong order the connectome's value at $\sigma = 6$ falls from
 0.759 % TIER0 3.7
-to 0.638 % TIER0 3.12
-while the weight-permuted null falls to
-0.575, % A2 5.1
-below it, reversing the comparison Section~\ref{sec:act2-perron} makes.
+to 0.638, % TIER0 3.12
+and the weight-permuted null falls to 0.575, % A2 5.1
+below the connectome, reversing the comparison Section~\ref{sec:act2-perron}
+draws.}
+One further piece of vocabulary: \emph{supercritical} below means an operating
+point of at least 3.05, % TIER0 3.2
+the connectome's own critical scale of 3.078 % TIER0 2.1
+rounded to the grid, a threshold that is structural rather than chosen to suit the
+results and that Section~\ref{sec:act2-counting} shows to be conservative. And
+where weight conditions are compared, in Section~\ref{sec:act2-sign}, they are
+separate weight families placed side by side. The proportion of negative weights,
+$f$, is an intervention applied to the connectome itself in
+Chapter~\ref{chapter:act-III}; nothing in this chapter varies it.
 
-% P5: d_eff defined here, justified in section 5. Lag caveat in the footnote.
-How many directions the readout has available needs a counting rule, and the
-obvious ones do not survive contact with the data. The rank of $A$ is the textbook
-answer and is useless in practice: the Gram spectra here decay smoothly over ten
-orders of magnitude without ever reaching zero, so the numerical rank is $N$ for
-every substrate and the question is not answered but hidden. Counting eigenvalues
-above some threshold is no better, since the threshold is arbitrary and a
-direction lying just either side of it is counted as one or as nothing. Both
-attempts fail for the same reason: they treat availability as a property of the
-state matrix alone, when what makes a direction usable is whether the
-\emph{readout} can put weight on it. So rather than choose a rule, this thesis
-reads one off the solver. A ridge fit already shrinks each direction by a factor
-determined by how far its Gram eigenvalue stands above the regularisation, and
-summing those factors gives the \emph{ridge effective rank}. With
-$g_1 \ge \dots \ge g_N$ the eigenvalues of $G$ and $\alpha$ the ridge
-regularisation strength,
-
+% P4: d_eff defined here, justified in section 5.
+That leaves the measure. Counting the usable directions of the state matrix needs a
+rule, and the rules available by inspection are unsatisfactory: these spectra fall
+smoothly across ten orders of magnitude without reaching zero, so every substrate
+has full numerical rank, and any cutoff placed by hand would count two otherwise
+indistinguishable directions as one and as none. Both approaches treat availability
+as a property of the states alone, when whether a direction is available depends on
+the readout, which cannot put weight on a direction the regularisation has
+suppressed however much structure it holds. So rather than choose a rule, this
+thesis takes the one the readout already implies. Ridge regression shrinks each
+direction by a factor set by how far its Gram eigenvalue stands above the
+regularisation strength $\alpha$, and adding those factors gives the \textbf{\emph{ridge
+effective rank}},
 \begin{equation}
     d_{\mathrm{eff}}(\alpha)
     \;=\; \sum_{i=1}^{N} \frac{g_i}{g_i + \alpha}
-    \;=\; \operatorname{tr}\!\bigl[G(G + \alpha I)^{-1}\bigr].
+    \;=\; \operatorname{tr}\!\bigl[G(G + \alpha I)^{-1}\bigr],
     \label{eq:deff}
 \end{equation}
-Each direction contributes a factor between zero and one: near one when its Gram
-eigenvalue stands clear of the regularisation floor, near zero when it lies well
-below, and exactly one half at the crossover $g_i = \alpha$. The sum is therefore a
-count of how many directions of the state matrix survive the regularisation,
-softened at the boundary, and the regularisation acts as a floor because that is
-what ridge regression does to a direction carrying little
-variance.\footnote{The memory-capacity design is nested in the lag, so the Gram at
-lag $k$ is the lag-zero Gram minus a positive semi-definite term of rank at most
-$k$, while the capture stores the spectrum at lag zero. Weyl's inequality bounds
-the difference by $0 \le d_{\mathrm{eff}}(0) - d_{\mathrm{eff}}(k) \le k$, since at
-most $k$ directions can be displaced and each is worth at most one count. At the
-deepest lag that permits a shift of up to 50 % A2 2.6
-units; measured on real cells it is 0.31 to 0.82, % A2 2.6
-a quarter of one per cent of the range reported across substrates in
-Section~\ref{sec:act2-counting}, so the stored spectrum stands in for every lag and
-the approximation cannot move an ordering.}
-The trace form is why this is the natural count here rather than a descriptor
-chosen to suit the argument: the ridge solution is
-$\hat{w} = (G + \alpha I)^{-1}A^{\top}y$, so Equation~\ref{eq:deff} is the
-effective degrees of freedom of the fitted readout in the standard
-sense~\cite{hastie2009elements}. That has a consequence for $\alpha$ which is easy
-to state and easy to get wrong. It is not chosen for the measure at all. It is the
-readout's own, $10^{-6}$ % TIER0 3.3
-on the memory-capacity task, taken from the same configuration the solver is handed
-rather than from a second copy of the number that could drift. Why this count and
-not a variance-weighted one is a result rather than a definition, and
-Section~\ref{sec:act2-counting} makes that case; making it here would leave the
+where $g_1 \ge \dots \ge g_N$ are the eigenvalues of $G$. Each direction
+contributes close to one when its eigenvalue stands well above $\alpha$, close to
+zero when it lies well below, and exactly one half at the crossover, so the sum
+counts how many directions survive the regularisation with a soft boundary rather
+than a sharp one. This is why $\alpha$ is called a \emph{floor} throughout: it is
+the level in the spectrum below which a direction stops being worth anything to the
+readout. The trace form on the right is what makes this the natural count rather
+than a descriptor chosen to suit the argument, since the fitted readout is
+$\hat{w} = (G + \alpha I)^{-1}A^{\top}y$ and Equation~\ref{eq:deff} is that
+readout's effective degrees of freedom in the standard
+sense~\cite{hastie2009elements}. It is a property of the fit, not a measure applied
+to it from outside, and $\alpha$ is correspondingly not free: it is the readout's
+own value, not a parameter of the measure. Why this count and not a
+variance-weighted one is a result rather than a definition;
+Section~\ref{sec:act2-counting} makes that case, and making it here would leave the
 measure looking assumed.
+
 
 
 \section{The Perron mode carries the mean}
@@ -220,48 +233,39 @@ measure looking assumed.
 
 % P1: what the identity leaves, and the two questions the two panels answer.
 Equation~\ref{eq:gram-split} splits the readout's matrix into a rank-one term
-carrying the time-average and a fluctuation term carrying everything that moves,
-but it does not say which part of the spectrum ends up in which. That is the
-question this section answers, and it has two halves. The first asks what the
-fluctuations are organised by, once the time-average has been removed: if the
-leading dynamical modes are still there, the decomposition is not clean and the
-readout is working in their shadow. The second asks how large the rank-one term
-gets, and how that depends on the substrate. Figure~\ref{fig:F4} answers them in
-turn.
+carrying the time-average and a fluctuation term carrying everything that moves. It
+does not say where the network's own dynamical modes end up between the two, and
+that is what this section measures, in two halves. The first asks what organises
+the fluctuations once the time-average is gone: if the leading eigenmodes of $W$
+are still among them, the decomposition is not clean and the readout is working in
+their shadow. The second asks how much of the activity the rank-one term consumes,
+and whether that depends on the substrate.
 
-% P2: A2.1. Below chance, with the harmonics control and the aggregation.
-Take the connectome at a supercritical operating point, remove each unit's mean
-over time, and ask how much of what is left the leading eigenvectors of $W$
-account for. The answer is that they account for less than nothing in particular.
-Section~\ref{sec:act2-captures} fixed the scale this is read against: $k$ arbitrary
-orthonormal directions out of $N$ hold about $k/N$ of the variance, so at $k = 1$
-chance is
-$1/448 = 0.0022$, % A2 2.1
-and the measured random baseline of
-0.0025 % A2 2.1
-sits where it should. The top eigenmode of $W$ holds
-0.0006, % A2 2.1
-below its own chance level, and it is below it in
-10 of 10 seeds at every $k \le 5$, % A2 F4
-reaching chance only around
-$k = 20$ % A2 F4
-and tracking it thereafter. On its own that result is ambiguous, because it is also
-what one would see if no structural basis whatever lined up with the fluctuations,
-which would make the measurement uninformative rather than the modes unusual. The
-graph harmonics settle it. On the same states, in the same panel, they sit
-7.6 times % A2 F4
-\emph{above} chance at $k = 1$, so the shortfall is specific to the modes the
-Perron root belongs to and is not a property of structural bases in general. One
-qualification travels with these numbers. The value of record for this comparison
-is pooled across the capture's three tasks and reads
-0.0001 % TIER0 3.12
-against a baseline of
-0.0023; % TIER0 3.12
-the figures in this chapter are drawn on the memory-capacity task alone, where the
-same quantity is several times larger, and the magnitude accordingly depends on
-which is quoted. The \emph{direction} does not, which is what the claim rests on:
+% P2: A2.1. Below chance, with the harmonics as the control that makes it mean
+% something. Aggregation moved to the footnote.
+Take the connectome at a supercritical operating point, subtract each unit's mean
+over time, and ask how much of what remains the leading eigenvectors of $W$
+account for. They account for less than chance would. The top eigenmode holds
+0.0006 % A2 2.1
+of the fluctuation variance against a random direction's
+0.0025, % A2 2.1
+it stays below chance in all
+ten seeds % A2 F4
+across the first several modes, and the curve reaches the random baseline only
+around $k = 20$ % A2 F4
+before tracking it thereafter.\footnote{These are the memory-capacity figures the
+panel draws. The value of record for this comparison is the pooled figure given in
+the caption, which is several times smaller, so the magnitude depends on which is
+quoted; the direction does not, and it is the direction the claim rests on.
 29 of the 30 % A2 2.1
-task and seed combinations sit below their own random baseline.
+task and seed combinations fall below their own random baseline.}
+On its own that could mean something much duller: that no structural basis lines up
+with these fluctuations at all, which would make the measurement uninformative
+rather than the modes unusual. The graph harmonics rule it out. Measured on the
+same states, in the same panel, they sit
+7.6 times % A2 F4
+\emph{above} chance. Some structural bases do align with the fluctuations. The
+dynamical modes the Perron root belongs to are the ones that do not.
 
 % Figure F4.
 \begin{figure}[ht]
@@ -270,75 +274,57 @@ task and seed combinations sit below their own random baseline.
     \caption[The Perron mode is a common mode]{%
     \textbf{The Perron mode is a common mode: it carries the time-average, and the
     fluctuations the readout uses are orthogonal to it.} Human $N = 448$ % TIER0 2.1
-    self-built consensus, all-positive empirical weights, memory-capacity task,
-    ten seeds, medians over seeds. \textbf{(a)} Fraction of the \emph{time-centred}
-    state variance held by the leading $k$ vectors of three orthonormal bases, on
-    the connectome alone at the supercritical operating point
-    $\sigma = 3.05$; % COV 3.4
-    both axes logarithmic, and not a statement about the null ladder. The dominant
-    $W$ eigenmodes fall below the random baseline and reach it only around
-    $k = 20$, % A2 F4
+    connectome, all-positive empirical weights, memory-capacity task,
+    medians over ten seeds. \textbf{(a)} Fraction of the \emph{time-centred} state
+    variance held by the leading $k$ vectors of three orthonormal bases, on the
+    connectome alone at $\sigma = 3.05$. % COV 3.4
+    The dominant $W$ eigenmodes fall below the random
+    baseline and reach it only around $k = 20$, % A2 F4
     while the graph harmonics on the same states sit well above it. The grey band
-    is the across-seed range of the chance curve, which is the quantity the
-    per-seed comparison is made against; a single random direction is far more
-    variable. Pooled across the capture's three tasks the leading mode holds
-    0.0001 % TIER0 3.12
-    against a 0.0023 % TIER0 3.12
-    baseline, the value of record. \textbf{(b)} Common-mode amplitude against
-    nominal $\sigma$ for the four substrates, absolute-valued before medianing
-    (Section~\ref{sec:act2-captures}). The connectome is the \textbf{least}
-    dominated at every $\sigma$ above roughly 1.5,
+    is the across-seed range of that baseline. \textbf{(b)} Common-mode amplitude
+    against nominal $\sigma$ for the four substrates. The connectome is the
+    \textbf{least} dominated at every $\sigma$ above roughly 1.5,
     0.759 % TIER0 3.7
     at $\sigma = 6$ against 0.949 to 0.989, % TIER0 3.7
     despite carrying much the largest Perron root
-    (Figure~\ref{fig:F2}). The nulls rise first because they become supercritical
-    first; the dotted rule is the connectome's own critical scale and the shaded
-    region lies above it.}
+    (Figure~\ref{fig:F2}). The dotted rule is the connectome's own critical scale;
+    the nulls become supercritical before it.}
     \label{fig:F4}
 \end{figure}
 
-% P3: A2.2 and the inversion. Refers back to chapter 4 without re-quoting.
-So the leading modes are absent from the fluctuations. Panel~(b) of the same
-figure asks where they went, by measuring the common-mode amplitude across the
-whole sweep in $\sigma$ for all four substrates. Every substrate's rises as it is
-driven harder, which is what a network being pushed into the flat regions of its
-nonlinearity does, and the nulls' rise first, since they reach their own critical
-scales well before the connectome reaches its; those scales are
-Chapter~\ref{chapter:act-I}'s and are not re-derived here. What matters is where
-the four curves end up. At $\sigma = 6$ % TIER0 3.7
+% P3: A2.2 and the inversion.
+So the leading modes are absent from the fluctuations. Panel~(b) asks where they
+went, tracking the common-mode amplitude across the sweep in $\sigma$ for all four
+substrates. Every substrate's amplitude rises as it is driven harder, which is what
+a network being pushed into the flat regions of its nonlinearity does, and the
+nulls rise first, since they reach their own critical scales well before the
+connectome reaches its. What matters is where the curves end up. At
+$\sigma = 6$ % TIER0 3.7
 the connectome sits at 0.759 % TIER0 3.7
 against the nulls' 0.949 to 0.989, % TIER0 3.7
-and near criticality at $\sigma = 2$ % TIER0 3.7
-the separation is wider still, 0.114 % TIER0 3.7
-against 0.53 to 0.59. % TIER0 3.7
-The connectome is the least common-mode dominated substrate on the ladder, and it
-is the substrate carrying by far the largest Perron root. That inversion is the
-finding of this section. It is not a paradox but a consequence of what
-Chapter~\ref{chapter:act-I} measured: what separates the connectome is a gap
-between its leading eigenvalue and its bulk, not a leading eigenvalue that is small
-or a bulk that is unusual, and a gap of that kind lets the leading mode be driven
-hard without the bulk following it. The nulls, whose bulk sits close behind their
-Perron root, synchronise as a whole. Their units end up pinned near the extremes of
-the nonlinearity together, which is what an amplitude approaching one means, and
-almost nothing is left that varies.
+and nearer criticality the gap is wider still. The connectome is the least
+common-mode dominated substrate on the ladder, and it is the substrate carrying by
+far the largest Perron root. That inversion is the finding of this section, and it
+is not a paradox. What distinguishes the connectome is the gap between its leading
+eigenvalue and its bulk, rather than a small leading eigenvalue or an unusual bulk,
+and a gap of that kind allows the leading mode to be driven hard without the bulk
+following it. The nulls, whose bulk sits close behind their Perron root,
+synchronise as a whole instead: their units end up pinned near the extremes of the
+nonlinearity together, which is what an amplitude approaching one means, and almost
+nothing is left over that varies.
 
 % P4: what this establishes and what it does not; poses section 4.
-Two things follow, and it is worth separating them from a third that does not. The
-decomposition is clean: the leading mode carries the time-average and the bulk
-carries what a readout could use, which is what licenses the rest of this chapter
-to work in the fluctuation subspace and to treat the rank-one term as accounted
-for. And the substrates differ in how much of their activity that rank-one term
-consumes, in the direction opposite to the one the spectrum naively suggests. What
-does \emph{not} follow is anything about capacity. Being least dominated by the
-common mode is not the same as having the most directions a readout can act on, and
-the step between them is the one this chapter has yet to measure; nothing above
-touches how the fluctuation spectrum is arranged, only how much of the activity is
-left in it. That arrangement is what the readout is finally sensitive to, through
-the regularisation floor Equation~\ref{eq:deff} counts against, and it is where
-Section~\ref{sec:act2-floor} goes next. Everything in this section, and everywhere
-else in this chapter, is measured on non-negative weights; no sign manipulation
-appears until Chapter~\ref{chapter:act-III}.
-
+Two things follow, and a third does not. The decomposition is clean, which licenses
+the rest of this chapter to work in the fluctuation subspace and treat the
+rank-one term as accounted for. And the substrates differ in how much of their
+activity that term consumes, in the opposite direction to the one their spectra
+naively suggest. What does not follow is anything about capacity. Being least
+dominated by the common mode is not the same as having the most directions a
+readout can act on, and nothing measured above touches how the fluctuation spectrum
+is \emph{arranged}, only how much activity is left in it. The arrangement is what
+the readout is finally sensitive to, through the floor of
+Equation~\ref{eq:deff}, and it is where the next section goes. Everything here, and
+everywhere else in this chapter, is measured on non-negative weights.
 
 
 
@@ -769,4 +755,6 @@ it is used to remove the common mode and check whether its consequences go with 
 
 
 
-
+\section{Handover}
+\label{sec:act2-toact3}
+\bigskip
