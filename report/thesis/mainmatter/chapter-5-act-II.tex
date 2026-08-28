@@ -751,6 +751,63 @@ it is used to remove the common mode and check whether its consequences go with 
 
 
 
+\section{The axis that does not move}
+\label{sec:act2-temporal}
+\bigskip
+% Additional section, not in the act2_manifold.md seven-item outline. Carries no
+% claim from the register; reports a negative result that bounds the chapter.
+% Placed here per CONVENTIONS working rule 8: negative results go where the claim
+% they bound is made. No figure: the curvature figure belongs to Act III.
+% Sources: fact sheet 12; A2 section 5 item 15; TIER0 3.11.
+% FORBIDDEN (sheet 12): bimodality as task-independent; any graded curvature or
+% trajectory-straightness account; "the manifold has been fully characterised";
+% "curvature is flat, so geometry does not matter"; "sigma_eff crosses 1".
+
+% P1: the second axis, measured and flat.
+A trajectory has a shape as well as a spread. Everything above concerns the spread:
+how many directions the activity occupies, and how many of them a readout can act
+on. The shape is a separate property, 
+and the natural way to measure it is the angle between successive steps along
+the path, averaged over the trajectory. Because it is computed on displacements
+rather than positions, it is unaffected by where the activity sits on average: the
+common mode's contribution to the time-average cancels in the difference, so this
+is a measurement of shape and not of offset.
+A path that runs nearly straight turns by a little; one that reverses
+on itself turns by close to $\pi$. 
+That quantity was recorded alongside everything else in this chapter, on all three
+tasks the captures cover, and it is reported here because it does not move. On the
+chaotic prediction task the seed-median curvature is
+0.261 % A2 5.15
+radians for the connectome and 0.263 % A2 5.15
+for Erdős–Rényi, and neither exceeds 0.26 at any operating point in
+between; % A2 5.15
+over the same range, predictive performance on that task falls by more than
+five-fold. % TIER0 3.11
+The two noise-driven tasks sit at much higher curvature and are equally flat. That
+the levels differ is a fact about the inputs rather than about the networks: a
+chaotic attractor is a smooth low-dimensional signal, so successive steps of the
+trajectory point in similar directions, whereas a white-noise drive delivers an
+independent kick at every timestep and successive displacements are close to
+uncorrelated. What the substrate contributes, on all three, is nothing.
+
+% P2: what that does and does not license.
+Two readings of this are available and only one is supported. It would be wrong to
+conclude that the geometry of the trajectory does not matter, since a quantity that
+does not vary cannot explain anything and equally cannot be ruled out. What the
+measurement does establish is narrower and more awkward: on the non-negative
+weights this chapter is measured on, prediction degrades sharply while the
+trajectory's shape stays put, so whatever governs that degradation is not visible
+on this axis, and the dimensional account developed above does not reach it either.
+The question of what does govern it is left open here and named as open. It is
+worth saying plainly that this is a limit on the chapter rather than a detail: the
+activity manifold has two axes, and the account offered above is an account of
+one.\footnote{One qualifier travels with any later statement about trajectory
+shape. Curvature on the chaotic task is sharply bimodal, with under one per cent of
+cells falling between the two clusters, but that is a property of the manifold
+\emph{and the signal driving it}: on the two noise-driven tasks roughly half of all
+cells sit in the band the chaotic task leaves empty. % A2 5.15
+The bimodality is real, and it is not general.}
+
 
 
 \section{From description to intervention}
@@ -793,27 +850,11 @@ retain, and once for how far into the future it can carry a signal of its own. T
 ridge effective rank goes forward as the instrument for the first of those, earned
 here rather than assumed, and with its scope attached.
 
-% P3: the boundary. The axis this chapter measured and cannot report.
-The third thing is a boundary rather than a result, and it is where the two halves
-of this thesis meet. A trajectory has a shape as well as a spread. This chapter has
-measured only the spread: how many directions the activity occupies and how much of
-the readout's budget they command. The shape was measured too, and it does not move.
-On the chaotic prediction task the curvature of the trajectory holds at
-0.26 % TIER0 3.11
-radians for the connectome and for Erdős–Rényi alike, unchanged from criticality to
-five times it, % TIER0 3.11
-while over that same range predictive performance falls by about an order of
-magnitude. % TIER0 3.11
-At $f = 0$, then, prediction is lost with the geometry intact, and neither the
-dimensional account developed here nor the memory results of the next chapter
-explain what governs it. That question is left open and named as open. The temporal
-axis is not flat everywhere: it begins to move once negative weights are
-introduced, which is one reason the intervention above is worth running on both
-halves of the problem at once. But at $f = 0$ there is nothing on it to draw, and
-the account this chapter offers of the activity manifold is an account of one of its
-two axes.\footnote{One qualifier travels with any later statement about trajectory
-shape. Curvature is sharply bimodal on the chaotic task, with under one per cent of
-cells falling between the two clusters, but that is a property of the manifold
-\emph{and the signal driving it}: on the two noise-driven tasks roughly half of all
-cells sit in the band the chaotic task leaves empty. % A2 5.15
-The bimodality is real, and it is not general.}
+% P3: the boundary, now a back-reference rather than a first report.
+The third thing carried forward is the boundary of
+Section~\ref{sec:act2-temporal}. Because the temporal axis does not move at
+$f = 0$, this chapter reports the spatial one alone; but that axis is not flat
+everywhere, and it begins to move once negative weights enter. The intervention
+described above therefore runs on both halves of the problem at once, and what it
+finds on the second is not a continuation of what this chapter has measured but a
+different regime, arriving where the geometry starts to change.
