@@ -3,4 +3,47 @@
 
 % Sigma is the operating-point axis, the one that moves in a real brain through neuromodulation and arousal
 
+The connectivity of neuronal networks is believed to lie at the heart of their processing abilities. 
+Implementing brain-derived connectivity maps as untrained recurrent networks has become a standard way 
+to ask which topological features support computation. However, how those features shape the geometry of 
+the network's activity, and how that geometry sets computational capacity, remains unclear.
+
+A robust finding across neural systems is that activity does not explore the available state space freely but 
+is confined to a low-dimensional manifold. Between network structure and the resulting dynamics lies the 
+connectivity matrix’s eigenspectrum. Its eigenvectors identify modes, coordinated patterns in which groups of 
+units rise and fall together, and its eigenvalues determine how strongly each is sustained. This depends not only 
+on the connectivity but on how hard the network is driven: scaling the weights up moves every mode together, 
+from activity that dies away to activity that is sustained indefinitely, and networks are conventionally compared 
+at a single setting of this gain. The modes are the manifold's axes, and the eigenvalues fix its extent along each; 
+only those axes carrying activity that varies independently are usable. 
+
+Here, we use this correspondence to compare a human structural connectome mode by mode against a ladder of 
+null networks that preserve its distribution of connection strengths, degree sequence and density in turn. 
+Because such connectivity is non-negative, every one of these networks is dominated by the same mode: the 
+whole population rising and falling together. Driven onto it, a network of any size carries essentially a 
+single number, leaving nothing to read out. The connectome sits further from that collapse than any null, 
+and weight placement is what puts it there. 
+
+We assess computational capacity through two demands that pull on the manifold in opposite ways: retaining past 
+inputs and predicting a signal forward when the network runs on its own output. Memory needs many axes carrying 
+independent activity, since each holds a different piece of history. They are not the axes variance would identify. 
+The manifold's memory lives in hundreds of directions carrying almost none of it. Dimensionality in this setting is
+conventionally read from how variance is distributed across the manifold. Measured that way, these networks rank 
+almost independently of what they compute, because such measures discount by construction the directions that 
+hold the information. We instead count directions by how much each contributes to what can be linearly recovered 
+from the state, a ridge-regularised effective rank of the manifold. Against measured memory, this ordering is 
+near-perfect where the variance-based one is near-zero.
+
+Prediction makes the opposite demand: not how many axes, but how the trajectory moves along them. 
+A path that turns sharply from step to step is one whose next point is hard to extrapolate, and we measure 
+this as the mean curvature of the network's trajectory. Being pulled toward the common mode straightens that 
+path and helps prediction, while destroying the independent axes memory requires. One geometric property, 
+read with opposite sign by the two capacities. 
+
+The connectome's peak memory is at or slightly below that of the nulls. What its weight placement buys is 
+not capacity but range: as the gain rises past the point where the nulls have collapsed onto the common mode, 
+the connectome is still computing. Connectivity, through the geometry it imposes, sets not how well a network 
+computes when the drive is tuned for it, but across how wide a range of drive it computes at all.  
+
+
 \afterpage{\blankpage}
