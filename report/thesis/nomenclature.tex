@@ -5,7 +5,7 @@
 \section*{Glossary:}
 \bigskip
 
-\begin{longtable}{p{2.5cm}p{12cm}}
+\begin{longtable}{p{2.5cm}p{12.5cm}}
     \toprule
     Term & Definition \\
     \midrule\endhead % Add abbreviations alphabetically here:
@@ -14,9 +14,13 @@
 
     \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity~\cite{atasoy2016human}. \\
 
+    \textbf{Effective spectral radius} & The spectral radius of the recurrent operator linearised about the network's driven state. An empirical locator of where free-running generation breaks, not a stability criterion. \\
+
     \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates used here are symmetric, so their eigenvalues are real and the spectrum is a distribution on the real line. \\
 
     \textbf{Gram matrix} & For a state matrix $A$, the un-centred second moment $A^{\top}A$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
+
+    \textbf{Lyapunov time} & The characteristic timescale over which nearby trajectories of a chaotic system separate; used here to express prediction horizons independently of the integration step. \\
 
     \textbf{Null ladder} & The family of randomised substrates the connectome is compared against, each destroying some part of its organisation and holding the rest fixed. \\
 
@@ -36,6 +40,7 @@
 
     \textbf{Time-centring} & Subtraction of each unit's mean over time from the state matrix, which separates the fixed pattern of activity a network holds throughout a run from the fluctuations about it. \\
 
+    \textbf{Valid prediction time} & The duration, in Lyapunov times, for which a free-running network's generated trajectory stays within a fixed error of the true one. \\
 
     \bottomrule
 \end{longtable}
@@ -52,7 +57,8 @@
 
     $W$ & Recurrent weight matrix of the reservoir, before rescaling \\
     $N$ & Number of units, equal to the number of parcels of the connectome \\
-    $\sigma$ & Nominal spectral radius, the operating point \\
+    $\sigma$ & Nominal spectral radius; the operating point \\
+    $\sigma_{eff}$ & Effective spectral radius \\
     $\lambda_1$ & Perron root, the leading eigenvalue of $W$ \\
     $\mathrm{bulk95}$ & 95th percentile of $|\lambda|$ over the spectrum, as a fraction of $|\lambda_1|$ \\
     $f$ & Sign fraction, the proportion of weights made negative \\
@@ -91,7 +97,7 @@
     GNN & Graph Neural Network \\
     RNN & Recurrent Neural Network \\
     ML & Machine Learning \\
-    SOTA & State-of-the-art \\
+    MC & Memory Capacity \\
 
     \bottomrule
 \end{longtable}

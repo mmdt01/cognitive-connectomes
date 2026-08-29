@@ -754,3 +754,136 @@ seven-section breakdown to its Act III entry.
 Act I's "**chapter 6 §6.1.1** carries it forward", which names a sub-subsection the
 breakdown does not have and cannot have, since the breakdown is seven sections with no
 third level. The added block records the mapping in place rather than editing them.
+
+---
+
+# APPENDED 29 August 2026: two read-only audits run for the chapter 6 §6.2 drafting session
+
+**Written during the chapter 6 §6.2 writing session.** Two read-only audits were run
+against the frozen artifacts: one to settle **B14**, one to obtain TIER0 §3.2's ordering
+statistic as a curve in sigma for §6.2's prose. The first succeeded and resolves B14. The
+second **failed its reproduction gate** and the failure is recorded here rather than
+worked around, per `report/CONVENTIONS.md` working rule 1. Nothing above this line was
+rewritten. Disagreement numbering continues at **B23**. No TIER0 section, act file or
+fact sheet was amended by either audit or by this entry.
+
+## B14. RESOLVED 29 August 2026 — same quantity, two ridge parameterisations
+
+The two pairs are **the same quantity under the same filter**: the pooled median memory
+capacity over the identical 520 supercritical cells (130 per variant, `spectral_radius
+>= 3.078`, `f` = 0, 10 seeds), taken from two runs that differ **only in how the ridge is
+parameterised**.
+
+| | fixed-alpha run | reparameterised run |
+|---|---|---|
+| file | `taskB_extended_sweep_scale_448.parquet`, column `mc_alpha_1e-06` | `n1000_memory_scale_448.parquet`, column `mc` |
+| ridge | fixed absolute alpha = 1e-6 at every cell | `alpha = lambda*trace(G)/N`, lambda = 4.4845e-10, pinned so the supercritical median alpha is 1e-6 |
+| levels | 12.278508 / 7.332849 / 4.622562 / 2.821782 | 12.3232 / 7.3449 / 4.6138 / 2.8031 |
+| ratio | **4.35133** | **4.39628** |
+
+Joined cell by cell on `(variant, seed, spectral_radius)` the two files overlap
+completely, and the median absolute per-cell change is **0.323%**, which reproduces TIER0
+§2.4's own control line ("median per-cell change 0.32%") from the artifacts. That
+sub-percent jitter is enough to move which cell sits at the pooled median.
+
+**So there are not three numbers but two moves on one quantity.** The reparameterisation
+moved the N = 448 margin **4.35 to 4.40** at fixed N, which is the control TIER0 §2.4
+already publishes; the change of scale then moved it **4.40 to 4.42**.
+
+**The 4.355 recorded in B14 is not a computed ratio.** It is 12.28 / 2.82, the two
+already-rounded levels divided by each other. No filter or aggregation of either file
+returns it.
+
+**Consequence carried, not resolved.** `report/CONVENTIONS.md`'s standing rule pairs
+"4.40 to 4.42" with "12.28 against 2.82", which places a margin from the reparameterised
+ridge beside levels from the fixed-alpha ridge. The two are one run apart, not one filter
+apart. Recorded here; `CONVENTIONS` is not amended by this entry.
+
+## B23. Fact sheet 14 mis-sources TIER0 §3.2's ordering statistic
+
+| document | value |
+|---|---|
+| Fact sheet 14, movement 1, last row | ordering **-1.00** subcritical, **-0.11** near peak, **+0.93** supercritical, spread **83 / 83 / 352**, artifact `taskA_ordering_by_sigma.csv`, aggregation "per-sigma ordering statistic, alpha = 1e-6" |
+| The artifact, read 29 August 2026 | that file holds 13 rows and **cannot return those three values by construction** |
+
+`alpha_sweep.py` computes the ordering by two non-equivalent routes.
+`ordering_source()` (line 180) writes `taskA_ordering_by_sigma.csv` and computes **one
+Spearman per sigma** across the seven-rung ladder. `ladder_by_alpha()` (line 135) writes
+`taskA_ladder_by_alpha.csv`, pooling every sigma in a region into one variant-median per
+variant and computing **a single Spearman over the region**. TIER0 §3.2's three values are
+the second function's output, emitted by `write_summary()` (line 245) from the ladder file.
+**A pooled regional Spearman is not any average of the per-sigma Spearmans inside it**, so
+the per-sigma file cannot reproduce them.
+
+Under §3.2's own region boundaries the per-sigma file gives: subcritical mean **-0.94**
+(median -0.96, from -0.96 / -1.00 / -0.96 / -0.82); near peak mean **+0.04** (median
++0.00, from -0.79 / -0.64 / +0.64 / +0.93); supercritical **+0.93**. Only the
+supercritical row agrees, and it agrees incidentally, the per-sigma statistic being
+constant across all four supercritical grid points.
+
+**Consequence.** Sheet 14 also attributes to this row the statement that the ordering
+"already flips sign at **sigma = 2.53**, 0.52 below the threshold". The audit stopped at
+the gate and **did not reach that item**, so the value is unverified and its provenance is
+now doubtful. It is not quoted in chapter 6.
+
+**What survives.** The qualitative three-regime shape is the same under both statistics:
+reversed subcritically, absent near the peak, strong and positive supercritically. Only
+the supercritical **+0.93** is quoted in chapter 6, being the one value that reproduced.
+
+## B24. The near-peak ordering sign: TIER0 against its own generator
+
+| document | value |
+|---|---|
+| TIER0 §3.2 | near-peak ordering **-0.11** |
+| `criticality_matched/results/taskA_alpha_summary.md`, generated by `alpha_sweep.py` | **+0.11**, with the bullet "the ordering is **absent** (+0.11)" |
+
+`alpha_sweep.py` prints `-spearman_vs_rank` (line 250), and its emitted summary carries
++0.11 for that row while TIER0 prints -0.11 and keeps the other two rows' negated signs.
+The underlying effect is null either way (**p = 0.819** in `taskA_ladder_by_alpha.csv`),
+so nothing turns on the sign, but the near-peak row **would fail to reproduce as printed
+from any file in this capture**, independently of B23's per-sigma / pooled distinction.
+
+This is `report/act3a_memory.md` §5 item 6's category, a value in generated markdown
+disagreeing with the canonical document, found this time in the opposite direction. For
+whoever owns TIER0. Chapter 6 quotes neither value and states the near-peak ordering as
+absent.
+
+## B25. The aggregation behind TIER0 §2.4's supercritical MC table
+
+| document | value |
+|---|---|
+| Fact sheet 14, movement 3 | "**seed medians** over cells with `sigma >=` the connectome's `sr_crit`" |
+| TIER0 §2.4 | states **no aggregation**: the table is headed only "supercritical MC (sigma >= the connectome's `sr_crit`)" |
+| The artifact, read 29 August 2026 | the published values are returned by the **pooled median over the 130 supercritical cells per variant** |
+
+Measured on `n1000_memory_scale_448.parquet`, the alternatives on the same rows:
+
+| aggregation | conn | w-perm | degree | ER | ratio |
+|---|---|---|---|---|---|
+| **pooled median over cells** | **12.3232** | **7.3449** | **4.6138** | **2.8031** | **4.3963** |
+| median over seeds per sigma, then over sigma | 11.8963 | 5.4555 | 4.4325 | 2.7511 | 4.3242 |
+| median over sigma per seed, then over seeds | 12.1846 | 6.0582 | 4.4325 | 2.7511 | 4.4290 |
+| pooled mean over cells | 11.8343 | 7.6430 | 5.2988 | 3.4680 | 3.4124 |
+
+Only the pooled reading reproduces §2.4's published row. Sheet 14 supplied an aggregation
+TIER0 does not state, and supplied one that does not return the published values. Chapter 6
+describes the aggregation as the artifact performs it.
+
+**A second attribution corrected in passing.** B14 above attributes the fixed-alpha pair to
+"§3.3's taskA alpha sweep". `taskA_deff_alpha.parquet` carries **no MC column at all**
+(schema: `variant, rung, spectral_radius, seed, alpha, d_eff, n_design_cols,
+d_eff_norm`), and no MC column exists in any `taskA_*.csv`. §3.3 is the **taskB** MC(alpha)
+re-run, as `taskB_summary.md` states in prose.
+
+## H. Status after 29 August 2026
+
+**New this session:** **B14 resolved**; **B23 to B25** opened, none resolved. Both audits
+were read-only, recorded SHA-256 digests before and after, and confirmed all opened files
+unchanged (fourteen files in the ordering audit, nineteen in the B14 audit).
+
+**Not edited, deliberately:** `TIER0_STATE_OF_PLAY.md`, `ACTION_PLAN_JOURNAL_ROADMAP.md`,
+`report/CONVENTIONS.md`, `report/FIGURE_LIST.md`, `report/CROSS_ACT_SPINE.md`, both Act III
+files, every fact sheet other than this one, `report/figlib`, `src/` and `report/thesis/`.
+**B23, B24 and B25 each identify a correction a rank-1 or rank-4 document should absorb,
+and none is made here**, on the same grounds as the 28 August block: a rank-5 record does
+not instruct the documents above it.
