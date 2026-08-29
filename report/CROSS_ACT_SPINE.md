@@ -184,26 +184,84 @@ common mode, and it delivers both consequences from one manipulation. The unifyi
 is therefore the **conclusion** of a causal test rather than a frame the reader must
 accept up front.
 
-- **§6.1 Memory along the regime axis, f = 0.** The crossing (peaks lowest at 432.4,
-  retains most at 47% against 28 / 22 / 11%); peak parity with its interval, with the
-  Aceituno reconciliation on the panel that reproduces their ordering; the N = 1000
-  margin under both thresholds; and what the gap buys, with `|mean_state|` rising 0.114 to
-  0.759 across sigma against ER's 0.593 to 0.989.
-- **§6.2 Prediction along the regime axis, f = 0.** Prediction decays roughly tenfold
-  with sigma while curvature stays flat at 0.26; collapse resistance far supercritically
-  (0 of 10 seeds against ER's 5 of 10, sigma 7.6 to 8.0, Fisher p = 0.033) and no
-  advantage at all near criticality; then the named open problem, with three candidate
-  explanations ruled out on the data and no fourth offered.
-- **§6.3 Is the common mode the cause? Remove it.** f introduced as a lesion. Memory:
-  nobody degrades, everyone gains, and the advantage closes because the nulls gain about
-  four times as much from a much lower start. Hub-targeted inhibition as the most
-  efficient way to destroy the mode. Generation: the switch appears once negative weights
-  make the period-2 branch reachable, and the VPT advantage clears the placement control.
-  `sigma_eff` as a locator, not a criterion. The free-running rollout, with its refuted
-  half reported at length.
-- **§6.4 One axis, two readouts.** The map argument, now earned; the crossing quantified
-  with its axis and its coverage; the scope limit back onto §6.2's open problem; and the
-  statement that contribution 2 has no out-of-sample test in this thesis.
+> **Expanded to seven sections, 28 August 2026, on the author's decision.** The four
+> bullets this replaces stated the same ordering at a coarser grain and are superseded by
+> the list below. **The ordering rationale above is unchanged and so is the
+> withdrawn-language table.** The mapping: old §6.1 becomes **§6.2**, old §6.2 becomes
+> **§6.3**, old §6.3 splits into **§6.4** (memory) and **§6.5** (generation), old §6.4
+> splits into **§6.6** (the map argument and the crossing) and **§6.7** (the scope
+> limits), and **§6.1 is new** and carries no results.
+>
+> **Seven numbered sections and no third level.** Content below a section is unnumbered
+> prose. A section carrying several movements names them in its description as a
+> sentence, not as a numbered list, and no sub-subsection is created for one.
+>
+> **Four places in this document still cite the old numbering and were deliberately not
+> edited**, since this session adds the breakdown and changes nothing else: "chapters 4,
+> 5 and §6.1 to §6.2 are entirely at f = 0" and "it appears in exactly one place, chapter
+> 6 §6.3" under **The primary variable and the intervention**; **open flags 2 and 3**
+> below; and **"chapter 6 §6.1.1 carries it forward"** under Act I, which names a
+> sub-subsection the breakdown does not have. Read against the breakdown, f enters at
+> **§6.4**, the two f = 0 sections are **§6.2 and §6.3**, flag 2's undrawn decay result
+> belongs to **§6.3**, F11's panels split across **§6.2 and §6.4**, and the comparison
+> problem is carried forward in **§6.1** with no third level beneath it.
+
+- **§6.1 What is being asked, and along which axis.** No results. What chapter 5 handed
+  over; the two demands the chapter puts to the substrate; spectral radius as the
+  operating-point axis and the primary variable of the thesis; both matching axes carried
+  forward from chapter 3 rather than re-derived; and an orientation table giving the
+  address of each result in the chapter (task, f, sigma, axis, metric), since two of them
+  read as a contradiction if the radius is dropped. One sentence flags that §6.2 and §6.3
+  are entirely at f = 0 and that a manipulation is introduced in §6.4. **Figures: none.**
+  F3 is chapter 3's; its argument is carried forward, not re-drawn.
+- **§6.2 Memory along the regime axis, at f = 0.** The crossing: peaks lowest at 432.4,
+  retains most at 47% against 28 / 22 / 11%, and why the peak is unresolvable at N = 448
+  so the chapter reads the decay region. Parity at the peak said with an interval, with
+  the Aceituno reconciliation placed on the panel that reproduces their ordering rather
+  than deferred to the discussion. The N = 1000 margin under both thresholds, compressed:
+  protocol, both thresholds, the ceiling not escaped as predicted, and the one
+  pre-registered falsification test that came back inconclusive and why it was a flawed
+  test. Then what the gap buys at f = 0, the mechanism, using chapter 5's common-mode and
+  floor results rather than re-establishing them, with `|mean_state|` rising 0.114 to
+  0.759 across sigma against ER's 0.593 to 0.989. Ends on the one-line version and what it
+  costs to say. **Figures: F7** (the lead figure), **F10** (parity, and the Aceituno
+  ordering on its alpha = 1e-8 panel), **F9** (both thresholds), **F11 panel (a) at its
+  f = 0 column** only.
+- **§6.3 Prediction along the regime axis, at f = 0.** Three sentences on what the closed
+  loop asks that the driven tasks do not, with the full protocol left to the methods
+  chapter. Prediction decays roughly tenfold with the operating point while the geometry
+  does not move, curvature staying flat at 0.26. Collapse resistance far supercritically,
+  0 of 10 seeds against ER's 5 of 10 at sigma 7.6 to 8.0, Fisher p = 0.033, with the
+  near-critical null result stated in the same breath and the radius named every time.
+  Then what sets generation at f = 0 as a named open problem, with the candidate
+  explanations ruled out on the data and no further one offered. **Figures: F13 panel (c)**
+  for the collapse asymmetry and **panels (a, b) at their f = 0 column** for the
+  near-critical null result. **The decay result has no figure** and is stated inline: open
+  flag 2.
+- **§6.4 Removing the common mode: memory.** The intervention and why, stated once: every
+  substrate at f = 0 has a Perron mode, so the common-mode account cannot be tested by
+  comparison alone, and grading f is the only manipulation in the thesis that removes the
+  proposed cause. Then nobody degrades, and the advantage closes because the nulls gain
+  far more from a much lower start. How much of the gap `bulk95` explains, as a controlled
+  comparison rather than a correlation. Hub-targeted inhibition as a consequence of where
+  the mode is destroyed, not as a separate result, compressed to one paragraph if the
+  section runs long. **Figures: F11, panels (a) across the whole f axis and (b).**
+- **§6.5 Removing the common mode: generation.** The same intervention, the opposite
+  consequence. The switch appears once negative weights make the period-2 branch
+  reachable. Prediction improves before it breaks, clearing the placement control. What
+  locates the transition and what does not, in one paragraph and its figure. The
+  free-running rollout, with its pre-registered claim reported in both halves and the
+  refuted half at length. **Figures: F12, F13 panels (a, b), F14, F17.**
+- **§6.6 One axis, two readouts.** The map argument, now earned rather than asserted,
+  because §6.4 and §6.5 showed both consequences following from one manipulation. The
+  crossing quantified, with its axis and its coverage. The bridge from memory capacity
+  through NARMA-10 to Lorenz, one paragraph, which is what makes the dissociation an axis
+  rather than two tasks. **Figures: F16.** The bridge paragraph has no figure: NARMA-10
+  has no slot on `report/FIGURE_LIST.md` and is not given one.
+- **§6.7 What the account does not cover.** The scope limit returned to deliberately: the
+  account is a statement about the f > 0 counterfactual, which is §6.3's open problem
+  restated from the other side. And that contribution 2 has no out-of-sample test in this
+  thesis, stated here rather than left to the discussion. **Figures: none.**
 
 **Hands on.** The dissociation as one axis, and one named open problem.
 

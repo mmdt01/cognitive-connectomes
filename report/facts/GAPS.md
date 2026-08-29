@@ -421,3 +421,336 @@ zero-strip, **was** absorbed into T0 as amendment (a) on 24 August 2026. The oth
 interior-minimum wording, was absorbed as amendment (b). The numbers that remain
 check-file-only, listed under C above, are the ones **no rank-1 document has yet
 absorbed**, and a claim resting on any of them is resting on a check file.
+
+---
+
+# APPENDED 28 August 2026: chapter 6 (Act III), sheets 13 to 19
+
+**Written for the chapter 6 structure-and-extraction session.** Seven sheets were added
+(**13** frame, **14** memory along the regime axis, **15** prediction along the regime
+axis, **16** removing the common mode: memory, **17** removing the common mode:
+generation, **18** one axis two readouts, **19** what the account does not cover) and the
+seven-section breakdown was written into `report/CROSS_ACT_SPINE.md`'s Act III entry.
+Nothing above this line was rewritten. Section letters continue the existing scheme;
+disagreement numbering continues at **B14**.
+
+Additional source key for this block: **A3M** = `report/act3a_memory.md`. **A3P** =
+`report/act3b_prediction.md`. **RM** = `ACTION_PLAN_JOURNAL_ROADMAP.md`. **PREREG** =
+`report/PREREG_MACKEY_GLASS.md`.
+
+---
+
+## A (continued). Numbers the chapter 6 breakdown commits to that are in no document
+
+Nothing below was reconstructed, computed from neighbouring values, or omitted silently.
+
+| what is missing | which section commits to it | where I looked |
+|---|---|---|
+| **The orientation table itself.** §6.1 commits to a table giving the address of every result in the chapter (task, `f`, sigma, axis, metric). Every **cell** is sourced and is on sheet 13; **no document carries the table**, and nothing states the chapter's result inventory as a list | §6.1, movement 4 | T0 §0 to §6 in full; SPINE Act III; A3M §1; A3P §1; FL's claim-to-primary-task mapping |
+| **The connectome's absolute VPT as a function of `f` at sigma = 2**, which is what "prediction improves before it breaks" would need. T0 §2.6 publishes **paired margins** only (+0.28 / -0.01 / +0.44 at `f` = 0; +1.71 / +1.62 / +2.20 at `f` = 0.25) plus the range "**1.3 to 2.8** against the nulls' **0.1 to 0.9**" from `f` ~ 0.20 to 0.25. The only absolute `f` = 0, sigma = 2 value in any document is T0 §3.11's **4.43**, which is *above* that range, so **no published number supports an increase in absolute VPT with `f`**. F13 panel (a) draws the curve; its values are in no document | §6.5, movement 2 ("prediction improves before it breaks") | T0 §2.6, §3.11, §6.9 in full; A3P §1, §2.1, §3's F13 block and caption, §5 items 2 and 6; FL's F13 row |
+| **The `f` at which the period-2 branch first becomes reachable.** T0 §3.9 says grading `f` makes it reachable "at far lower sigma" and gives no `f` onset; the collapse loci are per (variant, `f`) and only the `f` = 0 and `f` = 0.05 counts are published | §6.5, movement 1 ("the switch appears once negative weights make the period-2 branch reachable") | T0 §2.3, §3.9, §3.10, §3.11; A3P §1, §3's F12 and F13 blocks; FL F12 and F13 rows |
+| **An artifact path for the hub-gating and Dale-minus-edge tables.** T0 §3.8 and §3.5 publish their tables with **no "Artifacts:" line**, unlike §2.3, §2.6, §3.7, §3.10 and §3.11. Sheet 16's artifact cells for those rows can say no more than "Dale-axis capture" | §6.4, movement 4 | T0 §3.5 and §3.8 in full; A3M §1 (which cites §3.8 without an artifact); FL (hub-gating has no figure) |
+| **Any per-variant `f` = 0 curvature and VPT sweep beyond connectome and Erdős–Rényi.** T0 §3.11's table carries two variants at five sigma of the 29-point grid. An inline statement of §6.3's decay result can therefore carry **connectome and ER only**, at those five sigma | §6.3, movement 2, and open flag 2 | T0 §3.11 in full; A3P §2.1's gate row and §5 item 6; FL (no figure exists) |
+
+---
+
+## B (continued). Disagreements between documents, both values given, unresolved
+
+### B14. Supercritical MC, connectome against Erdős–Rényi, N = 448: **two TIER0 values**
+
+| document | value |
+|---|---|
+| T0 §3.3, and T0 §5's Aceituno paragraph | **12.28 against 2.82** at alpha = 1e-6 (ratio 4.355) |
+| T0 §2.4, reproduced exactly in A3M §2.3 | **12.32 against 2.80** (recomputed 12.3232 / 2.8031), ratio **4.40** |
+
+Both are supercritical median MC for the same pair at N = 448 and both are rank-1. They
+come from different filters (§3.3's taskA alpha sweep against §2.4's
+`n1000_memory_scale_448.parquet` at `sigma >=` the connectome's `sr_crit`). **CONV's
+standing rule pairs them across the split**: "every margin is quoted with its levels
+(4.40 to 4.42 always beside 12.28 against 2.82)", i.e. a ratio from one filter beside
+levels from the other. Carried on sheet 14, both rows.
+
+### B15. The share of Lorenz cells at the VPT floor
+
+| document | value |
+|---|---|
+| T0 §2.6 | **42%** of Lorenz cells are exactly 0 |
+| A3P §2.6 finding 3 | **41.3%**, rising from **7.2%** at `f` = 0 to about **65%** at `f` >= 0.30 |
+
+Same quantity, same capture; rounding or a filter difference, not stated either side.
+Carried on sheet 15.
+
+### B16. The connectome-minus-Erdős–Rényi MC advantage across `f`
+
+| document | value |
+|---|---|
+| T0 §2.6 | **+9.01 to +1.07**, from seed medians at **sigma = 6** on `e03_frontier_scale_448.parquet` (11.43 / 2.42 at `f` = 0; 14.18 / 13.11 at `f` = 0.5) |
+| A3P §5 item 7, the bridge paragraph | **+8.95** at `f` = 0 falling to **+0.50** at `f` = 0.50, as the **supercritical** advantage on the phase-diagram grid |
+
+Different populations and filters, neither stating its relation to the other. The two are
+close enough to be mistaken for one number stated twice, which is why they are recorded.
+Carried on sheets 16 and 18.
+
+### B17. From which `f` the generative margin clears all three nulls
+
+| document | value |
+|---|---|
+| RM §1 contribution 4 | "the only substrate still predicting **from `f` ~ 0.20** (+1.0 to +2.2 Lyapunov times **over all three nulls**)" |
+| T0 §2.6 | "from `f` ~ **0.20 to 0.25**" |
+| A3P §5 item 2, measured | at `f` = 0.20 the paired margins are +1.46, **+0.28** and +1.82, i.e. **two of three**. Three of three only from `f` = **0.25** |
+
+A3P states plainly that RM's two clauses "cannot both be true" and that F13's shading
+starts at 0.25. Carried on sheet 17.
+
+### B18. How many matched-axis crossings lie inside coverage
+
+| document | value |
+|---|---|
+| T0 §2.3, and FL's F16 flag | "**only the first** lies inside it", with the all-replicates edge at `x_hi` = **3.58** minimum over `f` |
+| A3P §5 item 3, recomputed | **3.525 < 3.58**, so **two** lie inside that edge; under the per-`f` edge (which runs 3.58 to 4.36) **five of six** do. **Neither reading gives one** |
+
+A3P says T0 "should be amended by whoever owns it", does not amend it, and records that
+no claim in the thesis depends on the count. Carried on sheet 18.
+
+### B19. Whether the human driven Mackey-Glass grid was collected
+
+| document | value |
+|---|---|
+| SPINE open flag 4 | "The driven Mackey-Glass registered prediction **was collected** and may never have been inspected" |
+| RM §5 | "The driven MG data **is** still collected in §4b and carries a narrower registered prediction on the memory side" |
+| A3P §5 item 7 | "Mackey-Glass on the human substrate **has never been run** and stays post-thesis by roadmap §6" |
+| PREREG §3 item 1, dated 15 August 2026 | "**no human Mackey-Glass results exist in the repo**: `experiments/human/human_mackey_glass/` has code and no results directory" |
+
+Not resolved, and **no Mackey-Glass data was inspected to settle it** (CONV working rule
+6). Carried on sheets 18 and 19, and it is half of the Task 4 verdict on open flag 4
+below.
+
+### B20. F12's two published pairs against the reproduction gate
+
+| document | value |
+|---|---|
+| T0 §3.10, and FL's F12 row | **215** cells (**0.56%**) in [0.6, 2.2] rad; two spikes **98%**; continuous-curvature R2 **0.371** |
+| A3P §2.1 and §5 item 1 | **216** cells (**0.5643%**), stable under all four open/closed conventions; two spikes **99.44%**; continuous R2 **0.37049**, which rounds to **0.370** |
+
+A3P logs it as a one-cell near-miss "logged, not reconciled", since a rank-4 document does
+not instruct T0 and regenerating an artifact to close a one-cell gap is what CONV working
+rule 1 forbids. Distinct from **B4**, which is a different capture entirely. Carried on
+sheet 17.
+
+### B21. Whether any level convention gives a nominal crossing
+
+| document | value |
+|---|---|
+| FL, F16 flag | "**All three** conventions give **no** nominal crossing on the extended sweep" |
+| A3P §5 item 5, recomputed | two do; **`f_star_level_on_subrange` gives a crossing at sigma = 4.382**, against the published 4.392 from the sigma <= 6 sub-panel re-run |
+
+A3P calls this an overstatement "in the safe direction" that in fact **strengthens** T0
+§2.3's "what moved is the panel, not the method". The headline claim, no nominal crossing
+on the `f_star` convention, is untouched. Carried on sheet 18.
+
+### B22. `lambda_min(J)` at the transition: two aggregation units, recorded so they are not read as one
+
+| document | value |
+|---|---|
+| T0 §3.11 | **-0.849 [-0.898, -0.769]** over **378 seed-level** transitions at `f` > 0; **-0.165**, scattered over [-0.367, -0.044], on **9 of 40** at `f` = 0 |
+| A3P §5 item 6 | **-0.881 [-0.922, -0.793]** at the **draw** level (n = **1,069**) at `f` > 0; **-0.165** on n = **27** at `f` = 0 |
+
+**Not a disagreement**: A3P states the unit explicitly and notes the `f` = 0 interval is
+identical in both because the three draws of a seed are literal duplicates there. Recorded
+because a numeral audit will see two intervals for one quantity, and because T0 §3.11
+already flags the same trap for `sigma_eff`'s two CVs (0.209 against 0.304). Carried on
+sheet 15.
+
+---
+
+## C (continued). Rows on sheets 13 to 19 whose only source is an act file, FIGURE_LIST, the roadmap or PREREG
+
+These numerals **cannot be checked against TIER0**. Grouped by sheet.
+
+### Sheet 13 (chapter 6 §6.1, the frame)
+- Curvature **0.261** and **0.263** rad at `f` = 0 over the whole sigma = 0 to 6 sweep, on
+  **36,540** cells. A2 §1 and §5 item 15. See **B5**.
+- The **orientation table** as an object. No document; see section A above.
+
+### Sheet 14 (§6.2, memory along the regime axis)
+- Peak `d_eff/N` **0.965 / 0.995 / 0.993 / 0.997** at N = 448. A3M §2.4 and F7's caption;
+  T0 §1.2 publishes no such column. See **B2** for the separate 0.961 / >= 0.993 pair that
+  body prose quotes.
+- "**within 3.5%** of the ceiling". A3M claim A3M.2 and F7's caption; T0 §1.2 says only
+  "within a few percent".
+- The `d_eff`-to-MC correspondence as a **cell-level** statistic, **+0.9973 to +0.9984**
+  (i.e. +0.998) over 520 cells, against T0 §3.3's **n = 52** seed-median +0.999. A3M §2.6
+  finding 7 and §5 item 4, which records that T0 does not name its unit.
+- `bulk95` spreading **0.41 to 0.61** across ten degree-rewire seeds, and the per-seed
+  reindex rule. FL's F7 flag; A3M §2.2 and §5 item 1.
+
+### Sheet 15 (§6.3, prediction along the regime axis)
+- The teacher-forced against free-run split of the four quantities. A3P §2.6 finding 4.
+- VPT ceiling **16.301** = 600 x 0.03 x 0.9056, observed maximum **7.952** = **48.8%** of
+  ceiling, **zero of 38,280** cells reaching it. A3P §2.6 finding 3. T0 §2.6 carries the
+  same as "16.3" and "<= 7.95".
+- Floor share **41.3%**, **7.2%** at `f` = 0 rising to about **65%** at `f` >= 0.30. A3P
+  §2.6 finding 3. See **B15**.
+- The VPT threshold convention: `rms_norm` = **1.7321**, epsilon = **0.4**, **0.693** in
+  z-scored units, mean over **20** windows. A3P §2.6 finding 3.
+- `climate_error`'s per-cell non-reproducibility, **3000** steps = **81.5** Lyapunov times,
+  and the measured 0.0570 / 0.0721 / 0.0289 and 8.262 / 8.270 / 15.586 triples. A3P §2.6
+  finding 5.
+- The cell arithmetic **4 x 11 x 29 x 10 x 3 = 38,280** and the duplicate check (**100%**
+  of groups identical at `f` = 0; at `f` = 0.25 curvature differs in 96.6% of groups while
+  VPT is identical in **45.1%**). A3P §2.0.
+- **0.258 to 0.261** and **10.0x** as the gate's restatement of T0 §3.11. A3P §2.1.
+- Weight-permuted **3 of 10** and degree-matching **1 of 10** collapsed seeds at `f` = 0.
+  A3P's F13 caption only.
+- The draw-level `lambda_min(J)` interval and its n. A3P §5 item 6. See **B22**.
+
+### Sheet 16 (§6.4, removing the common mode: memory)
+- The `f` grid as **11 values, 0 to 0.50 step 0.05**. A3P §2.0.
+- The bridge paragraph's **+8.95 to +0.50**. A3P §5 item 7. See **B16**.
+- Everything in movement 4 shares T0 §3.8's missing artifact line (section A above).
+
+### Sheet 17 (§6.5, removing the common mode: generation)
+- **216** cells, **0.5643%**, two spikes **99.44%**, continuous R2 **0.37049**. A3P §2.1
+  and §5 item 1. See **B20**.
+- The separator `CURV_COLLAPSE` = **1.0**, that the residual correlations are **Spearman**,
+  and that the Pearson within the smooth cluster is **+0.006**. A3P §2.6 finding 1, which
+  records that neither was written down anywhere before.
+- That "CV" is **IQR / median**, and the `sd/mean` triple **0.256 / 0.540 / 0.589** under
+  which the ordering of the two alternatives reverses. A3P §2.6 finding 2.
+- **The whole of E2 (F17)**, which has no `TIER0` section at all: the pre-registration as
+  written; **0.43** against **0.14** at `f` >= 0.30; fixed-point rates **0.43 / 0.64 /
+  0.66 / 0.70** over `f` >= 0.20; `sd_ratio` **229 / 158 / 11** of **440**; **206 of 229**
+  with climate error > 2; "wrong shape, right scale" = **34 of 440**; **87%** more than 3
+  z-scored units out, median **11.5**, furthest **38.5**, against a true span of about
+  **+/-2.5**; the distributional integrity gate at **39 of 44**. A3P §1, §3's F17 block and
+  caption, and §6.1; FL's F17 row.
+
+### Sheet 18 (§6.6, one axis two readouts)
+- The coverage arithmetic **3.525 < 3.58** and the per-`f` "five of six". A3P §5 item 3.
+  See **B18**.
+- The root-solved crossing **(2.938, 0.1527)**. A3P §5 item 4.
+- The third convention's nominal crossing at **sigma = 4.382**. A3P §5 item 5. See **B21**.
+- The boundary gap counts **84 of 121** and **46 of 121**. FL's F16 flag.
+- **The whole bridge paragraph**: **6.0 / 4.0 / 2.0** at `f` = 0.25 and medians **6.0 /
+  5.2 / 2.0**; NARMA-10 **+0.12 to +0.23** over `f` <= 0.15; MC **+8.95 to +0.50**; Lorenz
+  **~0** then **+0.05 to +1.54** from `f` = 0.20; Erdős–Rényi NRMSE **127.0 / 22.8 /
+  17.4** against the connectome's **0.51 to 1.02** at `f` = 0.45, sigma = 6; the per-task
+  alphas **1e-6 / 1e-8 / 1e-7**; **2,800** against **2,000** rows. A3P §5 item 7.
+
+### Sheet 19 (§6.7, what the account does not cover)
+- "**Mackey-Glass was not inspected**". A3M §5 item 10; A3P §5 item 11. **T0 does not
+  mention Mackey-Glass anywhere in the document.**
+- Closed-loop MG's cost, **~150 to 250 lines** and **~23 core-hours**. RM §5 (rank 2, not
+  rank 1).
+- "**contribution 2 has no out-of-sample test in this thesis**" and the claim-to-task
+  mapping it rests on. FL's "Addition 2" and claim-to-primary-task table; RM §5; A3P §5
+  item 12(iii).
+- The MG design-grounds withdrawal and its replacement prediction. FL "Addition 2";
+  PREREG §1.1 and §2.
+
+---
+
+## F. The three open flags this session was asked to report, not resolve
+
+**`report/CROSS_ACT_SPINE.md` open flags 2, 3 and 4 are all chapter 6 items.** What the
+sheets can and cannot supply for each. **Nothing below resolves a flag**, and no
+Mackey-Glass data was inspected.
+
+### Flag 2: §6.3's decay result has no figure
+
+**The numbers exist and the result can be stated inline, from `TIER0` §3.11.** That
+section publishes the complete table the sentence needs: at sigma = **2, 4, 6, 8, 11.2**,
+connectome curvature **0.26 / 0.26 / 0.26 / 0.26 / 0.26** with VPT **4.43 / 2.81 / 0.81 /
+1.18 / 0.44**, and Erdős–Rényi curvature **0.26 / 0.26 / 0.26 / 0.27 / 1.70** with VPT
+**3.73 / 2.45 / 1.18 / 0.49 / 0.23**. It is rank 1, it is complete as published, and
+**A3P §2.1's reproduction gate returns it** at three digits (**0.258 to 0.261** over
+sigma 2 to 11.2; VPT **4.43 to 0.44**, a factor of **10.0**). Sheet 15 carries all of it.
+
+**What the sheets cannot supply.** (i) **Only two of the four variants.** T0 §3.11's table
+has connectome and Erdős–Rényi rows only; no document publishes weight-permuted or
+degree-matching at `f` = 0 on this quantity, so an inline sentence cannot be made about
+the ladder. (ii) **Only five of the 29 sigma points**, so the shape between them, in
+particular the non-monotone step at sigma = 8, where connectome VPT reads **1.18** against
+sigma = 6's **0.81**, is stated but not resolved, and "~10x" smooths over it. (iii) A
+figure would need a `FIGURE_LIST` amendment, which is out of this session's scope; CONV
+working rule 3 forbids one that is not listed.
+
+### Flag 3: F11's panels split across §6.2 and §6.4
+
+**Which panel each section needs.** §6.2 (the mechanism at `f` = 0) needs **panel (a) at
+its `f` = 0 column only**: `|mean_state|` **0.759** against **0.949 / 0.959 / 0.989** at
+sigma = 6. §6.4 needs **panel (a) across the whole `f` axis** (the fall to **0.016 /
+0.015 / 0.018 / 0.024** by `f` = 0.5, which is the lesion) **and panel (b)** in full (the
+matched-axis residual, **26%**, 6.42 to 4.75, ~0.5 by `f` >= 0.2).
+
+**Whether the figure as built supplies it: yes for both, but not separably.** F11(a) is
+`|mean_state|` **against `f` at sigma = 6**, four variants, so §6.2's need is the leftmost
+point of a curve whose remaining ten points are §6.4's argument, and F11(b) is entirely
+§6.4's. **On the documents this is a reference split, not a re-cut**: nothing in §6.2
+needs a panel that does not exist, and nothing in §6.4 needs one either.
+
+**One thing the sheets found that the flag does not say.** The spine's §6.2 description
+quotes `|mean_state|` "rising **0.114 to 0.759** across sigma against ER's **0.593 to
+0.989**", a **sigma-resolved** statement. **F11(a) is `f`-resolved at fixed sigma = 6**
+and shows only the sigma = 6 half of that pair. The sigma-resolved version is **F4b**,
+which is Act II's and prints in **chapter 5**; T0 §3.7's table carries both rows (sigma =
+2 and sigma = 6) so the numbers are quotable in §6.2 either way, but **the panel that
+draws the rise across sigma is not in chapter 6**. Whether that matters is a writing
+decision and is reported, not taken.
+
+### Flag 4: the driven Mackey-Glass registered prediction
+
+**Searched:** `report/act3a_memory.md`, `report/act3b_prediction.md` and
+`TIER0_STATE_OF_PLAY.md` in full, by text search for "Mackey" and "MG" and by reading
+every hit in context. **No Mackey-Glass data of any kind was inspected.**
+
+**Verdict on inspection: it was NOT inspected, and this is determinable.** Three
+independent records agree and none dissents.
+- **T0 does not mention Mackey-Glass anywhere**: zero hits in 1,407 lines. A result that
+  had been inspected would have a section, since T0 is canonical for every result.
+- **A3M §5 item 10**: "Mackey-Glass was not inspected."
+- **A3P §5 item 11**: "Mackey-Glass was not inspected."
+- Corroborating, outside the three documents searched: **PREREG §4 "Outcome" is an
+  unwritten placeholder**, "*(appended after the run; do not write until sections 1 to 3
+  are committed)*", and PREREG's own header states sections 1 to 3 were written "before
+  any Mackey-Glass result from the §4b sweep was inspected".
+
+**Verdict on collection: cannot be determined, and the documents disagree.** SPINE open
+flag 4 and RM §5 say the driven MG data **was collected**; A3P §5 item 7 says it **has
+never been run** on the human substrate; PREREG §3 item 1 recorded on 15 August 2026 that
+`experiments/human/human_mackey_glass/` "has code and no results directory". Settling it
+means looking at the results tree, which is a step toward inspection and was not taken.
+Recorded as **B19**.
+
+**Consequence for the flag's own wording.** The flag offers two branches: MG "is either
+reported in §6.1 as corroboration, or the thesis states plainly that it was collected and
+not analysed, and why". **The first branch is unavailable**, since nothing has been inspected,
+so there is nothing to report as corroboration, and **the second branch's phrasing
+presumes the collection question B19 leaves open**. What the documents support is a
+sentence saying the driven MG grid was **not analysed**, that the task is **teacher-forced
+and therefore corroborates MC rather than Lorenz**, and that the original pre-registration
+was **withdrawn on design grounds before any data was inspected**. Sheet 19 carries that
+form. Note also that the flag places MG in "§6.1", the old numbering; under the breakdown
+the memory arm at `f` = 0 is **§6.2** and the out-of-sample statement is **§6.7**.
+
+---
+
+## G. Status after 28 August 2026
+
+**New this session:** section A gained five items; **B14 to B22** were opened, none
+resolved; section C gained seven sheet blocks; section F records the Task 4 verdicts on
+open flags 2, 3 and 4.
+
+**Not edited, deliberately, and out of this session's scope:** `TIER0_STATE_OF_PLAY.md`,
+`ACTION_PLAN_JOURNAL_ROADMAP.md`, `report/CONVENTIONS.md`, `report/FIGURE_LIST.md`, both
+Act III files, `report/PREREG_MACKEY_GLASS.md`, `report/figlib`, `src/` and
+`report/thesis/`. `report/CROSS_ACT_SPINE.md` was edited **once**, to add the
+seven-section breakdown to its Act III entry.
+
+**Newly found and not edited, for whoever opens the spine next.** Four cross-references in
+`report/CROSS_ACT_SPINE.md` still use the superseded four-section numbering: "chapters 4,
+5 and §6.1 to §6.2 are entirely at `f` = 0" and "it appears in exactly one place, chapter
+6 §6.3" under **The primary variable and the intervention**; **open flags 2 and 3**; and
+Act I's "**chapter 6 §6.1.1** carries it forward", which names a sub-subsection the
+breakdown does not have and cannot have, since the breakdown is seven sections with no
+third level. The added block records the mapping in place rather than editing them.
