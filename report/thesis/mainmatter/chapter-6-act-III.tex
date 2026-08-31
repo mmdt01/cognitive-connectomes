@@ -86,7 +86,7 @@ own critical scale while the connectome has only just reached its.
 % quoted without its levels; "the two axes" for sigma against f.
 Two matching axes follow from that normalisation, and
 Chapter~\ref{chapter:methods} establishes both
-(Figure~\ref{fig:f3-two-axes}). Matching on nominal $\sigma$ holds the
+(Figure~\ref{fig:F3}). Matching on nominal $\sigma$ holds the
 spectral radius fixed and lets the bulk radius vary; matching on
 $\sigma\!\cdot\!\mathrm{bulk95}$ holds the bulk radius fixed and leaves the
 Perron root deliberately unmatched. Neither choice is neutral, and the second
@@ -1183,3 +1183,112 @@ lets the bulk vary; the crossing exists on the first and not on the second. What
 survives both readings is the shape rather than the coordinate: the two advantages
 lie in opposite regions, and one substrate property, read by two demands, is what
 puts them there.
+
+
+
+\section{What the account does not cover}
+\label{sec:act3-scope}
+\bigskip
+% Section 6.7. Claims: none new. A3P.9 restated from the other side; RM 1's
+% "what must NOT be claimed" entries on the f = 0 generation regime and on
+% contribution 2's missing out-of-sample test. Sources: fact sheet 19.
+% Figures: none.
+% Numerals: 12, all restatements of numbers argued earlier in the chapter.
+% FORBIDDEN (sheet 19): letting the f > 0 mechanism read as general; "the
+% single-axis account explains generation at f = 0"; offering a fourth candidate
+% or hedging the open problem into a suggestion; "the biological cut" for f = 0;
+% implying Mackey-Glass fills the out-of-sample gap; stating that Mackey-Glass
+% was analysed, or that it was not collected (what the documents support is that
+% it was NOT INSPECTED; whether the human driven grid exists is an unresolved
+% disagreement between RM/SPINE and A3P/PREREG, GAPS B19); "scale-invariant"
+% full stop; any margin without its levels; treating the map argument as a
+% derivation or contribution 2 as tested; burying any of this in the discussion.
+
+% P1: the account is a statement about the f > 0 counterfactual. Numerals: 6.
+The account assembled over the preceding sections has a boundary, and it runs
+through the middle of this chapter rather than around its edge. Capacity is gated
+by which dynamical regime the manifold occupies: that is a statement about
+networks with negative weights, and it is not a statement about the substrate the
+instrument actually produces. With non-negative weights there is no switch to be
+gated by. Trajectory curvature holds at
+$0.26$~rad % TIER0 3.11
+across the entire operating-point sweep while prediction falls roughly ten-fold,
+so generation is lost there with no geometric event of any kind, and the quantity
+the mechanism is built on registers nothing. This is consistent with the account
+rather than a contradiction of it, which is exactly why it bounds it: the switch
+is a phenomenon of sign composition, and a non-negative matrix has no dominant
+negative eigenvalue to flip. Take the negative weights away and the switch goes,
+and the explanation resting on it goes with it. What replaces it is a named open
+question rather than a fourth guess. Section~\ref{sec:act3-prediction-sigma}
+eliminated the three available answers: not geometry, which does not move; not the
+effective radius, since Erdős--Rényi transitions at
+$0.014$, % TIER0 3.10
+two orders of magnitude below its own largest value and on the descending branch
+of its own curve; and not memory, since at $\sigma = 6$ the connectome holds
+$11.43$ against Erdős--Rényi's $2.42$ % TIER0 3.11
+in memory capacity and a lower valid prediction time,
+$0.81$ against $1.18$. % TIER0 3.11
+Whatever governs generation on non-negative weights, this work has not found it,
+and no part of the unifying account should be read as covering it.
+
+% P2: contribution 2 has no out-of-sample test. Numerals: 0.
+% Must not imply MG fills the gap; must not say MG was analysed or not collected.
+The unifying claim has a second limit, of a different kind. It rests on a joint
+reading of the memory and Lorenz results and on the plane that puts them together,
+and nothing was held back from it. The mapping of claims to the tasks that carry
+them was fixed before any data was inspected, which is what prevents a claim being
+relocated to whichever task happens to support it, and under that mapping the
+joint claim's evidence is the two tasks it unifies and no third. So there is no
+out-of-sample test of it in this thesis. The obvious candidate does not serve. The
+fourth task in the programme, Mackey-Glass, is implemented in a teacher-forced
+form, so the network is re-anchored to the true signal at every step and never
+runs on its own output; the regime switch that the account turns on has no
+consequence for what that task measures, which makes a prediction on it
+uninterpretable rather than merely difficult to detect. That was recognised as a
+design problem before any of its data was looked at, and the original registration
+was withdrawn on those grounds and a narrower one recorded in its place, on the
+memory side. A closed-loop version would be the test, and building it is deferred
+work rather than something the task's presence in the programme quietly supplies.
+No Mackey-Glass result is inspected anywhere in this thesis.
+
+% P3: the limits on each arm's own evidence. Numerals: 4.
+Three narrower limits attach to the results themselves. The memory comparison
+cannot be made at the peak at any network size: usable dimensionality there runs
+at
+$0.97$ to $1.00$ % TIER0 6.6
+of its ceiling even at the larger scale tested, so no parcellation makes that
+comparison informative and the chapter reads the decay region instead. Whether the
+bulk radius is what orders the ladder remains open and is only partly answered:
+matching on it absorbs about
+a quarter % TIER0 3.7
+of the gap where a common mode exists and almost none once the signs are balanced,
+which bounds the quantity's role without settling it, and a properly powered test
+would need more seeds or a pair of substrates whose separation in that quantity is
+both large and stable across scales. And the generative result at zero sign
+fraction rests on
+ten seeds % TIER0 2.3
+per substrate. With that sample the smallest attainable significance is bounded
+from below whatever the effect, so the family of comparisons it belongs to is
+declared narrowly and the claim rests on the size and direction of the asymmetry
+rather than on the test alone.
+
+% P4: what the matched axis does and does not match, and reproducibility.
+% Numerals: 2. Closes the chapter.
+Two limits are properties of the instruments rather than of the results. The
+matched axis used throughout holds a property of the linear operator fixed, and
+that is not the same as holding the dynamics fixed: at the point where each
+substrate's effective radius folds, the gain the units are actually running at
+differs across substrates, at
+$0.54$ for the connectome against $0.69$ % TIER0 6.2
+for Erdős--Rényi. That difference is part of the mechanism rather than a nuisance
+to be matched away, so matched effective criticality must be read narrowly as
+what it is: two networks placed at the same value of one spectral quantity, not
+two networks in the same dynamical state. The second is reproducibility. Which
+edges receive negative signs depends on a sort over a heavily tied ordering, so
+the pattern is exactly reproducible on the machine that produced a given capture
+and not across machines. Every distribution reported here was checked and agrees,
+but individual cell values at non-zero sign fraction are not portable, and any
+reanalysis should work from the distributions rather than expecting to reproduce
+particular cells. None of this is offered as a reason to discount the chapter's
+results. It is offered because the account is worth exactly what it covers, and
+the reader should not have to work out where that ends.
