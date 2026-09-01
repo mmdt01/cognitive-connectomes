@@ -10,6 +10,8 @@
     Term & Definition \\
     \midrule\endhead % Add abbreviations alphabetically here:
 
+    \textbf{Bulk:} & The band of eigenvalues remaining once the Perron root is set aside by position. It is not set aside by the statistic: $\mathrm{bulk95}$ is a percentile over the full spectrum with the Perron eigenvalue inside the population. \\
+
     \textbf{Common mode} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
 
     \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity~\cite{atasoy2016human}. \\
@@ -17,6 +19,8 @@
     \textbf{Effective spectral radius} & The spectral radius of the recurrent operator linearised about the network's driven state. An empirical locator of where free-running generation breaks, not a stability criterion. \\
 
     \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates used here are symmetric, so their eigenvalues are real and the spectrum is a distribution on the real line. \\
+
+    \textbf{Gap ratio} & The Perron root divided by the absolute bulk radius. Identically the inverse of $\mathrm{bulk95}$ and identically $\mathrm{sr\_crit}$: one quantity under three names. \\
 
     \textbf{Gram matrix} & For a state matrix $A$, the un-centred second moment $A^{\top}A$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
 
@@ -34,13 +38,15 @@
 
     \textbf{Ridge floor} & The ridge regularisation strength seen as a level within the Gram spectrum: directions whose eigenvalues stand well above it are available to the readout, and those well below it are suppressed. \\
 
-    \textbf{Spectral gap} & The separation between the Perron root and the bulk of the eigenspectrum. \\
+    \textbf{Spectral gap} & The separation between the Perron root and the bulk of the eigenspectrum, measured here as the gap ratio. \\
 
     $\mathrm{\textbf{sr\_crit}}$ & The nominal spectral radius at which a substrate's own bulk edge reaches one, identically $1/\mathrm{bulk95}$ and identically the gap ratio. It is a criticality scale each substrate carries with it, not the point at which that substrate becomes supercritical. \\
 
     \textbf{Time-centring} & Subtraction of each unit's mean over time from the state matrix, which separates the fixed pattern of activity a network holds throughout a run from the fluctuations about it. \\
 
     \textbf{Valid prediction time (VPT)} & The duration, in Lyapunov times, for which a free-running network's generated trajectory stays within a fixed error of the true one. \\
+
+    \textbf{Weight-permuted control:} & The connectome's own graph carrying its own weights reassigned across its own edges. It holds topology and the exact weight multiset fixed and varies only which edge carries which weight, so it is a control rather than a null, and it is what localises an effect to weight placement. \\
 
     \bottomrule
 \end{longtable}
@@ -60,6 +66,7 @@
     $\sigma$ & Nominal spectral radius; the operating point \\
     $\sigma_{eff}$ & Effective spectral radius \\
     $\lambda_1$ & Perron root, the leading eigenvalue of $W$ \\
+    $\mathrm{abs\_bulk}$ & Absolute bulk radius in raw units of $W$ \\
     $\mathrm{bulk95}$ & 95th percentile of $|\lambda|$ over the spectrum, as a fraction of $|\lambda_1|$ \\
     $f$ & Sign fraction, the proportion of weights made negative \\
     \addlinespace
