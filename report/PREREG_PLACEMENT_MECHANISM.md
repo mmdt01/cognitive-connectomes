@@ -261,3 +261,7 @@ harder**, and §3's "one session, no second analysis" governs.
 §3.1's limits stand on this outcome as on any other: no derivation of `|lambda_1|` from a
 structural statistic, no sufficiency claim, no task claim, and every withdrawn phrasing
 stays withdrawn.
+
+**Recorded 1 September 2026, after the fact:** the equivocal verdict was published
+as a negative result in `TIER0_STATE_OF_PLAY.md` §3.14 and drawn as figure **S3**,
+and the claims register was not changed.

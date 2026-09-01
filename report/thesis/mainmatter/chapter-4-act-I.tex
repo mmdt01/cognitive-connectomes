@@ -110,7 +110,8 @@ together and their spectra are in Appendix~\ref{app:wider-ladder}.
     Weighted adjacency on a shared logarithmic colour scale, same ordering.
     \textbf{(i--l)} One diagonal block magnified, marked on (e--h) and drawn on
     the same colour scale: one hemisphere's share of one community, the densest
-    such block of between 15 and 40 nodes. In (i) and (j) the same cells are
+    such block of between 15 and 40 nodes. % TIER0 3.13
+    In (i) and (j) the same cells are
     filled, because the edge set is the same edge set; what the permutation
     changes is which weight sits in each of them, drawn from the whole graph's
     multiset rather than from this block's. The same nodes in (k) and (l) form
@@ -221,8 +222,8 @@ is made.
 The connectome's Perron root stands
 more than three % (3.078) TIER0 3.1
 times clear of its own bulk edge at $N = 448$. % TIER0 3.1
-Every other substrate the figures draw stands just below two
-% between 1.807 (TIER0 3.1) and 1.922 (TIER0 3.1)
+Every other substrate the figures draw stands
+between 1.8 (TIER0 3.1) and 1.9 (TIER0 3.1)
 times clear of its own. That ratio, the Perron root over the absolute bulk
 radius, is the structural statistic this chapter reports, and the connectome's
 is at least 1.6-fold % TIER0 3.1(b)
@@ -325,7 +326,7 @@ this thesis does not test.
 Two further rungs hold more of the connectome's topology fixed than the
 degree-preserving rewire does, one preserving its community structure and one
 its clustering, and neither recovers the gap; their gap ratios at both
-parcellations, and the margin over all six non-negative substrates, are in
+parcellations, and the margin over all six nulls, are in
 Appendix~\ref{app:wider-ladder}. Those rungs corroborate the claim. The claim
 itself rests on the control, which holds the topology exactly rather than one
 statistic of it at a time.
@@ -372,30 +373,7 @@ statistic of it at a time.
 \end{table}
 
 
-
-
-
-\section{The gap survives a change of scale}
-\label{sec:act1-scale}
-\bigskip
-% Outline item 6. Carries A1.4. Figures F2 (both scales), S1 (appendix).
-
-% P1: what carries, the separation.
-The connectome's anomalously large spectral gap survives a more than two-fold 
-% (2.2-fold) TIER0 1.4
-change in the number of nodes. The near-identity of the bulks does not. The
-whole ladder was rebuilt at
-$N = 1000$, % TIER0 2.1
-and panel~(c) of Figure~\ref{fig:F2} is where the first half of that shows: the
-connectome's gap ratio is 3.99 % TIER0 3.1
-against 2.30 to 2.44 % TIER0 3.1
-for the three rungs drawn beside it, again at least
-1.6-fold % TIER0 3.1(b)
-clear of every one. Two parcellations are one step and there is no third, so
-this is a robustness check across a single change of scale rather than a
-demonstration of invariance.
-
-\begin{figure}[ht]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{F2.png}
     \caption[The difference is a gap, and the gap is what carries across
@@ -417,6 +395,30 @@ demonstration of invariance.
     and not the coincidence of the bulks.}
     \label{fig:F2}
 \end{figure}
+
+
+
+
+
+\section{The gap survives a change of scale}
+\label{sec:act1-scale}
+\bigskip
+% Outline item 6. Carries A1.4. Figures F2 (both scales), S1 (appendix).
+
+% P1: what carries, the separation.
+The connectome's anomalously large spectral gap survives a more than two-fold 
+% (2.2-fold) TIER0 1.4
+change in the number of nodes. The near-identity of the bulks does not. The
+whole ladder was rebuilt at
+$N = 1000$, % TIER0 2.1
+and panel~(c) of Figure~\ref{fig:F2} is where the first half of that shows: the
+connectome's gap ratio is 3.99 % TIER0 3.1
+against 2.30 to 2.44 % TIER0 3.1
+for the three rungs drawn beside it, again at least
+1.63-fold % TIER0 3.1(b)
+clear of every one. Two parcellations are one step and there is no third, so
+this is a robustness check across a single change of scale rather than a
+demonstration of invariance.
 
 
 % P2: what loosens, the near-identity of the bulks.
