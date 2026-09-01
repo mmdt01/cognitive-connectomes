@@ -11,7 +11,8 @@ source.
 
 **A one-off, and additive.** Nothing here regenerates or reads-then-rewrites an existing
 artifact. It builds the same four ``(condition, variant, seed)`` cells the rest of Act I
-builds, from the same builder, and writes two new files under ``report/artifacts/``:
+builds, from the same builder, and writes new files under ``report/artifacts/`` (two
+originally, and a third added for S4, described below):
 
     substrate_edges.parquet     one row per undirected edge per variant per seed
                                 [variant, seed, i, j, weight], i < j
@@ -40,6 +41,36 @@ respectable modularity for a graph with no community structure at all.
 The partition is taken from ``HumanSubstrateBuilder.partition``, which is the same object
 the null ladder's ``modularity_rewire`` rung is built against, so this script cannot be
 detecting a different partition from the rest of the pipeline.
+
+**A second output, added 1 September 2026 for S4**, which draws all seven substrates
+rather than the ladder's four:
+
+    substrate_edges_full.parquet   the same five columns, all seven variants
+
+``substrate_edges.parquet`` is written exactly as before, byte for byte, and the full
+family goes to a file of its own. The reason is F19: its builder takes its columns from
+``edges.variant.unique()``, so three extra variants in that file would silently widen a
+four-column figure to seven. The full file carries the four ladder variants' rows
+unchanged, appended to from the very frame the four-variant file is written from, and
+adds ``clustering_rewire``, ``modularity_rewire`` and ``random_gaussian`` at all ten
+seeds.
+
+**No topology statistics are computed for the three additional variants.**
+``substrate_topology.parquet`` and ``TIER0`` 3.13 belong to the four-substrate ladder
+and are unchanged; S4 carries no statistics strip.
+
+**Rung 0 is the one variant whose edge count is not 5,323.** ``random_gaussian`` draws
+every pair independently at the connectome's density, so its count is Binomial rather
+than fixed, and the exact-count assertion is exempted for that variant alone. It is
+checked against the binomial expectation to five standard deviations instead, and its
+ten per-seed counts are printed so the variation is on the record. ``clustering_rewire``
+and ``modularity_rewire`` match the count exactly, by construction, and are asserted
+exactly.
+
+**All seven are non-negative at ``human_empirical``.** Every randomised graph, rung 0
+included, takes its weights by drawing with replacement from the connectome's own
+weight pool, so no substrate in this family carries a signed weight. The build asserts
+it rather than assuming it.
 
 **Two verifications run before anything is written**, and either failing raises:
 
@@ -86,6 +117,28 @@ SINGLE_GRAPH = ("connectome", "connectome_weight_permuted")
 # carries for the control is the one F1 already draws.
 CONNECTOME_SEED = 0
 
+# The three rungs outside the ladder, written to the full-family file only. Order as
+# `report/thesis` `tab:methods-preservation` lists them, most preserved first, which is
+# also the column order S4 draws; the four ladder variants keep their own order above.
+EXTRA_VARIANTS = ["clustering_rewire", "modularity_rewire", "random_gaussian"]
+
+# Rung 0 fixes the density in EXPECTATION rather than the edge count, so its count is
+# Binomial(PAIR_COUNT, density) and an exact assertion would fail on a null that is
+# behaving exactly as designed. It is checked to five binomial standard deviations
+# instead: 71.0 edges at N = 448, so the band is +/- 355 and admits 4,968 to 5,678. The
+# ten observed counts run 5,180 to 5,439, which is -2.0 to +1.6 standard deviations.
+# **The exemption is rung 0's alone**: clustering_rewire and modularity_rewire are
+# double-edge-swap rewires and match the count exactly, and their assertion is exact.
+PAIR_COUNT = SCALE * (SCALE - 1) // 2
+RUNG0_TOLERANCE_SIGMA = 5.0
+
+
+def rung0_edge_band() -> tuple:
+    """``(expectation, standard deviation, half-width)`` of rung 0's edge-count check."""
+    density = EDGE_COUNT / PAIR_COUNT
+    deviation = float(np.sqrt(PAIR_COUNT * density * (1.0 - density)))
+    return EDGE_COUNT, deviation, RUNG0_TOLERANCE_SIGMA * deviation
+
 
 def representative_seed(variant: str) -> int:
     """F1's rule: the seed whose ``bulk95`` is nearest the median of that variant's ten.
@@ -117,6 +170,7 @@ def binary_statistics(graph: nx.Graph, partition) -> dict:
 
 
 def build() -> tuple:
+    """The four ladder variants. The builder is returned so `build_full` can reuse it."""
     builder = HumanSubstrateBuilder(scale=SCALE)
     partition = builder.partition          # Louvain, resolution 1.0, seed 0, connectome
     control_seed = representative_seed("connectome_weight_permuted")
@@ -141,19 +195,41 @@ def build() -> tuple:
             weighted = builder.weighted(CONDITION, variant, seed)
             adjacency = (weighted != 0).astype(np.uint8)
             graph = nx.from_numpy_array(adjacency)
-            upper_i, upper_j = np.triu_indices_from(weighted, k=1)
-            keep = weighted[upper_i, upper_j] != 0
-            edge_rows.append(pd.DataFrame(dict(
-                variant=variant, seed=seed,
-                i=upper_i[keep].astype(np.int16), j=upper_j[keep].astype(np.int16),
-                weight=weighted[upper_i, upper_j][keep])))
+            edge_rows.append(edge_frame(weighted, variant, seed))
             topology_rows.append(dict(variant=variant, seed=seed,
                                       **binary_statistics(graph, partition)))
             binary[(variant, seed)] = adjacency
 
     edges = pd.concat(edge_rows, ignore_index=True)
     topology = pd.DataFrame(topology_rows)
-    return binary, edges, topology
+    return builder, binary, edges, topology
+
+
+def edge_frame(weighted, variant: str, seed: int):
+    """One cell's upper-triangle edge list, in the columns both files carry."""
+    upper_i, upper_j = np.triu_indices_from(weighted, k=1)
+    keep = weighted[upper_i, upper_j] != 0
+    return pd.DataFrame(dict(
+        variant=variant, seed=seed,
+        i=upper_i[keep].astype(np.int16), j=upper_j[keep].astype(np.int16),
+        weight=weighted[upper_i, upper_j][keep]))
+
+
+def build_full(builder, edges):
+    """The seven-substrate family: the ladder's own rows, plus the three off-ladder rungs.
+
+    The ladder's rows are not rebuilt. ``edges`` is the frame
+    ``substrate_edges.parquet`` is written from, and it is concatenated unchanged, so the
+    four variants cannot differ by so much as a row between the two files. Only the three
+    additional rungs are built here, at all ten seeds each, from the same builder, the
+    same condition and the same weight pool.
+    """
+    rows = [edges]
+    for variant in EXTRA_VARIANTS:
+        for seed in range(N_SEEDS):
+            rows.append(edge_frame(builder.weighted(CONDITION, variant, seed),
+                                   variant, seed))
+    return pd.concat(rows, ignore_index=True)
 
 
 def verify(binary, edges) -> None:
@@ -207,6 +283,72 @@ def reproduction_gate(binary, topology) -> None:
           "(exact equality, no tolerance)\n")
 
 
+def verify_full(edges, full) -> None:
+    """The full family: the ladder's rows untouched, the counts, and the signs.
+
+    Three checks, and the first is the one the separate file exists for. The four ladder
+    variants must come through the concatenation exactly as ``substrate_edges.parquet``
+    carries them, because F19 reads that file and S4 reads this one and the two figures
+    have to be drawing the same four graphs.
+    """
+    ladder = full[full.variant.isin(VARIANTS)].reset_index(drop=True)
+    assert ladder.equals(edges), (
+        "the four ladder variants' rows differ between the full family and "
+        "substrate_edges.parquet. The full file appends to that frame and must not alter "
+        "a row of it; F19 and S4 would otherwise be drawing different graphs.")
+    print(f"[ok] the four ladder variants' {len(ladder):,} rows come through the full "
+          "family unchanged")
+
+    exact = full[full.variant.isin(("clustering_rewire", "modularity_rewire"))]
+    counts = exact.groupby(["variant", "seed"]).size()
+    wrong = counts[counts != EDGE_COUNT]
+    assert wrong.empty, (
+        f"edge count is not {EDGE_COUNT} for {len(wrong)} cell(s): {dict(wrong)}. Both "
+        "rewires are double-edge swaps and preserve the count exactly by construction, "
+        "so this is a broken null rather than a finding. The exemption below is rung 0's "
+        "alone and is not widened to cover these.")
+    print(f"[ok] edge count = {EDGE_COUNT} exactly for all {len(counts)} "
+          "clustering_rewire and modularity_rewire cells")
+
+    expectation, deviation, half_width = rung0_edge_band()
+    rung0 = full[full.variant == "random_gaussian"].groupby("seed").size()
+    outside = rung0[(rung0 - expectation).abs() > half_width]
+    assert outside.empty, (
+        f"random_gaussian edge count is outside {RUNG0_TOLERANCE_SIGMA:g} binomial "
+        f"standard deviations of {expectation} (band +/-{half_width:.0f}) for "
+        f"{len(outside)} seed(s): {dict(outside)}. Rung 0 matches the density in "
+        "expectation, so its count varies by design, but a draw this far out is a "
+        "broken density rather than a Binomial tail.")
+    worst = float((rung0 - expectation).abs().max() / deviation)
+    print(f"[ok] all {len(rung0)} random_gaussian seeds within "
+          f"{RUNG0_TOLERANCE_SIGMA:g} binomial sd of {expectation} "
+          f"(sd {deviation:.1f}, band +/-{half_width:.0f}; worst seed {worst:.2f} sd)")
+
+    negative = full[full.weight < 0]
+    assert negative.empty, (
+        f"{len(negative)} edges carry a negative weight. At condition {CONDITION!r} every "
+        "randomised graph is painted from the connectome's own weight pool, which has no "
+        "zero and no negative, so all seven substrates are non-negative; a signed weight "
+        "here means a variant has been built at the wrong condition.")
+    print(f"[ok] all {len(full):,} edges of all seven substrates are non-negative "
+          f"(min {full.weight.min():.3e}, max {full.weight.max():.3e})\n")
+
+
+def report_full(full) -> None:
+    """Rung 0's ten per-seed edge counts, printed so the variation is on the record."""
+    expectation, deviation, _ = rung0_edge_band()
+    rung0 = full[full.variant == "random_gaussian"].groupby("seed").size()
+    print("random_gaussian edge count per seed. Rung 0 fixes the density in expectation, "
+          "not the\ncount, so this is the one variant of the seven whose edge count "
+          f"varies. Expectation\n{expectation}, binomial sd {deviation:.1f}.\n")
+    print("seed  " + "".join(f"{seed:7d}" for seed in rung0.index))
+    print("edges " + "".join(f"{count:7d}" for count in rung0.values))
+    print("sd    " + "".join(f"{(count - expectation) / deviation:+7.2f}"
+                             for count in rung0.values))
+    print(f"\nmean {rung0.mean():.1f}, min {rung0.min()}, max {rung0.max()}, "
+          f"relative sd {rung0.std() / rung0.mean():.4f}\n")
+
+
 def report(topology) -> None:
     """The four statistics for all four variants, printed before anything is rendered."""
     columns = ["mean_clustering", "modularity_fixed_partition", "degree_assortativity",
@@ -221,17 +363,24 @@ def report(topology) -> None:
 
 
 def main() -> int:
-    binary, edges, topology = build()
+    builder, binary, edges, topology = build()
     verify(binary, edges)
     reproduction_gate(binary, topology)
     report(topology)
 
+    full = build_full(builder, edges)
+    verify_full(edges, full)
+    report_full(full)
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     edges.to_parquet(OUT_DIR / "substrate_edges.parquet", index=False)
     topology.to_parquet(OUT_DIR / "substrate_topology.parquet", index=False)
+    full.to_parquet(OUT_DIR / "substrate_edges_full.parquet", index=False)
     print(f"wrote {len(edges):,} edge rows -> {OUT_DIR / 'substrate_edges.parquet'}")
     print(f"wrote {len(topology)} topology rows -> "
           f"{OUT_DIR / 'substrate_topology.parquet'}")
+    print(f"wrote {len(full):,} edge rows -> "
+          f"{OUT_DIR / 'substrate_edges_full.parquet'}")
     return 0
 
 

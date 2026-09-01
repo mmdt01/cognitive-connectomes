@@ -4,7 +4,7 @@
 builders live one module per act, which is also one module per sweep session:
 
 ===================== ========= ================================================
-``act1_structure``    session 1 F1, F2, F3, S1   (chapters 3 and 4)
+``act1_structure``    session 1 F1, F2, F3, F19, S1, S3, S4  (chapters 3 and 4)
 ``act2_manifold``     session 2 F4, F5, F6       (chapter 5)
 ``act3_memory``       session 3 F7, F9-F11       (chapter 6, memory arm)
 ``act3_prediction``   session 4 F12-F14, F16, F17, S2 (chapter 6; S2 prints in 5)
@@ -23,7 +23,9 @@ The public names are unchanged (``FIGURES``, ``SUPPLEMENTARY``, ``ALL_FIGURES``,
 """
 
 from report.figlib.figures.act1_structure import (
-    f1_spectrum, f2_gap_not_bulk, f3_two_axes, s1_spectrum_n1000)
+    f1_spectrum, f2_gap_not_bulk, f3_two_axes, f19_substrates_as_graphs,
+    s1_spectrum_n1000, s3_weight_against_degree_product,
+    s4_full_substrate_family)
 from report.figlib.figures.act2_manifold import (
     f4_perron_carries_the_mean, f5_sign_selects_the_basis,
     f6_pr_misses_readout_structure, f18_gram_spectrum_against_the_floor)
@@ -56,6 +58,7 @@ FIGURES = {
     "F17": (6, "the free-running attractor, and how it fails", f17_free_run_attractors),
     "F18": (5, "the Gram spectrum against the ridge floor",
             f18_gram_spectrum_against_the_floor),
+    "F19": (4, "the four substrates, as graphs", f19_substrates_as_graphs),
 }
 
 # The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
@@ -86,7 +89,20 @@ WORKSHOP = ("F1", "F2", "F7", "F12")
 # in `covariance_spectra.parquet`, so F18 needed no run. It is Act II's own claim and
 # session 2's module, but session 2 closed on 17 August; `FIGURE_LIST` names this
 # session as its owner explicitly, which is the F3 and F16 arrangement.
-assert len(FIGURES) == 17, f"registry holds {len(FIGURES)} figures, not 17"
+#
+# **17 to 18 on 1 September 2026, for F19.** Chapter 4's first section sets out the four
+# substrates and what each preserves, and had only a preservation table to do it with:
+# the chapter described the ladder in prose and drew it nowhere, so a reader met the
+# weight-permuted control as a sentence rather than as a picture of the connectome's own
+# graph. F19 draws all four as matrices under one node ordering, with the four
+# binary-graph statistics beneath. It is Act I's own figure and Act I's module. **It
+# carries no contribution and makes no claim**: it prints in the section
+# `act1_structure.md` registers as having no results, and its statistics strip is a set
+# of design facts about four graphs. Its source parquets did not exist and were built
+# for it by `report/artifacts/build_substrate_graphs.py`, whose reproduction gate --
+# connectome against control, byte-identical binary adjacency and exact equality on all
+# four statistics -- runs before anything is written.
+assert len(FIGURES) == 18, f"registry holds {len(FIGURES)} figures, not 18"
 
 # ---------------------------------------------------------------------------------
 # Supplementary figures -- appendix only, NOT part of the numbered main-text list.
@@ -111,6 +127,45 @@ SUPPLEMENTARY = {
     # text asserts. It prints in chapter 5, where the manifold is decomposed.
     "S2": (None, "the two curvature regimes made visible (chapter 5)",
            s2_curvature_regimes),
+    # S3 is the pre-registered placement-mechanism test, drawn where it fails. It clears
+    # the bar because it makes NO claim the main text does not already make: the register
+    # is unchanged, the verdict on `PREREG_PLACEMENT_MECHANISM.md` was EQUIVOCAL, and A1.5
+    # still says placement with no mechanism attached. What the panel adds is a NEGATIVE
+    # result put where the claim it bounds is made (`CONVENTIONS`, working rule 8) --
+    # the registered prediction was a positive weight-against-degree-product correlation
+    # and the connectome's is negative. Its numbers are `TIER0` 3.14(b). Act I's own
+    # measurement and Act I's module.
+    #
+    # **One panel, and the other two of the sketch are deliberately not built.** The
+    # masking curve was posed as a fraction of each cell's own `|lambda_1|`, which divides
+    # by the one quantity the substrates differ in and is not interpretable as posed
+    # (`TIER0` 3.14(d)); the strength sandwich would give a figure to an account `TIER0`
+    # 3.14(c) records as untested, which is the post-hoc move the registration exists to
+    # prevent. Neither is a layout problem and neither is to be revisited by looking
+    # harder: the prereg's 3 fixes one session and no second analysis.
+    "S3": (None, "the registered placement prediction, refuted (appendix)",
+           s3_weight_against_degree_product),
+    # S4 is F19 widened from the ladder's four substrates to the family of seven. It
+    # clears the bar on both clauses: it makes NO claim the main text does not already
+    # make -- it makes no claim at all, as F19 does not -- and it is the existing
+    # substrate builder at different parameters, which is the clause S2 had to amend.
+    # It prints in the appendix, beside `tab:act1-offladder`, because that is where the
+    # three off-ladder rungs are on the record.
+    #
+    # **Drawing seven substrates does not widen the ladder.** TIER0 3.1(b)'s scope guard
+    # holds over it: no comparison is made, no spectral quantity is quoted, no statistics
+    # strip is drawn, and nothing is recomputed across the wider set.
+    # `substrate_topology.parquet` and TIER0 3.13 are the four-substrate ladder's and are
+    # untouched.
+    #
+    # **It reads a source of its own, and that is the point.** F19 takes its columns from
+    # `edges.variant.unique()`, so adding the three rungs to `substrate_edges.parquet`
+    # would have silently widened a four-column figure to seven. The build script writes
+    # `substrate_edges_full.parquet` as a second output instead, asserting that the four
+    # ladder variants come through it unchanged; F19 still reads the four-variant file
+    # and re-renders byte-identical.
+    "S4": (None, "the full substrate family, as graphs (appendix)",
+           s4_full_substrate_family),
 }
 for _id, (_chapter, _name, _builder) in SUPPLEMENTARY.items():
     assert _id.startswith("S") and _id not in FIGURES, (

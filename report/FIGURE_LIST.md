@@ -1,8 +1,29 @@
 # Master figure list
 
-**Fixed in session 0, 15 August 2026. Count 17.** No session creates a figure that is
+**Fixed in session 0, 15 August 2026. Count 18.** No session creates a figure that is
 not here; if one seems missing, report and stop. `W` marks the workshop subset (5pp, 4
 figures).
+
+> **AMENDED 1 September 2026 (Act I). Count 17 to 18, for F19.** The reason, stated as
+> the 19 August amendment requires. Chapter 4's **first** section sets out the substrate
+> and the null ladder and had only a preservation table to do it with: the chapter
+> described four graphs in prose and drew none of them, so a reader met the
+> weight-permuted control as a sentence rather than as a picture of the connectome's own
+> graph with its weights reordered. F19 draws all four as matrices under one node
+> ordering, with the four binary-graph statistics beneath.
+>
+> **It carries no contribution and makes no claim.** It prints in the section
+> `report/act1_structure.md` §4 registers as carrying **no results**, and its statistics
+> strip is a set of design facts about four graphs, not a measurement. That is also why
+> it quotes no spectral quantity: the gap belongs to the sections after it.
+>
+> **Its sources did not exist and were built for it.** No frozen parquet in the
+> repository held adjacency, so `report/artifacts/build_substrate_graphs.py` was written
+> and committed to freeze one. It verifies the edge count and the degree sequence, then
+> runs a reproduction gate (connectome against control: byte-identical binary adjacency,
+> **exact** equality on all four statistics) **before** it writes anything. The numbers
+> are promoted into `TIER0` §3.13, which is their canonical home. **No run happened and
+> none was needed.**
 
 > **AMENDED 24 August 2026 (floor-sensitivity session). Count 16 to 17, for F18.** The
 > reason, stated as the 19 August amendment requires. `CROSS_ACT_SPINE.md` sets out the
@@ -64,7 +85,7 @@ per sweep session** — so a session edits its own module and nothing else:
 
 | module | session | figures |
 |---|---|---|
-| `act1_structure.py` | 1 | F1, F2, **F3**, S1 |
+| `act1_structure.py` | 1 | F1, F2, **F3**, **F19**, S1, **S3**, **S4** |
 | `act2_manifold.py` | 2, and the **floor-sensitivity session (24 Aug) for F18** | F4, F5, F6, **F18** |
 | `act3_memory.py` | 3 | F7, F9, F10, F11 |
 | `act3_prediction.py` | 4 | F12, F13, F14, **F16**, F17, **S2** |
@@ -86,7 +107,8 @@ cut the merged-in panel too** (see the F3 flag): the two panels argued different
 and read as two half-figures, so F3 is now a single panel and F8's content is methods
 prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
 contribution 2. **F17 added** in session 4 for E2. **F18 added** on 24 August for the
-chain's step 3. Rendered figures: F1 to F7, F9 to F18 = 17. IDs are stable identifiers,
+chain's step 3. **F19 added** on 1 September for chapter 4's opening section. Rendered
+figures: F1 to F7, F9 to F19 = 18. IDs are stable identifiers,
 not a reading order, so F16 and F17 sitting in chapter 6 after chapter 7's F15 is
 intended, and so is F18 returning to chapter 5 after both. **F8 stays retired**: the next
 free number was taken rather than the retired one reused, so every reference to F8
@@ -115,6 +137,7 @@ verified, see the flag below the table.
 | F17 | 6 | 4 | **The free-running rollout, which no other artifact captures.** Every persisted state matrix is teacher-forced. Pre-stated claim: the connectome retains the true climate to higher `f` (**confirmed**: 0.43 of frozen cells against the nulls' 0.14 at `f` >= 0.30) and the collapse is a change of shape not of scale (**refuted**: `sd_ratio` is bimodal, 229 of 440 cells at a fixed point against 158 keeping the spread, 11 between) | `criticality_matched/results/e2_free_run_scale_448.parquet` (source `free_run`), 440 rows = 4 variants x 11 `f` x 10 seeds at sigma = 2, cols `climate_error, sd_ratio, trajectory`; **panel (d) reads the frozen `e01_jacobian_scale_448.parquet` instead**, which carries 30 cells per (variant, `f`) against this capture's 10 | confirmed* | |
 | F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
 | F18 | 5 | (Act II) | **The Gram spectrum against the ridge floor**, the chain's step 3. Supercritically the connectome holds **89.0%** of its directions more than a decade clear of the floor against Erdős–Rényi's **11.4%** (`d_eff` 412.9 against 74.8); floor sensitivity is strongly sigma-dependent and each substrate's **interior** dip sits at a different sigma (connectome 3.58, every null 1.58 or 2.00), which is where each one's measured ridge optimum migrates to as alpha rises | **(a, b)** `results/scale_448/covariance_spectra.parquet` (source `floor_mass`); filter `task == "mc"`, `condition == "human_empirical"`, `variant in LADDER`, **no sigma filter at load** (520 rows = 4 variants x 13 spectral radii x 10 seeds); cols `eig_gram`, `alpha`, reduced per cell to `d_eff, floor_sensitivity, n_within_decade, n_below_floor, frac_below_floor` plus the four position bins. Exact zeros STRIPPED first, alpha from the file's own column. Panel (a) then cuts to `spectral_radius >= 3.05` (50 cells per variant). **(c)** `criticality_matched/results/taskB_extended_sweep_scale_448.parquet` (source `alpha_peaks`); argmax over sigma of the seed-median `mc_alpha_*` column, 20 rows = 5 alpha x 4 variants | confirmed* | |
+| F19 | 4 | (none) | **The four substrates, as graphs.** The ladder drawn rather than described: binary and weighted adjacency under one node ordering, with the degree marginal above each column, plus one diagonal block magnified on the same colour scale. **Carries no claim**: it prints in chapter 4's no-results opening section. Connectome and weight-permuted control are one binary graph, which is the gate that the placement control is a placement control | `report/artifacts/substrate_edges.parquet` (source `substrate_edges`), 117,106 rows = 22 (variant, seed) cells x 5,323 edges, cols `variant, seed, i, j, weight`, no row filter. Node ordering from source `substrate_order`, **computed live**. The four binary-graph statistics are **not drawn here**: they are `substrate_topology.parquet` (source `substrate_topology`, 22 rows) rendered as chapter 4's `tab:act1-topology` | confirmed* | |
 
 Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
 carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6.
@@ -143,11 +166,36 @@ outside this file still binds, which is why they are listed here.
 > registry has since gone 15 to 16 (19 August, F17) and 16 to 17 (24 August, F18), and
 > `report/figlib/figures/__init__.py` now reads
 > `assert len(FIGURES) == 17, f"registry holds {len(FIGURES)} figures, not 17"`,
-> **verified by reading it on 25 August 2026; the file was not edited.** "Enforces"
+> **verified by reading it on 25 August 2026; the file was not edited.** [It reads **18**
+> since 1 September 2026, when F19 was added; the sentence is left as the record of what
+> was read on 25 August, and the S-figure separation it is about is unaffected.] "Enforces"
 > also became wrong on 19 August, when the cap became a soft count: the assertion
 > records the number rather than gating it, which is what the amendment at the head of
 > this file says. The S-figure separation is unaffected, which is the point the
 > paragraph was making.
+
+> **AMENDED 1 September 2026 (Act I), for S4.** An appendix figure, outside the cap and
+> outside `FIGURES`, so the count of 18 is untouched. Appendix
+> section `app:wider-ladder` carries the three off-ladder substrates as a table of
+> numbers and the chapter draws only the ladder's four, so the two rungs that hold the
+> most of the connectome's topology appear nowhere as pictures. S4 is F19 widened from
+> four substrates to the full family of seven, in the column order of the methods
+> chapter's preservation table.
+>
+> **It clears the bar because it makes no claim at all**, which is F19's position too.
+> It compares nothing among the seven, quotes no spectral quantity, and carries no
+> statistics strip: the four binary-graph statistics stay the ladder's in
+> `tab:act1-topology`, and the three additional rungs' spectra stay in
+> `tab:act1-offladder`. `TIER0` §3.1(b)'s scope guard on those three rungs holds over
+> this figure. `substrate_topology.parquet` and `TIER0` §3.13 are unchanged.
+>
+> **Its source is a new file rather than a widened one.** F19 takes its columns from
+> `edges.variant.unique()`, so three extra variants in `substrate_edges.parquet` would
+> have turned a four-column figure into a seven-column one with no error raised.
+> `build_substrate_graphs.py` gained a second output,
+> `substrate_edges_full.parquet`, and asserts the four ladder variants come through it
+> unchanged; `substrate_edges.parquet` is byte-identical after the extension and F19
+> re-renders byte-identical. **No run happened and none was needed.**
 
 **The bar for an S-figure, so this does not become a way around the count:** it makes
 **no claim the main text does not already make**.
@@ -166,6 +214,9 @@ outside this file still binds, which is why they are listed here.
 |----|----|----|----|----|
 | S1 | F1 | F1 rebuilt at **N = 1000**. Same builder, same claim, larger parcellation; shows the gap-ratio separation surviving a 2.2x change in N, and makes the null-ordering reversal visible | `eigenspectrum/results/scale_1000/spectra_per_seed.parquet` (source `spectra_1000`); `eig_w_real` (1000 floats/row), `bulk95`, `lambda_max_raw`; filter `condition == "human_empirical"` and `variant in LADDER` (40 rows) | confirmed |
 | S2 | F12 | **E1 — the two curvature regimes made visible. Prints in chapter 5**, built in `act3_prediction.py` (session 4 owns it; the act decides the module, as for F3 and F16). Unit traces either side of one substrate's transition plus the per-step turning-angle distributions — the temporal intuition Act II hands over as a boundary rather than a result (`act2_manifold.md` §5 item 15). Makes **no** claim F12 does not | `criticality_matched/results/e1_curvature_regimes_scale_448.parquet` (source `curvature_regimes`); 2 rows, cols `regime, spectral_radius, mean_curvature, turning_angles, unit_traces`; connectome, `f` = 0.25, one seed, two sigma one grid step apart | confirmed* |
+| S3 | none | **The pre-registered placement-mechanism test, drawn where it fails. Prints in the appendix**, at `width=\textwidth`; built in `act1_structure.py` (session 1 owns it, and it is Act I's own measurement). Mean edge weight against the endpoint degree product, connectome and weight-permuted control, in the twenty equal-count bins `TIER0` §3.14(b) publishes the rank correlation of. `PREREG_PLACEMENT_MECHANISM.md` registered a **positive** correlation in the connectome before it was measured; the connectome's is **negative** and the control's covers zero, so the weighted rich club is refuted as an account of the gap on this substrate. Makes **no** claim the register does not already make: the prereg's verdict was EQUIVOCAL, A1.5 is unchanged and still carries no mechanism | `report/artifacts/placement_mechanism_degree_weight.parquet` (source `placement_degree_weight`), 40 rows = 2 substrates x 20 bins, cols `variant, bin_index, bin_lower, bin_upper, n_edges, median_degree_product, mean_weight, sem_weight`; plus `..._rank_correlation.parquet` (source `placement_rank_correlation`), 2 rows, for the two rho and their bootstrap intervals. No row filter on either; N = 448, `condition == "human_empirical"`, one seed per substrate | confirmed |
+
+| S4 | F19 | **The full substrate family, as graphs. Prints in the appendix**, full page and rotated a quarter turn, at `width=\textheight`; built in `act1_structure.py` (session 1 owns it, and it is Act I's own figure). F19 widened from the ladder's four substrates to all seven, in the column order of the methods chapter's full preservation table (`tab:methods-preservation`), most preserved first. Two rows by seven columns: binary adjacency with the degree marginal above each panel, then weighted adjacency, all seven on one logarithmic colour scale under one colour bar. Same node ordering as F19, same community boundaries, same representative-seed rule, so the four columns the two figures share are the same four matrices. **No zoom row**: F19's magnified block is chosen from the connectome's partition and carries an argument about the control, and neither transfers to a figure that compares nothing. Makes **no** claim, as F19 makes none: no comparison among the seven, no spectral quantity quoted, no statistics strip | `report/artifacts/substrate_edges_full.parquet` (source `substrate_edges_full`), 276,572 rows = 52 (variant, seed) cells x the columns `variant, seed, i, j, weight`; plus `substrate_order` for the node ordering and `spectra_448_full` (70 rows) for the seed rule and nothing else. No row filter on any of the three; N = 448, `condition == "human_empirical"` | confirmed |
 
 **S1 — the row ordering is NOT monotone at N=1000, and the caption must not imply it
 is.** Rows a-d are in ladder order, and at N=448 that happens to coincide with descending
@@ -174,6 +225,87 @@ gap ratio (3.08, 1.92, 1.87, 1.81), which is why F1's caption can say "rises fro
 exceeds the degree row's, because the null ordering by `bulk95` reverses between scales
 (`TIER0` §2.1). The connectome's ~1.7x separation from every null holds at both. Quote
 the separation, never the sweep down the column.
+
+**S3, one panel: the other two of the three-panel sketch are deliberately not built.** The masking curve was posed as a fraction of each cell's own `|lambda_1|`, which divides by the one quantity the substrates differ in and is **not interpretable as posed** (`TIER0` §3.14(d)); no number from it is published anywhere. The strength sandwich would give a figure to the account `TIER0` §3.14(c) records as **untested**, which is the post-hoc move the registration exists to prevent. Neither omission is a layout problem and neither is to be revisited: the prereg's §3 fixes one session and no second analysis.
+
+**S3, two intervals in one figure, and they must not be confused.** The shaded band around each line is ±1 standard error of that bin mean, named on the y-axis; the bracketed pairs in the legend, and the "95% percentile intervals" the caption quotes, are the **bootstrap** intervals on the two Spearman correlations, over 10,000 resamples of the 5,323 edges. The x-axis is logarithmic because the bins are equal-count on a heavy-tailed product; the rank correlation is invariant to that.
+
+**S3, both series are drawn solid, and that is deliberate.** The style contract's dash for `connectome_weight_permuted` is overridden here and **only** here: two dashed, capped series crossing each other twenty times read as a thicket, and the panel is about a trend. **No colour is varied**, so the substrate encoding is the thesis-wide one, and the contract's redundancy is carried by marker shape (circle against square) plus the luminance gap between black and vermillion, which survives greyscale and all three dichromacies. Axis titles and the legend sit one point below the contract's sizes, at `AXIS_LABEL_SIZE - 1` and `LEGEND_SIZE - 1`: this legend carries two correlations and their intervals, which is more text than any other legend in the sweep, and one point keeps it to three rows. Both are written relative to the contract constants, not as literals, so they follow any change to it. The panel is built at 7.4 x 3.4 in and placed at `\textwidth`, which on this class (`hscale=0.77` on A4, so `\textwidth` = 6.37 in) prints at 0.86 scale, the same scale factor F1, F2 and F19 print at.
+
+**S3, what the panel may not be read as saying.** It carries a negative result and nothing else. It licenses **no mechanism claim**, no derivation of `|lambda_1|` from a structural statistic, no sufficiency claim and no task claim, and it says nothing about the absolute bulk: this concerns `|lambda_1|` only.
+
+**S4 draws seven substrates and does not widen the ladder.** `TIER0` §3.1(b) puts
+`random_gaussian`, `clustering_rewire` and `modularity_rewire` on the record and guards
+their scope, and the guard holds over this figure. It makes no comparison among the
+seven, quotes no spectral quantity, and recomputes nothing across the wider set.
+`substrate_topology.parquet` and `TIER0` §3.13 hold the four binary-graph statistics of
+the four-substrate ladder and are **not** extended: the ladder's statistics stay in
+`tab:act1-topology`, the three additional rungs' spectra stay in `tab:act1-offladder`,
+and S4 carries no statistics strip of its own.
+
+**S4, the column order is the preservation table's, so the ladder is not contiguous.**
+Columns run connectome, weight-permuted, clustering rewire, modularity rewire, degree
+rewire, Erdős–Rényi, random gaussian, which reproduces `tab:methods-preservation` row for
+row. The criticality-matched ladder is therefore columns **one, two, five and six**, and
+the caption names them by number. Calling them the four leftmost would be wrong under
+this ordering, and preservation order is worth more here than contiguity because what
+each substrate keeps is the figure's whole subject.
+
+**S4, all seven substrates are non-negative, and a draft of this figure assumed
+otherwise.** At `condition == "human_empirical"` every randomised graph, rung 0
+included, takes its weights by drawing with replacement from the connectome's own weight
+pool, so no substrate in the family carries a signed weight; the build script and the
+figure both assert it rather than assuming it. A first draft of the caption put
+`random_gaussian` on a diverging scale of its own on the belief that its weights were
+signed, which is false at this condition, and which `TIER0` §3.1(b) contradicts anyway by
+publishing a Perron-based quantity for that rung. All seven weighted panels are therefore
+on **one** logarithmic scale under one colour bar. Chapter 3's ladder prose and
+`app:wider-ladder` carried the same belief and are being corrected by hand, outside this
+session.
+
+**S4, rung 0 is the one substrate whose edge count is not 5,323.** `random_gaussian`
+draws each pair independently at the connectome's density, so it matches the density in
+expectation rather than the count and its count is Binomial: the ten seeds run 5,180 to
+5,439 against an expectation of 5,323 and a binomial standard deviation of 71.0. The
+exact-count assertion both the artifact and the figure carry is **exempted for that
+variant alone**, replaced by a five standard deviation band, and the ten per-seed counts
+are printed by the build so the variation is on the record. `clustering_rewire` and
+`modularity_rewire` are exact and are asserted exactly.
+
+**S4 is the one figure in the sweep printed at `\textheight`, and both the canvas and
+the type sizes follow from that.** It is placed full page and rotated a quarter turn, so
+its printed width is `\textheight` (676.04 pt, 9.35 in) rather than `\textwidth`
+(6.37 in). Two consequences, both handled in the builder rather than by scaling the
+include. **The canvas is drawn at the printed width**, so the figure prints at scale 1.0
+and its 300 dpi raster is 300 dpi on the page; a 7.6 in canvas magnified to `\textheight`
+would fall to 244 dpi, which is the wrong direction for seven columns of 448 x 448
+matrices. **Every type size is then set at `TYPE_SCALE` = `\textwidth` / 7.6 in = 0.84
+times the contract's size**, because the contract's sizes are a statement about the
+printed page: a 9pt label in a figure reduced to 0.84 prints at 7.5pt, and the same label
+in a figure printed at 1.0 would print at 9pt, larger than that label anywhere else in
+the thesis. The factor puts S4's printed type exactly where F1's, F2's and F19's is.
+Every size is written relative to a contract constant and none as a literal, so they
+follow any change to the contract; this is S3's arrangement, which sets two sizes one
+point below the contract with the reason stated, at a different factor and for a
+different reason. **The contract's fixed sizes are not being relaxed** and nothing here
+licenses a second figure setting its own type: the deviation exists only because the
+placement is unique, and it is calculated from the placement rather than chosen.
+
+**S4, the panel labels are placed by measurement, not by eye.** Fourteen labels in
+seven columns sit in the inter-column and inter-row gaps, and at F19's spacing the gaps
+are narrower than the letters, so each one lands on the panel above or to its left.
+`hspace`, `wspace` and the label offset are set together so that every letter's box
+clears every panel by at least 2.5 pt, the tightest being the 'm', whose glyph is the
+widest of the fourteen. The clearances were read off the drawn figure.
+
+**S4 reads a source of its own, and that is why F19 is safe.** F19 takes its columns from
+`edges.variant.unique()`, so adding the three rungs to `substrate_edges.parquet` would
+have widened a four-column figure to seven with no error raised.
+`build_substrate_graphs.py` writes a second file instead,
+`substrate_edges_full.parquet`, and asserts the four ladder variants come through the
+concatenation unchanged. Verified on the extension: `substrate_edges.parquet` and
+`substrate_topology.parquet` are byte-identical before and after, and F1, S1, S3 and F19
+all re-render byte-identical.
 
 **S1 — the builder is shared, so F1's flags all apply.** Median-`|lambda_1|` scaling,
 per-row `[-lambda_1, +lambda_1]` binning and the two assertions that guard them are in
@@ -481,6 +613,73 @@ that module and closed on 17 August, so the **floor-sensitivity session of 24 Au
 renders F18** and is named here, per the module table above. Session 2's three figures
 were not touched: a full `--all` re-render moved only F18, verified with `git status`
 rather than assumed.
+
+**F19 - its two sources are the only frozen artifact in the sweep that holds
+adjacency, and this figure is why they exist.** Every other source is a reduction:
+eigenvalues, task scores, Gram spectra. Nothing held the edges, so
+`report/artifacts/build_substrate_graphs.py` was written and committed to freeze them,
+and the numbers were promoted into `TIER0` §3.13. The parquets are gitignored, as every
+parquet in this repository is; **the script is the committed object** and re-running it
+reproduces both files.
+
+**F19 - the zoom row magnifies a diagonal BLOCK, not a community, and the rule is
+stated.** Of the diagonal blocks of the drawn ordering (hemisphere x community), the one
+with the highest within-block binary edge density among blocks of 15 to 40 nodes: at
+N = 448 that is hemisphere 1, community 5, 22 nodes, 125 internal edges, density 0.5411.
+`TIER0` 3.13 carries the rule, the chosen block and every candidate in the range. **An
+earlier community-level rule was withdrawn for non-contiguity**: hemisphere is the outer
+key, so a community spanning both hemispheres occupies two non-contiguous diagonal
+blocks, and the indicator on (e-h) would have to mark two squares and the rectangle
+between them. `_densest_block` raises rather than widening the size range if no block
+falls in it.
+
+**F19 - the zoom panels are on the SAME colour scale as (e-h), and must stay there.**
+Rescaling them to their own range would make (i) against (j) a comparison of two
+different scales and say nothing. The builder asserts that (i) and (j) fill the same
+cells before it renders, which is the block-level form of the connectome/control gate.
+
+**F19 - the statistics moved out of the figure on 1 September 2026 and into
+`tab:act1-topology`.** They were drawn as a four-row strip beneath the columns; four rows
+of numbers under four matrices read as a fifth band of the figure rather than as a table,
+and a table is what they are. **`substrate_topology.parquet` and `TIER0` 3.13 did not
+change** and remain their source and their canonical home. The chapter table is filled
+from 3.13 to four decimal places, the precision 3.13 publishes and the precision chapter
+4's other topology tables already use.
+
+**F19 - the reproduction gate lives in the builder script and is restated in the
+figure.** Connectome against weight-permuted control: byte-identical binary adjacency,
+then **exact equality** on all four statistics, to equality and not to a tolerance. It
+runs before either parquet is written. The figure asserts the adjacency half again, so a
+figure that has come apart from its artifact fails the build rather than drawing panels
+(a) and (b) as two subtly different images when they are supposed to be one.
+
+**F19 - all four statistics are BINARY-graph statistics, and the modularity uses a FIXED
+partition.** Louvain on the binary connectome, resolution 1.0, seed 0, detected **once**
+and applied unchanged to every variant. Do not re-detect per variant: that fits whatever
+partition best suits each draw and reports a respectable modularity for a graph with no
+community structure at all. `TIER0` §3.13 carries the method, the resolution and the six
+community sizes.
+
+**F19 - the node ordering is computed live, and carries F15's standing caveat.** Source
+`substrate_order` is one of the two live sources (the other is `perron_yeo`): neither the
+Louvain partition nor the release hemisphere labels are persisted anywhere. It costs one
+substrate load and no run. The hemisphere labels come from the release geometry, so the
+assumption F15 states applies here too, that the release node ordering matches the
+consensus ordering. **Here it decides only the order rows and columns are drawn in**, so
+nothing rests on it, which is why the figure states the ordering in its caption rather
+than a hemisphere identity.
+
+**F19 - it carries no contribution, and must not acquire one.** It prints in chapter 4's
+opening section, which `report/act1_structure.md` §4 registers as carrying no results.
+It quotes no spectral quantity, no gap ratio and no task: the gap is F1's and F2's, and
+no task appears in Act I at all. Its statistics strip is a set of design facts about four
+graphs.
+
+**F19 - the seed is F1's, and that is the point.** The two randomised variants are drawn
+at the seed whose `bulk95` is nearest the median, which is the seed F1's panels a-d draw
+(degree 1, Erdős–Rényi 2). The rule lives once in
+`act1_structure._representative_row`, which both builders call, so a reader setting the
+two figures side by side sees the same two matrices and the two cannot drift apart.
 
 **F15 — no frozen parquet, and one soft assumption.** The leading eigenvector is not
 persisted anywhere, so this figure recomputes it. It also assumes the release node

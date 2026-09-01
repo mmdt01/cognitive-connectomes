@@ -31,8 +31,19 @@ ANALYSIS = _REPO_ROOT / "experiments" / "human" / "analysis"
 CRIT = ANALYSIS / "criticality_matched" / "results"
 EIGEN = ANALYSIS / "eigenspectrum" / "results"
 PROBES = ANALYSIS / "results"
+# Written by `report/artifacts/build_substrate_graphs.py`, a committed one-off. The
+# only frozen artifact in the sweep that holds ADJACENCY rather than a reduction of
+# it; nothing else in the repository does, which is why it had to be built.
+ARTIFACTS = _REPO_ROOT / "report" / "artifacts"
 
 LADDER = ["connectome", "connectome_weight_permuted", "degree_rewire", "erdos_renyi"]
+# The full substrate family, in the order `tab:methods-preservation` lists it, most
+# preserved first. **Not a ladder**: the criticality-matched programme sweeps the four
+# above and TIER0 3.1(b) carries a scope guard on the other three, which are on the
+# record and are not merged into any ladder table. Held here because two sources feed
+# S4, the one figure that draws all seven, and both need the same set.
+FULL_FAMILY = ["connectome", "connectome_weight_permuted", "clustering_rewire",
+               "modularity_rewire", "degree_rewire", "erdos_renyi", "random_gaussian"]
 BASE_CONDITION = "human_empirical"
 N_NODES = 448
 
@@ -78,8 +89,146 @@ def _spectra(scale: int) -> pd.DataFrame:
     return frame
 
 
+def _spectra_full(scale: int) -> pd.DataFrame:
+    """Per-seed spectra at ``scale``, ALL SEVEN variants, on the non-negative substrate.
+
+    ``_spectra`` filters to the four-rung ladder, which is right for every figure that
+    draws the ladder. S4 draws the whole family and needs the three off-ladder rungs for
+    **one** purpose: the representative-seed rule, which picks the seed whose ``bulk95``
+    is nearest that variant's median. Same file, same condition filter, same two derived
+    columns; only the variant filter is dropped.
+
+    **This supplies a seed, not a number.** TIER0 3.1(b) is canonical for these three
+    rungs' spectral quantities, carries the scope guard that keeps them out of the
+    ladder's tables, and S4 quotes none of them.
+    """
+    frame = pd.read_parquet(EIGEN / f"scale_{scale}/spectra_per_seed.parquet")
+    frame = frame[(frame.condition == BASE_CONDITION)
+                  & (frame.variant.isin(FULL_FAMILY))].copy()
+    frame["abs_bulk"] = frame.bulk95 * frame.lambda_max_raw
+    frame["gap_ratio"] = 1.0 / frame.bulk95
+    frame["scale"] = scale
+    return frame
+
+
 def _spectra_both_scales() -> pd.DataFrame:
     return pd.concat([_spectra(448), _spectra(1000)], ignore_index=True)
+
+
+def _substrate_edges() -> pd.DataFrame:
+    """The four Act I substrates as edge lists: one row per undirected edge, i < j.
+
+    22 (variant, seed) cells x 5,323 edges. The connectome and the weight-permuted
+    control are single graphs and are carried at one seed each; the two randomised
+    variants are carried at all ten. Written by
+    ``report/artifacts/build_substrate_graphs.py``, which verifies the edge count and the
+    degree sequence and runs the connectome-against-control reproduction gate before it
+    writes anything.
+    """
+    return pd.read_parquet(ARTIFACTS / "substrate_edges.parquet")
+
+
+def _substrate_edges_full() -> pd.DataFrame:
+    """All seven substrates as edge lists, in the same five columns as ``substrate_edges``.
+
+    52 (variant, seed) cells: the 22 that ``substrate_edges`` carries, row for row, plus
+    ``clustering_rewire``, ``modularity_rewire`` and ``random_gaussian`` at all ten seeds
+    each. Written by the same script, which asserts the ladder's rows come through the
+    concatenation unchanged.
+
+    **A separate file, deliberately.** F19 takes its columns from
+    ``edges.variant.unique()``, so three extra variants in ``substrate_edges.parquet``
+    would silently widen a four-column figure to seven. That file is unchanged and F19
+    still reads it; only S4 reads this one.
+
+    **Rung 0 is the one variant not at 5,323 edges.** ``random_gaussian`` matches the
+    density in expectation rather than the count, so its count is Binomial; the build
+    checks it against the binomial expectation to five standard deviations and prints its
+    ten per-seed counts. Every other variant is exact.
+
+    **All seven are non-negative.** At ``human_empirical`` every randomised graph takes
+    its weights from the connectome's own pool, so no substrate here carries a signed
+    weight; the build asserts it.
+    """
+    return pd.read_parquet(ARTIFACTS / "substrate_edges_full.parquet")
+
+
+def _substrate_topology() -> pd.DataFrame:
+    """Four binary-graph statistics per (variant, seed); 22 rows.
+
+    **All four are computed on the binary graph with weights discarded**, and
+    ``modularity_fixed_partition`` evaluates one partition -- Louvain at resolution 1.0,
+    seed 0, detected once on the connectome -- on every variant rather than re-detecting
+    per variant. Re-detecting would report a respectable modularity for a graph with no
+    community structure at all.
+    """
+    return pd.read_parquet(ARTIFACTS / "substrate_topology.parquet")
+
+
+def _substrate_order() -> pd.DataFrame:
+    """The node ordering F19 draws all eight panels under. Computed live, not frozen.
+
+    Hemisphere, then community, then descending connectome degree within community. One
+    ordering for every panel, so the four substrates are compared cell for cell.
+
+    Live for the same reason ``perron_yeo`` is: neither the Louvain partition nor the
+    release hemisphere labels are persisted anywhere, and both are cheap -- the partition
+    is built by ``HumanSubstrateBuilder.__init__`` itself, so this costs one substrate
+    load. Taking it from the builder is also what stops it drifting from
+    ``build_substrate_graphs.py``, which uses that same attribute: there is one Louvain
+    call in the repository for this substrate, not two.
+
+    Hemisphere labels come from the release geometry, which carries the standing caveat
+    F15 states: the release node ordering is taken to match the consensus ordering. Here
+    it decides only the order the rows and columns are drawn in, so nothing rests on it.
+    """
+    from src.connectomes.human_suarez import load_routing_geometry
+    from experiments.human.substrates import HumanSubstrateBuilder
+
+    builder = HumanSubstrateBuilder(scale=N_NODES)
+    geometry = load_routing_geometry(N_NODES)
+    hemisphere = np.asarray(geometry["hemiid"]).ravel()[geometry["cortical"]].astype(int)
+    degree = builder.mask.sum(1).astype(int)
+
+    # Communities ranked by size, descending, so both hemispheres list them in the same
+    # order and the two halves of a community that spans them can be read against each
+    # other. Ties broken on the smallest member index, so the rank is deterministic.
+    communities = sorted(builder.partition, key=lambda c: (-len(c), min(c)))
+    community = np.empty(N_NODES, int)
+    for rank, members in enumerate(communities):
+        community[list(members)] = rank
+
+    frame = pd.DataFrame(dict(node=np.arange(N_NODES), hemisphere=hemisphere,
+                              community=community, degree=degree))
+    frame = frame.sort_values(["hemisphere", "community", "degree", "node"],
+                              ascending=[True, True, False, True]).reset_index(drop=True)
+    frame["position"] = np.arange(N_NODES)
+    return frame
+
+
+def _placement_degree_weight() -> pd.DataFrame:
+    """Mean edge weight per degree-product bin, connectome and its weight-permuted control.
+
+    40 rows = 2 substrates x 20 equal-count bins. **The bins are cut on the CONNECTOME's
+    degree products** and applied to both, which is what makes the two rows comparable bin
+    for bin: the control is the same binary graph, so its degree products are the
+    connectome's and only the weight sitting on each edge differs.
+
+    Frozen by ``report/artifacts/build_placement_mechanism.py``, the pre-registered
+    analysis of ``report/PREREG_PLACEMENT_MECHANISM.md``; TIER0 §3.14(b) publishes the
+    rank correlation these bins are the shape of.
+    """
+    return pd.read_parquet(ARTIFACTS / "placement_mechanism_degree_weight.parquet")
+
+
+def _placement_rank_correlation() -> pd.DataFrame:
+    """Spearman rho of edge weight against endpoint degree product, with its interval.
+
+    Two rows, one per substrate. The interval is a 95% percentile bootstrap over 10,000
+    resamples of the 5,323 edges. Read beside ``placement_degree_weight``, which is the
+    same measurement binned rather than ranked.
+    """
+    return pd.read_parquet(ARTIFACTS / "placement_mechanism_rank_correlation.parquet")
 
 
 def _alignment() -> pd.DataFrame:
@@ -421,8 +570,163 @@ def _ph_spectra(scale: int = 448) -> pd.DataFrame:
     return frame
 
 
+def _ph_spectra_full(scale: int = 448) -> pd.DataFrame:
+    """The ladder's four placeholder rows plus the three off-ladder rungs, same schema.
+
+    S4 reads this source for one thing, the representative seed, so all the placeholder
+    has to do is give each of the seven variants ten ``bulk95`` values with a median.
+    """
+    rows = [_ph_spectra(scale)]
+    for variant, bulk in zip(("clustering_rewire", "modularity_rewire",
+                              "random_gaussian"), (0.48, 0.51, 0.54)):
+        for seed in range(10):
+            noise = 1.0 + 0.05 * _RNG.standard_normal()
+            eig = np.sort(np.concatenate([
+                _RNG.uniform(-bulk, bulk, scale - 1), [1.0]]))
+            rows.append(pd.DataFrame([dict(
+                condition=BASE_CONDITION, variant=variant, seed=seed,
+                eig_w_real=eig, bulk95=bulk * noise,
+                lambda_max_raw=0.19 / (bulk / 0.32) * noise,
+                perron_root=1.0, scale=scale,
+                abs_bulk=bulk * noise * 0.19 / (bulk / 0.32) * noise,
+                gap_ratio=1.0 / (bulk * noise))]))
+    return pd.concat(rows, ignore_index=True)
+
+
 def _ph_spectra_both() -> pd.DataFrame:
     return pd.concat([_ph_spectra(448), _ph_spectra(1000)], ignore_index=True)
+
+
+_PH_SUBSTRATE_EDGES: dict = {}
+
+
+def _ph_substrate_graph() -> np.ndarray:
+    """One fixed random graph behind BOTH substrate placeholders.
+
+    The two are not independent: F19 asserts that the ordering's degree column is the
+    degree of the connectome it draws, which is a real check on the frozen pair and must
+    not fail on the smoke path for want of two placeholders agreeing. So the connectome
+    placeholder, the control placeholder (the same edge set, as the real control is) and
+    the ordering's degrees all come from this one draw.
+    """
+    if "edges" not in _PH_SUBSTRATE_EDGES:
+        rng = np.random.default_rng(20260901)
+        pairs = np.array(np.triu_indices(N_NODES, 1)).T
+        _PH_SUBSTRATE_EDGES["edges"] = pairs[rng.choice(len(pairs), 5323, replace=False)]
+    return _PH_SUBSTRATE_EDGES["edges"]
+
+
+def _ph_substrate_edges() -> pd.DataFrame:
+    """22 cells of 5,323 edges, so the layout builds with no artifact present."""
+    pairs = np.array(np.triu_indices(N_NODES, 1)).T
+    fixed = _ph_substrate_graph()
+    rows = []
+    for variant in LADDER:
+        single = variant in ("connectome", "connectome_weight_permuted")
+        for seed in ([0] if single else range(10)):
+            chosen = (fixed if single
+                      else pairs[_RNG.choice(len(pairs), 5323, replace=False)])
+            rows.append(pd.DataFrame(dict(
+                variant=variant, seed=seed, i=chosen[:, 0].astype(np.int16),
+                j=chosen[:, 1].astype(np.int16),
+                weight=10.0 ** _RNG.uniform(-5.5, -1.0, 5323))))
+    return pd.concat(rows, ignore_index=True)
+
+
+def _ph_substrate_edges_full() -> pd.DataFrame:
+    """The ladder's placeholder cells plus the three off-ladder rungs; 52 cells.
+
+    Built on ``_ph_substrate_edges`` rather than beside it, so the four ladder variants
+    are the same rows in both placeholders and the connectome placeholder still agrees
+    with the ordering's degree column, which S4 asserts exactly as F19 does.
+
+    ``random_gaussian`` is given a per-seed count that varies about 5,323, because it is
+    the one variant whose real count does and S4's edge-count check treats it separately.
+    The spread is the real binomial standard deviation; nothing here is a datum.
+    """
+    pairs = np.array(np.triu_indices(N_NODES, 1)).T
+    rows = [_ph_substrate_edges()]
+    for variant in ("clustering_rewire", "modularity_rewire", "random_gaussian"):
+        for seed in range(10):
+            count = (5323 if variant != "random_gaussian"
+                     else int(round(5323 + 71.0 * _RNG.standard_normal())))
+            chosen = pairs[_RNG.choice(len(pairs), count, replace=False)]
+            rows.append(pd.DataFrame(dict(
+                variant=variant, seed=seed, i=chosen[:, 0].astype(np.int16),
+                j=chosen[:, 1].astype(np.int16),
+                weight=10.0 ** _RNG.uniform(-5.5, -1.0, count))))
+    return pd.concat(rows, ignore_index=True)
+
+
+def _ph_substrate_topology() -> pd.DataFrame:
+    rows = []
+    for variant, (clustering, modularity) in zip(
+            LADDER, ((0.43, 0.55), (0.43, 0.55), (0.07, 0.0), (0.05, 0.0))):
+        for seed in ([0] if variant.startswith("connectome") else range(10)):
+            rows.append(dict(variant=variant, seed=seed, mean_clustering=clustering,
+                             modularity_fixed_partition=modularity,
+                             degree_assortativity=0.11 if "connectome" in variant else -0.01,
+                             global_efficiency=0.41 if "connectome" in variant else 0.48))
+    return pd.DataFrame(rows)
+
+
+# The real ordering's ten diagonal blocks (hemisphere x community), as (hemisphere,
+# community, size). The placeholder reproduces them rather than inventing a partition,
+# because F19 selects the block it magnifies BY SIZE: a placeholder whose communities are
+# not contiguous runs has no block of 15 to 40 nodes and the smoke path would fail on a
+# rule that is fine. Sizes only; nothing here is a datum.
+_PH_BLOCKS = [(0, 1, 46), (0, 2, 18), (0, 3, 78), (0, 4, 60), (0, 5, 23),
+              (1, 0, 90), (1, 1, 42), (1, 2, 66), (1, 3, 3), (1, 5, 22)]
+
+
+def _ph_substrate_order() -> pd.DataFrame:
+    chosen = _ph_substrate_graph()
+    degree = np.bincount(chosen.ravel(), minlength=N_NODES)
+    hemisphere = np.concatenate([np.full(size, hemi) for hemi, _, size in _PH_BLOCKS])
+    community = np.concatenate([np.full(size, comm) for _, comm, size in _PH_BLOCKS])
+    frame = pd.DataFrame(dict(node=np.arange(N_NODES), hemisphere=hemisphere,
+                              community=community, degree=degree))
+    frame = frame.sort_values(["hemisphere", "community", "degree", "node"],
+                              ascending=[True, True, False, True]).reset_index(drop=True)
+    frame["position"] = np.arange(N_NODES)
+    return frame
+
+
+def _ph_placement_degree_weight() -> pd.DataFrame:
+    """Twenty bins per substrate: a falling connectome and a flat control, plus noise.
+
+    The shape is the real one because the layout has to be exercised, not because it is a
+    datum. Nothing is read off a smoke render.
+
+    **The control's bin means are recentred so the two substrates share a pooled mean
+    edge weight exactly.** S3 asserts that, because the permutation holds the weight
+    multiset fixed and a difference would be a defect in it; the assertion is a real check
+    on the frozen pair and must not fail on the smoke path for want of a placeholder that
+    respects it. Same reason ``_ph_substrate_graph`` puts one draw behind both substrate
+    placeholders. The bin edges are shared for the same reason.
+    """
+    products = np.geomspace(168.0, 1920.0, 20)
+    counts = np.full(20, 266)
+    falling = 0.0046 - 0.0016 * np.linspace(0, 1, 20) + _RNG.normal(0, 3e-4, 20)
+    pooled = float(np.average(falling, weights=counts))
+    flat = pooled + _RNG.normal(0, 3e-4, 20)
+    flat += pooled - float(np.average(flat, weights=counts))
+    rows = []
+    for variant, mean in (("connectome", falling),
+                          ("connectome_weight_permuted", flat)):
+        rows.append(pd.DataFrame(dict(
+            variant=variant, seed=0, bin_index=np.arange(20),
+            bin_lower=products * 0.94, bin_upper=products * 1.06,
+            n_edges=counts, median_degree_product=products, mean_weight=mean,
+            sem_weight=_RNG.uniform(2.3e-4, 5.0e-4, 20))))
+    return pd.concat(rows, ignore_index=True)
+
+
+def _ph_placement_rank_correlation() -> pd.DataFrame:
+    return pd.DataFrame(dict(
+        variant=["connectome", "connectome_weight_permuted"], seed=0, n_edges=5323,
+        spearman_rho=[-0.124, -0.003], ci_low=[-0.151, -0.030],
+        ci_high=[-0.098, 0.024], n_bootstrap=10000, bootstrap_seed=0))
 
 
 def _ph_alignment() -> pd.DataFrame:
@@ -807,6 +1111,15 @@ SOURCES = {
         "condition == 'human_empirical' and variant in the four-variant ladder; "
         "40 rows (4 variants x 10 seeds). abs_bulk and gap_ratio derived here.",
         lambda: _spectra(448), lambda: _ph_spectra(448)),
+    "spectra_448_full": Source(
+        "spectra_448_full", EIGEN / "scale_448/spectra_per_seed.parquet",
+        ("eig_w_real", "bulk95", "lambda_max_raw", "abs_bulk", "gap_ratio"),
+        "condition == 'human_empirical', ALL SEVEN variants, no ladder filter; 70 rows "
+        "(7 variants x 10 seeds). Same file and same derived columns as spectra_448. "
+        "Feeds S4, which reads bulk95 for the representative-seed rule ONLY and quotes "
+        "no spectral quantity; TIER0 sec 3.1(b) is canonical for the three off-ladder "
+        "rungs and carries the scope guard keeping them out of the ladder's tables.",
+        lambda: _spectra_full(448), lambda: _ph_spectra_full(448)),
     "spectra_1000": Source(
         "spectra_1000", EIGEN / "scale_1000/spectra_per_seed.parquet",
         ("eig_w_real", "bulk95", "lambda_max_raw", "abs_bulk", "gap_ratio"),
@@ -818,6 +1131,68 @@ SOURCES = {
         ("bulk95", "lambda_max_raw", "abs_bulk", "gap_ratio", "scale"),
         "both scales concatenated with a 'scale' column; same filter as spectra_448.",
         _spectra_both_scales, _ph_spectra_both),
+    "substrate_edges": Source(
+        "substrate_edges", ARTIFACTS / "substrate_edges.parquet",
+        ("variant", "seed", "i", "j", "weight"),
+        "no row filter; long form, one row per undirected edge (i < j) per variant per "
+        "seed. 117,106 rows = 22 (variant, seed) cells x 5,323 edges. The connectome and "
+        "the weight-permuted control are single graphs, carried at one seed each (the "
+        "control at F1's representative seed); degree_rewire and erdos_renyi at all 10. "
+        "condition == 'human_empirical', N = 448. Built by "
+        "report/artifacts/build_substrate_graphs.py.",
+        _substrate_edges, _ph_substrate_edges),
+    "substrate_edges_full": Source(
+        "substrate_edges_full", ARTIFACTS / "substrate_edges_full.parquet",
+        ("variant", "seed", "i", "j", "weight"),
+        "no row filter; same long form and same columns as substrate_edges, all seven "
+        "variants. 52 (variant, seed) cells: substrate_edges' 22 rows for rung for rung, "
+        "plus clustering_rewire, modularity_rewire and random_gaussian at all 10 seeds. "
+        "condition == 'human_empirical', N = 448. A SEPARATE file from substrate_edges "
+        "so that F19, which takes its columns from edges.variant.unique(), is not "
+        "silently widened; F19 reads substrate_edges and S4 reads this. random_gaussian "
+        "is the one variant not at exactly 5,323 edges (density matched in expectation, "
+        "counts 5,180 to 5,439). All seven are non-negative. Built by "
+        "report/artifacts/build_substrate_graphs.py. Feeds S4.",
+        _substrate_edges_full, _ph_substrate_edges_full),
+    "substrate_topology": Source(
+        "substrate_topology", ARTIFACTS / "substrate_topology.parquet",
+        ("variant", "seed", "mean_clustering", "modularity_fixed_partition",
+         "degree_assortativity", "global_efficiency"),
+        "no row filter; 22 rows, one per (variant, seed) of substrate_edges. ALL FOUR "
+        "statistics are computed on the BINARY graph, weights discarded. "
+        "modularity_fixed_partition evaluates ONE partition -- Louvain, resolution 1.0, "
+        "seed 0, detected once on the connectome -- on every variant; community "
+        "detection is NOT re-run per variant. Aggregate as the median over the ten "
+        "seeds for the two randomised variants.",
+        _substrate_topology, _ph_substrate_topology),
+    "substrate_order": Source(
+        "substrate_order", _REPO_ROOT / "data/human/Suarez2021_Data",
+        ("node", "hemisphere", "community", "degree", "position"),
+        "COMPUTED LIVE, not frozen: hemisphere from the release geometry, community from "
+        "HumanSubstrateBuilder's own Louvain partition (the same attribute "
+        "build_substrate_graphs.py uses), degree from the binary connectome. Ordered by "
+        "hemisphere, then community, then descending degree. One substrate load, no run.",
+        _substrate_order, _ph_substrate_order),
+    "placement_degree_weight": Source(
+        "placement_degree_weight",
+        ARTIFACTS / "placement_mechanism_degree_weight.parquet",
+        ("variant", "bin_index", "bin_lower", "bin_upper", "n_edges",
+         "median_degree_product", "mean_weight", "sem_weight"),
+        "no row filter; 40 rows = 2 substrates x 20 equal-count bins. The bins are cut "
+        "on the CONNECTOME's degree products and applied to both substrates, which is "
+        "what makes the two rows comparable bin for bin; 255 to 277 edges per bin, "
+        "products spanning 36 to 3,795. condition == 'human_empirical', N = 448, one "
+        "seed per substrate (both are single graphs). Built by "
+        "report/artifacts/build_placement_mechanism.py. Feeds S3.",
+        _placement_degree_weight, _ph_placement_degree_weight),
+    "placement_rank_correlation": Source(
+        "placement_rank_correlation",
+        ARTIFACTS / "placement_mechanism_rank_correlation.parquet",
+        ("variant", "n_edges", "spearman_rho", "ci_low", "ci_high", "n_bootstrap"),
+        "no row filter; 2 rows, one per substrate. Spearman rho of edge weight against "
+        "endpoint degree product, 95% percentile bootstrap over 10,000 resamples of the "
+        "5,323 edges, seed 0. TIER0 sec 3.14(b) publishes both rows. Feeds S3.",
+        _placement_rank_correlation, _ph_placement_rank_correlation),
     "alignment": Source(
         "alignment", PROBES / "scale_448/manifold_alignment.parquet",
         ("task", "condition", "basis", "k", "captured"),
