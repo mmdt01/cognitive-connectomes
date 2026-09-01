@@ -1,6 +1,170 @@
 \chapter{Appendix: Supplementary Material}
 \label{appendix:supplementary}
 
+
+\section{The wider substrate ladder}
+\label{app:wider-ladder}
+\bigskip
+
+Section~\ref{sec:act1-bulk-gap-placement} rests the placement claim on the
+weight-permuted control and reports two further rungs as corroboration. Their
+values are here. The clustering-preserving and modularity-preserving rewires
+each hold fixed everything the degree-preserving rewire does and one further
+property of the topology besides; 
+the random gaussian rung is included for completeness and takes no part in any
+comparison, since it is not a rung of the criticality-matched ladder and matches
+the connectome's edge count only in expectation.
+
+Holding progressively more of the connectome's topology fixed recovers none of
+what placement supplies. At $N = 448$ the strongest null of all six is the
+clustering-preserving rewire at
+2.081, % TIER0 3.1(b)
+above every rung the figures draw, and the connectome's margin over it is
+1.479-fold; % TIER0 3.1(b)
+at $N = 1000$ Erdős–Rényi remains the strongest and the margin is
+1.635-fold. % TIER0 3.1(b)
+The separation therefore survives at both parcellations against every null
+available, but its size depends on which null set it is measured against, and it
+is quoted here with that set named. On $|\lambda_1|$ all three additional rungs
+sit inside the null band at both scales, so the reading of
+Chapter~\ref{chapter:act-I} is unchanged: a large Perron root over a bulk close
+to everyone's.
+
+These three rungs are not part of the four-substrate ladder. They appear in no
+figure of Chapter~\ref{chapter:act-I}, the published spreads in
+Table~\ref{tab:act1-ladder} are the ladder's and are not recomputed across the
+wider set, and the near-identity of the absolute bulks stated at $N = 448$ is a
+statement about the four.
+
+
+\begin{table}[ht]
+    \centering
+    \caption[The three off-ladder substrates]{\textbf{The three substrates
+    outside the four-rung ladder.} Aggregation and units as
+    Table~\ref{tab:act1-ladder}: medians over ten seeds, raw units of $W$,
+    absolute bulk the product of the medians. All three are resampled at every
+    seed, so unlike the connectome the two aggregation orders differ on every
+    row, and only the product of medians satisfies the gap-ratio identity.}
+    \label{tab:act1-offladder}
+    \begin{tabular}{lrrrr}
+        \toprule
+        substrate & absolute bulk & $|\lambda_1|$ & $\mathrm{bulk95}$ & gap ratio \\
+        \midrule
+        \multicolumn{5}{l}{\emph{$N = 448$}} \\
+        random gaussian & 0.0593 & 0.1104 & 0.5374 & 1.861 \\ % TIER0 3.1(b)
+        clustering rewire & 0.0582 & 0.1212 & 0.4806 & 2.081 \\ % TIER0 3.1(b)
+        modularity rewire & 0.0598  & 0.1167 & 0.5123 & 1.952 \\ % TIER0 3.1(b)
+        \midrule
+        \multicolumn{5}{l}{\emph{$N = 1000$}} \\
+        random gaussian & 0.0558 & 0.1357 & 0.4113 & 2.432 \\ % TIER0 3.1(b)
+        clustering rewire & 0.0581 & 0.1377 & 0.4218 & 2.371 \\ % TIER0 3.1(b)
+        modularity rewire & 0.0604 & 0.1353 & 0.4462 & 2.241 \\ % TIER0 3.1(b)
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% full substrate family adjacency matrices
+\begin{sidewaysfigure}
+    \centering
+    \includegraphics[width=0.95\textheight]{S4.png}
+    \captionsetup{font=small}
+    \caption[The full substrate family, as graphs]{%
+    \textbf{The full substrate family.} All seven substrates, drawn under the
+    node ordering of Figure~\ref{fig:F19}: hemisphere, then community, with
+    communities detected once on the connectome and reused throughout.
+    \textbf{Top row} binary adjacency with the degree marginal above each panel;
+    \textbf{bottom row} weighted adjacency, all seven on one logarithmic colour
+    scale. Columns run in the order of
+    Table~\ref{tab:methods-preservation}, most preserved first. The
+    criticality-matched ladder Chapter~\ref{chapter:act-I} draws is the
+    connectome, the weight-permuted control, the degree-preserving rewire and
+    Erdős–Rényi, in columns one, two, five and six; the clustering-preserving
+    and modularity-preserving rewires in columns three and four each hold fixed
+    everything the degree rewire does and one further property of the topology
+    besides, and the random gaussian rung in column seven fixes only the node
+    count and the expected density, so it is the one substrate whose edge count
+    varies between seeds. Every randomised substrate takes its weights from the
+    connectome's own multiset, so all seven are non-negative. This figure shows
+    what the substrates look like and makes no comparison among them: the ladder
+    statistics of Table~\ref{tab:act1-ladder} are the ladder's and are not
+    recomputed across this set, and the spectra of the three additional
+    substrates are in Table~\ref{tab:act1-offladder}. Randomised substrates are
+    drawn at the seed used throughout this chapter.}
+    \label{fig:S4}
+\end{sidewaysfigure}
+
+
+
+
+
+\section{A pre-registered test of one mechanism}
+\label{app:mechanism}
+\bigskip
+
+Chapter~\ref{chapter:act-I} localises the spectral gap to weight placement and
+claims no mechanism for it. One candidate mechanism was specific enough to
+test, and was tested. The prediction, its falsifier and the decision rule were
+committed before any of the analysis ran.
+
+The candidate is the weighted rich club. For a symmetric non-negative matrix
+the Perron root is the maximum of the Rayleigh quotient over non-negative
+vectors, so heavy weights on edges sharing endpoints reinforce one another in
+it while scattered heavy weights do not. If the connectome's heavy edges ran
+between its hubs they would share endpoints, and a weight permutation, which
+holds the graph and the multiset fixed, would destroy that arrangement and the
+Perron root with it.
+
+Three predictions were registered. Edge weight would correlate positively with
+endpoint degree product in the connectome and at zero in the control; the
+heaviest edges would carry a larger fraction of the Perron root in the
+connectome than in the control; and the ratio of maximum node strength between
+them would be smaller than their Perron ratio, excluding a single dominant node
+as the explanation.
+
+The first fails, in the direction opposite to the prediction, and
+Figure~\ref{fig:S3} is the measurement. The second was posed on a fraction of
+each substrate's own Perron root, which divides by the one quantity these
+substrates differ in, so it cannot be read: the same normalisation this thesis
+retracts in Section~\ref{sec:act1-bulk-gap-placement}. The third fails and
+leaves an account standing rather than excluding one. Weight placement
+concentrates node strength: the connectome's maximum node strength is
+2.54 times % TIER0 3.14
+the control's while its Perron root is 1.65 times, % TIER0 3.14
+on identical mean strength. That is a candidate this thesis does not test. It
+was not the registered hypothesis, it arrives from a measurement designed to
+exclude it rather than to examine it, and adopting it here would be the
+post-hoc move the registration exists to prevent.
+
+The registered decision rule returned equivocal, so nothing in the claims
+register changed and the limit stated in
+Section~\ref{sec:act1-bulk-gap-placement} stands as written.
+
+\bigskip
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{S3.png}
+    \caption[The connectome's heavy edges avoid its hubs]{%
+    \textbf{The connectome's heavy edges run between its lower-degree parcels.}
+    Mean edge weight against the product of the two endpoints' binary degrees,
+    in twenty equal-count bins cut on the connectome's products so that both
+    substrates bin identically. The weight-permuted control holds the graph and
+    the weight multiset fixed, so any trend it shows is sampling noise, and it
+    shows none: Spearman
+    $-0.0033$, % TIER0 3.14
+    with a bootstrap interval covering zero. The connectome's trend is negative,
+    Spearman $-0.1242$ % TIER0 3.14
+    with an interval excluding zero. A weighted rich club would put the trend
+    the other way. 
+    Ten thousand edge resamples, 95\% percentile intervals, $N = 448$. % TIER0 3.14
+    }
+    \label{fig:S3}
+\end{figure}
+
+
+
+
+% ------------------------------
+
 % S1
 \begin{figure}[ht]
     \centering
@@ -11,8 +175,8 @@
     $N = 1000$ % TIER0 2.1
     self-built consensus. \textbf{(a--d)} The four bulk bands again sit at the
     same place while $\lambda_1$ separates, and the connectome's gap ratio again
-    stands roughly $1.7\times$ % TIER0 3.1
-    clear of every null, 3.99 % TIER0 3.1
+    stands at least 1.63-fold % TIER0 3.1(b)
+    clear of every rung of the four-substrate ladder, 3.99 % TIER0 3.1
     against 2.30 to 2.44. % TIER0 3.1
     The rows are in ladder order and their gap ratios are \emph{not} monotone
     here, reading 3.99, 2.39, 2.30 and 2.44 % A1 S1 caption
@@ -38,4 +202,8 @@
     \textbf{}}
     \label{fig:S2}
 \end{figure}
+
+
+
+
 
