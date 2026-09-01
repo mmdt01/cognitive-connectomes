@@ -18,6 +18,162 @@
 % \section{Measures}
 
 
+\section{The Connectivity Substrate}
+\label{sec:methods-substrate}
+\bigskip
+
+The individual data are the 70 % METH A.1
+diffusion-weighted datasets of a publicly released healthy-adult
+cohort \cite{griffa2019structural}, in the form distributed with the
+connectome-reservoir release of Suárez et al. \cite{suarez2021learning}. The
+release provides the same cohort at several parcellation resolutions of the
+Lausanne atlas. This thesis works at the two highest,
+$N = 448$ and $N = 1000$. % METH A.4
+Both of the measures Chapter~\ref{chapter:act-I} reports are percentiles taken
+over a spectrum, and the reservoir measures in later chapters are ranks of an
+$N$-dimensional state space, so each needs enough nodes to be informative; the
+coarser resolutions do not supply them.
+
+Each individual structural matrix is restricted to cortical parcels, and its
+edge weights are streamline fibre densities. The group matrix is formed by a
+distance-dependent consensus rule \cite{betzel2019distance}: candidate edges are
+grouped into bins by the Euclidean distance between parcel centroids, with
+inter-hemispheric and intra-hemispheric connections treated separately, and one
+edge is retained per bin, the one present in the largest number of individuals.
+A retained edge takes as its weight the mean of that connection across all
+subjects. The result is symmetric, has a zero diagonal, and is non-negative
+throughout, since tractography counts streamlines and cannot represent an
+inhibitory connection. At $N = 448$ it holds
+5{,}323 % METH A.6
+undirected edges, a density of 5.32\%; % METH A.6
+the same build at $N = 1000$ gives
+10{,}784 % METH A.6
+edges and 2.16\%. % METH A.6
+
+\section{The null ladder}
+\label{sec:methods-ladder}
+\bigskip
+
+Five null models and one control are used. In order of how much of the
+connectome each keeps: 
+a random gaussian matrix, which shares only the node count and the expected edge
+density, its edges drawn independently at that density rather than fixed in
+number; an Erdős–Rényi graph, matching the node
+count, edge count and density exactly rather than in expectation; a
+degree-preserving rewire, which adds the degree sequence and so carries the
+connectome's heavy-tailed degree distribution intact; and
+clustering-preserving and modularity-preserving rewires, each holding fixed
+everything the degree rewire does and one further property of the topology
+besides. Weights are painted onto every randomised graph by drawing, with
+replacement, from the connectome's own multiset of edge
+weights. % METH B.0
+Each null is generated at ten seeds; % METH B.0
+the connectome is one fixed graph and returns the same matrix every time.
+
+The weight-permuted variant is a control rather than a null. It takes the
+connectome's own graph and its own weights and permutes the weights across the
+edges: same edge set, same degrees, and the same weight multiset exactly rather
+than in distribution, since the values are reordered rather than
+resampled. % METH B.1
+
+Chapter~\ref{chapter:act-I} draws four of these seven: the connectome, the
+weight-permuted control, Erdős–Rényi and the degree-preserving rewire, which is
+forty cells at each parcellation. The clustering- and modularity-preserving
+rewires appear there as numbers only, in Appendix~\ref{app:wider-ladder}. 
+The random gaussian rung takes no part in that comparison either. It is not a
+rung of the criticality-matched ladder, and its edge count is matched only in
+expectation, so it is the one substrate here that does not hold the connectome's
+edge count fixed.
+
+\begin{table}[ht]
+    \centering
+    \caption[What each substrate preserves, full ladder]{\textbf{What each
+    substrate preserves and what it destroys, across the full family.} Rows are
+    ordered by how much of the connectome each keeps, most at the top. The
+    ordering is not a strict nesting: the clustering-preserving and
+    modularity-preserving rewires each add one constraint to the degree rewire,
+    but neither contains the other, so their relative position is arbitrary. 
+    The random gaussian rung matches the connectome's density in expectation rather
+    than exactly, so its edge count varies between seeds; every other randomised
+    rung matches it exactly. All randomised rungs take their weights from the
+    connectome's own multiset, so all are non-negative.
+    Table~\ref{tab:act1-preservation} gives the four-substrate subset the
+    figures of Chapter~\ref{chapter:act-I} draw.}
+    \label{tab:methods-preservation}
+    \begin{tabular}{lccccccc}
+        \toprule
+        & no. of & edges, & non-neg. & degree & clustering & modularity & weight \\
+        & nodes & density & weights & sequence &  &  & placement \\
+        \midrule
+        \textbf{connectome} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+        weight-permuted & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & --- \\
+        clustering rewire & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & --- & --- \\
+        modularity rewire & \checkmark & \checkmark & \checkmark & \checkmark & --- & \checkmark & --- \\
+        degree rewire & \checkmark & \checkmark & \checkmark & \checkmark & --- & --- & --- \\
+        Erdős–Rényi & \checkmark & \checkmark & \checkmark & --- & --- & --- & --- \\
+        random gaussian & \checkmark & --- & \checkmark & --- & --- & --- & --- \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\section{Validating the nulls}
+\label{sec:methods-null-validation}
+\bigskip
+
+Each rung asserts its own defining property at construction, and those
+assertions are weaker than they look. All of them test a property the generator
+preserves by construction, % METH B.6
+so they will catch a mis-wired pipeline, a transposed mask or a generator called
+on the wrong graph, and none of them can report whether a randomisation has
+actually explored anything.
+
+The distinction matters for the degree-preserving rewire, the one rung whose
+randomisation is iterative: its assertion holds after any number of swaps,
+including none at all. That the chain has in fact mixed is a separate
+measurement. At the production setting of ten accepted swaps per edge, the
+rewired graph retains 3.6\% % A1 5.3
+of the connectome's edges against a chance floor of roughly
+2.2\% % A1 5.3
+at this density, and retention is flat from five swaps per edge through to
+forty, % A1 5.3
+so the chain has settled well before the setting these results use.
+
+
+
+\section{The bulk edge and the critical scale}
+\label{sec:methods-bulk95}
+\bigskip
+
+The bulk edge used throughout is $\mathrm{bulk95}$: the 95th percentile of
+$|\lambda|$ over the spectrum, divided by $|\lambda_1|$, so that it is expressed
+as a fraction of the Perron root rather than in the units of the
+weights. % A1 2.6 finding 1
+The word outlier then invites one assumption that the definition does not
+license. The Perron eigenvalue is inside the population the percentile is taken
+over. % A1 2.6 finding 1
+It is an outlier in where it sits, not one the statistic sets aside, and the
+bulk edge is therefore a percentile of the whole spectrum rather than of the
+spectrum with its largest element removed.
+
+Every substrate-level $\mathrm{bulk95}$ reported in this thesis is the median
+over seeds, and the critical scale derived from it is
+$\mathrm{sr\_crit} = 1 / \mathrm{median}_{\text{seeds}}(\mathrm{bulk95})$. % TIER0 1.3
+The median rather than the mean, because $1/x$ is convex, so the per-seed mean
+of $1/\mathrm{bulk95}$ is biased upward against the inverse of the mean, by up
+to 0.0431 % TIER0 1.3
+within the four-substrate ladder. The median commutes with monotone transforms,
+so the two computation orders agree and $\mathrm{sr\_crit}$ can be reproduced by
+inverting the reported central $\mathrm{bulk95}$. % TIER0 1.3
+The absolute bulk radius in raw units of $W$ is
+$\mathrm{median}(\mathrm{bulk95}) \times \mathrm{median}(|\lambda_1|)$, the
+product of the medians, which is the only aggregation under which the identity
+$|\lambda_1| / \mathrm{abs\_bulk} = 1/\mathrm{bulk95} = \mathrm{sr\_crit}$
+holds. % TIER0 3.1
+
+
+
+
 
 % Figure 3: two spectral radius scaling axis
 \begin{figure}[ht]
