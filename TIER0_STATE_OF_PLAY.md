@@ -1295,6 +1295,230 @@ Artifacts: `results/scale_448/manifold_alignment.parquet`,
 `saturation_diagnostics.parquet`, `probe3_deff.parquet`, and the `*_summary.md` files
 beside them.
 
+### 3.13 The ladder as graphs: four binary-graph statistics, and the gate they are
+
+**Added 1 September 2026, for F19.** The four substrates of Act I have been described in
+prose and drawn only through their spectra. Nothing in this document, and no frozen
+artifact in the repository, held their **adjacency** or any measure of it, so a reader
+could not check that the weight-permuted control is what it is claimed to be. This
+section puts the numbers on the record.
+
+**Scope guard, first, because it governs everything below. These are design facts of the
+null ladder and they carry no claim.** They say what four graphs are, not what any of
+them does. No task appears in Act I, none of these numbers is a result, and none of the
+six contributions rests on any of them. They belong to chapter 4's first section, which
+`report/act1_structure.md` §4 registers as carrying no results. **In particular the
+connectome/control row is a gate, not a finding**: it is the check that the placement
+control is a placement control, and if it ever fails it is a defect in the permutation.
+
+**All four are computed on the BINARY graph, with weights discarded**, which is the whole
+point of the table. Aggregation: **the median over the ten seeds for the two randomised
+variants; the connectome and the control are single graphs** and their rows are the value
+itself, not an aggregate. Scale: **N = 448**, condition `human_empirical`, the self-built
+cortical consensus. Every variant carries exactly **5,323** undirected edges.
+
+| variant | mean clustering | modularity (fixed partition) | degree assortativity | global efficiency |
+|---|---|---|---|---|
+| connectome | **0.4277** | **0.5486** | **0.1067** | **0.4064** |
+| weight-permuted | **0.4277** | **0.5486** | **0.1067** | **0.4064** |
+| degree | 0.0697 | −0.0002 | −0.0192 | 0.4789 |
+| Erdős–Rényi | 0.0529 | −0.0036 | −0.0068 | 0.4820 |
+
+**The connectome and the control are identical on all four, by construction, and that is
+the gate rather than a result.** The permutation reorders which edge carries which weight
+and leaves the edge set untouched, so the two are **one binary graph**, with byte-identical
+adjacency, and no measure of a binary graph can tell them apart. The builder asserts
+both halves of that before it writes anything: byte-identical adjacency, then **exact
+equality** on all four statistics, to equality and not to a tolerance. A nonzero
+difference on any of the four would be a defect in the permutation, and it stops the
+build rather than being reported as a difference between substrates.
+
+**Partition detection.** `networkx.community.louvain_communities` on the **binary
+connectome** graph, at the networkx default **resolution 1.0**, seed **0**
+(`experiments.human.matrix_config.LOUVAIN_SEED`); **6 communities**, of sizes 90, 88, 84,
+81, 60, 45. It is detected **once, on the connectome, and applied unchanged to every
+variant**. Community detection is not re-run per variant, and must not be: re-detecting
+would fit whatever partition best suits each draw and report a respectable modularity for
+a graph with no community structure at all. The partition is read from
+`HumanSubstrateBuilder.partition`, the same attribute the ladder's `modularity_rewire`
+rung is built against, so there is one Louvain call for this substrate and not two.
+
+**Two further readings, stated so they are not rediscovered.** (i) `degree_rewire`
+reproduces the connectome's degree sequence **exactly**, since double-edge swaps preserve
+it by construction, and the builder checks all ten seeds against it. (ii) Both randomised
+variants sit at zero on the fixed-partition modularity: the seed spread **straddles zero**
+(degree −0.0086 to +0.0031; Erdős–Rényi −0.0082 to +0.0090), so the sign of either median
+is not a reading and the quantity is zero at the precision published here.
+
+**The magnified block, and the rule that selects it. Added 1 September 2026, for F19's
+zoom row.** F19 magnifies one **diagonal block of the drawn ordering** (hemisphere x
+community). The rule: **of the diagonal blocks of 15 to 40 nodes, the one with the
+highest within-block binary edge density**, measured on the connectome. Ties break on the
+earlier block, so the rule is total. It selects:
+
+**Hemisphere 1, community index 5, 22 nodes, 125 internal edges, within-block density
+0.5411**, occupying positions 426 to 448 of the drawn ordering.
+
+Every block in the size range, so the selection is checkable:
+
+| hemisphere | community | positions | nodes | internal edges | within-block density |
+|---|---|---|---|---|---|
+| 0 | 2 | 46 to 64 | 18 | 68 | 0.4444 |
+| 0 | 5 | 202 to 225 | 23 | 136 | 0.5375 |
+| **1** | **5** | **426 to 448** | **22** | **125** | **0.5411** |
+
+The community index is the rank used by the node ordering, communities sorted by size
+descending. The ten diagonal blocks are of sizes 46, 18, 78, 60, 23, 90, 42, 66, 3, 22;
+three fall in the range and are the three above.
+
+**An earlier version of this rule selected a whole community and was withdrawn on 1
+September 2026, for non-contiguity under the drawn ordering rather than for failing to
+select.** Hemisphere is the outer key of the ordering, so a community that spans both
+hemispheres occupies **two non-contiguous** diagonal blocks: magnifying one would magnify
+a node set that is not contiguous in the drawn ordering, and the indicator marking it on
+the full panels would have to mark two squares and the rectangle between them. The
+diagonal blocks are the squares a reader already sees in the full panels, so the rule
+selects among those instead. Nothing else moved with it: the partition, the node
+ordering, the separator lines and the colour scale are unchanged.
+
+**A second identity, of the same kind as the connectome/control gate above.** Within the
+selected block the connectome and the weight-permuted control fill **exactly the same 250
+cells** (125 undirected edges drawn symmetrically), because the permutation moves weights
+between edges and leaves the edge set alone. The figure asserts it before rendering. On
+the same 22 nodes the two randomised substrates carry 23 and 15 undirected edges at the
+seeds this chapter draws, against the connectome's 125.
+
+> Artifacts: `report/artifacts/substrate_edges.parquet` (117,106 rows = 22 (variant, seed)
+> cells x 5,323 edges) and `report/artifacts/substrate_topology.parquet` (22 rows), both
+> written by the committed one-off `report/artifacts/build_substrate_graphs.py`. Parquets
+> are gitignored repo-wide, as every parquet here is; the script is what is committed and
+> re-running it reproduces both files. Verifications run before either is written: the
+> edge count is 5,323 in all 22 cells, and every `degree_rewire` seed's sorted degree
+> sequence equals the connectome's. Nothing was regenerated and no run happened: the
+> substrates are rebuilt from `HumanSubstrateBuilder` at N = 448, which
+> `report/act1_structure.md` §2.5 shows reproduces the frozen spectra cell for cell at
+> 0.000e+00.
+
+### 3.14 The registered placement-mechanism test: a gate, a refuted account, and one untested observation
+
+**Added 1 September 2026.** `report/PREREG_PLACEMENT_MECHANISM.md` registered three
+measurements against the placement claim A1.5 rests on, and its §4 records what they
+returned. This section puts on the record, here where results live, the three things that
+survive: one integrity check, one registered prediction that fails, and one observation
+that is explicitly not a result. Read-only throughout. No run happened, no artifact was
+regenerated, and no published number moved.
+
+**Scope guard, first, because it governs all four parts below.** The analysis returned
+**EQUIVOCAL** under the decision rule frozen in its §3 before anything was computed, and
+§3 fixes what an equivocal verdict does: the claims register is unchanged, the limit in
+`report/act1_structure.md` §1 stands as written, and none of the six documents §3.2 lists
+is edited. **Nothing in this section licenses a mechanism claim.** Act I claims that the
+effect is weight **placement** and claims **no mechanism** for why placement produces the
+gap, and that pair is exactly as it was. No derivation of `|λ₁|` from a structural
+statistic, no sufficiency claim, and no task claim, since no task appears in Act I. This
+concerns `|λ₁|` only and revisits nothing about the absolute bulk. §3's "one session, no
+second analysis" governs, and an equivocal verdict is not to be resolved by looking
+harder.
+
+**(a) The `substrate_edges.parquet` reconstruction gate. An integrity check, and it
+carries no claim.**
+
+Every one of the 22 `(variant, seed)` cells in `substrate_edges.parquet` was rebuilt as a
+symmetric weighted adjacency from its edge rows alone, and its `|λ₁|` checked against
+`lambda_max_raw` for the same cell in `scale_448/spectra_per_seed.parquet`, before
+anything else was computed.
+
+| quantity | over the 22 cells | worst cell |
+|---|---|---|
+| maximum absolute deviation | **4.30e-16** | `degree_rewire`, seed 6 |
+| maximum relative deviation | **3.61e-15** | `degree_rewire`, seed 1 |
+| float32 storage precision, the bar | 1.19e-07 | |
+
+**This gives `substrate_edges.parquet` cell-for-cell standing against the frozen
+spectra**, which is what the substrate figure F19 and §3.13's four statistics rest on: the
+edge list and the published eigenvalues are two descriptions of the same 22 matrices, well
+inside the precision either file could have been stored at. A
+deviation above the bar would have meant the two files were not describing the same
+matrices, and would have stopped the build rather than being reported.
+
+**(b) The registered prediction, and its refutation in the opposite direction.**
+
+Spearman rank correlation of edge weight against the product of the two endpoints' binary
+degrees, one cell per substrate:
+
+| substrate | Spearman rho | 95% CI |
+|---|---|---|
+| connectome | **-0.1242** | [-0.1507, -0.0979] |
+| weight-permuted control | **-0.0033** | [-0.0304, +0.0237] |
+
+**Binning rule**, which is what makes the two rows comparable: 20 equal-count bins
+(`pandas.qcut`, 20 quantiles) on the degree product, **cut on the connectome's products**
+so that both substrates bin identically and can be read bin for bin. The control is the
+same binary graph, so its degree products are the connectome's. 255 to 277 edges per bin;
+degree products spanning 36 to 3,795. **Interval:** 95% percentile bootstrap over 10,000
+resamples of the 5,323 edges, seed 0. N = 448.
+
+**The registered prediction was a POSITIVE correlation in the connectome** (P3, frozen in
+the prereg's §3), with the control at approximately zero. The control half holds: -0.0033,
+with an interval covering zero, which is what permuting the weight multiset over a fixed
+graph has to give and is therefore a check rather than a finding. The connectome half
+fails, and fails **in the direction opposite to the prediction**: the correlation is
+negative, with an interval excluding zero. **The weighted rich club is therefore refuted
+as an account of the gap on this substrate.** The connectome's heavy edges are not where
+that account requires them to be; they run between its lower-degree parcels. Figure **S3**
+draws the twenty bin means for both substrates.
+
+**(c) The account left standing, recorded as untested.**
+
+Raw units of `W`, one cell per substrate:
+
+| substrate | mean node strength | max node strength |
+|---|---|---|
+| connectome | 0.077349 | **0.517022** |
+| weight-permuted control | 0.077349 | **0.203490** |
+
+Max-strength ratio, connectome over control: **2.5408**, against a **cell-matched Perron
+ratio of 1.6521** on the same two cells. Mean strength is identical between the two to
+**1.39e-17**, which is what preserving the weight multiset exactly requires and is the
+second half of the same integrity check as (a).
+
+**This is an observation arising from a measurement designed to exclude a different
+account, not a tested hypothesis.** The prereg's P2 was written to exclude "one strong
+node" by showing the max-strength ratio *smaller* than the Perron ratio; it is larger, so
+the exclusion does not go through and the account is left standing. **Being left standing
+is not evidence for it.** No measurement here addresses it: the sandwich inequality
+`mean_strength <= |λ₁| <= max_strength` bounds `|λ₁|` and does not derive it, and no
+number above shows that a single strong node accounts for any part of the gap. **This
+thesis does not test it**, and nothing may be built on it.
+
+**(d) The masking curve is measured, and is not published here, on its posing.** The
+prereg's §2 item 1 posed it as `λ₁` of the heaviest-`k` masked matrix **as a fraction of
+that cell's own unmasked `λ₁`**. That normalisation divides by the one quantity the
+substrates differ in, which is what §3.1 records: the absolute bulk is near-identical
+across the four and the entire between-variant difference sits in `|λ₁|`. So a difference
+between two substrates' curves is not separable from the difference between their
+denominators, and **the measurement is not interpretable as posed**. No number from it is
+published here, none appears in any figure, and none enters the thesis. The prereg's §4.2
+holds what was computed, as the record of what that session did. Re-posing it on a common
+denominator would be a second analysis, which §3 forbids.
+
+> Artifacts: `report/artifacts/placement_mechanism_gate.parquet` (22 rows, one per cell),
+> `_strength.parquet` (22 rows), `_degree_weight.parquet` (40 rows = 2 substrates x 20
+> bins) and `_rank_correlation.parquet` (2 rows), all written by the committed one-off
+> `report/artifacts/build_placement_mechanism.py`. `_masking.parquet` is written by the
+> same script and is read by nothing: not by this section, not by any figure. Parquets are
+> gitignored repo-wide, as every parquet here is; the script is what is committed and
+> re-running it reproduces all five. **Inputs:** `report/artifacts/substrate_edges.parquet`
+> (§3.13) and
+> `experiments/human/analysis/eigenspectrum/results/scale_448/spectra_per_seed.parquet`,
+> `condition == "human_empirical"`, N = 448. **Aggregation:** the connectome and the
+> weight-permuted control are single graphs carried at one seed each (the control at F1's
+> representative-seed rule, which is what the edge list stores), so every number in (b) and
+> (c) is a cell value and not an aggregate; the two ratios in (c) are formed from those two
+> cells and not from §3.1's medians; the gate in (a) is a maximum over all 22 cells, which
+> includes the ten seeds each of `degree_rewire` and `erdos_renyi`. Source of record:
+> `report/PREREG_PLACEMENT_MECHANISM.md` §4, whose sections 1 to 3 are frozen.
+
 ---
 
 ## 4. Robustness of the E0.2 verdict

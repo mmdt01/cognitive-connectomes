@@ -403,6 +403,79 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   > up to 9 `d_eff` units, so (a) and (b) are not expected to subtract exactly to (c).
 
 
+### F19: the four substrates, as graphs
+
+- **Claim carried:** **none.** F19 prints in §4's outline item 2, "The substrate and the
+  null ladder", which is registered above as carrying **no results**: every numeral in it
+  is a design fact or a count. The figure is the ladder drawn rather than described.
+  Added 1 September 2026; `FIGURE_LIST` carries the count amendment and the reason.
+- **Source:** `report/artifacts/substrate_edges.parquet` (source `substrate_edges`;
+  117,106 rows = 22 (variant, seed) cells x 5,323 edges) and
+  `substrate_topology.parquet` (source `substrate_topology`; 22 rows). Node ordering from
+  source `substrate_order`, **computed live**, as `perron_yeo` is. The seed for the two
+  randomised variants comes from `spectra_448` by F1's own rule.
+- **The sources did not exist.** Every frozen artifact in the sweep is a *reduction* of a
+  substrate: eigenvalues, task scores, Gram spectra. None held adjacency, so
+  `report/artifacts/build_substrate_graphs.py` was written and committed to freeze it.
+  It rebuilds the four cells from `HumanSubstrateBuilder` at N = 448 on
+  `human_empirical`, which §2.5 above shows reproduces the frozen spectra cell for cell
+  at 0.000e+00. **No run happened and none was needed.** Parquets are gitignored
+  repo-wide; the script is the committed object.
+- **Verifications, then the gate, then the write.** Edge count 5,323 in all 22 cells;
+  every `degree_rewire` seed's sorted degree sequence equal to the connectome's; then
+  connectome against control, **byte-identical binary adjacency and exact equality on all
+  four statistics**. The gate is the reason the figure exists in this section: it is the
+  check that the placement control is a placement control, and a nonzero difference on
+  any of the four would be a defect in the permutation rather than a finding.
+- **Panels:** 3 x 4. (a-d) binary adjacency, zeros white, with the degree marginal above
+  each column on shared y limits; (e-h) weighted adjacency on a shared logarithmic colour
+  scale, same ordering; (i-l) one diagonal block magnified, marked on (e-h) and drawn on
+  that same scale. One node ordering throughout: hemisphere, then community, then
+  descending degree within community, with separator lines at the community boundaries
+  and the hemisphere split drawn heavier.
+- **The magnified block is selected by a stated rule, and it is a BLOCK not a community.
+  Added 1 September 2026.** Of the diagonal blocks of the drawn ordering, the one with
+  the highest within-block binary edge density among blocks of 15 to 40 nodes:
+  hemisphere 1, community 5, 22 nodes, 125 internal edges, density 0.5411, with all three
+  in-range candidates recorded in `TIER0` §3.13. An earlier community-level rule was
+  withdrawn for **non-contiguity**: hemisphere is the outer key, so a community spanning
+  both hemispheres occupies two non-contiguous diagonal blocks and the indicator would
+  have to mark two squares and the rectangle between them. `_densest_block` raises rather
+  than widening the range. **The zoom panels share (e-h)'s scale**; rescaling them would
+  make (i) against (j) a comparison of two scales. The builder asserts that (i) and (j)
+  fill the same 250 cells, which is the block-level form of the connectome/control gate. A community that spans the hemispheres therefore appears as two blocks,
+  because hemisphere is the outer key.
+- **The sequential maps are not variant colours.** A matrix cell is an edge, not a
+  substrate, so the Okabe-Ito palette is spent where substrate identity is carried: the
+  column titles and the degree marginals. `Greys` and `magma_r` are both colourblind-safe
+  and monotone in luminance, and both put zero at white.
+- **The seed is F1's.** The two randomised variants are drawn at the seed whose `bulk95`
+  is nearest the median (degree 1, Erdős–Rényi 2), which is what F1's panels a-d draw.
+  The rule was extracted into `act1_structure._representative_row` and both builders now
+  call it, so the two figures cannot come to draw different graphs. F1 and S1 re-render
+  byte-identical after that extraction, checked rather than assumed.
+- **The four statistics are a chapter table, not a panel. Changed 1 September 2026.**
+  They were drawn as a strip beneath the columns and are now `tab:act1-topology` in
+  chapter 4, filled from `TIER0` §3.13 to four decimal places. Four rows of numbers under
+  four matrices read as a fifth band of the figure rather than as a table.
+  `substrate_topology.parquet` and `TIER0` §3.13 are unchanged; only the rendering moved,
+  and the figure no longer reads the topology source at all.
+- **What the numbers are** (medians over the ten seeds for the two randomised variants;
+  the connectome and the control are single graphs). Promoted to `TIER0` §3.13, which is
+  the canonical home:
+
+  | variant | mean clustering | modularity (fixed) | degree assortativity | global efficiency |
+  |---|---|---|---|---|
+  | connectome | 0.4277 | 0.5486 | 0.1067 | 0.4064 |
+  | weight-permuted | 0.4277 | 0.5486 | 0.1067 | 0.4064 |
+  | degree | 0.0697 | -0.0002 | -0.0192 | 0.4789 |
+  | Erdős–Rényi | 0.0529 | -0.0036 | -0.0068 | 0.4820 |
+
+  The seed spread on the fixed-partition modularity straddles zero for both randomised
+  variants (degree -0.0086 to +0.0031, ER -0.0082 to +0.0090), so the sign of either
+  median is not a reading. Four decimal places is what the table uses, which keeps every
+  cell on one precision and never prints a signed zero.
+
 ### S1 — F1 at N = 1000 (appendix, outside the cap)
 
 - **Claim carried:** A1.4 (and A1.1 to A1.3, A1.5 at the larger parcellation)
