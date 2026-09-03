@@ -5,128 +5,90 @@
 \label{sec:act3-frame}
 \bigskip
 % Section 6.1 (CROSS_ACT_SPINE.md, Act III, seven-section breakdown of 28 Aug).
-% Carries NO claim and points at no figure. Sources: fact sheet 13 throughout.
+% Carries NO claim. One figure reference, F3, which is chapter 3's.
+% Sources: fact sheet 13, movement 2 and movement 3.
+% Numerals: 3. Was 1,003 words and is now ~500: P1's re-receipt of chapter 5 is
+% cut as repetition (chapter 5's closing section hands these forward, and 6.2,
+% 6.3 and 6.4 each re-receive the one they use where they use it); the operator
+% definition is cut to Chapter 3's sec:methods-matching, which already carries
+% it; the two addresses that were quoted with their sigma are cut to the guard
+% they were supporting, since sheet 13 forbids results here.
+% MACKEY-GLASS, open flag 4: the task mapping is stated as a mapping. The word
+% "corroboration" is NOT used of Mackey-Glass anywhere, since no Mackey-Glass
+% result is reported in this thesis. Section 6.7 carries the reason.
 % FORBIDDEN here (sheet 13): any result; "the two axes" for sigma against f;
-% "the biological cut"; introducing f before P5's single sentence; re-deriving
-% the two-axis argument; "89% an artifact of nominal-sigma matching"; "the
+% "the biological cut"; introducing f beyond P3's sentences; re-deriving the
+% two-axis argument; "89% an artifact of nominal-sigma matching"; "the
 % connectome is subcritically worse than ER"; any margin without its levels;
 % "compact bulk"; "the connectome is a better reservoir".
-%
-% PROVISIONAL LABELS used below, to be renamed once the sections exist:
-%   sec:act3-memory-sigma (6.2)  sec:act3-prediction-sigma (6.3)
-%   sec:act3-lesion-memory (6.4) sec:act3-lesion-generation (6.5)
-%   sec:act3-oneaxis (6.6)       sec:act3-scope (6.7)
-%   fig:two-axes = chapter 3's F3.
 
-% P1: what arrives, and the boundary that arrives with it.
-Three things arrive from Chapter~\ref{chapter:act-II}, and none of them is a
-statement about what a network can compute. The first is the \textbf{common
-mode}, the pattern in which every unit moves together: the previous chapter
-established that a non-negative substrate cannot avoid carrying one, and
-measured how far each substrate is dominated by its own
-(Section~\ref{sec:act2-perron}). It arrives as a description of what the states
-look like, not as an explanation of anything they do. The second is the \textbf{ridge
-effective rank} $d_{\mathrm{eff}}$ (Equation~\ref{eq:deff}), which counts the
-directions of the state matrix a linear readout can act on. It arrives earned
-rather than assumed, and with its scope attached: it is the right quantity for
-asking how much of a manifold a readout can use and the wrong one for asking
-what shape that manifold has (Section~\ref{sec:act2-counting}). The third is the
-reason the second must be read more than once. Where a substrate's Gram spectrum
-sits relative to the readout's regularisation floor is not fixed by the
-substrate but moves with how hard the network is driven
-(Section~\ref{sec:act2-floor}), so \textbf{usable dimensionality is a property of a
-substrate at an operating point}. A fourth thing arrives and it is a
-boundary rather than a result. On non-negative weights the shape of the
-trajectory does not move across the operating-point sweep while predictive
-performance falls sharply, so capacity is lost there with the geometry intact,
-and what governs that loss was left open and named as open
-(Section~\ref{sec:act2-temporal}). This chapter does not narrow itself around
-that boundary; Section~\ref{sec:act3-prediction-sigma} is where it is measured.
+% P1: the two demands, and the mapping fixed in advance. Numerals: 0.
+Chapter~\ref{chapter:act-II} measured what a driven network's activity looks
+like. This chapter asks what that activity is worth. Two demands can be made of
+it and they are not the same demand. One is to reconstruct an input the network
+has already seen, which requires that traces of the past still be separable in
+the present state. The other is to sustain a signal with no input arriving to
+correct it, the network driving itself from its own output. The first asks how
+many independent directions survive; the second asks whether the dynamics stay
+in a regime where a trajectory can be continued at all. Both are put to the same
+four substrates along the same axis, and the question the chapter closes on is
+whether the two answers are two facts or one.
 
-% P2: the two demands, and the third that joins them.
-What a substrate is asked for is not one quantity. A readout can be asked to
-reconstruct an input the network has already seen, which requires that traces of
-the past still be separable in the present state; or it can be asked to
-sustain a signal on its own, driving itself from its own output with no further
-input to correct it. The first is a demand on how many independent directions
-survive; the second is a demand on whether the dynamics stay in a regime where a
-trajectory can be continued at all. This chapter puts both to the same
-substrates, along the same axis, and its unifying question is whether the two
-answers are two facts or one. Which task carries which demand was fixed in
-advance, before any of the data below was inspected, so that no claim can be
-rescued by the observation that there is always some task on which it holds.
-Retention is carried by the \textbf{memory-capacity} task, with NARMA-10 and
-Mackey-Glass as corroboration. Generation is carried by the \textbf{Lorenz prediction}
-task, and it has \emph{no} corroborating task: the regime switch and the
-resistance margin reported below rest on Lorenz alone. The joint question is
-carried by the two together, and what that costs is returned to in
-Section~\ref{sec:act3-scope}.
+% P2: the mapping, declared before inspection. Numerals: 0.
+Which task carries which demand was fixed before any of the data below was
+inspected, so that no claim here can be rescued by the observation that there is
+always some task on which it holds. Retention is carried by the
+\textbf{memory-capacity} task, and the mapping places NARMA-10 and Mackey-Glass
+on the same side of the dissociation rather than on the generative one.
+Generation is carried by the \textbf{Lorenz prediction} task and has \emph{no}
+corroborating task: the resistance margin and the regime switch reported below
+rest on Lorenz alone. What the joint question costs, and what became of the
+fourth task, is Section~\ref{sec:act3-scope}'s.
 
-% P3: the primary variable, stated concretely.
-Both demands are made along one variable. Every substrate in this thesis is run
-as the operator $\sigma W/|\lambda_1|$, whose spectral radius is exactly $\sigma$
-for every variant by construction and whose bulk radius is
-$\sigma \cdot \mathrm{bulk95}$. That $\sigma$ is the \textbf{operating point}:
-how hard the recurrent dynamics are driven, and the one quantity in this
-comparison that has a biological counterpart a brain actually moves, through
-neuromodulation, arousal and plasticity. It is the primary variable of this
-thesis and every headline claim in this chapter is made along it. The regimes
-the comparison is run across, subcritical, near-critical and supercritical, are
-positions on that variable, and the supercritical window used throughout is the
-shared one defined by the connectome's own critical scale, which means it is not
-symmetric between substrates: at the top of it each null is running far past its
-own critical scale while the connectome has only just reached its.
-
-
-% P4: both matching axes, carried forward from chapter 3 and not re-derived.
-% Sources: fact sheet 13, movement 3, rows 2, 3, 4. Numerals: 3.
-% FORBIDDEN here (sheet 13): re-deriving the two-axis argument, which is
-% chapter 3's, contribution 5's and F3's; "89% an artifact of nominal-sigma
-% matching"; "the connectome is subcritically worse than ER"; the 1.7x ratio
-% quoted without its levels; "the two axes" for sigma against f.
-Two matching axes follow from that normalisation, and
-Chapter~\ref{chapter:methods} establishes both
-(Figure~\ref{fig:F3}). Matching on nominal $\sigma$ holds the
-spectral radius fixed and lets the bulk radius vary; matching on
-$\sigma\!\cdot\!\mathrm{bulk95}$ holds the bulk radius fixed and leaves the
-Perron root deliberately unmatched. Neither choice is neutral, and the second
-is the less neutral of the two in this chapter: the mechanism under test is
-the Perron mode, and at the matched point the connectome is run at
+% P3: the primary variable and both matching axes, carried forward not derived.
+% Sources: sheet 13, movement 3, rows 2, 3, 4. Numerals: 3.
+Both demands are made along one variable. Every substrate here is run at a
+nominal spectral radius $\sigma$, and that $\sigma$ is the \textbf{operating
+point}: how hard the recurrent dynamics are driven. It is the primary variable
+of this thesis, and every headline claim below is made along it.
+Two matching axes follow from the normalisation, and
+Chapter~\ref{chapter:methods} establishes both (Figure~\ref{fig:F3}). Matching
+on nominal $\sigma$ holds the spectral radius fixed and lets the bulk radius
+vary; matching on $\sigma\!\cdot\!\mathrm{bulk95}$ holds the bulk radius fixed
+and leaves the Perron root deliberately unmatched. 
+Neither choice is neutral, and the two are not neutral in the same direction.
+The mechanism under test is the Perron mode, and the matched-bulk axis is the
+one that leaves it unmatched: at the matched point the connectome runs at
 $\sigma = 6.0$ against Erdős--Rényi's % TIER0 1.1
 $3.54$, % TIER0 1.1
-a Perron root $1.7$ times larger, % TIER0 1.1
-so that axis hands the connectome more of the very quantity proposed as the
-cause. The subcritical deficit those two axes disagree about is present at
-matched spectral radius and absent at matched bulk radius, which is why every
-result below is reported on both and rests on surviving both.
+a Perron root $1.7$ times larger. % TIER0 1.1
+That axis hands the connectome more of the very quantity proposed as the cause,
+so an advantage measured on it cannot be an artifact of the matching. The
+nominal axis is partial in the other direction. Neither is the chapter's axis:
+each result below names the one it was measured on, and rests on surviving both.
 
-% P5: the one f sentence, and the operating-point guard.
-% Sources: fact sheet 13, movement 3 (last row) and movement 4 (rows 3 and 6).
-% The orientation table is deliberately not built; its one load-bearing
-% sentence is carried here instead. Requires a matching edit to
-% CROSS_ACT_SPINE.md, which commits section 6.1 to the table.
-% FORBIDDEN here (sheet 13): "the biological cut" for f = 0; introducing f as a
-% second axis of the chapter or before section 6.4, beyond this one sentence;
-% "the two axes" for sigma against f; any result.
-Two scope statements close this section. The first is that
+% P4: the two scope statements. Numerals: 0.
+% The one permitted f passage. No f > 0 number, and no result.
+% The inhibition clause is about the ROLE of W in the dynamics, not about what
+% dMRI measures: a streamline count has no sign, a coupling does. Makes no
+% anatomical claim about long-range projections.
 Sections~\ref{sec:act3-memory-sigma} and~\ref{sec:act3-prediction-sigma} are
-measured entirely on non-negative weights, and that a manipulation is introduced
-in Section~\ref{sec:act3-lesion-memory}: the sign fraction $f$, the proportion of
-weights made negative. It enters as an intervention and not as a second axis of
-the chapter. Macroscale diffusion tractography cannot represent the sign of a
-connection, so $f = 0$ is what the instrument produces rather than a property of
-cortex, and grading $f$ upward asks what the missing half of the biology would
-do. The second concerns how the results below are to be read against one
-another. They are measured at operating points that differ by more than a
-factor of three, and the operating point is not a detail of the setup but the
-variable the chapter is about: the connectome's resistance to collapse appears
-far above its own critical scale, at $\sigma \approx 7.6$ to $8.0$, % TIER0 2.3
-while the generative advantage over the nulls is measured near criticality, at
-$\sigma = 2$. % TIER0 2.6
-Quoted without its operating point, either statement makes the other look false.
-Every claim below therefore names the operating point it is measured at and the
-axis it is matched on, and none should be read without them.
-
+measured on non-negative weights throughout, which is the recurrent connectivity
+the human structural connectome supplies. A manipulation arrives in
+Section~\ref{sec:act3-lesion-memory}: the sign fraction $f$, the proportion of
+weights made negative. It enters as an intervention on a substrate and not as a
+second axis of the chapter. Macroscale diffusion tractography cannot represent
+the sign of a connection, so $f = 0$ is what the instrument produces rather than
+a property of the cortex, and grading $f$ upward asks what a network carrying
+inhibition would do. A streamline count is non-negative by construction, while
+the quantity it stands in for in these dynamics is a coupling, by which one
+parcel's activity raises or lowers another's. The second statement concerns how
+the results below are to be read against one another. They are measured at
+operating points that differ by more than a factor of three, and the operating
+point is not a detail of the setup but the variable the chapter is about: two of
+the findings that follow, quoted without it, make each other look false. Every
+claim below therefore names the operating point it was measured at and the axis
+it was matched on, and none should be read without them.
 
 
 
@@ -136,15 +98,32 @@ axis it is matched on, and none should be read without them.
 \bigskip
 % Section 6.2 (CROSS_ACT_SPINE.md, Act III, seven-section breakdown of 28 Aug).
 % Claims: A3M.1, A3M.2, A3M.3, A3M.4, A3M.5, A3M.7, A3M.8 (act3a_memory.md 1).
-% Figures: F7 (lead, and a workshop figure), F10, F9, F11 panel (a) at its f = 0
-% column only. Sources: fact sheet 14 throughout, with three corrections from the
-% audits of 29 Aug recorded in GAPS.md B23 to B25.
-% Numerals: 22. Over the 8-16 budget because the spine merges three results with
-% three figures into one section. First two cuts if it must come down: the three
-% null peak d_eff values are already absent (F7's caption carries them), so cut
-% (i) the +0.93 ordering value in P2, leaving the regional qualifier in words,
-% and (ii) the 89.0 / 11.4 pair in P5, leaving a back-reference to chapter 5.
-% ENTIRELY AT f = 0. The single permitted mention of f is the last clause of P6.
+% Figures: F7 (lead), F10. F11 panel (a) is NOT floated here: it prints whole in
+% 6.4, where its f axis is the argument, and this section forward-references it
+% (open flag 3, resolved as a re-cut and not a reference split).
+% F9 AND THE N = 1000 PARAGRAPH MOVED to the appendix, app:scale, as a
+% robustness check bounding A3M.4. The claim survives here in three sentences
+% with both filters and their levels; the pre-registered test that came back
+% inconclusive is named here in one clause and argued there.
+% Sources: fact sheet 14, with the audits of 29 Aug (GAPS B23 to B25).
+% Numerals: 19.
+% ENTIRELY AT f = 0. The single permitted mention of f is the last clause.
+%
+% CHANGED 3 September, on verification V1: the sentence carrying the
+% nominal-axis retention ordering NO LONGER cites F3. F3 is two substrates,
+% d_eff levels and a paired delta, and its own caption disclaims the ladder
+% comparison. The claim is TIER0 1.2's, in prose, and is quoted as such. It is
+% currently computed in no artifact and drawn in no figure; if that is closed,
+% it is closed by an F7 panel and this sentence gains a reference.
+% CUT on the same audits: the +0.93 ordering value (GAPS B23, B24 leave it
+% without its two companions), leaving the regional statement in words.
+%
+% AUDIT NOTES, 29 Aug, retained:
+%  - P5 uses 12.32 / 2.80 with 4.40 to 4.42. These are the same run. The pair
+%    12.28 / 2.82 is the same quantity before the ridge reparameterisation
+%    (GAPS B14, resolved). CONVENTIONS' standing pairing crosses the two and is
+%    deliberately not followed. Do not "correct" this back.
+%
 % FORBIDDEN here (sheet 14): "always worst"; any peak-capacity claim in either
 % direction; "the connectome is a better reservoir"; "the connectome is
 % subcritically worse than ER"; "scale-invariant" full stop; "bulk95 is the
@@ -153,69 +132,24 @@ axis it is matched on, and none should be read without them.
 % statement without its sigma; a curvature or trajectory-geometry account of
 % memory; "compact bulk"; nobody-degrades, the nulls catching up and
 % hub-targeted inhibition, all of which are 6.4's.
-%
-% AUDIT NOTES, 29 Aug, from the two read-only checks:
-%  - P4 uses 12.32 / 2.80 with 4.40 to 4.42. These are the same run. The pair
-%    12.28 / 2.82 is the same quantity before the ridge reparameterisation
-%    (GAPS B14, resolved). CONVENTIONS' standing pairing crosses the two and is
-%    deliberately not followed.
-%  - P4's aggregation clause says pooled median over supercritical cells, which
-%    is what the artifact does. Sheet 14 says "seed medians"; that does not
-%    return the published values (GAPS B25).
-%  - P2 quotes only +0.93 from TIER0 3.2. The subcritical and near-peak values
-%    failed their reproduction gate (GAPS B23) and the near-peak sign is
-%    disputed by the generating artifact (GAPS B24). The 2.53 sign flip is
-%    unverified and is not used.
-%
-% PROVISIONAL LABELS: fig:f7-crossing, fig:f9-scale, fig:f10-parity,
-% fig:f11-mechanism. Citation key aceituno2020 is a placeholder.
 
-% P1: why the obvious comparison is unavailable, and what is measurable instead.
-% Claim A3M.2. Figure F7(b). Numerals: 0.
-A reservoir's memory is usually reported as a single number, the best it
-achieves anywhere along the operating-point axis, and that number cannot answer
-the question this section asks. Measured as the ridge effective rank
-(Equation~\ref{eq:deff}), every substrate on the ladder peaks within a few
-percent of the hard $d_{\mathrm{eff}} = N$ ceiling, % TIER0 1.2
-because at its own optimum each is using very nearly every direction available
-to it; the larger network reported below does not escape that ceiling either.
-Peak capacity is therefore not resolvable at this size, and no claim is made
-about it in either direction. What is resolvable is what happens on either side
-of the peak. A ceiling can clip curves but it cannot manufacture a crossing
-between them, so a difference in how fast substrates fall away from their optima
-is robust to finite size in a way a difference between the optima is not. This
-section reads the decay region, and the result it finds there is a crossing.
-
-% P2: the crossing. Claim A3M.1. Figure F7(a, c).
-% Numerals: 7. The three null peak values are F7's caption's, not the body's:
-% the ordering within the nulls is not a claim at any scale (sheet 14).
-On the axis that holds the bulk radius fixed, all four substrates rise together,
-all four reach the ceiling, and they separate only on the way down
-(Figure~\ref{fig:F7}). The connectome's peak is the lowest of the four,
-at $432.4$ of a possible $448$; % TIER0 1.2
-its three nulls peak above it. But at the top of the four-variant overlap, at
+% P1: the crossing, first. Claim A3M.1. Figure F7. Numerals: 6.
+Matched on the bulk radius, all four substrates rise together, all four reach
+the ceiling, and they separate only on the way down (Figure~\ref{fig:F7}). The
+connectome's peak is the lowest of the four, at
+$432.4$ of a possible $448$; % TIER0 1.2
+its three nulls peak above it. At the top of the four-variant overlap, at
 $\sigma \cdot \mathrm{bulk95} = 2.599$, % TIER0 1.2
 which is the largest matched radius at which every substrate and every seed
-still has coverage, the connectome retains
+still has coverage, it holds
 $47\%$ % TIER0 1.2
-of its own peak against the nulls'
+of that peak against the nulls'
 $28$, $22$ and $11\%$: % TIER0 1.2
-a four-fold spread in what survives, in the reverse of the order in which the
-substrates peaked. The ordering the peak gives and the ordering the decay gives
-are opposite, and that crossing, rather than either ordering alone, is the
-finding. It is not a property of the axis that produces it: the same retention
-ordering holds on the nominal axis, where the Perron root rather than the bulk
-is what is held fixed (Figure~\ref{fig:F3}), % TIER0 1.2
-so it survives the matching choice that hands the connectome the larger gap.
-What it is not is a global advantage. The ladder ordering is regional: it runs
-the other way below criticality, where the nominal axis leaves the bulk
-unmatched, it is absent near the peak, and above criticality it is strong and
-consistent at $+0.93$. % TIER0 3.2
-Stated on the axis that holds the bulk fixed, where the subcritical deficit is
-not present at all, the defensible summary is parity below criticality and
-advantage above it.
+a four-fold spread, in the reverse of the order in which the substrates peaked.
+The ordering the peak gives and the ordering the decay gives are opposite, and
+the crossing between them, rather than either ordering alone, is the result.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{F7.png}
     \caption[Matched on the bulk radius, the connectome peaks lowest and retains
@@ -236,13 +170,42 @@ advantage above it.
     \label{fig:F7}
 \end{figure}
 
-% P3: parity at the peak, with its interval, and the Aceituno reconciliation
-% placed on the panel that reproduces their ordering. Claims A3M.3, A3M.8,
-% A3M.7. Figure F10. Numerals: 6. The d_eff-to-MC correspondence value is
-% deliberately absent: it has two aggregation units (+0.999 over n = 52 seed
-% medians, +0.998 over 520 cells) and naming the unit in body prose costs a
-% clause for a number that is not the point of the sentence. F10's caption
-% carries it with its unit.
+
+% P2: why the peak cannot carry a claim. Claim A3M.2. Numerals: 1.
+That the peak cannot carry a claim is not a limitation discovered afterwards.
+Measured as the ridge effective rank (Equation~\ref{eq:deff}), every substrate
+on the ladder peaks within a few percent of the hard
+$d_{\mathrm{eff}} = N$ ceiling, % TIER0 1.2
+because at its own optimum each is using very nearly every direction available
+to it, and the larger network reported below does not escape the ceiling
+either. Peak capacity is therefore not resolvable at this size, and no claim is
+made about it in either direction. What is resolvable is what happens on either
+side of the peak: a ceiling can clip curves but it cannot manufacture a
+crossing, so a difference in how fast substrates fall away from their optima is
+robust to finite size in a way a difference between the optima is not. This
+section therefore focuses on reading the decay region.
+
+% P3: the crossing survives the axis, and what it is not. Numerals: 0.
+% The nominal-axis statement is TIER0 1.2's prose. NO figure reference: see the
+% verification note at the head of this section.
+The crossing is not a property of the axis that produces it. The same retention
+ordering holds on the nominal axis, where the Perron root rather than the bulk
+is what is held fixed, % TIER0 1.2
+so it survives the matching choice that hands the connectome the larger
+spectral gap.
+What it is not is a global advantage. The ladder ordering is regional: it runs
+the other way below criticality, where the nominal axis leaves the bulk
+unmatched, it is absent near the peak, and it is strong and consistent above
+criticality. Stated on the axis that holds the bulk fixed, where the subcritical
+deficit is not present at all, the defensible summary is parity below
+criticality and advantage above it.
+
+% P4: parity at the peak, with its interval. Claims A3M.3, A3M.7. Figure F10.
+% Numerals: 3. The d_eff-to-MC correspondence value is deliberately absent from
+% the body: it has two aggregation units (+0.999 over n = 52 seed medians,
+% +0.998 over 520 cells) and naming the unit in prose costs a clause for a
+% number that is not the point of the sentence. F10's caption carries it with
+% its unit.
 The peaks cannot be separated as capacities, but they can be compared as a
 statement about their similarity, and that comparison is worth making precisely
 because it runs against the chapter's direction. Paired within seed, each
@@ -254,20 +217,23 @@ readable. Against Erdős--Rényi and against the weight-permuted placement contr
 the difference excludes zero at every ridge strength tested; against
 degree-matching it does so at
 one of five, % TIER0 3.4
-and the point estimate changes sign at one of them. The defensible statement is
+and at one of them the point estimate changes sign. The defensible statement is
 therefore \emph{parity} at the peak, not a deficit, and certainly not that this
 substrate is the worst of the four. That the five ridge strengths span five
-orders of magnitude makes the panel a robustness check rather than a search: the
-correspondence between usable dimensionality and measured memory holds at every
-one of them, provided the regularisation is raised in both places at once, so
-the readout's regularisation is not what produces the result in either
-direction. The same panel is where an apparent disagreement with the literature
-resolves. At the smallest ridge, nearest the pseudoinverse limit that work
-optimises, the reported spread-beats-compact ordering reproduces exactly on
-these substrates, with Erdős--Rényi highest and the connectome
-lowest~\cite{aceituno2020tailoring}. It is reproduced rather than contradicted, and the
-two results are about different places on the axis: spread wins at the peak, and
-a large spectral gap wins across the range.
+orders of magnitude makes the panel a robustness check rather than a search:
+usable dimensionality tracks measured memory at every one of them, provided the
+regularisation is raised in both places at once, so the readout's regularisation
+is not what produces the result in either direction.
+
+% P5: the Aceituno reconciliation, on the panel that reproduces their ordering.
+% Claim A3M.8. Numerals: 0. Citation key aceituno2020 is a placeholder.
+The same panel is where an apparent disagreement with the literature resolves.
+At the smallest ridge, nearest the pseudoinverse limit that work optimises, the
+reported spread-beats-compact ordering reproduces exactly on these substrates,
+with Erdős--Rényi highest and the connectome
+lowest~\cite{aceituno2020tailoring}. It is reproduced rather than contradicted,
+and the two results are about different places on the axis: spread wins at the
+peak, and a large spectral gap wins across the range.
 
 \begin{figure}[ht]
     \centering
@@ -290,118 +256,75 @@ a large spectral gap wins across the range.
     \label{fig:F10}
 \end{figure}
 
-% P4: does the decay difference survive a change of scale, and the one
-% pre-registered test that did not settle. Claim A3M.4. Figure F9.
-% Numerals: 9. Both margins are required (TIER0 2.4 says report both) and each
-% travels with levels; the N = 1000 levels are in F9's caption rather than here,
-% which is where the full value set belongs.
+% P6: scale, compressed to the claim and both filters. Claim A3M.4.
+% Numerals: 7. Protocol, the fixed-N control, the ceiling check and the
+% pre-registered falsification test are app:scale's; both margins and their
+% levels stay here, because TIER0 2.4 says report both and CONVENTIONS forbids a
+% margin without its levels.
 Whether any of this is an artifact of the parcellation is a question the
 comparison has to answer rather than assume, so the memory sweep was repeated at
-$N = 1000$ % TIER0 2.4
-with the run length scaled to hold the ratio of retained timesteps to units
-fixed and the ridge reparameterised to scale with the Gram matrix rather than
-held at an absolute value. Two changes are therefore in play and they are
-separated by a control at fixed $N$: the reparameterisation alone moves the
-supercritical margin from
-$4.35$ to $4.40$, % TIER0 2.4
-so what happens beyond that is attributable to size (Figure~\ref{fig:F9}).
-With the threshold set at the connectome's own critical scale and applied to
-every variant, the supercritical median memory capacity is
+$N = 1000$. % TIER0 2.4
+The supercritical margin holds. With the threshold set at the connectome's own
+critical scale and applied to every variant, median memory capacity is
 $12.32$ against Erdős--Rényi's $2.80$ % TIER0 2.4
-at the smaller size, a margin of $4.40$, and $4.42$ at the larger: % TIER0 2.4
-flat across a change of scale. With each variant instead evaluated above its own
-critical scale the same margin reads
+at the smaller size, a margin of $4.40$, and $4.42$ at the larger; % TIER0 2.4
+with each variant instead evaluated above its own critical scale the same margin
+reads
 $3.56$ and $3.85$, % TIER0 2.4
 which is to say it grows by about a tenth. Both filters are defensible and they
-say different things, so both are drawn, and what survives both is the claim that
-the margin is not an artifact of the smaller network; what does not survive is
-calling it scale-invariant without naming the filter. The first reading is
-primary only because it evaluates every substrate over an identical range of
-operating points, and it should be read knowing that this is also the filter
-that flatters the connectome, since it samples each null further above its own
-critical scale, where that null has already decayed further. One thing this run
-was designed to settle and did not. It carried a pre-registered falsification
-test, on the prediction that if the bulk radius is what orders the ladder then a
-reversal in that quantity between the two sizes should reverse the memory
-ordering with it. The memory ordering did not move. But the reversal the test
-rests on is itself not significant at the larger size
-($p = 0.16$), % TIER0 2.4
-so the test was flawed rather than passed: the correct classification is
-inconclusive, and it is inconclusive because the predictor was noisy and not
-because the outcome was. Whether the bulk radius is what orders the ladder is
-returned to in Section~\ref{sec:act3-lesion-memory}, where an intervention can
-ask it more sharply than a change of scale could.
+say different things, so both are reported: what survives both is that the
+margin is not an artifact of the smaller network, and what does not survive is
+calling it scale-invariant without naming the filter.
+Appendix~\ref{app:scale} gives the protocol, the control that separates the two
+changes in play, and the one pre-registered test this run was designed to settle
+and did not.
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{F9.png}
-    \caption[The supercritical memory margin survives a 2.2-fold change in
-    $N$]{\textbf{The supercritical memory margin survives across network scale, 
-    under both definitions of ``supercritical''.} Memory-capacity task,
-    non-negative weights, four substrates and ten seeds each; run length scaled from
-    $3000$ to $6000$ to hold retained timesteps per unit near $5.5$, and the ridge
-    reparameterised to scale with the Gram matrix rather than held at an absolute
-    value. \textbf{(a)} Median memory capacity against nominal $\sigma$ for the
-    connectome and Erdős--Rényi at both sizes; the dotted rules are the connectome's
-    critical scale, $3.078$ at $N = 448$ and $3.985$ at $N = 1000$. \textbf{(b)} With
-    that threshold applied to every variant, the connectome to Erdős--Rényi margin is
-    $4.40$ and $4.42$. \textbf{(c)} With each variant taken above its own critical
-    scale, $3.56$ and $3.85$. Both are drawn because the answer depends on the
-    filter: the margin holds either way, but only (b) is flat. The larger network
-    does not escape the $d_{\mathrm{eff}}$ ceiling.}
-    \label{fig:F9}
-\end{figure}
-
-% P5: the mechanism, using chapter 5 and not re-establishing it. Claim A3M.5.
-% Figure F11 panel (a) at its f = 0 column ONLY; the panel's own axis is 6.4's.
-% Numerals: 5. The sigma-resolved rise is carried as a back-reference to
-% chapter 5's F4b rather than as a four-number pair, because the panel that
-% draws it is not in this chapter (GAPS flag 3).
-What the gap buys is visible in the quantity the previous chapter measured. A
-non-negative matrix has an all-positive leading eigenvector by
-Perron--Frobenius, so every substrate here carries a common mode, and driving
-the network harder drives that mode harder. The nulls give way to it. At the
-supercritical operating point $\sigma = 6$ their common-mode amplitude stands at
+% P7: the mechanism, using chapter 5 and not re-establishing it. Claim A3M.5.
+% Numerals: 5. F11(a) is forward-referenced, not floated: open flag 3.
+What the connectome's unique spectral gap buys is a common mode that can be driven without the rest
+of the spectrum going with it. A non-negative matrix has an all-positive leading
+eigenvector by Perron--Frobenius, so every substrate here carries a common mode,
+and driving the network harder drives that mode harder. The nulls give way to it.
+At the supercritical operating point $\sigma = 6$ their common-mode amplitude stands at
 $0.949$ to $0.989$, % TIER0 3.7
-which is very nearly every unit pinned at the
-same saturated value, doing the same thing at the same time. The connectome
-reaches $0.759$, % TIER0 3.7
+which is very nearly every unit pinned at the same saturated value, doing the
+same thing at the same time. The connectome reaches
+$0.759$, % TIER0 3.7
 the least dominated of the four, and it does so while carrying by far the
-largest Perron root of the four: the substrate with the most to be dominated by
-is the one least dominated. The amplitude climbs with the operating point for
-every substrate, and the connectome's climb starts lower and ends lower
-(Chapter~\ref{chapter:act-II}, Figure~\ref{fig:F4}). That is what a
-large spectral gap does here. It lets the leading mode be driven hard without
-the bulk of the spectrum following it, so the activity that is not the common
-mode survives, and Section~\ref{sec:act2-floor} is what connects that to the
-measure this section reads: what stays clear of the readout's regularisation
-floor is what the readout can use, and supercritically the connectome holds
+largest Perron root: the substrate with the most to be dominated by is the one
+least dominated by it. That is what a large spectral gap does. It lets the
+leading mode be driven hard without the bulk of the spectrum following it, so
+the activity that is not the common mode survives, and what survives clear of
+the readout's regularisation floor is what the readout can use. Supercritically
+the connectome holds
 $89.0\%$ of its directions more than a decade clear of that floor against
-Erdős--Rényi's $11.4\%$. % TIER0 3.6
-The decay difference in Figure~\ref{fig:F7} is that gap, read out.
+Erdős--Rényi's $11.4\%$ % TIER0 3.6
+(Section~\ref{sec:act2-floor}). The decay difference in Figure~\ref{fig:F7} is
+that gap, read out. Figure~\ref{fig:F11}a draws the amplitudes across all four
+substrates, in Section~\ref{sec:act3-lesion-memory}, where the axis it is drawn
+against is the argument.
 
-% P6: the one-line version and both of its costs, stated in the same paragraph.
-% Numerals: 0. The last clause hands 6.4 its motivation without naming f as a
-% result or previewing any f > 0 number.
-Put in one line, the finding is that the connectome does not make memory better.
-Non-negativity makes memory worse for every substrate, and the connectome's
-spectral gap makes it least worse. Both halves of that sentence carry a cost and
-neither is left for a reader to find. The first is that at its own optimum this
-substrate is not ahead, and the interval says so. The second is sharper: on the
-quantity the reservoir literature has largely optimised, peak capacity at
-minimal regularisation, this substrate loses, and the ordering that says so is
-reproduced above rather than explained away. The reply is not that the
-measurement is wrong but that the operating point is not a free parameter. A
-tuned reservoir can be placed at its optimum and held there; a brain is driven
-across a range by neuromodulation, arousal and plasticity, and what matters over
-a range is how much is retained away from the optimum rather than how much is
-available at it. That is the sense in which the advantage here is robustness and
-not capacity. It also points at what would test the account rather than
-illustrate it. Every substrate compared so far has a common mode, because every
-one has non-negative weights, so comparison alone cannot show that the common
-mode is what the difference is made of. The next section removes it.
-
-
+% P8: the finding as range, then both of its costs. Numerals: 0.
+The finding is about range rather than height. Every substrate here has an
+operating point at which it does its best work, and at that point they are hard
+to tell apart; move away from it and they part company, the connectome carrying
+most of its memory with it while the nulls leave most of theirs behind. Across
+the shared range the spread in what survives is four-fold, and the substrate
+that retains most is the one that peaked lowest. So the quantity that separates
+these substrates is not how much memory a network has at its best but how much
+of it is still there once the network is driven somewhere else. The mechanism is
+a rescue rather than a gain: non-negativity costs every substrate memory, and
+the connectome's spectral gap makes it cost least. Both halves of that sentence
+carry. At its own optimum this substrate is not ahead, and the interval says so. 
+On the quantity the reservoir literature has largely optimised, peak capacity at minimal regularisation, it
+loses, and the ordering that says so is reproduced above rather than explained
+away. Neither cost touches the finding, because neither is about the same
+quantity: a peak is a height and this result is a width. What the account still
+lacks is a test rather than an illustration. Every substrate compared so far
+carries a common mode, because every one of them has non-negative weights, so
+comparison alone cannot show that the common mode is what the difference is made
+of. The removal comes in Section~\ref{sec:act3-lesion-memory}. Before that, the 
+the same axis has a second demand to answer first, and prediction cannot be scored by looking at the past at all.
 
 
 
@@ -409,91 +332,106 @@ mode is what the difference is made of. The next section removes it.
 \label{sec:act3-prediction-sigma}
 \bigskip
 % Section 6.3 (CROSS_ACT_SPINE.md, Act III, seven-section breakdown of 28 Aug).
-% Claims: A3P.4 and A3P.9 (act3b_prediction.md 1); RM 1 contribution 4's f = 0
-% half and its scope limit. Sources: fact sheet 15, plus the read-only audit of
-% 30 Aug (zero_vpt_and_branch_seeds_audit.md), gate passed 20/20.
-% Figures: the proposal figure only. F13 is deliberately not floated here, so
-% that the sign fraction is introduced only in 6.4. The decay table is CUT: the
-% figure draws its twenty values and draws them better, and its Erdős–Rényi row
-% was the misleading median.
-% Numerals: 24. Over the 8-16 budget. The section carries a dissociation, a
-% two-regime comparison, a bounding negative result and three rule-outs.
-% First cuts if it must come down: the branch counts in P2 (5/3/1), leaving
-% "seeds of all three nulls and none of the connectome's"; and the memory
-% levels in P4, leaving the inverted ordering in words.
-% ENTIRELY AT f = 0.
+% Claims: A3P.4, A3P.9 (act3b_prediction.md 1); RM 1 contribution 4's f = 0 half
+% and its scope limit. Sources: fact sheet 15; the read-only audit of 30 Aug;
+% verifications V4 and V5 of 3 September.
+% Figures: F21, pending the registry amendment. One table was drafted and cut.
+% Numerals: 7 in prose. ENTIRELY AT f = 0.
 %
-% SOURCE TAGS: % AUDIT marks numbers that exist ONLY in the 30 Aug audit and in
-% no thesis document. They need a home in GAPS.md or act3b before submission;
-% an untagged numeral is a finding, and these are tagged but unfiled.
+% RESTRUCTURED 4 September, second pass. The first draft led on instruments and
+% carried the closed-loop apparatus in the body. Now: the demand and the parity,
+% the failure, what accounts for it, the bound, the seam and the turn.
+% MOVED OUT: the closed-loop protocol, the rollout horizon and the climate-error
+% limit to Chapter 3, sec:methods-closed-loop; the zero-scoring counts to
+% app:second-failure; the rank-3 closed-loop term and the Jacobian eigenvalue,
+% dropped from the thesis body as apparatus.
+% MOVED TO 6.7: the three ruled-out candidates and their numerals (sheet 19
+% movement 1 already lists them). 6.3 announces the limit; 6.7 evidences it.
 %
-% WITHDRAWN BY THE AUDIT, do not reinstate:
-%  - "Erdős–Rényi's curvature rises to 1.70 at the top of the sweep". There is
-%    no rise. 1.70 is a median of a bimodal set that no seed takes.
-%  - "that is the collapse appearing in the geometry column". Branch departures
-%    begin at sigma = 3.6, well below the collapse window at 7.6 to 8.0, and
-%    not in ladder order.
-%  - the 5/3/1/0 branch-to-collapse match. item2_collapse_loci_scale_448.csv
-%    holds only connectome and Erdős–Rényi; the middle two counts are not in it.
+% WITHDRAWN BY THE 30 AUG AUDIT, do not reinstate: "Erdős–Rényi's curvature
+% rises to 1.70 at the top of the sweep"; "that is the collapse appearing in the
+% geometry column".
 % FORBIDDEN here (sheet 15): any generative statement without its sigma; "50% of
-% replicates"; "the generative advantage emerges with f"; any graded curvature
-% or straightness account; "capacity is gated by which dynamical regime the
-% manifold is in" stated of f = 0; "sigma_eff crosses 1 at the transition";
-% "curvature is flat, so geometry does not matter"; offering a fourth
-% explanation; any per-cell climate_error value; quoting the two lambda_min(J)
-% aggregation units against each other.
+% replicates"; any graded curvature or straightness account; "capacity is gated
+% by which dynamical regime the manifold is in" stated of f = 0; "sigma_eff
+% crosses 1"; "curvature is flat, so geometry does not matter"; offering an
+% explanation for the f = 0 loss; any per-cell climate_error value.
 
-% P1: what the closed loop asks that the driven tasks do not. Numerals: 1.
-% The horizon pair is cut to words; the figure now shows the floor directly.
-The two demands of this chapter are not scored the same way. A driven task is
-corrected at every step, because the input the network receives is the true one,
-so an error made at one step does not propagate into the state scored at the
-next. A free-running network has no such correction: it is initialised on a true
-trajectory, released, and thereafter driven by its own output, so errors compound
-and what is scored is how long the generated trajectory stays with the true one
-before leaving it. That duration, expressed in Lyapunov times so that it is a
-property of the dynamics rather than of the integration step, is the valid
-prediction time. One consequence of the arrangement must be stated plainly or
-everything below is misread: trajectory curvature is measured under teacher
-forcing, on the driven trajectory, while valid prediction time is measured on the
-free run. This is not a defect, since the loss of generative capacity is a
-property of the operator and is visible under drive, but the two are not
-measurements of the same trajectory. The instrument's range does not limit what
-follows. No evaluation anywhere in the sweep came close to the rollout horizon,
-so lengthening it would buy nothing. The floor, by contrast, is reached: some
-$7.2\%$ % A3P 2.6
-of evaluations at $f = 0$ score exactly zero, meaning the generated trajectory
-left the true one at the first predicted step rather than drifting away from it.
+% P1: the demand, and parity where each substrate is best. Numerals: 4.
+% Sheet 15: this parity and P2's collapse are the pair TIER0 2.6 says must
+% always carry their sigma, which is why they are adjacent.
+Unlike a network scored on memory, which is handed the true signal at every step, 
+a network asked to generate is released after a short
+initialisation and runs on its own output, so its mistakes become its own next
+input and accumulate. What is scored is how long it stays with the true signal
+before leaving it. Asked that way, and asked where each substrate is at its best,
+near criticality at $\sigma = 2$, the four are not distinguishable: the
+connectome's margins over the three nulls are
+$+0.28$, $-0.01$ and $+0.44$ % TIER0 2.6
+Lyapunov times, none of them significant. That is the same shape as the memory
+result from the previous section, where the four peaks also sat within a few percent of
+each other. Once again the substrates separate away from their best operating
+points rather than at them.
 
-% P2: the dissociation. Rewritten against the audit: curvature is bimodal, not
-% flat-then-rising, and the branch is not the collapse. Numerals: 9.
-The previous chapter handed this section a boundary rather than a result: on
-non-negative weights the shape of the driven trajectory does not move across the
-operating-point sweep while predictive performance falls away, and what governs
-that loss was left open. Figure~\ref{fig:decay-dissociation} is that boundary
-measured. The connectome's trajectory curvature holds at
+% P2: the failure the connectome never has. Claim A3P.4. Numerals: 3.
+Driven well past that point, the nulls stop predicting altogether. Above
+$\sigma \approx 7.6$ to $8.0$, % TIER0 2.3
+five of Erdős--Rényi's ten seeds settle onto a pair of states and alternate
+between them, flipping from one to the other at every step and going nowhere
+else. What they generate is no longer a path that winds around the Lorenz
+attractor; it is two points. Across the whole swept range, to more than five
+times the radius at which its own bulk edge reaches one, this happens to none of
+the connectome's ten seeds. The substrates are not being separated here by how
+long they predict for, but by whether what they produce is a trajectory at all.
+Five against none is significant
+($p = 0.033$, % TIER0 2.3
+Fisher exact), though on ten seeds per substrate the claim rests on the size and
+direction of the difference rather than on the test.
+
+% P3: what accounts for it, and where it is earned. Numerals: 0.
+% Names the mechanism WITHOUT claiming it here. 6.6 earns it.
+What the connectome brings to that comparison is the same spectral gap the
+memory result turned on, read from its other end. Alternation between two states
+is what a network settles into when the most negative part of its spectrum grows
+strong enough to dominate its own dynamics, and a large gap holds that part far
+below the leading eigenvalue. The substrate whose spectrum is most spread out
+between its extremes is therefore the one furthest from reaching the alternating
+state, and it stays furthest from it however hard it is driven. Stated here, that
+is an account which fits; it is not yet one that has been tested, because every
+substrate compared so far has the same sign structure and so none of them can
+isolate it. Section~\ref{sec:act3-unifying} returns to it once an intervention
+has made the test possible.
+
+% P4: the bound on the other side. Numerals: 0.
+% Negative result kept beside the claim it bounds (CONVENTIONS working rule 8).
+% The V4 correction: the separation is SHOWN, not inferred from absence.
+Resisting that particular failure does not make this substrate reliable. On a
+blunter measure, counting how many seeds stop predicting at all somewhere high in
+the sweep, the ordering reverses and the connectome is the worst of the four,
+while the degree-matched null never fails at any operating point. The two
+failures are separate events rather than degrees of one, and can be shown to be:
+no seed of the connectome that stops predicting is a seed that has fallen into
+the alternating state, and it has none of the latter anywhere.
+Appendix~\ref{app:second-failure} gives the counts. What holds is the narrower
+statement, that the connectome resists one specific way of failing to generate.
+
+% P5: the seam, the open question and the turn. Claim A3P.9. Numerals: 2.
+% The question is announced as open here; 6.7 carries the evidence that it is.
+% NO explanation of the f = 0 loss is offered, and none is implied.
+Set against how much prediction is lost across the sweep, none of this shows up
+in the activity itself. The connectome's curvature, the mean angle between
+successive segments of its trajectory, holds at
 $0.26$~rad % TIER0 3.11
-at every operating point from just above criticality to the top of the sweep,
-while its valid prediction time falls from
-$4.43$ to $0.44$ % TIER0 3.11
-Lyapunov times, roughly ten-fold. The fall is not monotone, and the value at
-$\sigma = 8$ % TIER0 3.11
-sits above the one before it, so the ten-fold figure describes the range rather
-than a steady decline. Curvature is not a dead measure. Across the four
-substrates the seeds occupy two sharply separated groups, one at
-$0.26$~rad % AUDIT B1
-and one just below $\pi$, with no seed anywhere between them, and individual
-seeds move from the lower group to the upper one as the operating point rises:
-five of Erdős--Rényi's ten do so, three of the weight-permuted null's and one of
-the degree-matched null's, % AUDIT B2
-and none of the connectome's at any operating point. But a seed either jumps or
-it does not. The earliest jump occurs at
-$\sigma = 3.6$, % AUDIT B2
-a third of the way along the sweep and well below the region where any substrate
-collapses, and the jumps are not otherwise ordered in the operating point. So
-curvature registers a binary event and is silent through everything else: the
-graded ten-fold decline that every substrate undergoes has no correlate in the
-shape of the manifold at all.
+from just above criticality to the top of the sweep, while over the same range
+its prediction falls roughly tenfold (Figure~\ref{fig:F21}). The measure that
+carried the memory half of this chapter registers nothing at all here: capacity
+is lost with the geometry intact, and what governs that loss is left open, having
+resisted the explanations this thesis could test. Something can still be done
+about the question, and it is not another comparison. Every substrate to this
+point has non-negative weights, so every one of them carries a common mode, and
+no contrast between them can show that the common mode is what any of these
+differences are made of. The next section stops comparing and starts changing the
+weights.
 
 \begin{figure}[htbp]
     \centering
@@ -502,121 +440,22 @@ shape of the manifold at all.
     curvature does not move]{\textbf{Prediction decays across the
     operating-point sweep while the geometry does not move.} Lorenz task,
     $N = 448$, non-negative weights, ten seeds per substrate, against nominal
-    $\sigma$. Points are individual seeds, lines are seed medians. \textbf{(a)}
-    Trajectory curvature, the mean angle between successive segments of the
-    driven trajectory, measured under teacher forcing, drawn on the full $0$ to
-    $\pi$ range so that flatness is not compression. Seeds occupy two separated
-    groups, one near $0.26$~rad and one just below $\pi$, with none in between;
-    nine of the forty seeds reach the upper group somewhere on the sweep and
-    none of them is the connectome's. Medians mislead here, and Erdős--Rényi's
-    $1.70$~rad at $\sigma = 11.2$ is a value no seed takes. \textbf{(b)} Valid
-    prediction time in Lyapunov times, log axis, falling for every substrate over
-    the same range. Seeds scoring exactly zero are stacked on the strip below the
-    break, height reading as a count. Curvature is bimodal rather than graded,
-    and the graded loss in (b) happens without it.}
-    \label{fig:decay-dissociation}
+    $\sigma$. Points are individual seeds and lines are seed medians.
+    \textbf{(a)} Trajectory curvature, the mean angle between successive segments
+    of the driven trajectory, drawn on the full $0$ to $\pi$ range so that
+    flatness is not an artifact of a compressed axis. Seeds occupy two separated
+    groups, one near $0.26$~rad and one just below $\pi$, and none lies between
+    them. The upper group is the alternating state of the text: a two-state cycle
+    reverses direction at every step, which this measure reads as an angle near
+    $\pi$. Medians mislead here, and Erdős--Rényi's $1.70$~rad at
+    $\sigma = 11.2$ is a value that no seed takes. \textbf{(b)} Valid prediction
+    time in Lyapunov times, log axis, falling for every substrate across the same
+    range; seeds scoring exactly zero are stacked on the strip below the break,
+    where height reads as a count. Curvature is measured on the driven trajectory
+    and prediction time on the free run. The graded loss in (b) has no
+    counterpart in (a).}
+    \label{fig:F21}
 \end{figure}
-
-% P3: collapse resistance far supercritically, and the absence of any advantage
-% near criticality, in one breath with the radius named every time.
-% Claim A3P.4. Numerals: 8.
-Something does separate the substrates on this task, and it is found by asking
-where each one fails rather than how well it does. Driven far above the
-connectome's critical scale, at
-$\sigma \approx 7.6$ to $8.0$, % TIER0 2.3
-Erdős--Rényi's free-running trajectories stop being trajectories: five of its ten
-seeds collapse onto a period-two orbit, generating a repeating two-cycle in place
-of the attractor. None of the connectome's ten seeds does so anywhere in the
-swept range (Fisher exact
-$p = 0.033$). % TIER0 2.3
-The resistance is to a qualitative failure, not to a quantitative one. That
-statement holds only where it is made. Near criticality, at $\sigma = 2$, where
-every substrate is close to its own best prediction, the same comparison at the
-same sign fraction finds nothing: the paired margins against the three nulls are
-$+0.28$, $-0.01$ and $+0.44$ % TIER0 2.6
-Lyapunov times, and none is significant. Same substrates, same weights, opposite
-answers, and the operating point is the whole of the difference, which is why no
-generative claim in this thesis is quoted without the radius it was measured at.
-Two limits travel with the collapse result. The independent unit is the seed, of
-which there are ten per substrate, and repeated draws at $f = 0$ are duplicates
-rather than additional evidence. With ten units the resolution of any test is
-bounded from below regardless of the effect, so the claim rests on the size and
-direction of the asymmetry, five against zero, and its family of comparisons is
-declared narrowly rather than expanded afterwards.
-
-% P3b: the negative result that bounds P3, placed where the claim is made
-% (CONVENTIONS working rule 8). Entirely from the 30 Aug audit. Numerals: 4.
-% Does NOT claim the two failure modes are related: A7 reports that
-% undeterminable from these artifacts, and this paragraph says so.
-Resistance to that failure is not reliability in general, and on a second and
-cruder measure the ordering reverses. Counting substrates by how many of their
-seeds stop predicting altogether at some point in the upper sweep, the connectome
-is the worst of the four and the degree-matched null is the best, with no failing
-seed at all: % AUDIT A1, A6
-five of the connectome's ten seeds record a valid prediction time of exactly
-zero somewhere above
-$\sigma = 3.6$, % AUDIT A2, A5
-against two of Erdős--Rényi's. % AUDIT A3
-Three qualifications bound how much that should be read into. The failures are
-confined to the upper sweep and none occurs at or below the operating point where
-the near-critical comparison is made. They are never a whole condition failing:
-at worst half the seeds of a given condition score zero and the rest predict at
-between one and three Lyapunov times, in line with their neighbours. And they are
-not the same event as the period-two collapse, which is recorded in a separate
-artifact that carries no per-run identifier, so the two cannot be matched seed by
-seed and no relation between them is asserted here. What can be said is narrower
-than it first appears: the connectome resists one specific mode of generative
-failure, and it is not the most reliable substrate on this task.
-
-% P4: three candidates, each ruled out on the data. Numerals: 6.
-% sigma_eff introduced here for the first time; its own maximum is cut and
-% carried in words.
-What sets generation at $f = 0$ is then a well-posed question with three obvious
-answers, and the data rules out all three. The first is geometry, and
-Figure~\ref{fig:decay-dissociation} has already disposed of it: the quantity that
-would have to register a graded loss does not move for the substrate whose
-capacity falls ten-fold, and where it moves for others it moves as a jump between
-two branches, which is not what a graded account predicts. The second is an
-effective radius. A driven network's operator can be linearised about its own
-state and assigned an effective spectral radius, $\sigma_{\mathrm{eff}}$, which
-Section~\ref{sec:act3-lesion-generation} develops as the best empirical locator
-of where generation breaks. At $f = 0$ it does not apply. Erdős--Rényi's
-transition occurs at
-$\sigma_{\mathrm{eff}} = 0.014$, % TIER0 3.10
-two orders of magnitude below the largest value it reaches anywhere on the sweep
-and on the descending branch of its own curve, so nothing is being crossed; and
-the connectome does not break at $f = 0$ at all within
-$\sigma \leq 11.2$, % TIER0 3.11
-so for that substrate there is no transition to locate. The third is that memory
-is doing the work, generation being retention run forward. The ordering is
-inverted. At $\sigma = 6$ the connectome holds a memory capacity of
-$11.43$ against Erdős--Rényi's $2.42$, % TIER0 3.11
-and a slightly \emph{lower} valid prediction time,
-$0.81$ against $1.18$. % TIER0 3.11
-The substrate with far more of the past available to it predicts the future
-slightly less well.
-
-% P5: the question left open and named as open. Claim A3P.9. Numerals: 1.
-% Must not resolve by implication, and must not let 6.5's mechanism read as
-% general. F17 deliberately not named.
-No fourth candidate is offered here. Two further facts say why this is a boundary
-of the present work rather than an omission from it. The first is that the map
-governing the closed loop is not the recurrent matrix but that matrix plus a
-rank-three term formed from the input and output weights, and the evaluator used
-throughout this thesis does not expose the fitted readout, so the operator that
-actually generates the trajectory was never available to be measured. The second
-is that the failure is not a local linear bifurcation: the smallest eigenvalue of
-the exact Jacobian at the fixed point never approaches
-$-1$ % TIER0 3.11
-anywhere in the sweep, so generation breaks while the fixed point it breaks away
-from is still linearly stable. A mean-field correction was the obvious next
-refinement and it is not the missing piece either. What remains is a capacity
-lost with the geometry intact, on the only sign configuration the instrument can
-produce, and no account of what governs it. The sections that follow introduce an
-intervention and find a mechanism that operates under it; that mechanism is not an
-answer to this question, and Section~\ref{sec:act3-scope} states the limit
-explicitly rather than leaving it to be inferred.
-
 
 
 

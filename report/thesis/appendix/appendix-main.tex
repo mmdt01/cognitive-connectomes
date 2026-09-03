@@ -303,6 +303,148 @@ check whether its consequences go with it.
 
 
 
+\section{The memory margin across network scale}
+\label{app:scale}
+\bigskip
+% Destination for chapter 6 section 6.2's N = 1000 paragraph and F9, moved here
+% as a robustness check bounding A3M.4. The claim itself stays in the main text
+% with both margins and their levels; this section carries the protocol, the
+% fixed-N control, the ceiling prediction and the pre-registered falsification
+% test. Sources: TIER0 2.4, 2.5, 6.6; fact sheet 14 movement 3.
+% FORBIDDEN: "scale-invariant" full stop; "bulk95 is the ladder controller";
+% any margin without its levels; reading the inconclusive test as a pass.
+% GOVERNANCE: F9 moves from the main-text registry to SUPPLEMENTARY. The label
+% below may need renaming once that is done.
+
+Section~\ref{sec:act3-memory-sigma} reports a memory margin that holds across a
+$2.2$-fold change in network size. Two things changed between the two runs and
+they are separated by a control. The run length was scaled from
+$3000$ to $6000$ % TIER0 2.5
+so that the ratio of retained timesteps to units stayed near
+$5.5$, % TIER0 2.5
+and the ridge was reparameterised to scale with the Gram matrix rather than held
+at an absolute value. At fixed $N$ the reparameterisation alone moves the
+supercritical margin from
+$4.35$ to $4.40$, % TIER0 2.4
+so anything beyond that is attributable to size.
+
+The threshold that defines ``supercritical'' decides what the run says, which is
+why both readings are drawn (Figure~\ref{fig:F9}). Taking the connectome's own
+critical scale and applying it to every variant gives a margin of
+$4.40$ and $4.42$; % TIER0 2.4
+taking each variant above its own gives
+$3.56$ and $3.85$. % TIER0 2.4
+The first is reported as primary only because it evaluates every substrate over
+an identical range of operating points, and it should be read knowing that it is
+also the filter that flatters the connectome, since it samples each null further
+above its own critical scale, where that null has already decayed further. Two
+predictions stated before the run held: the margin does not vanish, and the
+larger network does not escape the ceiling, peak usable dimensionality running
+at
+$0.971$ for the connectome and $0.984$ to $0.999$ % TIER0 2.4
+of its maximum for the nulls.
+
+One thing this run was designed to settle and did not. It carried a
+pre-registered falsification test, on the prediction that if the bulk radius is
+what orders the ladder, then a reversal in that quantity between the two sizes
+should reverse the memory ordering with it. The memory ordering did not move.
+But the reversal the test rests on is itself not significant at the larger size
+($p = 0.16$), % TIER0 2.4
+so the test was flawed rather than passed: the correct classification is
+inconclusive, and it is inconclusive because the predictor was noisy and not
+because the outcome was. The registration asserted that the test was on the sign
+rather than the size without first checking that the sign was established. The
+question it was meant to answer is asked again in
+Section~\ref{sec:act3-lesion-memory}, by an intervention that removes the
+proposed mechanism outright and therefore does not depend on a predictor moving.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{F9.png}
+    \caption[The supercritical memory margin holds across a 2.2-fold change in
+    $N$, under both definitions of ``supercritical'']{\textbf{The supercritical
+    memory margin holds across network scale, under both definitions of
+    ``supercritical''.} Memory-capacity task, non-negative weights, four
+    substrates and ten seeds each; run length scaled from $3000$ to $6000$ to hold
+    retained timesteps per unit near $5.5$, and the ridge reparameterised to scale
+    with the Gram matrix rather than held at an absolute value. \textbf{(a)} Median
+    memory capacity against nominal $\sigma$ for the connectome and Erdős--Rényi at
+    both sizes; the dotted rules are the connectome's critical scale, $3.078$ at
+    $N = 448$ and $3.985$ at $N = 1000$. \textbf{(b)} With that threshold applied to
+    every variant, the connectome to Erdős--Rényi margin is $4.40$ and $4.42$, on
+    levels $12.32$ against $2.80$ and $13.93$ against $3.15$. \textbf{(c)} With each
+    variant taken above its own critical scale, $3.56$ and $3.85$. Both are drawn
+    because the answer depends on the filter: the margin holds either way, but only
+    (b) is flat. The larger network does not escape the $d_{\mathrm{eff}}$ ceiling.}
+    \label{fig:F9}
+\end{figure}
+
+
+
+
+\section{A second mode of generative failure}
+\label{app:second-failure}
+\bigskip
+% Destination for chapter 6 section 6.3's zero-VPT paragraph, moved here as a
+% negative result bounding A3P.4. The bounding statement stays in the main text
+% beside the claim (CONVENTIONS working rule 8); the counts are here.
+% NUMERALS GATED: every count below is from the read-only audit of 30 Aug as
+% reproduced by verification V4 on 3 September, and is filed nowhere above rank
+% 5. DO NOT SET until GAPS B26 is committed. Unit: the seed-cell,
+% 1160 = 4 variants x 29 sigma x 10 seeds, three draws collapsed because at
+% f = 0 the sign transform is the identity.
+% The reason chapter 6 previously gave for separating the two modes is
+% WITHDRAWN: the collapse flag IS persisted per seed and draw, and the two can
+% be matched. See V4.
+% FORBIDDEN: reading the two modes as one event; "50% of replicates".
+
+Section~\ref{sec:act3-prediction-sigma} reports that the connectome alone avoids
+the period-two collapse, and bounds that result with a second and cruder measure
+on which the ordering reverses. Counting seeds that record a valid prediction
+time of exactly zero at any operating point, the connectome has
+five of ten, % GAPS B26
+the weight-permuted control
+three, % GAPS B26
+Erdős--Rényi
+two, % GAPS B26
+and the degree-matched null none at all, its lowest value anywhere in the sweep
+being
+$0.068$. % GAPS B26
+
+Three things bound how much should be read into that. The failures are confined
+to the upper sweep, the lowest operating point at which any connectome seed
+records a zero being
+$\sigma = 3.6$, % GAPS B26
+so none occurs at or below the point at which the near-critical comparison of
+Section~\ref{sec:act3-prediction-sigma} is made. They are never a whole
+condition failing: at worst half the seeds of a condition score zero while the
+rest predict at between one and three Lyapunov times, in line with their
+neighbours. And they are a different event from the collapse rather than a
+milder form of it, which can now be shown rather than assumed. Both flags are
+recorded per seed, so the forty seeds at zero sign fraction cross-tabulate
+directly:
+
+\begin{center}
+\begin{tabular}{lcc}
+    \toprule
+    & \multicolumn{2}{c}{zero prediction time} \\
+    \cmidrule(lr){2-3}
+    collapses to period two & no & yes \\
+    \midrule
+    no  & $25$ & $6$ \\
+    yes & $5$  & $4$ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+All five of the connectome's zero-scoring seeds sit in the upper-left and
+upper-right cells, since it has no collapsing seed at all; Erdős--Rényi's two
+are both collapsing seeds. The two failure modes are therefore distinct, they
+order the substrates differently, and both orderings are correct measurements of
+different things.
+
+
+
 % ------------------------------
 
 % S1
