@@ -7,7 +7,7 @@ builders live one module per act, which is also one module per sweep session:
 ``act1_structure``    session 1 F1, F2, F3, F19, S1, S3, S4  (chapters 3 and 4)
 ``act2_manifold``     session 2 F4, F5, F6, F18, F20  (chapter 5)
 ``act3_memory``       session 3 F7, F9-F11       (chapter 6, memory arm)
-``act3_prediction``   session 4 F12-F14, F16, F17, S2 (chapter 6; S2 prints in 5)
+``act3_prediction``   session 4 F12, F13, F16, F17, F21, S2, S5 (ch. 6; S2 in 5)
 ``act4_anchor``       --        F15              (chapter 7)
 ===================== ========= ================================================
 
@@ -34,11 +34,13 @@ from report.figlib.figures.act3_memory import (
     f7_the_crossing, f9_scale_invariance, f10_peak_parity, f11_perron_rescue)
 from report.figlib.figures.act3_prediction import (
     f12_curvature_is_bimodal, f13_generation_as_vpt, f14_sigma_eff_is_a_locator,
-    f16_phase_boundaries, f17_free_run_attractors, s2_curvature_regimes)
+    f16_phase_boundaries, f17_free_run_attractors, f21_decay_dissociation,
+    s2_curvature_regimes)
 from report.figlib.figures.act4_anchor import f15_yeo_loads_the_perron_mode
 
 # =============================================================================
-# Registry -- the 15 rendered main-text figures. F8 is retired into F3.
+# Registry -- the 19 rendered main-text figures. F8 is retired into F3; F14 left
+# for the appendix as S5 on 3 September 2026 and its ID is not reused either.
 # =============================================================================
 FIGURES = {
     "F1": (4, "spectrum: a large real Perron root over everyone's bulk", f1_spectrum),
@@ -53,7 +55,6 @@ FIGURES = {
     "F11": (6, "rescue from Perron domination", f11_perron_rescue),
     "F12": (6, "curvature is bimodal", f12_curvature_is_bimodal),
     "F13": (6, "generation read as VPT", f13_generation_as_vpt),
-    "F14": (6, "sigma_eff as locator, not criterion", f14_sigma_eff_is_a_locator),
     "F15": (7, "which Yeo networks load the Perron mode", f15_yeo_loads_the_perron_mode),
     "F16": (6, "the crossing, with its axis and its coverage", f16_phase_boundaries),
     "F17": (6, "the free-running attractor, and how it fails", f17_free_run_attractors),
@@ -62,6 +63,8 @@ FIGURES = {
     "F19": (4, "the four substrates, as graphs", f19_substrates_as_graphs),
     "F20": (5, "from a driven network to a Gram spectrum",
             f20_driven_network_to_gram),
+    "F21": (6, "prediction decays while the geometry does not move",
+            f21_decay_dissociation),
 }
 
 # The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
@@ -193,6 +196,20 @@ SUPPLEMENTARY = {
     # and re-renders byte-identical.
     "S4": (None, "the full substrate family, as graphs (appendix)",
            s4_full_substrate_family),
+    # S5 is F14, moved out of the main text on 3 September 2026. **The S-figure bar is
+    # cleared because chapter 6 section 6.5 carries A3P.5 in prose**: the paragraph
+    # states that only 1 of 38 brackets contains unity, that the transitions concentrate
+    # between 0.77 and 0.90, that the robust CV is 0.209 against nominal sigma's 0.667,
+    # and that the variant offset was predicted before it was fitted -- so the panel
+    # makes no claim the main text does not already make, which is the whole bar. The
+    # chapter cut the figure and kept the claim (`act3b_prediction.md`, and the P4
+    # comment in `chapter-6-act-III.tex`); this is where the panel goes.
+    #
+    # The builder is unchanged and keeps its name: `f14_sigma_eff_is_a_locator` renders
+    # S5. The F14 ID is retired and not reused, on the F8 model, so every reference to
+    # F14 elsewhere still resolves.
+    "S5": (None, "sigma_eff as locator, not criterion (appendix)",
+           f14_sigma_eff_is_a_locator),
 }
 for _id, (_chapter, _name, _builder) in SUPPLEMENTARY.items():
     assert _id.startswith("S") and _id not in FIGURES, (

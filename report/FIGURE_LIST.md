@@ -4,6 +4,63 @@
 not here; if one seems missing, report and stop. `W` marks the workshop subset (5pp, 4
 figures).
 
+> **AMENDED 3 September 2026 (Act III, prediction arm). Count 19 to 19, for F14 out and
+> F21 in.** The reason, stated as the 19 August amendment requires. That amendment asks
+> a count *change* to state its reason; this one states why the count does **not**
+> change. Two moves cancel in the count, and they are independent: neither was made to
+> pay for the other, and either would stand alone.
+>
+> **F14 leaves the main-text registry for the appendix as S5.** Chapter 6 cut the panel
+> on 30 August and kept the claim. Section 6.5 carries A3P.5 in prose, with the 1 of 38
+> brackets containing unity, the 0.77 to 0.90 band, the robust CV of 0.209 against
+> nominal sigma's 0.667 and the variant offset that was predicted before it was fitted,
+> all stated there. That is the S-figure bar exactly: it makes **no claim the main text
+> does not already make**, so the panel goes to the appendix rather than being deleted or
+> argued back into the chapter. **The F14 ID is retired and not reused**, on the F8
+> model, so every reference to F14 elsewhere still resolves; the builder keeps its name
+> (`f14_sigma_eff_is_a_locator`) and both F14 flags below are retitled, not dropped.
+>
+> **The guard that enforces one of those flags was widened with the move.** "No line at
+> 1" was asserted on panel (b) alone and only against a *horizontal* rule, y-data all
+> 1.0. Panel (c) puts the effective radius on **x** with `xlim` to 1.06, where the
+> withdrawn criterion would be drawn as a *vertical* line well inside the visible range
+> and the old check could not see it. Both orientations are now asserted in both panels.
+> The test distinguishes a rule from a data line by span, because panel (c)'s
+> degree-matching bracket legitimately has y-data [1.0, 1.0]: 1 is the row it is drawn
+> on. Both arms were injection-tested and both fired.
+>
+> **F21 joins the main-text registry, for chapter 6 section 6.3.** The chapter already
+> printed this figure, as `f_decay_dissociation.png`, produced by
+> `report/proposals/f_decay_dissociation.py`: a standalone script outside `figlib`,
+> outside this file and outside the registry, writing a PNG into `report/figures/` with
+> no PDF beside it. `CONVENTIONS`' style contract forbids exactly that ("no hand-tuned
+> one-offs"), so the panels are rebuilt inside `act3_prediction.py`, which is this act's
+> module, on the registry's own `jacobian` source, and the figure prints as F21. The
+> proposal script is left where it stands, as the proposal it was. **No run happened and
+> none was needed.**
+>
+> **What F21 carries.** It bounds contribution 4 rather than carrying it: `TIER0` §3.11's
+> scope limit on the switch account, at `f` = 0 capacity is lost with the geometry
+> intact, which is A3P.9's premise. **Its upper curvature group IS the period-two
+> collapse, not a second phenomenon.** The branch test and the collapse test are one test
+> at one constant, `mean_curvature` against `extend_f.CURV_COLLAPSE` = 1.0 rad
+> (`report/scratch/f13_panel_c_collapse_counts_audit.md`, 30 August), and the builder
+> recomputes the nine-of-forty count at that constant instead of quoting it. Nine of the
+> forty seeds reach the upper group somewhere on the sweep and **none is the
+> connectome's**. **Medians mislead in panel (a)**, which is why every seed is drawn:
+> Erdős–Rényi's 1.70 rad at sigma = 11.2 is a median across a cell split five and five
+> between the groups, a value no seed takes, and it is **never** to be written as its
+> curvature rising. The 30 August audit withdrew that reading. No graded curvature or
+> straightness account is available from either panel, and neither panel carries a
+> reference line at any value.
+>
+> **Gate.** All twenty cells of `TIER0` §3.11's published table reproduce from
+> `e01_jacobian_scale_448.parquet` at the two decimal places `TIER0` prints, 20 of 20.
+> The nine-of-forty count, the absence of any connectome seed from the upper group and
+> the "1.70 is a value no seed takes" claim (nearest seed 1.434 rad away) are recomputed,
+> not quoted. The builder asserts all four, so a mismatch fails the build rather than the
+> reader.
+
 > **AMENDED 2 September 2026 (Act II). Count 18 to 19, for F20.** The reason, stated as
 > the 19 August amendment requires. Chapter 5 opened on its first **result**. The object
 > the chapter measures — a `T_eff x N` state matrix, and the split of `A^T A` into a
@@ -123,7 +180,7 @@ per sweep session** — so a session edits its own module and nothing else:
 | `act1_structure.py` | 1 | F1, F2, **F3**, **F19**, S1, **S3**, **S4** |
 | `act2_manifold.py` | 2, the **floor-sensitivity session (24 Aug) for F18**, the **F20 session (2 Sep)** | F4, F5, F6, **F18**, **F20** |
 | `act3_memory.py` | 3 | F7, F9, F10, F11 |
-| `act3_prediction.py` | 4 | F12, F13, F14, **F16**, F17, **S2** |
+| `act3_prediction.py` | 4 | F12, F13, **F16**, F17, **F21**, **S2**, **S5** |
 | `act4_anchor.py` | — | F15 |
 
 **The act decides the module, not the chapter**, and the two cross-act figures are why
@@ -143,8 +200,11 @@ and read as two half-figures, so F3 is now a single panel and F8's content is me
 prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
 contribution 2. **F17 added** in session 4 for E2. **F18 added** on 24 August for the
 chain's step 3. **F19 added** on 1 September for chapter 4's opening section. **F20
-added** on 2 September for chapter 5's opening section. Rendered
-figures: F1 to F7, F9 to F20 = 19. IDs are stable identifiers,
+added** on 2 September for chapter 5's opening section. **F21 added** on 3 September
+for chapter 6's section 6.3, the same day **F14 left the main text for the appendix as
+S5**: F14's ID is retired to the appendix and **is not reused**, on the F8 model, so
+every reference to F14 elsewhere still resolves and the two moves cancel in the count.
+Rendered figures: F1 to F7, F9 to F13, F15 to F21 = 19. IDs are stable identifiers,
 not a reading order, so F16 and F17 sitting in chapter 6 after chapter 7's F15 is
 intended, and so is F18 returning to chapter 5 after both. **F8 stays retired**: the next
 free number was taken rather than the retired one reused, so every reference to F8
@@ -168,16 +228,21 @@ verified, see the flag below the table.
 | F11 | 6 | 3 | Rescue from Perron domination: `\|mean_state\|` 0.759 against the nulls' 0.949-0.989 at sigma = 6, f = 0; and matching on `sigma·bulk95` absorbs only **26%** of the f = 0 gap | (a) `item2_f_extension_scale_448.parquet` + `item3_f_extension_nulls_scale_448.parquet`, filter `task == "mc"`, `spectral_radius == 6.0`, col `mean_state` by `f`. (b) `e03_mechanism_matched_scale_448.csv` cols `median_abs_gap_matched_x` vs `..._sigma` (6.42 -> 4.75 at f = 0) | confirmed | |
 | F12 | 6 | 4 | Curvature is **bimodal**: 215 of 38,280 cells (0.56%) lie in [0.6, 2.2] rad; a binary collapsed-or-not bit explains R2 = 0.364 against continuous curvature's 0.371 | `criticality_matched/results/e01_jacobian_scale_448.parquet`; cols `mean_curvature, vpt`; no row filter (38,280 Lorenz cells = 4 variants x 11 f x 29 sigma x 10 seeds x 3 draws) | confirmed | W |
 | F13 | 6 | 4 | Generation read as VPT: +1.0 to +2.2 Lyapunov times from f ~ 0.20 at sigma = 2, clearing the weight-permuted placement control; **plus the f = 0 collapse panel** (ER 5/10 seeds, connectome 0/10) | (a) `e03_frontier_scale_448.parquet` filter `metric == "vpt"`, `spectral_radius == 2.0`. (b) `e03_frontier_paired_scale_448.csv` same filter — paired within seed, so all connectome-minus-null statements come from here. (c) `item2_collapse_loci_scale_448.csv` filter `f == 0`, cols `n_seeds_collapsed / n_seeds` | confirmed | |
-| F14 | 6 | 4 | `sigma_eff` is a **locator, not a criterion**: transition at 0.77-0.90 with variant offsets ordered by spectral gap; CV 0.209 against nominal sigma's 0.667 | `e01_threshold_invariance_scale_448.csv` filter **`scope == "f > 0"`** (n = 37); plus `e01_threshold_table_scale_448.csv` cols `effective_radius_lo/hi` per (variant, f) | confirmed* | |
 | F15 | 7 | anchor | Which Yeo networks load the Perron mode (minimal Act IV) | **computed live, no frozen parquet**: leading eigenvector of the N=448 self-built consensus (`eigh`) x release RSN labels from `data/human/Suarez2021_Data`, restricted to cortical nodes. Seconds, not a run | confirmed* | |
 | F17 | 6 | 4 | **The free-running rollout, which no other artifact captures.** Every persisted state matrix is teacher-forced. Pre-stated claim: the connectome retains the true climate to higher `f` (**confirmed**: 0.43 of frozen cells against the nulls' 0.14 at `f` >= 0.30) and the collapse is a change of shape not of scale (**refuted**: `sd_ratio` is bimodal, 229 of 440 cells at a fixed point against 158 keeping the spread, 11 between) | `criticality_matched/results/e2_free_run_scale_448.parquet` (source `free_run`), 440 rows = 4 variants x 11 `f` x 10 seeds at sigma = 2, cols `climate_error, sd_ratio, trajectory`; **panel (d) reads the frozen `e01_jacobian_scale_448.parquet` instead**, which carries 30 cells per (variant, `f`) against this capture's 10 | confirmed* | |
 | F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
 | F18 | 5 | (Act II) | **The Gram spectrum against the ridge floor**, the chain's step 3. Supercritically the connectome holds **89.0%** of its directions more than a decade clear of the floor against Erdős–Rényi's **11.4%** (`d_eff` 412.9 against 74.8); floor sensitivity is strongly sigma-dependent and each substrate's **interior** dip sits at a different sigma (connectome 3.58, every null 1.58 or 2.00), which is where each one's measured ridge optimum migrates to as alpha rises | **(a, b)** `results/scale_448/covariance_spectra.parquet` (source `floor_mass`); filter `task == "mc"`, `condition == "human_empirical"`, `variant in LADDER`, **no sigma filter at load** (520 rows = 4 variants x 13 spectral radii x 10 seeds); cols `eig_gram`, `alpha`, reduced per cell to `d_eff, floor_sensitivity, n_within_decade, n_below_floor, frac_below_floor` plus the four position bins. Exact zeros STRIPPED first, alpha from the file's own column. Panel (a) then cuts to `spectral_radius >= 3.05` (50 cells per variant). **(c)** `criticality_matched/results/taskB_extended_sweep_scale_448.parquet` (source `alpha_peaks`); argmax over sigma of the seed-median `mc_alpha_*` column, 20 rows = 5 alpha x 4 variants | confirmed* | |
 | F20 | 5 | (none) | **From a driven network to a Gram spectrum.** The object chapter 5 measures, drawn: the real white-noise drive, the recorded state matrix `A`, three units followed from a trace to a trajectory, and equation 5.1 as three matrices. **Carries no claim, deliberately; it defines the object chapter 5 measures.** It prints first, in the chapter's opening section; no null substrate appears and no comparison is made, between substrates or among the three units. The one number it quotes — the rank-one term carries **51.3%** of `trace(A^T A)` on this cell — is that cell's, and whether substrates differ in it is §5.2's claim (A2.2, F4), which the panel scales are built not to pre-empt | **The only figure in the sweep that re-runs a reservoir**: states are never persisted (working rule 5), so the cell is regenerated through the evaluators' opt-in `collect_states` path. The cell identity is not re-derived — it is source `gram_spectra`'s, i.e. F6a's cell (connectome, `task == "mc"`, `condition == "human_empirical"`, sigma = 3.0526, alpha = 1e-6, the seed whose `d_eff` is nearest the median of the ten, resolving to **seed 7**). The graph and the three units come from `report/artifacts/substrate_edges.parquet` (source `substrate_edges`) filtered to `variant == "connectome"`, node strength at the 10th/50th/90th percentiles giving nodes **119, 346, 262**; node ordering from source `substrate_order`, the same as F19's. Gate: `act2_manifold.md` §2.7 | confirmed* | |
 | F19 | 4 | (none) | **The four substrates, as graphs.** The ladder drawn rather than described: binary and weighted adjacency under one node ordering, with the degree marginal above each column, plus one diagonal block magnified on the same colour scale. **Carries no claim**: it prints in chapter 4's no-results opening section. Connectome and weight-permuted control are one binary graph, which is the gate that the placement control is a placement control | `report/artifacts/substrate_edges.parquet` (source `substrate_edges`), 117,106 rows = 22 (variant, seed) cells x 5,323 edges, cols `variant, seed, i, j, weight`, no row filter. Node ordering from source `substrate_order`, **computed live**. The four binary-graph statistics are **not drawn here**: they are `substrate_topology.parquet` (source `substrate_topology`, 22 rows) rendered as chapter 4's `tab:act1-topology` | confirmed* | |
+| F21 | 6 | 4 (its scope limit) | **Prediction decays while the geometry does not move.** A3P.9's premise, and `TIER0` §3.11's scope limit on the switch account: at `f` = 0 the connectome's curvature holds at 0.26 rad across the whole sweep while its VPT falls from 4.43 to 0.44. **(a)** trajectory curvature under teacher forcing, drawn on the **full 0 to pi range** so flatness is not an artifact of a compressed axis; two separated groups with nothing between them, and **the upper group IS the period-two collapse**, the same test at the same constant (curvature above 1.0 rad, `extend_f.CURV_COLLAPSE`), not a second phenomenon. Nine of the forty seeds reach it somewhere on the sweep and **none is the connectome's**. **(b)** VPT on a log axis, falling for every substrate over the same range, with the seeds scoring exactly zero stacked on a strip below an axis break so the height reads as a count. **Medians mislead in (a)**: Erdős–Rényi's 1.70 rad at sigma = 11.2 is a value no seed takes and is **never** to be read as its curvature rising (withdrawn 30 August). No graded curvature or straightness account, and **no reference line at any value** in either panel | `criticality_matched/results/e01_jacobian_scale_448.parquet` (source `jacobian`); filter **`f == 0`**, Lorenz, N = 448, nominal sigma axis; cols `mean_curvature`, `vpt`; 1,160 seed-cells = 4 variants x 29 sigma x 10 seeds after collapsing the three draws, which are bit-identical at `f` = 0 and are asserted so before they are collapsed. Lines are **seed medians over the ten seeds per substrate**, points are the seeds themselves | confirmed | |
 
 Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
-carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6.
+carry 3, F12/F13/**F17** carry 4, F3 carries 5, F6 carries 6. The locator panel that
+was F14 is **S5**, in the appendix, and its claim (A3P.5) is carried in chapter 6
+section 6.5's prose, which is why the panel clears the S-figure bar.
+**F21 bounds contribution 4 rather than carrying it**: it is `TIER0` §3.11's scope limit
+on the switch account, at `f` = 0 capacity is lost with the geometry intact, and it
+carries A3P.9's premise.
 **F19 and F20 carry none of the six, and neither carries a claim at all.** Each opens
 its own chapter's first section by drawing what that chapter is about — F19 the four
 substrates, F20 the driven state matrix and its Gram split — and each prints in a
@@ -197,7 +262,11 @@ itself.
 **Added 15 August 2026 (session 1), at the author's request.** These are **not** part of
 the numbered main-text list and do **not** consume a main-text slot: `FIGURES` in
 `report/figlib/figures/__init__.py` holds exactly **17** and still carries the
-assertion that records the count. S-figures live in a separate `SUPPLEMENTARY`
+assertion that records the count. [It holds **19** as of 3 September 2026, when F14 left
+`FIGURES` for `SUPPLEMENTARY` as S5 and F21 joined `FIGURES` in the same commit: the two
+moves cancel and the assertion is unchanged at 19. The sentence is left as the record of
+what was written on 15 August, and the S-figure separation it is about is unaffected,
+which is the point it was making.] S-figures live in a separate `SUPPLEMENTARY`
 registry, and `python -m report.figlib` renders both. The rule that no figure exists
 outside this file still binds, which is why they are listed here.
 
@@ -258,6 +327,7 @@ outside this file still binds, which is why they are listed here.
 | S3 | none | **The pre-registered placement-mechanism test, drawn where it fails. Prints in the appendix**, at `width=\textwidth`; built in `act1_structure.py` (session 1 owns it, and it is Act I's own measurement). Mean edge weight against the endpoint degree product, connectome and weight-permuted control, in the twenty equal-count bins `TIER0` §3.14(b) publishes the rank correlation of. `PREREG_PLACEMENT_MECHANISM.md` registered a **positive** correlation in the connectome before it was measured; the connectome's is **negative** and the control's covers zero, so the weighted rich club is refuted as an account of the gap on this substrate. Makes **no** claim the register does not already make: the prereg's verdict was EQUIVOCAL, A1.5 is unchanged and still carries no mechanism | `report/artifacts/placement_mechanism_degree_weight.parquet` (source `placement_degree_weight`), 40 rows = 2 substrates x 20 bins, cols `variant, bin_index, bin_lower, bin_upper, n_edges, median_degree_product, mean_weight, sem_weight`; plus `..._rank_correlation.parquet` (source `placement_rank_correlation`), 2 rows, for the two rho and their bootstrap intervals. No row filter on either; N = 448, `condition == "human_empirical"`, one seed per substrate | confirmed |
 
 | S4 | F19 | **The full substrate family, as graphs. Prints in the appendix**, full page and rotated a quarter turn, at `width=\textheight`; built in `act1_structure.py` (session 1 owns it, and it is Act I's own figure). F19 widened from the ladder's four substrates to all seven, in the column order of the methods chapter's full preservation table (`tab:methods-preservation`), most preserved first. Two rows by seven columns: binary adjacency with the degree marginal above each panel, then weighted adjacency, all seven on one logarithmic colour scale under one colour bar. Same node ordering as F19, same community boundaries, same representative-seed rule, so the four columns the two figures share are the same four matrices. **No zoom row**: F19's magnified block is chosen from the connectome's partition and carries an argument about the control, and neither transfers to a figure that compares nothing. Makes **no** claim, as F19 makes none: no comparison among the seven, no spectral quantity quoted, no statistics strip | `report/artifacts/substrate_edges_full.parquet` (source `substrate_edges_full`), 276,572 rows = 52 (variant, seed) cells x the columns `variant, seed, i, j, weight`; plus `substrate_order` for the node ordering and `spectra_448_full` (70 rows) for the seed rule and nothing else. No row filter on any of the three; N = 448, `condition == "human_empirical"` | confirmed |
+| S5 | none | **`sigma_eff` is a locator, not a criterion. Prints in the appendix**; built in `act3_prediction.py` (session 4 owns it, and it is Act III's own measurement). **This is F14, moved out of the main text on 3 September 2026**, unchanged: transition at 0.77 to 0.90 with variant offsets ordered by spectral gap, robust CV 0.209 against nominal sigma's 0.667, and no line drawn at 1. Makes **no** claim the main text does not already make, which is the whole bar: chapter 6 section 6.5 carries A3P.5 in prose, the 1 of 38 brackets, the band, the CV and the predicted offset included, and cut the panel on 30 August while keeping the claim. The **F14 ID is retired and not reused**, on the F8 model, and the builder keeps its name (`f14_sigma_eff_is_a_locator`) | `e01_threshold_invariance_scale_448.csv` filter **`scope == "f > 0"`** (n = 37); plus `e01_threshold_table_scale_448.csv` cols `effective_radius_lo/hi` per (variant, f) | confirmed* |
 
 **S1 — the row ordering is NOT monotone at N=1000, and the caption must not imply it
 is.** Rows a-d are in ladder order, and at N=448 that happens to coincide with descending
@@ -550,13 +620,18 @@ below the connectome — the panel would argue against its own caption and again
 audit item 1) and it was present in session 0's F11 builder too; both builders now
 assert the connectome is lowest, so it fails the build rather than the reader.
 
-**F14 — two aggregation units, do not read them against each other.** CV 0.209 is per
-(variant, f) with under-half-transitioning cells dropped (n = 37, `TIER0` §3.10). The
-seed-level unit (n = 378, §3.11) gives `sigma_eff` 0.304 against the exact Jacobian's
-0.152. `TIER0` §3.11 says this explicitly: *do not read 0.209 against 0.152.* The panel
-shows the §3.10 comparison; if the Jacobian is added it needs its own axis and its own n.
+**S5 (F14 before it moved) — two aggregation units, do not read them against each
+other.** CV 0.209 is per (variant, f) with under-half-transitioning cells dropped
+(n = 37, `TIER0` §3.10). The seed-level unit (n = 378, §3.11) gives `sigma_eff` 0.304
+against the exact Jacobian's 0.152. `TIER0` §3.11 says this explicitly: *do not read
+0.209 against 0.152.* The panel shows the §3.10 comparison; if the Jacobian is added it
+needs its own axis and its own n.
 
-**F14 — no line at 1.** The unit crossing is withdrawn. Draw the 0.77-0.90 band.
+**S5 (F14 before it moved) — no line at 1, in either orientation.** The unit crossing
+is withdrawn. Draw the 0.77-0.90 band. The builder's guard covers panel (b), where a rule
+at 1 would be horizontal, **and** panel (c), where `sigma_eff` is on x with `xlim` to
+1.06 and a rule at 1 would be vertical and inside the visible range. Both arms are
+injection-tested.
 
 **F16 — the coverage mask is the point, not decoration.** Promoted to `TIER0` §2.3 on
 15 August 2026, which is now the canonical home; this entry points at it. Recomputed from

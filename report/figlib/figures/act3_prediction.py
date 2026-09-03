@@ -1,9 +1,12 @@
 """Act III, prediction arm -- chapter 6, contributions 4 and 2.
 
-F12 to F14 carry contribution 4 (generation is gated, not graded; `sigma_eff` is a
-locator). F16 carries contribution 2 -- the unifying claim -- and is a cross-act figure:
-it needs both arms, so **session 4 renders it** once session 3's memory arm is
-validated.
+F12, F13 and S5 carry contribution 4 (generation is gated, not graded; `sigma_eff` is a
+locator). **S5 is F14**, which left the main text for the appendix on 3 September 2026
+because chapter 6 §6.5 carries its claim in prose; the F14 ID is retired and not reused,
+and the builder keeps its name. F16 carries contribution 2 -- the unifying claim -- and
+is a cross-act figure: it needs both arms, so **session 4 renders it** once session 3's
+memory arm is validated. **F21** was registered the same day for chapter 6 §6.3, in
+place of an unregistered one-off script.
 
 **Substrate naming.** These builders use ``VARIANT_TITLE`` / ``VARIANT_TITLE_TICK`` --
 the real null-model names -- matching F1 to F11. They were the last on the rung-numbered
@@ -267,6 +270,44 @@ def f13_generation_as_vpt(ctx):
     return fig
 
 
+def _full_span_rules(ax, value=None) -> list:
+    """Reference lines in ``ax``: rules at ``value``, or at **any** value when None.
+
+    A rule is constant in one coordinate and spans the panel in the other, and it is
+    caught in both orientations: ``axhline`` / ``axvline`` draw [0, 1] in axes fractions
+    along that other coordinate, and a rule laid down with ``plot`` runs the visible
+    range. A *data* line can be constant without being a rule -- F14/S5 panel (c)'s
+    degree-matching bracket has y-data [1.0, 1.0], because 1 is the row it is drawn on --
+    and it spans neither, which is what separates the two and why the test is not "any
+    constant line".
+
+    Lines drawn wholly in axes fractions are furniture rather than values, so they are
+    skipped: F21's axis break is two markers laid along the foot and head of its panels.
+    """
+    found = []
+    for line in ax.get_lines():
+        if line.get_transform() is ax.transAxes:
+            continue
+        x = np.asarray(line.get_xdata(), dtype=float)
+        y = np.asarray(line.get_ydata(), dtype=float)
+        if x.size < 2 or y.size < 2:
+            continue
+        for constant, across, limits, orientation in (
+                (y, x, ax.get_xlim(), "horizontal"),
+                (x, y, ax.get_ylim(), "vertical")):
+            if not np.allclose(constant, constant[0]):
+                continue
+            at = float(constant[0])
+            if value is not None and not np.isclose(at, value):
+                continue
+            spans_axes_fraction = across.min() <= 0.0 and across.max() >= 1.0
+            spans_visible = (across.max() - across.min()) >= 0.9 * abs(
+                limits[1] - limits[0])
+            if spans_axes_fraction or spans_visible:
+                found.append((orientation, at))
+    return found
+
+
 def f14_sigma_eff_is_a_locator(ctx):
     """A locator, not a criterion. No line is drawn at 1, because 1 is withdrawn.
 
@@ -357,11 +398,10 @@ def f14_sigma_eff_is_a_locator(ctx):
                      "transition. At $f$ = 0 the locator does\nnot apply at all.",
                      xy=(0.03, 0.97), xycoords="axes fraction", ha="left", va="top",
                      fontsize=style.TICK_SIZE - 1, color="0.35")
-    # There is deliberately NO line at 1: the unit crossing is withdrawn (TIER0 §3.10),
-    # and drawing it would reinstate the criterion the figure exists to retire.
-    assert not any(np.isclose(line.get_ydata(), 1.0).all()
-                   for line in axes[1].get_lines() if line.get_ydata().size), \
-        "F14: no reference line may be drawn at sigma_eff = 1; the criterion is withdrawn."
+    # There is deliberately NO line at 1 here: the unit crossing is withdrawn
+    # (TIER0 §3.10), and drawing it would reinstate the criterion the figure exists to
+    # retire. The guard is at the foot of this builder, over both panels that carry a
+    # sigma_eff scale and both orientations a rule can take.
     axes[1].set_xlabel("sign fraction $f$")
     axes[1].set_ylabel(r"$\sigma_{\rm eff}$ at the transition")
     axes[1].set_ylim(0, 1.12)
@@ -396,6 +436,20 @@ def f14_sigma_eff_is_a_locator(ctx):
     axes[2].set_title("the offset, ordered by spectral gap",
                       fontsize=style.TITLE_SIZE - 1)
     axes[2].grid(axis="y", visible=False)
+
+    # **The guard on a falsified criterion, and it is not narrower than the flag it
+    # enforces.** It used to test panel (b) alone, and only for a horizontal rule: y-data
+    # all 1.0. But (b) puts sigma_eff on **y** and (c) puts it on **x**, with xlim to
+    # 1.06 -- so on (c) the withdrawn criterion would be drawn as a *vertical* line at 1,
+    # inside the visible range, and a y-only test on one panel could not see it. Both
+    # orientations, both panels.
+    for panel, ax in (("b", axes[1]), ("c", axes[2])):
+        rules = _full_span_rules(ax, 1.0)
+        assert not rules, (
+            f"S5 (F14 before it moved): panel ({panel}) draws a {rules[0][0]} reference "
+            "line at sigma_eff = 1. The unit crossing is withdrawn (TIER0 §3.10) and no "
+            "rule may be drawn there in either orientation.")
+
     for ax, letter in zip(axes, "abc"):
         style.panel_label(ax, letter, offset_points=(-36, 4))
     fig.tight_layout()
@@ -893,3 +947,233 @@ def s2_curvature_regimes(ctx):
         style.panel_label(ax, letter, offset_points=(-36, 4))
     fig.tight_layout()
     return fig
+
+
+# =============================================================================
+# F21 -- the decay dissociation, chapter 6 section 6.3.
+#
+# Registered 3 September 2026. The figure existed first as
+# `report/proposals/f_decay_dissociation.py`, a standalone script writing beside itself
+# and printing into chapter 6 as `f_decay_dissociation.png`. CONVENTIONS' style contract
+# forbids that -- "every figure is produced by the shared figure module reading frozen
+# parquets, no hand-tuned one-offs" -- so the panels are rebuilt here, on the registry's
+# own source, and the figure prints as F21.
+#
+# **The upper curvature group is the period-two collapse, not a second phenomenon.**
+# `COLLAPSE_BIT` = 1.0 rad above is `extend_f.CURV_COLLAPSE`, and the frozen collapse
+# counts in `e01_threshold_table_scale_448.csv` are `curv > CURV_COLLAPSE` applied to
+# these very cells: the branch test and the collapse test are one test at one constant.
+# The builder asserts the count it draws against that constant, so the identity is
+# checked rather than asserted in prose.
+# =============================================================================
+
+# The reproduction gate, TIER0 §3.11's published table: seed medians at `f` = 0, to the
+# two decimal places TIER0 prints. Nothing is drawn unless all twenty reproduce.
+DECAY_GATE_SIGMA = (2.0, 4.0, 6.0, 8.0, 11.2)
+DECAY_GATE = {
+    ("connectome", "mean_curvature"): (0.26, 0.26, 0.26, 0.26, 0.26),
+    ("connectome", "vpt"): (4.43, 2.81, 0.81, 1.18, 0.44),
+    ("erdos_renyi", "mean_curvature"): (0.26, 0.26, 0.26, 0.27, 1.70),
+    ("erdos_renyi", "vpt"): (3.73, 2.45, 1.18, 0.49, 0.23),
+}
+# Seed clouds side by side rather than on top of one another. The sweep steps by 0.4, so
+# +-0.1125 of total spread leaves the grid points cleanly separated.
+DECAY_OFFSET_STEP = 0.075
+DECAY_JITTER = 0.022
+
+
+def _decay_seed_table(ctx):
+    """One row per (variant, sigma, seed) at `f` = 0 -- the unit of analysis.
+
+    The capture carries three draws per seed. At `f` = 0 no edges are flipped, so the
+    three are bit-identical repeats of one run rather than independent units; collapsing
+    them without checking would triple the apparent n.
+    """
+    frame = ctx.frame("jacobian")
+    at_zero = frame[frame.f == 0.0]
+    keys = ["variant", "spectral_radius", "seed"]
+    columns = ["mean_curvature", "vpt"]
+    assert ctx.placeholder or int(
+        at_zero.groupby(keys)[columns].nunique().max().max()) == 1, \
+        "F21: the three draws are not identical at f = 0; the seed is not the unit."
+    return at_zero.groupby(keys, as_index=False)[columns].first()
+
+
+def _decay_reproduction_gate(seeds) -> None:
+    """TIER0 §3.11, all twenty cells. A failed reproduction stops the figure."""
+    medians = seeds.groupby(["variant", "spectral_radius"])[
+        ["mean_curvature", "vpt"]].median()
+    for (variant, column), expected in DECAY_GATE.items():
+        got = tuple(round(float(medians.loc[(variant, sigma), column]), 2)
+                    for sigma in DECAY_GATE_SIGMA)
+        assert got == expected, (
+            f"F21: TIER0 §3.11 does not reproduce for {variant} {column}: "
+            f"expected {expected}, got {got} at sigma {DECAY_GATE_SIGMA}.")
+
+
+def f21_decay_dissociation(ctx):
+    """Prediction decays across the sweep while the geometry does not move.
+
+    Chapter 6 §6.3, carrying the premise of A3P.9 -- what sets generation at `f` = 0 is
+    open, and it is **not** geometry. Lorenz task, N = 448, `f` = 0 (the all-positive
+    substrate, which is where the biological connectome lives), nominal sigma, ten seeds
+    per substrate, seed medians as lines and every seed as a point.
+
+    (a) Trajectory curvature under teacher forcing, on the **full 0 to pi range**, so
+        that the connectome's flat line is flat in the data and not flattened by a
+        compressed axis. Seeds sit in two separated groups and nothing lies between
+        them. **The upper group is the period-two collapse**: a two-cycle reverses at
+        every step, which this measure reads as an angle near pi, and the branch test is
+        the collapse test -- both are `mean_curvature` against `COLLAPSE_BIT` = 1.0 rad,
+        the repo's `extend_f.CURV_COLLAPSE`. They are one phenomenon, not two. Nine of
+        the forty seeds reach it somewhere on the sweep and **none is the connectome's**.
+        **The medians mislead here**, which is why every seed is drawn: Erdős–Rényi's
+        1.70 rad at sigma = 11.2 is a value no seed takes, it is a median across a cell
+        split five and five between the groups, and it must never be read as curvature
+        rising (the 30 August audit withdrew that reading).
+    (b) Valid prediction time, log axis, falling for every substrate over the same
+        range. Seeds scoring exactly zero cannot go on a log axis and are not missing
+        data, so they are stacked on their own strip below an axis break, height reading
+        as a count.
+
+    No reference line is drawn at any value in either panel, and the panels say nothing
+    about graded curvature: the loss in (b) has no counterpart in (a), which is the whole
+    of the claim.
+
+    Gate: all twenty cells of TIER0 §3.11's published table reproduce at the two decimal
+    places TIER0 prints, and the nine-of-forty count is recomputed at the collapse
+    constant rather than quoted.
+    """
+    seeds = _decay_seed_table(ctx)
+    if not ctx.placeholder:
+        _decay_reproduction_gate(seeds)
+
+    fig = plt.figure(figsize=(7.4, 5.9))
+    # Two levels: the zero strip sits hard under (b) with only the break between them,
+    # while (a) and (b) need ordinary panel spacing.
+    outer = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.06], hspace=0.16)
+    inner = outer[1].subgridspec(2, 1, height_ratios=[1.0, 0.10], hspace=0.06)
+    ax_curvature = fig.add_subplot(outer[0])
+    ax_vpt = fig.add_subplot(inner[0], sharex=ax_curvature)
+    ax_zero = fig.add_subplot(inner[1], sharex=ax_curvature)
+
+    # Deterministic, so the figure rebuilds identically: the jitter separates ten seeds
+    # inside one cell, it is not a sample of anything.
+    rng = np.random.default_rng(20260903)
+    positive = seeds.vpt[seeds.vpt > 0]
+    zeros_drawn = 0
+    marker = dict(s=3.0, alpha=0.55, linewidths=0.0, zorder=2)
+
+    for index, variant in enumerate(style.LADDER):
+        colour = style.VARIANT_COLOUR[variant]
+        offset = (index - 1.5) * DECAY_OFFSET_STEP
+        sub = seeds[seeds.variant == variant].sort_values("spectral_radius")
+
+        for ax, column, rows in ((ax_curvature, "mean_curvature", sub),
+                                 (ax_vpt, "vpt", sub[sub.vpt > 0])):
+            x = rows.spectral_radius.to_numpy() + offset
+            ax.scatter(x + rng.uniform(-DECAY_JITTER, DECAY_JITTER, x.size),
+                       rows[column].to_numpy(), color=colour, **marker)
+
+        # Exact zeros are measurements, not missing data, and cannot go on a log axis.
+        # Stacked inside the cell so the height of a stack reads as a count of seeds.
+        for sigma, cell in sub[sub.vpt == 0.0].groupby("spectral_radius"):
+            count = len(cell)
+            ax_zero.scatter(np.full(count, sigma + offset),
+                            0.5 + (np.arange(count) - (count - 1) / 2.0) * (0.72 / 9.0),
+                            color=colour, s=3.0, alpha=0.75, linewidths=0.0)
+            zeros_drawn += count
+
+        median = sub.groupby("spectral_radius")[["mean_curvature", "vpt"]].median()
+        # Colour, dash and width straight from the contract -- no override, no new
+        # colour: one substrate, one line, thesis-wide.
+        line = style.variant_kwargs(variant, label=style.VARIANT_TITLE[variant], zorder=3)
+        ax_curvature.plot(median.index, median.mean_curvature, **line)
+        ax_vpt.plot(median.index, median.vpt.where(median.vpt > 0), **line)
+
+    assert zeros_drawn == int((seeds.vpt == 0.0).sum()), (
+        f"F21: the zero strip drew {zeros_drawn} of "
+        f"{int((seeds.vpt == 0.0).sum())} exactly-zero seed-cells. Every one is a "
+        "measurement and the strip's height is a count of them.")
+
+    # -- (a) curvature, the full range the measure can take -------------------------
+    ax_curvature.set_ylim(0.0, np.pi * 1.02)
+    ax_curvature.set_yticks([0.0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi])
+    ax_curvature.set_yticklabels(["0", r"$\pi/4$", r"$\pi/2$", r"$3\pi/4$", r"$\pi$"])
+    ax_curvature.set_ylabel("trajectory curvature (rad)\n(teacher-forced)")
+    ax_curvature.tick_params(axis="x", which="both", labelbottom=False)
+    style.panel_label(ax_curvature, "a")
+    # Top left, which stays empty: the collapsed seeds begin at sigma = 3.6 and the
+    # empty band between the two groups is where the note below goes.
+    style.legend(ax_curvature, loc="upper left", ncol=1, bbox_to_anchor=(0.02, 0.99))
+
+    upper = seeds.groupby(["variant", "seed"]).mean_curvature.max() > COLLAPSE_BIT
+    n_upper, n_seeds = int(upper.sum()), int(upper.size)
+    on_branch = upper[upper].reset_index()
+    if not ctx.placeholder:
+        assert (n_upper, n_seeds) == (9, 40), (
+            f"F21: {n_upper} of {n_seeds} seeds reach the period-two group at "
+            f"curvature > {COLLAPSE_BIT} rad; TIER0 §3.11 has 9 of 40.")
+        assert "connectome" not in set(on_branch.variant), \
+            "F21: no connectome seed may reach the period-two group (TIER0 §3.11)."
+        top = seeds[(seeds.variant == "erdos_renyi") & (seeds.spectral_radius == 11.2)]
+        gap = float(np.min(np.abs(top.mean_curvature - top.mean_curvature.median())))
+        assert round(float(top.mean_curvature.median()), 2) == 1.70 and gap > 1.0, (
+            "F21: the caption says Erdős–Rényi's 1.70 rad at sigma = 11.2 is a value no "
+            f"seed takes; the nearest seed is {gap:.3f} rad away.")
+    # Every constraint the caption carries, carried in the panel too, so the two cannot
+    # drift apart. No graded reading is offered and none is available: the groups are
+    # separated and the sentence names the upper one for what it is.
+    ax_curvature.annotate(
+        f"upper group = the period-two collapse (curvature > {COLLAPSE_BIT:.1f} rad):\n"
+        f"{n_upper} of {n_seeds} seeds reach it somewhere on the sweep, none the "
+        "connectome's.\nWhere a cell splits, the median falls between the groups and\n"
+        f"describes neither: {style.VARIANT_TITLE['erdos_renyi']}'s 1.70 rad at "
+        r"$\sigma$ = 11.2 is a value no seed takes.",
+        xy=(0.03, 0.62), xycoords="axes fraction", ha="left", va="top",
+        fontsize=style.TICK_SIZE - 1, color="0.35")
+
+    # -- (b) VPT, log, with the exact zeros on their own strip ----------------------
+    ax_vpt.set_yscale("log")
+    ax_vpt.set_ylim(float(positive.min()) * 0.6, float(positive.max()) * 1.5)
+    ax_vpt.set_ylabel("VPT (Lyapunov times)")
+    ax_vpt.spines["bottom"].set_visible(False)
+    ax_vpt.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
+    style.panel_label(ax_vpt, "b")
+
+    ax_zero.set_ylim(0.0, 1.0)
+    ax_zero.set_yticks([0.5])
+    ax_zero.set_yticklabels(["0"])
+    ax_zero.tick_params(axis="y", length=0)
+    ax_zero.spines["top"].set_visible(False)
+    ax_zero.grid(False)
+    ax_zero.set_xlabel(style.AXIS_LABEL["nominal"])
+    ax_zero.set_xlim(-0.35, 11.55)
+    # Ticks every 2.0, all of them sampled sigmas (the sweep steps by 0.4). The sweep
+    # ends at 11.2, past the last tick; the axis is not padded out to a round 12, so the
+    # right-hand edge of the data is where the drawing stops.
+    ax_zero.set_xticks(np.arange(0.0, 10.1, 2.0))
+    ax_zero.annotate("stacked: height is a count of seeds", xy=(0.02, 0.5),
+                     xycoords="axes fraction", ha="left", va="center",
+                     fontsize=style.TICK_SIZE - 1, color="0.35")
+    _draw_axis_break(ax_vpt, ax_zero)
+
+    # **No reference line at any value, in either panel.** The zeros are drawn as data on
+    # their own strip precisely so that no rule has to stand in for them, and neither
+    # panel carries a threshold: the claim is a dissociation between two measurements,
+    # and a line across either one would assert a level the figure does not measure.
+    for panel, ax in (("a", ax_curvature), ("b", ax_vpt)):
+        rules = _full_span_rules(ax)
+        assert not rules, (
+            f"F21: panel ({panel}) draws a {rules[0][0]} reference line at "
+            f"{rules[0][1]}. Neither panel carries a reference line at any value.")
+    return fig
+
+
+def _draw_axis_break(upper, lower) -> None:
+    """The two slashes that say the axis is cut between the log panel and the strip."""
+    kwargs = dict(marker=[(-1.0, -0.6), (1.0, 0.6)], markersize=6, linestyle="none",
+                  color=style.ANNOTATION_COLOUR, mec=style.ANNOTATION_COLOUR, mew=0.9,
+                  clip_on=False)
+    upper.plot([0.0, 1.0], [0.0, 0.0], transform=upper.transAxes, **kwargs)
+    lower.plot([0.0, 1.0], [1.0, 1.0], transform=lower.transAxes, **kwargs)
