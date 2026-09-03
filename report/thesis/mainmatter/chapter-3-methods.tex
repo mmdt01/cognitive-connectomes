@@ -477,6 +477,53 @@ than folding them in.
 
 
 
+\section{The closed loop, and what a prediction horizon measures}
+\label{sec:methods-closed-loop}
+\bigskip
+% Destination for chapter 6 section 6.3's protocol paragraph, moved here in the
+% length pass. Carries no claim. Sources: A3P 2.6 findings 3 and 5; TIER0 2.6.
+% FORBIDDEN: any per-cell climate_error value, anywhere in the thesis.
+
+The tasks in this thesis are scored in two different ways, and the difference
+decides what a number from each one means. On a driven task the input the network
+receives at every step is the true one, so an error made at one step does not
+propagate into the state scored at the next. A free-running network has no such
+correction. It is initialised on a true trajectory, released, and thereafter
+driven by its own output, so errors compound and what is scored is how long the
+generated trajectory stays with the true one before leaving it.
+
+That duration is the \textbf{valid prediction time}. A window is counted as valid
+while the Euclidean distance between the generated and true states, divided by
+the root-mean-square norm of the z-scored three-dimensional series, stays below
+$0.4$; % A3P 2.6
+the reported value is the mean over
+$20$ % A3P 2.6
+rollout windows, expressed in Lyapunov times so that it is a property of the
+dynamics rather than of the integration step.
+
+The instrument's range does not bind. The rollout horizon corresponds to
+$16.3$ % TIER0 2.6
+Lyapunov times and the largest value observed anywhere in the sweep is
+$7.95$, % TIER0 2.6
+reached by no cell out of
+$38{,}280$, % A3P 2.6
+so lengthening the horizon would buy nothing. The floor is live, and a value of
+exactly zero means every window failed at the first predicted step.
+
+One further quantity is measured on the free run and reported under a
+restriction. The climate error compares the statistics of a long autonomous
+rollout with those of the true attractor, over
+$3000$ % A3P 2.6
+steps, which is some
+$81.5$ % A3P 2.6
+Lyapunov times. Over that length a difference of machine epsilon in the order of
+a floating-point reduction decorrelates the trajectory, so individual cells are
+not reproducible even on identical hardware. Climate error is therefore reported
+only as seed medians and as rates over cells, never as a per-cell value, at any
+point in this thesis.
+
+
+
 
 
 
