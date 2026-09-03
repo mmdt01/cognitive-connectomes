@@ -174,11 +174,340 @@ holds. % TIER0 3.1
 
 
 
+\section{The comparison problem: two matching axes}
+\label{sec:methods-matching}
+\bigskip
+% Carries A1.6. Figure F3. Named in CROSS_ACT_SPINE.md under Act I as the
+% section Act I owns in chapter 3; Chapters 5 and 6 carry it forward rather
+% than re-deriving it. A1.7 is NOT claimed here: see the audit note.
+% FORBIDDEN: "compact bulk"; the crossing quoted without its axis; any claim
+% that one axis is the correct one; "the connectome is a better reservoir".
+
+Comparing substrates requires putting them at the same operating point, and on
+these substrates there is no single way to do it. The reason is
+Chapter~\ref{chapter:act-I}'s result. The four absolute bulk radii agree to
+4.4\% % TIER0 3.1
+of their mean while their Perron roots run from
+0.1061 to 0.1889, % TIER0 3.1
+so the substrates differ in essentially one quantity, and a matching rule must
+choose which end of the spectrum it holds fixed.
+
+Scaling each substrate to a nominal spectral radius $\sigma$ divides it by its
+own $|\lambda_1|$, which sets the leading eigenvalue to $\sigma$ exactly and
+leaves the bulk where it falls. It is the normalisation the connectome-reservoir
+literature uses \cite{suarez2021learning, suarez2024connectome,
+milisav2026neuromorphic}. Under it the four bulks, expressed as fractions of
+their own Perron roots, spread
+47.3\%: % TIER0 3.1
+the same bulks that agreed to 4.4\% in raw units. Nothing about them has moved
+between those two numbers, only the divisor, and the divisor is the one quantity
+the comparison is about. A nominal-matched comparison therefore holds the Perron
+root fixed and lets each substrate sit at a different distance from its own
+$\mathrm{sr\_crit}$.
+
+The alternative is the product $\sigma \cdot \mathrm{bulk95}$, which holds the
+bulk edge fixed instead: at $\sigma \cdot \mathrm{bulk95} = 1$ every substrate's
+bulk edge reaches one, whatever its Perron root. That axis exists because each
+substrate arrives carrying its own $\mathrm{bulk95}$, and it is available only
+for that reason.
+
+Neither axis is neutral, and it is worth being explicit about why not, because
+the temptation is to treat the second as a correction to the first. Each holds
+fixed exactly what the other lets vary. Since the substrates differ in one
+quantity, no third axis holds both fixed at once, and the choice is therefore a
+choice about which hypothesis is being given a hearing rather than a choice
+between a naive convention and its repair. A comparison made on the nominal axis
+is a comparison at matched Perron roots and unmatched bulks; one made on the
+matched-bulk axis is the reverse. Neither is the neutral view, and there is no
+neutral view to be had.
+
+Two consequences follow, and both are enforced throughout this thesis.
+\textbf{Every result is quoted with the axis it was measured on}, and results on
+the two axes are never set against each other as though they disagreed: they are
+two measurements of different things. And \textbf{the two axes have different
+coverage}, because holding the bulk fixed compresses the reachable range of
+operating points by each substrate's own $\mathrm{bulk95}$. A sweep that runs to
+$\sigma = 8$ on the nominal axis reaches much less far in the matched
+coordinate, so a comparison on that axis is bounded by where the substrates'
+ranges still overlap, and a feature at the edge of that overlap must not be read
+as though the sweep continued past it.
+
+Figure~\ref{fig:F3} shows what this costs on a real result, using the memory
+measure Chapter~\ref{chapter:act-II} develops. The same two substrates, the same
+recorded states, read on the two axes: a large advantage on one, a smaller one on
+the other, and a subcritical deficit that is almost entirely an artefact of the
+normalisation. It is placed here rather than with that result because it is not
+a finding about the connectome. It is what the comparison itself does, and
+Chapters~\ref{chapter:act-II} and~\ref{chapter:act-III} carry it forward rather
+than re-deriving it.
 
 % Figure 3: two spectral radius scaling axis
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{F3.png}
-    \caption[]{}
+    \caption[The two matching axes, and what each holds fixed]{%
+    \textbf{Neither matching axis is neutral: each holds fixed what the other
+    lets vary.} The connectome and Erdős--Rényi on the memory-capacity task,
+    $N = 448$, % TIER0 2.1
+    ridge effective rank against operating point, medians over ten seeds. The
+    two substrates are drawn rather than the full ladder because the point is
+    the axis, not the comparison. \textbf{(a)} On the nominal axis, which scales
+    each substrate by its own $|\lambda_1|$ and so holds the Perron root fixed,
+    both reach the hard ceiling at $N$ but the connectome reaches it later and
+    leaves it more slowly; the shaded region is the difference between them.
+    \textbf{(b)} The same states on the matched-bulk axis
+    $\sigma \cdot \mathrm{bulk95}$, which holds the bulk edge fixed instead: the
+    two now peak together, and what remains is the difference in how quickly
+    each falls away. \textbf{(c)} The difference between the two substrates on
+    each axis. Read at matched Perron roots it runs from
+    $-217$ % TIER0 [verify]
+    to $+343$; % TIER0 [verify]
+    read at matched bulk edges, from
+    $-24$ % TIER0 [verify]
+    to $+197$. % TIER0 [verify]
+    Most of the subcritical deficit is an artefact of the normalisation and does
+    not survive the change of axis, while the supercritical advantage is reduced
+    and survives. The two curves cover different ranges because holding the bulk
+    fixed compresses the reachable operating points, so the matched-bulk curve
+    ends where the substrates' ranges stop overlapping and nothing should be
+    read past that edge.}
     \label{fig:F3}
 \end{figure}
+
+
+
+
+
+\section{The state matrix and its Gram spectrum}
+\label{sec:methods-states}
+\bigskip
+% Landing for chapter 5 cut items 2, 5, 6 and 14: the Gram matrix as an object,
+% the centring identity's derivation and implementation, and the reasons no
+% link in Chapter 5 is derived from W's spectrum.
+
+Every measure of activity in this thesis is a function of one object. Driving a
+reservoir with an input signal and recording every unit at every timestep gives
+the state matrix $A \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$, a trajectory
+through an $N$-dimensional space with one point per timestep, whose shape is what
+the phrase \emph{activity manifold} refers to. Runs are
+3000 timesteps with the first 500 discarded as warmup, % A2 2.5
+so $T_{\mathrm{eff}} = 2500$. % A2 2.5
+The memory-capacity design carries no bias column, so its Gram spectrum has
+448 entries; % A2 2.5
+the two prediction tasks carry one and have 449. % A2 2.5
+
+A linear readout does not see the trajectory. It sees the matrix of pairwise
+inner products between the units' time series, the Gram matrix $G = A^{\top}A$,
+whose entry $(i,j)$ is unit $i$'s time series dotted with unit $j$'s. That matrix
+records how the units co-vary and nothing else, fixing the shape of the
+trajectory up to a rotation: two networks whose states have the same Gram matrix
+have the same activity manifold in every respect a readout could detect, however
+differently the two are wired. It is also, literally, the matrix a ridge readout
+inverts, since the fit is
+$\hat{w} = (G + \alpha I)^{-1}A^{\top}y$. The companion object $AA^{\top}$
+describes the geometry over time rather than over units and is where the shape of
+the trajectory as a path lives; the two share their non-zero eigenvalues, so the
+phrase \emph{the Gram spectrum} is unambiguous, and it is the first that is
+measured here.
+
+Writing $m = T_{\mathrm{eff}}^{-1}A^{\top}\mathbf{1}$ for each unit's mean over
+time and $\tilde{A} = A - \mathbf{1}m^{\top}$ for the time-centred states,
+expanding $A^{\top}A$ gives Equation~\ref{eq:gram-split} exactly: the
+fluctuations about the mean plus a rank-one term holding the time-average.
+Centring subtracts each unit's mean \emph{over time}, not the mean over units,
+and the implementation agrees with a direct covariance computation to
+$3.3 \times 10^{-16}$. % A2 2.6 finding 2
+Which of the two objects is in use is not a preprocessing detail, because it
+changes what the leading eigenvector means, and every measure below is labelled
+with the one it is computed on. The participation ratio is computed on the
+time-centred covariance. The ridge effective rank is computed on the un-centred
+Gram matrix, deliberately, because the un-centred matrix is the one the solver
+inverts.
+
+One thing is not attempted anywhere in this thesis. The position of a Gram
+spectrum is never obtained analytically from the eigenvalues of $W$. The
+nonlinearity and the statistics of the input both intervene, and the same
+recurrent matrix driven at different operating points puts its Gram spectrum in
+materially different places, so the link Chapter~\ref{chapter:act-II} draws
+between the spectral gap and the number of usable directions is measured one step
+at a time rather than derived.
+
+A last approximation is worth bounding, since the memory-capacity design is
+nested across lags while the Gram spectrum is recorded once. Weyl's inequality
+bounds the drop in $d_{\mathrm{eff}}$ from lag zero to lag $k$ by $k$ itself,
+which over the fifty lags used here permits a shift of up to
+50 units; % A2 2.5
+measured on real cells the worst shift is
+0.31 to 0.82 units, % A2 2.5
+which is 1.6\% % A2 2.5
+of that bound. The recorded value is therefore a valid stand-in at every lag, and
+the approximation cannot move an ordering.
+
+
+\section{Two counts of dimensionality}
+\label{sec:methods-counts}
+\bigskip
+% Landing for chapter 5 cut items 1 and 8: the justification of d_eff, the
+% terminology collision, the participation ratio's definition, and the ridge
+% regularisation strengths. Chapter 5 defines both measures and argues between
+% them; what is here is why each is the quantity it is.
+
+The ridge effective rank of Equation~\ref{eq:deff} is not a descriptor applied to
+a fit from outside. Written in trace form,
+$d_{\mathrm{eff}}(\alpha) = \operatorname{tr}\bigl[G(G + \alpha I)^{-1}\bigr]$,
+it is the effective degrees of freedom of the fitted readout in the standard
+sense~\cite{hastie2009elements}: a property of the fit itself. That is what makes
+it the natural count here rather than one choice among many. The alternatives
+available by inspection are all worse for this substrate family. These Gram
+spectra decay smoothly across ten orders of magnitude without reaching zero, so a
+numerical-rank criterion returns $N$ for every substrate, and a hand-placed
+threshold would count two otherwise indistinguishable directions as one and as
+none. Both treat availability as a property of the states alone, when whether a
+direction is available depends on what is reading them.
+
+The name collides with an established one. \emph{Effective rank} is also used for
+a quantity computed on the recurrent matrix
+itself~\cite{clark2025connectivity}. That is a property of $W$; the measure used
+here is computed on the states the network produces when driven, at a stated
+operating point, by a stated input. The two are related, since the states are the
+network's, but they are not the same measurement and no result of this thesis
+transfers between them.
+
+The regularisation strength is the readout's own. For the memory-capacity task it
+is $\alpha = 10^{-6}$, % TIER0 3.3
+taken from the same parameter dictionary that configures the evaluator rather
+than set separately for the measure, so the two are the same float and not two
+copies of one number. The prediction tasks carry
+$10^{-8}$ and $10^{-7}$. % CHK Task 2
+This identity is load-bearing: the correspondence between $d_{\mathrm{eff}}$ and
+measured memory capacity holds at
++0.999 % TIER0 3.3
+at every regularisation strength from $10^{-8}$ to $10^{-3}$, and reading one
+through the other is licensed only while the two values agree. Raising $\alpha$
+does not break the link provided it is raised in both places. One implementation
+detail follows from the bias column: the routine regularises the unregularised
+bias direction, which is bounded by
+one $d_{\mathrm{eff}}$ unit % A2 2.6 finding 5
+and is in practice around $10^{-12}$. The memory-capacity design has no bias
+column, so nothing in Chapter~\ref{chapter:act-II} is affected.
+
+The participation ratio is the standard instrument for the same question in
+systems neuroscience. Given the eigenvalues $\mu_1 \ge \dots \ge \mu_N$ of the
+time-centred state covariance, the variance the population puts along each
+direction,
+\begin{equation}
+    \mathrm{PR}
+    \;=\; \frac{\bigl(\sum_i \mu_i\bigr)^{2}}{\sum_i \mu_i^{2}} ,
+    \label{eq:pr}
+\end{equation}
+which equals the number of directions when variance is spread evenly across them
+and falls toward one as a few directions come to dominate. It has reasons behind
+it beyond convenience, being closely related to the quantities that govern how
+population dimensionality is recovered from finite
+recordings~\cite{gao2017theory}. Section~\ref{sec:act2-counting} compares the two
+measures on the same states; what is recorded here is only that they are computed
+on the same recorded run, one before centring and one after.
+
+
+\section{Aggregation conventions for the manifold measures}
+\label{sec:methods-aggregation}
+\bigskip
+% Landing for chapter 5 cut items 4 and 14: the sign convention on the
+% common-mode amplitude, the supercritical filter as applied to artifacts, the
+% zero-strip, and the inventory of captures.
+
+The common-mode amplitude is signed, and its sign is arbitrary: which way the
+pattern points is settled by the input realisation a given run happens to draw,
+so runs of the same substrate straddle zero. The absolute value is therefore
+taken per run, \textbf{before} any aggregation, never after. The order is not a
+matter of taste. Combining first can only understate the amplitude, by an amount
+that depends on how many of a substrate's runs straddle zero, which differs
+between substrates: in the wrong order the connectome's value at $\sigma = 6$
+falls from 0.759 % TIER0 3.7
+to 0.638, % TIER0 3.12
+while the weight-permuted control falls to
+0.575, % A2 5.1
+below the connectome, reversing the comparison
+Section~\ref{sec:act2-perron} draws. The largest discrepancy between the two
+orders anywhere in the sweep is
+0.676. % A2 5.1
+The figure builders assert the correct order rather than relying on it.
+
+Substrate-level values of every manifold measure are medians over seeds.
+\emph{Supercritical} statistics are medians over the fifty cells per substrate at
+an operating point of at least
+3.05, % TIER0 3.2
+which is five radii of the measurement grid at ten seeds each. Where a statistic
+is a count of Gram eigenvalues, exact zeros are dropped before the statistic is
+formed; % TIER0 3.6(a)
+the count of exact zeros grows down the null ladder, from a median of
+1 for the connectome to 91.5 for Erdős–Rényi, % TIER0 3.6(a)
+so the convention is load-bearing rather than cosmetic, and
+Chapter~\ref{chapter:act-II} reports exact zeros as their own category rather
+than folding them in.
+
+\begin{table}[ht]
+    \centering
+    \caption[The captures Chapter 5 draws on]{\textbf{The four captures
+    Chapter~\ref{chapter:act-II} draws on.} Every result in that chapter is read
+    from data recorded once and stored; no figure there required a network to be
+    run again. The coverage differs between captures and bounds what each can be
+    asked: in particular the basis-alignment capture holds two substrates only,
+    so no statement drawn from it is a statement about the null ladder. 
+    That capture is nested rather than crossed: each weight condition was
+    recorded at two operating points, one shared point just below
+    $\sigma = 1$ and one near that condition's own
+    $\mathrm{sr\_crit}$, % A2 audit 23
+    so its three conditions span four distinct radii between them while no cell
+    was recorded at more than two.Radii are
+    nominal spectral radii. The two grids are not interchangeable, and a panel
+    drawn from both says so.}
+    \label{tab:methods-captures}
+    \begin{tabular}{lccccc}
+        \toprule
+        capture & substrates & conditions & tasks & radii & seeds \\
+        \midrule
+        state covariance and Gram spectra & 7 & 3 & 3 & 13 & 10 \\ % CHK Task 2
+        basis alignment & 2 & 3 & 3 & 2 per condition & 10 \\ % A2 audit 23
+        ridge optimum against $\alpha$ & 4 & 1 & 1 & 21 & 10 \\ % TIER0 3.6
+        saturation and shape diagnostics & 4 & 1 & 3 & 58 & 10 \\ % A2 5.15
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

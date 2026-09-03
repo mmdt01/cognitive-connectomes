@@ -12,17 +12,27 @@
 
     \textbf{Bulk:} & The band of eigenvalues remaining once the Perron root is set aside by position. It is not set aside by the statistic: $\mathrm{bulk95}$ is a percentile over the full spectrum with the Perron eigenvalue inside the population. \\
 
-    \textbf{Common mode} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
+    \textbf{Cell:} & One combination of substrate, operating point and seed. Substrate-level statistics in this thesis are medians over cells, and the number of cells is stated wherever one is quoted. \\
+
+    \textbf{Common mode:} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
 
     \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity~\cite{atasoy2016human}. \\
+
+    \textbf{Criticality} & The operating point at which the leading eigenvalue of the scaled recurrent matrix reaches one, which under nominal scaling is $\sigma = 1$. Distinct from $\mathrm{sr\_crit}$, which is the larger operating point at which the bulk edge reaches one. \\
+
+    \textbf{Curvature:} & The mean angle between successive displacements along the trajectory, a measure of the manifold's temporal axis. \\
 
     \textbf{Effective spectral radius} & The spectral radius of the recurrent operator linearised about the network's driven state. An empirical locator of where free-running generation breaks, not a stability criterion. \\
 
     \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates used here are symmetric, so their eigenvalues are real and the spectrum is a distribution on the real line. \\
 
+    \textbf{Floor sensitivity:} & The rate at which $d_{\mathrm{eff}}$ falls per e-fold rise in the regularisation, with the note that it vanishes at both ends of the spectrum, so a low value never interprets itself. \\
+
     \textbf{Gap ratio} & The Perron root divided by the absolute bulk radius. Identically the inverse of $\mathrm{bulk95}$ and identically $\mathrm{sr\_crit}$: one quantity under three names. \\
 
     \textbf{Gram matrix} & For a state matrix $A$, the un-centred second moment $A^{\top}A$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
+
+    \textbf{Gram spectrum} & The eigenvalues of the Gram matrix. A property of a substrate at an operating point under a given input, not only of its recurrent connectivity. \\
 
     \textbf{Lyapunov time} & The characteristic timescale over which nearby trajectories of a chaotic system separate; used here to express prediction horizons independently of the integration step. \\
 
@@ -40,7 +50,9 @@
 
     \textbf{Spectral gap} & The separation between the Perron root and the bulk of the eigenspectrum, measured here as the gap ratio. \\
 
-    $\mathrm{\textbf{sr\_crit}}$ & The nominal spectral radius at which a substrate's own bulk edge reaches one, identically $1/\mathrm{bulk95}$ and identically the gap ratio. It is a criticality scale each substrate carries with it, not the point at which that substrate becomes supercritical. \\
+    \textbf{Supercritical} & Used throughout as a label for the filter $\sigma \geq 3.05$, the connectome's own $\mathrm{sr\_crit}$ rounded to the measurement grid and applied to every substrate. It is far above criticality proper and describes the linear operator rather than the realised dynamics. \\
+
+    $\mathrm{\textbf{sr\_crit}}$ & The nominal spectral radius at which a substrate's own bulk edge reaches one, identically $1/\mathrm{bulk95}$ and identically the gap ratio. It is a criticality scale each substrate carries with it. It is not a critical point: criticality proper is at $\sigma = 1$, and at $\sigma = \mathrm{sr\_crit}$ the leading mode has long been expansive while five per cent of modes have just joined it. \\
 
     \textbf{Time-centring} & Subtraction of each unit's mean over time from the state matrix, which separates the fixed pattern of activity a network holds throughout a run from the fluctuations about it. \\
 
@@ -74,14 +86,14 @@
     $T_{\mathrm{eff}}$ & Number of timesteps retained after the warmup is discarded \\
     $m$ & Vector of per-unit means over time \\
     $\tilde{A}$ & Time-centred state matrix, $A - \mathbf{1}m^{\top}$ \\
-    $\bar{x}$ & Common-mode amplitude, the grand mean of $A$ over time and units \\
+    $\bar{x}$ & Common-mode amplitude: its absolute value is taken per run before any aggregation \\
     \addlinespace
     $G$ & Gram matrix, $A^{\top}A$ \\
     $\lambda_i$ & Eigenvalues of $W$ \\
     $g_i$ & Eigenvalues of $G$ \\
     $\mu_i$ & Eigenvalues of the state covariance, $\tilde{A}^{\top}\tilde{A} / T_{\mathrm{eff}}$ \\
     $\alpha$ & Ridge regularisation strength \\
-    $d_{\mathrm{eff}}$ & Ridge effective rank \\
+    $d_{\mathrm{eff}}$ & Ridge effective rank: the dimensionality of the state space as the fitted readout can use it \\
     $\mathrm{PR}$ & Participation ratio \\
     $k$ & Number of leading basis vectors in a projection \\
 
