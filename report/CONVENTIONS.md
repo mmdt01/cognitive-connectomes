@@ -91,6 +91,47 @@ Fixed in session 0 and held across every figure so the chapters sit together.
   asserts it and the smoke entry point runs it, so the two cannot drift silently.
 - **Phase boundaries** get their own fixed pair (`style.BOUNDARY_COLOUR`): they are not
   variants, and the memory boundary is one colour everywhere it appears.
+- **Non-variant quantities get their own namespace, and adding one is not a palette
+  amendment.** The variant palette is amended once and was (session 1, to Okabe-Ito);
+  everything else that needs colour gets a *separate* small set, because the thing being
+  coloured is not a substrate. There are now five: `BASIS_COLOUR` (bases and measures,
+  session 2), `BOUNDARY_COLOUR` (the two phase boundaries), `AXIS_COLOUR` (the two
+  matching axes), `REGIME_COLOUR` (smooth against collapsed, session 4) and
+  **`UNIT_COLOURS`** (individual reservoir units, added 2 September 2026 for F20).
+  **The distinction is the whole point**: a namespace addition leaves `VARIANT_COLOUR`
+  and `src/experiment/plots._VARIANT_STYLE` byte-identical and re-renders every existing
+  figure unchanged, which an amendment does not. A session may add one; a session that
+  wants a *variant* colour changed still reports and stops.
+
+  **`UNIT_COLOURS` = `#3333BB` indigo, `#779955` olive, `#886699` plum**, ordered by the
+  rank of the unit a figure highlights, never keyed by node index — which units a figure
+  draws is that act's datum, not the contract's. **Off the Okabe-Ito wheel, and forced
+  rather than chosen**: the wheel has eight hues, `VARIANT_COLOUR` spends seven and the
+  eighth (`#F0E442`) is unusable on white, so any wheel triple *is* three substrate
+  colours and sits at dE 0.0 from one. Measured, both plausible wheel triples also fail
+  the separation floor — orange/blue/bluish green scores 14.4 among the three and
+  orange/sky blue/reddish purple 15.2, the latter with the two lightest 0.011 apart in
+  relative luminance, i.e. the same grey. This is `BASIS_COLOUR`'s wall and
+  `BASIS_COLOUR`'s answer.
+
+  **Chosen by measurement, on one floor more than `BASIS_COLOUR` had.** Worst-case CIE76
+  dE in Lab after Vienot/Brettel dichromacy simulation, over normal vision and all three
+  dichromacies:
+
+  | check | `UNIT_COLOURS` | floor | `BASIS_COLOUR`, for reference |
+  |---|---|---|---|
+  | among the three | **55.5** | 25.0 | 50.8 |
+  | against all seven substrate colours | **11.5** | 8.0 | 11.5 |
+  | against white | **50.6** | 36.0 | 36.4 (its grey) |
+  | greyscale relative-luminance gap | **0.103** | 0.08 | 0.064 |
+
+  The white floor is the new one and it changed the answer: the search's first triple
+  carried a pale mauve `#DDBBDD` at dE **23.4** from white, paler than any ink the thesis
+  draws (the palest is the chance-baseline grey `#9A9A9A` at 36.4). It was **darkened** to
+  `#886699` rather than swapped for a wheel colour, which is what lifts the minimum to
+  50.6. All four floors are asserted inside `style.check_colour_consistency()` — the same
+  function that guards the variant palette, so the smoke entry point already runs them —
+  and all four were injection-tested, 4 of 4 firing on their own condition.
 - Panel labels **a, b, c** lower-case bold, top-left.
 - Font sizes: axis labels 9pt, ticks 8pt, panel labels 10pt bold.
 - **300 dpi**, PDF plus PNG, written to `report/figures/`. PNGs are tracked, vector PDFs

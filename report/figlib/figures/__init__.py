@@ -5,7 +5,7 @@ builders live one module per act, which is also one module per sweep session:
 
 ===================== ========= ================================================
 ``act1_structure``    session 1 F1, F2, F3, F19, S1, S3, S4  (chapters 3 and 4)
-``act2_manifold``     session 2 F4, F5, F6       (chapter 5)
+``act2_manifold``     session 2 F4, F5, F6, F18, F20  (chapter 5)
 ``act3_memory``       session 3 F7, F9-F11       (chapter 6, memory arm)
 ``act3_prediction``   session 4 F12-F14, F16, F17, S2 (chapter 6; S2 prints in 5)
 ``act4_anchor``       --        F15              (chapter 7)
@@ -28,7 +28,8 @@ from report.figlib.figures.act1_structure import (
     s4_full_substrate_family)
 from report.figlib.figures.act2_manifold import (
     f4_perron_carries_the_mean, f5_sign_selects_the_basis,
-    f6_pr_misses_readout_structure, f18_gram_spectrum_against_the_floor)
+    f6_pr_misses_readout_structure, f18_gram_spectrum_against_the_floor,
+    f20_driven_network_to_gram)
 from report.figlib.figures.act3_memory import (
     f7_the_crossing, f9_scale_invariance, f10_peak_parity, f11_perron_rescue)
 from report.figlib.figures.act3_prediction import (
@@ -59,6 +60,8 @@ FIGURES = {
     "F18": (5, "the Gram spectrum against the ridge floor",
             f18_gram_spectrum_against_the_floor),
     "F19": (4, "the four substrates, as graphs", f19_substrates_as_graphs),
+    "F20": (5, "from a driven network to a Gram spectrum",
+            f20_driven_network_to_gram),
 }
 
 # The workshop subset (5pp, ~4 figures), marked W on FIGURE_LIST.md. F16 is the first
@@ -102,7 +105,31 @@ WORKSHOP = ("F1", "F2", "F7", "F12")
 # for it by `report/artifacts/build_substrate_graphs.py`, whose reproduction gate --
 # connectome against control, byte-identical binary adjacency and exact equality on all
 # four statistics -- runs before anything is written.
-assert len(FIGURES) == 18, f"registry holds {len(FIGURES)} figures, not 18"
+#
+# **18 to 19 on 2 September 2026, for F20.** Chapter 5 opened on its first *result*.
+# The chapter's object -- a `T_eff x N` state matrix and the split of `A^T A` into a
+# fluctuation term and a rank-one time-average term -- was introduced in prose and
+# equation 5.1 and drawn nowhere, so a reader met the thing being measured only as
+# notation. F20 draws it: one driven reservoir, its recorded state matrix, three units
+# followed from a trace into a trajectory, and equation 5.1 as three matrices.
+# **It carries no contribution and makes no claim**, which is F19's position: no null
+# substrate appears, no comparison is made between substrates or among the three units,
+# and the one number it quotes (51.3% of the trace) is a property of the single cell it
+# draws, quoted so the reader can see the split has two comparable halves rather than
+# one. Whether substrates differ in that share is section 5.2's finding and F4's, and
+# the figure is built so it cannot be read as pre-empting it.
+#
+# **It is the one figure in the sweep that re-runs a reservoir.** `CONVENTIONS` working
+# rule 5 forbids persisting state matrices, so a figure that draws one has to regenerate
+# it through the evaluators' opt-in `collect_states` path -- 0.3 s, writing nothing.
+# `report/act2_manifold.md` §2.7 is the reproduction gate that licenses it: eigenvalues
+# of `A^T A` from the re-run against the frozen `eig_gram`, worst relative deviation
+# 3.4e-07 over the 438 directions above the ridge floor, with `mc`, `mean_state` and the
+# design shape reproducing alongside. A cheaper form of that gate runs on every build.
+# The cell was specified, gated and then STOPPED on 2 September because its first
+# caption could not be written against it (audit item 21, kept in the record); this is
+# the rebuilt figure under the rewritten caption, not a second attempt at the first one.
+assert len(FIGURES) == 19, f"registry holds {len(FIGURES)} figures, not 19"
 
 # ---------------------------------------------------------------------------------
 # Supplementary figures -- appendix only, NOT part of the numbered main-text list.

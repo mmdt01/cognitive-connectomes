@@ -4,6 +4,41 @@
 not here; if one seems missing, report and stop. `W` marks the workshop subset (5pp, 4
 figures).
 
+> **AMENDED 2 September 2026 (Act II). Count 18 to 19, for F20.** The reason, stated as
+> the 19 August amendment requires. Chapter 5 opened on its first **result**. The object
+> the chapter measures — a `T_eff x N` state matrix, and the split of `A^T A` into a
+> fluctuation term and a rank-one time-average term — reached the reader as prose and
+> equation 5.1 and was drawn nowhere, so the thing being measured existed only as
+> notation while every measurement of it had a figure. F20 draws it: the real drive, the
+> recorded state matrix, three units followed from a trace into a trajectory, and
+> equation 5.1 as three matrices.
+>
+> **It carries no contribution and makes no claim**, which is F19's position. No null
+> substrate appears, no comparison is made between substrates or among the three units,
+> and the caption says in terms that three units on one cell support no claim about which
+> units do what. The one number it quotes — the rank-one term carries **51.3%** of the
+> trace — is a property of the single cell it draws, quoted so the reader can see the
+> split has two comparable halves. **Whether substrates differ in that share is section
+> 5.2's finding (A2.1, A2.2, F4), and the figure is built so it cannot pre-empt it**: (b)
+> and (c) share one vertical scale, (d)'s two sub-panels share one box, and (e) is on one
+> shared scale with no inset, so no panel makes either term look larger than it is.
+>
+> **It is the one figure in the sweep that re-runs a reservoir.** Working rule 5 forbids
+> persisting state matrices, so a figure drawing one has to regenerate it through the
+> evaluators' opt-in `collect_states` path — 0.3 s, writing nothing.
+> `report/act2_manifold.md` §2.7 is the reproduction gate that licenses it, and a cheaper
+> form of it runs on every build. **The figure was specified, gated and STOPPED once**,
+> on 2 September, because its first caption could not be written against the cell
+> (`act2_manifold.md` audit item 21, kept in the record); this row is the rebuilt figure
+> under the rewritten caption.
+>
+> **A colour namespace was added for it, and that is not a palette amendment.**
+> `style.UNIT_COLOURS` (`#3333BB`, `#779955`, `#886699`) colours individual *units*,
+> which are not substrates. `VARIANT_COLOUR` and `src/experiment/plots._VARIANT_STYLE`
+> are untouched and every other figure re-renders unchanged. See `CONVENTIONS.md`'s
+> style contract for the measured separations and the four floors
+> `style.check_colour_consistency()` now asserts.
+
 > **AMENDED 1 September 2026 (Act I). Count 17 to 18, for F19.** The reason, stated as
 > the 19 August amendment requires. Chapter 4's **first** section sets out the substrate
 > and the null ladder and had only a preservation table to do it with: the chapter
@@ -86,7 +121,7 @@ per sweep session** — so a session edits its own module and nothing else:
 | module | session | figures |
 |---|---|---|
 | `act1_structure.py` | 1 | F1, F2, **F3**, **F19**, S1, **S3**, **S4** |
-| `act2_manifold.py` | 2, and the **floor-sensitivity session (24 Aug) for F18** | F4, F5, F6, **F18** |
+| `act2_manifold.py` | 2, the **floor-sensitivity session (24 Aug) for F18**, the **F20 session (2 Sep)** | F4, F5, F6, **F18**, **F20** |
 | `act3_memory.py` | 3 | F7, F9, F10, F11 |
 | `act3_prediction.py` | 4 | F12, F13, F14, **F16**, F17, **S2** |
 | `act4_anchor.py` | — | F15 |
@@ -107,8 +142,9 @@ cut the merged-in panel too** (see the F3 flag): the two panels argued different
 and read as two half-figures, so F3 is now a single panel and F8's content is methods
 prose. The ID count is unchanged — F8 stays retired either way. **F16 added** for
 contribution 2. **F17 added** in session 4 for E2. **F18 added** on 24 August for the
-chain's step 3. **F19 added** on 1 September for chapter 4's opening section. Rendered
-figures: F1 to F7, F9 to F19 = 18. IDs are stable identifiers,
+chain's step 3. **F19 added** on 1 September for chapter 4's opening section. **F20
+added** on 2 September for chapter 5's opening section. Rendered
+figures: F1 to F7, F9 to F20 = 19. IDs are stable identifiers,
 not a reading order, so F16 and F17 sitting in chapter 6 after chapter 7's F15 is
 intended, and so is F18 returning to chapter 5 after both. **F8 stays retired**: the next
 free number was taken rather than the retired one reused, so every reference to F8
@@ -137,10 +173,15 @@ verified, see the flag below the table.
 | F17 | 6 | 4 | **The free-running rollout, which no other artifact captures.** Every persisted state matrix is teacher-forced. Pre-stated claim: the connectome retains the true climate to higher `f` (**confirmed**: 0.43 of frozen cells against the nulls' 0.14 at `f` >= 0.30) and the collapse is a change of shape not of scale (**refuted**: `sd_ratio` is bimodal, 229 of 440 cells at a fixed point against 158 keeping the spread, 11 between) | `criticality_matched/results/e2_free_run_scale_448.parquet` (source `free_run`), 440 rows = 4 variants x 11 `f` x 10 seeds at sigma = 2, cols `climate_error, sd_ratio, trajectory`; **panel (d) reads the frozen `e01_jacobian_scale_448.parquet` instead**, which carries 30 cells per (variant, `f`) against this capture's 10 | confirmed* | |
 | F16 | 6 | **2** | **The crossing, with its axis and its coverage.** The memory and generative boundaries on both axes: on `sigma·bulk95` they cross at (2.938, 0.153) inside full replicate coverage; on nominal sigma they do not cross at all once the sweep passes sigma = 6 | `e02_heatmap_boundaries_extension.csv` + `..._extension_nominal.csv` concatenated with an `axis` column; `panel == "dD"` is the memory boundary and `"dStraight"` the generative one; use `f_star` (level over fully covered cells). Coverage mask from `e02_heatmap_coverage_extension.csv` (`x_hi` per f, minimum 3.58) | confirmed* | |
 | F18 | 5 | (Act II) | **The Gram spectrum against the ridge floor**, the chain's step 3. Supercritically the connectome holds **89.0%** of its directions more than a decade clear of the floor against Erdős–Rényi's **11.4%** (`d_eff` 412.9 against 74.8); floor sensitivity is strongly sigma-dependent and each substrate's **interior** dip sits at a different sigma (connectome 3.58, every null 1.58 or 2.00), which is where each one's measured ridge optimum migrates to as alpha rises | **(a, b)** `results/scale_448/covariance_spectra.parquet` (source `floor_mass`); filter `task == "mc"`, `condition == "human_empirical"`, `variant in LADDER`, **no sigma filter at load** (520 rows = 4 variants x 13 spectral radii x 10 seeds); cols `eig_gram`, `alpha`, reduced per cell to `d_eff, floor_sensitivity, n_within_decade, n_below_floor, frac_below_floor` plus the four position bins. Exact zeros STRIPPED first, alpha from the file's own column. Panel (a) then cuts to `spectral_radius >= 3.05` (50 cells per variant). **(c)** `criticality_matched/results/taskB_extended_sweep_scale_448.parquet` (source `alpha_peaks`); argmax over sigma of the seed-median `mc_alpha_*` column, 20 rows = 5 alpha x 4 variants | confirmed* | |
+| F20 | 5 | (none) | **From a driven network to a Gram spectrum.** The object chapter 5 measures, drawn: the real white-noise drive, the recorded state matrix `A`, three units followed from a trace to a trajectory, and equation 5.1 as three matrices. **Carries no claim, deliberately; it defines the object chapter 5 measures.** It prints first, in the chapter's opening section; no null substrate appears and no comparison is made, between substrates or among the three units. The one number it quotes — the rank-one term carries **51.3%** of `trace(A^T A)` on this cell — is that cell's, and whether substrates differ in it is §5.2's claim (A2.2, F4), which the panel scales are built not to pre-empt | **The only figure in the sweep that re-runs a reservoir**: states are never persisted (working rule 5), so the cell is regenerated through the evaluators' opt-in `collect_states` path. The cell identity is not re-derived — it is source `gram_spectra`'s, i.e. F6a's cell (connectome, `task == "mc"`, `condition == "human_empirical"`, sigma = 3.0526, alpha = 1e-6, the seed whose `d_eff` is nearest the median of the ten, resolving to **seed 7**). The graph and the three units come from `report/artifacts/substrate_edges.parquet` (source `substrate_edges`) filtered to `variant == "connectome"`, node strength at the 10th/50th/90th percentiles giving nodes **119, 346, 262**; node ordering from source `substrate_order`, the same as F19's. Gate: `act2_manifold.md` §2.7 | confirmed* | |
 | F19 | 4 | (none) | **The four substrates, as graphs.** The ladder drawn rather than described: binary and weighted adjacency under one node ordering, with the degree marginal above each column, plus one diagonal block magnified on the same colour scale. **Carries no claim**: it prints in chapter 4's no-results opening section. Connectome and weight-permuted control are one binary graph, which is the gate that the placement control is a placement control | `report/artifacts/substrate_edges.parquet` (source `substrate_edges`), 117,106 rows = 22 (variant, seed) cells x 5,323 edges, cols `variant, seed, i, j, weight`, no row filter. Node ordering from source `substrate_order`, **computed live**. The four binary-graph statistics are **not drawn here**: they are `substrate_topology.parquet` (source `substrate_topology`, 22 rows) rendered as chapter 4's `tab:act1-topology` | confirmed* | |
 
 Contributions 1 to 6 are the roadmap §1 list. F1/F2 carry 1, **F16 carries 2**, F7/F9/F10/F11
 carry 3, F12/F13/F14/**F17** carry 4, F3 carries 5, F6 carries 6.
+**F19 and F20 carry none of the six, and neither carries a claim at all.** Each opens
+its own chapter's first section by drawing what that chapter is about — F19 the four
+substrates, F20 the driven state matrix and its Gram split — and each prints in a
+section its act file registers as carrying no results.
 **F18 carries none of the six, deliberately.** It is `CROSS_ACT_SPINE.md`'s step 3, the
 measured link from weak common-mode domination to usable dimensionality, and it is the
 mechanism *behind* contribution 6 rather than a seventh claim. `TIER0` §3.6 files it under a
@@ -687,6 +728,43 @@ ordering matches the consensus ordering; the loader documents that as verified b
 node-strength and edge-weight correspondence at **r >= 0.98**, which is an agreement, not
 an identity. State it in the caption. (Recomputed here: Perron root 0.188862, matching
 `lambda_max_raw` to six decimals, so the substrate is the right one.)
+
+**F20 — it re-runs a reservoir, and that is why it has a gate.** Every other figure in
+the sweep reads a frozen parquet. F20 draws the state matrix itself, which working rule 5
+forbids persisting (10 to 44 MB per cell), so the cell is regenerated through the
+evaluators' opt-in `collect_states` path on every build: 0.3 s, nothing written, no cache.
+`report/act2_manifold.md` §2.7 is the reproduction gate — eigenvalues of `A^T A` from the
+re-run against the frozen `eig_gram`, worst relative deviation **3.4e-07** over the 438
+directions above the ridge floor, with `mc`, `mean_state` and the design shape reproducing
+alongside — and the builder re-asserts a one-scalar form of it (`d_eff` from the re-run
+against the frozen spectrum, to 1e-3) so a drifted re-run fails the build.
+
+**F20 — the cell is F6a's cell and is never re-derived.** The builder takes the seed,
+sigma and alpha from source `gram_spectra`, which already applies the rule, rather than
+re-implementing "the seed whose `d_eff` is nearest the median of the ten". Two figures
+captioned as drawing the same cell must not each own a copy of the rule. It asserts the
+resolution is **seed 7** and that the strength percentiles still return **119, 346, 262**,
+because §2.7 and the caption name those and a silent change would leave both wrong.
+
+**F20 — the panel scales are correctness constraints, not layout.** Three of them.
+**(b) and (c) share one vertical scale**, and it is the activity's own bound: `leak_rate`
+is 1.0, so a state is exactly `tanh(.)` and lies in (-1, 1). On a shared scale centring is
+visibly a *shift* — each trace slides to zero keeping its shape — which is all (c) claims.
+**(d)'s two sub-panels share that same box**, so the raw and centred clouds are comparable
+and neither is zoomed. **(e) is symmetric-logarithmic**, and this one changed the answer:
+on a *linear* shared scale the rank-one term reads as strong structure and the fluctuation
+term as a near-blank wash, because the first is an outer product and heavy-tailed (median
+|entry| 83, 99th percentile 2088) while the second is comparatively even (median 435, 99th
+percentile 618). That picture says the fixed pattern dominates the activity — which is
+**§5.2's question, not this figure's**, and is false of the quantity the caption quotes,
+since the two terms carry 51.3% and 48.7% of the trace. The bound `|entry| <= T_eff`
+(from `|x| < 1` and Cauchy-Schwarz) is asserted, so the shared scale clips nothing.
+
+**F20 — no dimensionality is stated anywhere on it, and the drawn text is checked.**
+The figure counts nothing: no `d_eff`, no rank, no direction count, and none of
+"low-dimensional", "subspace", "sheet", "plane", "surface". Where a word for the
+eigenvalues of `A^T A` is needed it is **Gram spectrum**, in full, and it appears in the
+caption rather than on a panel. Sigma = 3.05 is never labelled critical or near-critical.
 
 **Repo contradiction — FIXED IN `TIER0`, not pending.** `TIER0` §2.1's `bulk95`
 columns held per-seed **means** beside `1/median` `sr_crit` values, at both scales. They

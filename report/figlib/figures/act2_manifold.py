@@ -1,7 +1,8 @@
 """Act II -- the spectrum decomposes the manifold.  Chapter 5.
 
 F4 and F5 are Act II's own claims (the Perron mode is a common mode; sign selects the
-basis); F6 carries contribution 6 (PR misses readout-relevant structure).
+basis); F6 carries contribution 6 (PR misses readout-relevant structure). F20 opens the
+chapter and carries no claim at all: it defines the object the chapter then measures.
 
 Owned by session 2 (`report/act2_manifold.md`).
 
@@ -13,10 +14,22 @@ Two conventions this module holds to, both learned from Act I:
   `act2_manifold.md` audit item 1.
 * **Never mix a median into a per-cell panel.** F6a draws one cell and everything on it
   is that cell's. This is Act I audit item 13, applied before rather than after.
+
+**F20 is the one figure in the sweep that re-runs a reservoir rather than reading a
+frozen artifact**, because `CONVENTIONS` working rule 5 forbids persisting state
+matrices and F20 draws one. The re-run is the evaluators' opt-in `collect_states` path,
+it costs 0.3 s, it writes nothing, and `act2_manifold.md` §2.7 is the reproduction gate
+that licenses it -- eigenvalues of `A^T A` from the re-run against the frozen
+`eig_gram`, worst relative deviation 3.4e-07 over the 438 directions above the ridge
+floor. The builder re-asserts a cheaper form of that gate on every build.
 """
 
+from types import SimpleNamespace
+
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from scipy.stats import spearmanr
 
 from report.figlib import style
@@ -696,4 +709,510 @@ def f18_gram_spectrum_against_the_floor(ctx):
     for ax, letter in zip(axes, "abc"):
         style.panel_label(ax, letter)
     fig.tight_layout()
+    return fig
+
+
+# =============================================================================
+# F20 -- from a driven network to a Gram spectrum
+# =============================================================================
+# **The cell is F6a's cell, and it is taken from F6a's own source rather than
+# re-derived.** `gram_spectra` already applies the selection rule -- the connectome at
+# the supercritical operating point, MC, all-positive, and the one seed whose `d_eff` is
+# nearest the median of the ten -- and returns the resolved seed in a column. Copying
+# that rule into a second place is how two figures captioned as "the same cell" quietly
+# come apart, so nothing below re-implements it.
+F20_SEED = 7                      # what the rule resolves to. ASSERTED, never selected on.
+F20_WINDOW = 200                  # timesteps drawn in (b) and (c)
+F20_UNIT_PERCENTILES = (0.10, 0.50, 0.90)
+# The trace split measured in `act2_manifold.md` §2.7, unrounded. The caption quotes
+# 51.3%; this is the number it is rounded from and the builder asserts the render
+# against it, so the caption cannot outlive the datum.
+F20_RANK_ONE_TRACE_FRACTION = 0.513185
+# `leak_rate` is 1.0 for every task here, so the state is exactly `tanh(.)` and lives in
+# (-1, 1). Panels (b), (c) and (d) therefore all use the same [-1, 1] box: it is the
+# activity's own bound rather than a choice, it is shared across the three panels by
+# construction, and it is what lets (b) and (c) sit on one vertical scale without either
+# being cropped. It is also every entry of (e) divided by T_eff -- see F20_GRAM_LIMIT.
+F20_ACTIVITY_LIMIT = 1.0
+# One diverging map for every signed quantity in the figure -- the state matrix in (a)
+# and the three Gram matrices in (e) -- so a reader learns the encoding once. Not a
+# substrate, basis, regime or unit colour: a heatmap scale is its own channel, and this
+# figure draws no substrate comparison for it to be confused with.
+F20_SIGNED_CMAP = "RdBu_r"
+# The linear window around zero for panel (e)'s symmetric-log scale. Set below the
+# median |entry| of the smallest of the three matrices (83) so that every one of them
+# is drawn on the logarithmic part rather than half-flattened into the linear core.
+F20_GRAM_LINTHRESH = 20.0
+
+
+def _f20_units(edges):
+    """The three highlighted units, by the rule the caption states.
+
+    Node strength on the connectome -- the sum of the weights on a node's edges -- at the
+    10th, 50th and 90th percentiles, nearest-rank, ordered ascending with ties broken on
+    the lowest node index. **On this substrate all 448 strengths are distinct, so the tie
+    rule never binds**; it is stated because a rule with an unresolved tie is not a rule,
+    not because it does any work here.
+
+    Read off `substrate_edges`, which is F19's own frozen edge list, rather than off a
+    live substrate load: the selection is then reproducible from an artifact, and the
+    units are chosen on the same graph the node ordering and panel (e) are drawn under.
+    The variant is filtered explicitly rather than taken from `edges.variant.unique()`,
+    which is the trap `FIGURE_LIST`'s S4 note records against F19.
+    """
+    connectome = edges[edges.variant == "connectome"]
+    connectome = connectome[connectome.seed == connectome.seed.min()]
+    strength = np.zeros(N_NODES)
+    weight = connectome.weight.to_numpy(float)
+    np.add.at(strength, connectome.i.to_numpy(int), weight)
+    np.add.at(strength, connectome.j.to_numpy(int), weight)
+    assert np.unique(strength).size == N_NODES, (
+        f"node strength is not unique across the {N_NODES} nodes "
+        f"({np.unique(strength).size} distinct values), so the 'ties broken on the "
+        "lowest node index' clause of the caption is now load-bearing rather than "
+        "vacuous. Check the caption still describes what the rule does.")
+    order = np.lexsort((np.arange(N_NODES), strength))
+    units = [int(order[int(round(q * (N_NODES - 1)))]) for q in F20_UNIT_PERCENTILES]
+    assert len(set(units)) == 3, f"the three percentiles collapsed onto {units}"
+    return units, strength
+
+
+def _f20_capture(ctx, cell):
+    """The drive and the state matrix for one cell, re-run through `collect_states`.
+
+    Returns ``(drive, states)`` -- the retained white-noise input, one value per row, and
+    the ``T_eff x N`` post-warmup state matrix the MC solver forms as its design matrix
+    ``A``. Nothing is written and nothing is cached: `CONVENTIONS` working rule 5 forbids
+    persisting states, which is the whole reason this figure re-runs.
+
+    **The drive is redrawn rather than returned by the evaluator**, which is a coupling
+    to `memory_capacity._measure`'s first RNG call, so it is checked rather than assumed:
+    a lag-1 readout fit on the redrawn input has to reproduce the evaluator's own
+    `mc_per_lag[0]`. If the redrawn series were not the series that drove these states
+    that number would collapse to chance, so the assertion is a real gate on the one
+    trace in panel (a) that could otherwise be silently wrong.
+    """
+    if ctx.placeholder:
+        return _f20_placeholder_capture(cell)
+
+    from src.reservoir import blas          # noqa: F401  BLAS cap; numpy is already in
+    from src.reservoir.build import build_from_adjacency
+    from experiments.human.substrates import HumanSubstrateBuilder
+    from experiments.human import matrix_config
+    from experiments.human.human_mc import task_config as mc_task_config
+
+    spec = mc_task_config.task()
+    params = spec["task_params"]
+    builder = HumanSubstrateBuilder(scale=N_NODES)
+    reservoir = build_from_adjacency(
+        weighted_adjacency=builder.weighted("human_empirical", "connectome", cell.seed),
+        target_spectral_radius=cell.spectral_radius, leak_rate=spec["leak_rate"],
+        input_scaling=spec["input_scaling"], seed=cell.seed, input_dim=1)
+    out = spec["task_evaluate"](reservoir, seed=cell.seed + matrix_config.INPUT_SEED_OFFSET,
+                                collect_states=True, **params)
+    states = np.asarray(out["states"], dtype=float)
+    drive = np.random.default_rng(
+        cell.seed + matrix_config.INPUT_SEED_OFFSET).uniform(
+            -params["input_scaling"], params["input_scaling"],
+            size=(params["T"], 1))[params["warmup"]:, 0]
+
+    assert states.shape == (cell.t_effective, N_NODES), (
+        f"the re-run returned a {states.shape} state matrix against the frozen cell's "
+        f"({cell.t_effective}, {N_NODES}). The figure and the artifact are no longer "
+        "describing the same reservoir.")
+    assert drive.size == states.shape[0], (
+        f"{drive.size} retained input samples against {states.shape[0]} retained "
+        "timesteps; panel (a) draws them on one time axis.")
+    design = states[1:]
+    target = drive[:-1]
+    weights = np.linalg.solve(
+        design.T @ design + params["ridge_alpha"] * np.eye(N_NODES), design.T @ target)
+    measured = float(np.corrcoef(design @ weights, target)[0, 1] ** 2)
+    reference = float(np.asarray(out["mc_per_lag"])[0])
+    assert abs(measured - reference) < 1e-6, (
+        f"the input series panel (a) draws does not reconstruct from these states: a "
+        f"lag-1 readout scores {measured:.6f} against the evaluator's own "
+        f"{reference:.6f}. The drive is redrawn from `default_rng(seed + "
+        "INPUT_SEED_OFFSET)` and that redraw has come apart from "
+        "`memory_capacity._measure`, so the trace is not this reservoir's input.")
+    return drive, states
+
+
+def _f20_placeholder_capture(cell):
+    """A layout-only stand-in with the real thing's shape, bounds and time structure.
+
+    Nothing is read off a smoke render, so the only requirements are that it is
+    ``T_eff x N``, that it lives in (-1, 1) as a tanh state does, that it carries a
+    spread of per-unit offsets so (b) and (c) have something to separate, and that it is
+    temporally continuous so (d) is a trajectory rather than a cloud of independent
+    points.
+    """
+    rng = np.random.default_rng(20)
+    drive = rng.uniform(-1.0, 1.0, cell.t_effective)
+    innovation = rng.standard_normal((cell.t_effective, N_NODES))
+    walk = np.empty_like(innovation)
+    walk[0] = innovation[0]
+    for step in range(1, cell.t_effective):          # AR(1): a continuous trajectory
+        walk[step] = 0.55 * walk[step - 1] + innovation[step]
+    offsets = np.linspace(-1.6, 0.1, N_NODES)[rng.permutation(N_NODES)]
+    return drive, np.tanh(offsets + 1.3 * walk / walk.std())
+
+
+def _f20_ring(ordering):
+    """Node positions for panel (a)'s network glyph, and the drawn-order lookup.
+
+    A ring in the **same node ordering panel (e) uses** -- hemisphere, then community,
+    then descending degree -- so a community is a contiguous arc and the two matrices
+    and the glyph are all one permutation of the same 448 nodes. The layout is schematic;
+    the ordering, the edges and the nodes are not.
+    """
+    order = ordering.node.to_numpy(int)
+    position = np.empty(N_NODES, int)
+    position[order] = np.arange(N_NODES)
+    angle = 2.0 * np.pi * np.arange(N_NODES) / N_NODES
+    return order, position, np.cos(angle), np.sin(angle)
+
+
+def _f20_chords(ax, position, x, y, index_i, index_j, **kwargs):
+    """Edges as straight chords of the ring, drawn as one collection."""
+    start = np.column_stack([x[position[index_i]], y[position[index_i]]])
+    end = np.column_stack([x[position[index_j]], y[position[index_j]]])
+    ax.add_collection(LineCollection(np.stack([start, end], axis=1), **kwargs))
+
+
+def _f20_block_edges(ordering):
+    """Community boundaries in the drawn ordering, and the heavier hemisphere cut.
+
+    F19's construction, reproduced here because the two figures share the ordering: a
+    community spanning the hemispheres appears as two arcs, one per half, since
+    hemisphere is the outer key.
+    """
+    block = ordering.hemisphere.to_numpy() * 100 + ordering.community.to_numpy()
+    hemisphere = ordering.hemisphere.to_numpy()
+    return (np.flatnonzero(block[1:] != block[:-1]) + 1,
+            np.flatnonzero(hemisphere[1:] != hemisphere[:-1]) + 1)
+
+
+def f20_driven_network_to_gram(ctx):
+    """What a readout sees: one driven reservoir, its state matrix, and its Gram split.
+
+    **Carries no claim, deliberately.** It prints first in chapter 5 and defines the
+    object the rest of the chapter measures -- a `T_eff x N` state matrix and the
+    decomposition of `A^T A` the later sections quantify. One substrate, one cell, no
+    null, no comparison. Three units are highlighted so the reader has something to
+    follow from a trace, through a trajectory, into a matrix; **three units on one cell
+    support no claim about which units do what**, and the caption says so rather than
+    leaving the panels to imply otherwise.
+
+    **What this figure must not pre-empt.** How much of the trace the rank-one term
+    consumes, and whether substrates differ in it, is section 5.2's finding (A2.1, A2.2,
+    F4). Nothing here says or implies that the fixed pattern dominates the activity: (b)
+    and (c) sit on one vertical scale so centring is visibly a shift rather than a
+    magnification, (d)'s two sub-panels share one box for the same reason, and (e) is on
+    one shared scale with no inset to make either term look larger than it is.
+    """
+    spectra = ctx.frame("gram_spectra")
+    edges = ctx.frame("substrate_edges")
+    ordering = ctx.frame("substrate_order").sort_values("position")
+    cell = SimpleNamespace(seed=int(spectra.seed.iloc[0]),
+                           spectral_radius=float(spectra.spectral_radius.iloc[0]),
+                           alpha=float(spectra.alpha.iloc[0]),
+                           t_effective=int(spectra.T_effective.iloc[0]))
+
+    units, _ = _f20_units(edges)
+    drive, states = _f20_capture(ctx, cell)
+    order, position, ring_x, ring_y = _f20_ring(ordering)
+    boundaries, hemisphere_cut = _f20_block_edges(ordering)
+
+    # ---- the decomposition the figure is about, computed once.
+    mean_state = states.mean(0)
+    centred = states - mean_state
+    gram = states.T @ states
+    gram_fluctuation = centred.T @ centred
+    gram_rank_one = cell.t_effective * np.outer(mean_state, mean_state)
+    trace_total = float(np.trace(gram))
+    rank_one_fraction = float(np.trace(gram_rank_one)) / trace_total
+
+    # ---- structural assertions: true of the arithmetic, so they run on both paths.
+    residual = np.abs(gram - gram_fluctuation - gram_rank_one).max()
+    assert residual / np.abs(gram).max() < 1e-10, (
+        f"panel (e) draws an equation that does not hold: the worst entry of "
+        f"A^T A - (At^T At + T m m^T) is {residual:.3e}. Every '=' and '+' on the panel "
+        "is a claim about these three arrays.")
+    assert abs(rank_one_fraction
+               + float(np.trace(gram_fluctuation)) / trace_total - 1.0) < 1e-12, (
+        "the two trace fractions do not sum to one, so the caption's percentage is not "
+        "a share of anything.")
+    # Every entry of all three matrices is bounded by T_eff, because |x| < 1 and
+    # Cauchy-Schwarz. That is what makes +/- T_eff a shared scale with NO clipping
+    # anywhere rather than a percentile chosen to look right, so it is checked.
+    gram_limit = float(cell.t_effective)
+    for name, matrix in (("A^T A", gram), ("At^T At", gram_fluctuation),
+                         ("T m m^T", gram_rank_one)):
+        assert np.abs(matrix).max() <= gram_limit * (1 + 1e-9), (
+            f"an entry of {name} ({np.abs(matrix).max():.1f}) exceeds T_eff "
+            f"({gram_limit:.0f}), so panel (e)'s shared colour scale clips it. The bound "
+            "is |x| < 1 plus Cauchy-Schwarz; if it fails, the states are not tanh.")
+    assert np.abs(states).max() < F20_ACTIVITY_LIMIT, (
+        "a state lies outside (-1, 1), so panels (b) to (d) are cropping data. leak_rate "
+        "is 1.0 and the activation is tanh; this cannot happen unless one of those has "
+        "changed.")
+
+    # ---- content assertions: claims about the frozen cell, so frozen data only.
+    if not ctx.placeholder:
+        assert cell.seed == F20_SEED, (
+            f"`gram_spectra`'s median-d_eff rule now resolves to seed {cell.seed}, not "
+            f"{F20_SEED}. `act2_manifold.md` §2.7's reproduction gate is on seed "
+            f"{F20_SEED}, so the figure and its gate are no longer the same cell.")
+        assert units == [119, 346, 262], (
+            f"the strength percentiles now select {units}, not [119, 346, 262]. The "
+            "figure block and §2.7 name those three nodes and the caption's selection "
+            "rule is quoted against them.")
+        assert abs(rank_one_fraction - F20_RANK_ONE_TRACE_FRACTION) < 5e-6, (
+            f"the rank-one term carries {rank_one_fraction:.6f} of the trace against "
+            f"§2.7's {F20_RANK_ONE_TRACE_FRACTION}. The caption quotes 51.3% and is "
+            "sourced to that number alone.")
+        # The §2.7 gate, in its cheap form: the re-run's Gram must still be the frozen
+        # cell's Gram. A full eigenvalue comparison is the act file's; `d_eff` is one
+        # scalar summarising all 448 and costs one eigensolve.
+        recomputed = np.linalg.eigvalsh(gram)
+        frozen = spectra.eig_gram.to_numpy(float)
+        d_eff = float((np.clip(recomputed, 0.0, None)
+                       / (np.clip(recomputed, 0.0, None) + cell.alpha)).sum())
+        d_eff_frozen = float((frozen / (frozen + cell.alpha)).sum())
+        assert abs(d_eff - d_eff_frozen) < 1e-3, (
+            f"the re-run's design-Gram gives d_eff {d_eff:.6f} against the frozen "
+            f"spectrum's {d_eff_frozen:.6f}. §2.7's gate no longer holds and every panel "
+            "is drawing a different reservoir from the one the chapter cites.")
+
+    # ------------------------------------------------------------------ layout
+    # Five stacked bands, because every panel is either full width by nature (a's flow,
+    # b and c's time axis, e's three matrices) or is a pair that has to share a scale
+    # (d). (b) and (c) share one inner grid so they sit tight against a common x axis;
+    # everything else is separated by the outer hspace.
+    fig = plt.figure(figsize=(7.6, 9.0))
+    outer = fig.add_gridspec(4, 1, height_ratios=[1.62, 2.12, 1.92, 2.16], hspace=0.54,
+                             left=0.085, right=0.925, top=0.968, bottom=0.040)
+    band_a = outer[0].subgridspec(1, 5, width_ratios=[1.20, 0.26, 1.15, 0.26, 2.55],
+                                  wspace=0.07)
+    band_bc = outer[1].subgridspec(2, 1, hspace=0.34)
+    band_d = outer[2].subgridspec(1, 4, width_ratios=[0.02, 1.0, 1.0, 0.02], wspace=0.02)
+    band_e = outer[3].subgridspec(2, 5, height_ratios=[1.0, 0.062],
+                                  width_ratios=[1.0, 0.20, 1.0, 0.20, 1.0],
+                                  hspace=0.26, wspace=0.05)
+
+    ax_drive = fig.add_subplot(band_a[0, 0])
+    ax_network = fig.add_subplot(band_a[0, 2])
+    ax_states = fig.add_subplot(band_a[0, 4])
+    ax_raw = fig.add_subplot(band_bc[0])
+    ax_centred = fig.add_subplot(band_bc[1], sharex=ax_raw, sharey=ax_raw)
+    ax_cloud_raw = fig.add_subplot(band_d[0, 1], projection="3d")
+    ax_cloud_centred = fig.add_subplot(band_d[0, 2], projection="3d")
+    ax_gram = [fig.add_subplot(band_e[0, column]) for column in (0, 2, 4)]
+    ax_colourbar = fig.add_subplot(band_e[1, :])
+    for column, symbol in ((1, "="), (3, "+")):
+        spacer = fig.add_subplot(band_e[0, column])
+        spacer.axis("off")
+        spacer.text(0.5, 0.5, symbol, transform=spacer.transAxes, ha="center",
+                    va="center", fontsize=15, color=style.ANNOTATION_COLOUR)
+    for column in (1, 3):
+        arrow = fig.add_subplot(band_a[0, column])
+        arrow.axis("off")
+        arrow.annotate("", xy=(0.95, 0.5), xytext=(0.05, 0.5),
+                       xycoords="axes fraction", textcoords="axes fraction",
+                       arrowprops=dict(arrowstyle="-|>", lw=1.0,
+                                       color=style.ANNOTATION_COLOUR))
+
+    timestep = np.arange(cell.t_effective)
+    window = (cell.t_effective - F20_WINDOW) // 2
+    drawn = slice(window, window + F20_WINDOW)
+
+    # ---------------------------------------------- (a) the drive, the network, and A
+    # The whole retained drive, with the 200 steps (b) and (c) draw picked out on it, so
+    # the window is placed rather than asserted. Time runs DOWNWARD here and in the state
+    # matrix beside it: they are the same 2500 rows and a reader should be able to sight
+    # across from one to the other.
+    # All 2500 retained samples, at the density 2500 samples actually have. The window
+    # (b) and (c) draw is marked by a band rather than by a darker overlay of the same
+    # trace: 200 samples in a tenth of an inch is a solid bar, which marks the window
+    # but stops looking like a signal.
+    ax_drive.plot(drive, timestep, lw=0.10, color=style.CEILING_COLOUR, alpha=0.55)
+    ax_drive.axhspan(window, window + F20_WINDOW, color=style.ANNOTATION_ACCENT,
+                     alpha=0.22, lw=0, zorder=2)
+    ax_drive.annotate("(b, c)", xy=(0.04, window - 45), va="bottom", ha="left",
+                      xycoords=("axes fraction", "data"),
+                      fontsize=style.TICK_SIZE - 1, color=style.ANNOTATION_ACCENT)
+    # Both this panel and the state matrix beside it run 0 to T_eff top to bottom, so
+    # the two are one time axis and a reader can sight straight across from an input
+    # sample to the row it produced. Only this panel carries the ticks.
+    ax_drive.set_ylim(cell.t_effective, 0)
+    ax_drive.set_xlim(-1.15, 1.15)
+    ax_drive.set_xticks([-1, 0, 1])
+    ax_drive.set_yticks([0, 1250, 2500])
+    ax_drive.set_xlabel("input $u(t)$")
+    ax_drive.set_ylabel("retained timestep $t$")
+    ax_drive.set_title("white-noise drive", fontsize=style.TITLE_SIZE)
+
+    connectome = edges[edges.variant == "connectome"]
+    connectome = connectome[connectome.seed == connectome.seed.min()]
+    index_i = connectome.i.to_numpy(int)
+    index_j = connectome.j.to_numpy(int)
+    _f20_chords(ax_network, position, ring_x, ring_y, index_i, index_j,
+                colors=style.ANNOTATION_COLOUR, lw=0.12, alpha=0.045, zorder=1)
+    for unit, colour in zip(units, style.UNIT_COLOURS):
+        incident = (index_i == unit) | (index_j == unit)
+        _f20_chords(ax_network, position, ring_x, ring_y, index_i[incident],
+                    index_j[incident], colors=colour, lw=0.45, alpha=0.55, zorder=2)
+    ax_network.plot(ring_x, ring_y, ls="none", marker="o", ms=0.6,
+                    color=style.CEILING_COLOUR, zorder=3)
+    for unit, colour in zip(units, style.UNIT_COLOURS):
+        ax_network.plot([ring_x[position[unit]]], [ring_y[position[unit]]], ls="none",
+                        marker="o", ms=5.0, color=colour, mec="white", mew=0.7, zorder=5)
+    ax_network.annotate("", xy=(-0.86, 0.0), xytext=(-1.55, 0.0), xycoords="data",
+                        textcoords="data", annotation_clip=False,
+                        arrowprops=dict(arrowstyle="-|>", lw=1.0,
+                                        color=style.ANNOTATION_COLOUR))
+    ax_network.set_xlim(-1.12, 1.12)
+    ax_network.set_ylim(-1.12, 1.12)
+    ax_network.set_aspect("equal")
+    ax_network.axis("off")
+    ax_network.set_title("reservoir", fontsize=style.TITLE_SIZE)
+
+    ax_states.imshow(states[:, order], aspect="auto", cmap=F20_SIGNED_CMAP,
+                     vmin=-F20_ACTIVITY_LIMIT, vmax=F20_ACTIVITY_LIMIT,
+                     interpolation="nearest", rasterized=True)
+    for unit, colour in zip(units, style.UNIT_COLOURS):
+        ax_states.plot([position[unit]], [1.0], marker="v", ms=4.2, color=colour,
+                       clip_on=False, transform=ax_states.get_xaxis_transform(),
+                       zorder=5)
+    ax_states.set_yticks([])
+    ax_states.set_xlabel(f"one column per unit  ($N$ = {N_NODES}, ordered as Fig. 19)")
+    # On the right, so it does not sit in the arrow's way, and phrased as the axis
+    # rather than as a range: the tick numbers are the drive panel's, which this shares.
+    ax_states.yaxis.set_label_position("right")
+    ax_states.set_ylabel(f"one row per retained timestep\n"
+                         f"($T_{{\\rm eff}}$ = {cell.t_effective})",
+                         fontsize=style.AXIS_LABEL_SIZE - 1)
+    ax_states.set_title("state matrix $A$", fontsize=style.TITLE_SIZE)
+    ax_states.grid(False)
+
+    # ------------------------------------------- (b, c) three units, one vertical scale
+    # ONE scale across both panels, and it is the activity's own bound rather than a
+    # choice: leak_rate is 1.0, so a state is exactly tanh(.) and lies in (-1, 1). On a
+    # shared scale centring is visibly a SHIFT -- each trace slides to zero and keeps its
+    # shape -- which is the whole content of (c) and the reason there is no magnification
+    # factor to annotate.
+    traces = states[:, units]
+    for index, (unit, colour) in enumerate(zip(units, style.UNIT_COLOURS)):
+        ax_raw.plot(timestep[drawn], traces[drawn, index], lw=0.8, color=colour,
+                    label=f"unit {unit}")
+        ax_raw.axhline(traces[:, index].mean(), color=colour, ls="--", lw=0.9,
+                       alpha=0.85, zorder=1)
+        ax_centred.plot(timestep[drawn], traces[drawn, index] - traces[:, index].mean(),
+                        lw=0.8, color=colour)
+    ax_centred.axhline(0.0, color=style.ANNOTATION_COLOUR, lw=0.7, zorder=1)
+    ax_raw.set_ylim(-1.05, 1.05)
+    ax_raw.set_xlim(timestep[drawn][0], timestep[drawn][-1])
+    ax_raw.set_yticks([-1, 0, 1])
+    ax_raw.set_ylabel("activity $x_i(t)$")
+    ax_centred.set_ylabel("$x_i(t) - $ mean")
+    ax_centred.set_xlabel("retained timestep $t$")
+    ax_raw.tick_params(labelbottom=False)
+    # The legend sits ABOVE (b) and does the work a title would, with the dashed rule
+    # named as a fourth entry: there is nowhere inside these axes a three-column box does
+    # not cover a trace, since the three units between them span most of the (-1, 1) box.
+    # F4b's `_assert_legend_clear` found the same thing the expensive way.
+    mean_proxy = plt.Line2D([], [], ls="--", lw=0.9, color=style.ANNOTATION_COLOUR)
+    handles, labels = ax_raw.get_legend_handles_labels()
+    ax_raw.legend(handles + [mean_proxy],
+                  labels + [f"mean over all {cell.t_effective} retained steps"],
+                  loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=4,
+                  fontsize=style.LEGEND_SIZE - 1, columnspacing=1.6, handlelength=1.8)
+
+    # ------------------------------------ (d) the same three units, as one trajectory
+    # Both sub-panels in the SAME (-1, 1) box and at the same viewing angle, so the two
+    # clouds are directly comparable and centring is a translation the reader can see
+    # rather than a rescaling they have to take on trust. Nothing is fitted to the cloud
+    # and nothing is drawn through it.
+    cloud_mean = traces.mean(0)
+    for ax, cloud, title in (
+            (ax_cloud_raw, traces, "raw"),
+            (ax_cloud_centred, traces - cloud_mean, "time-centred")):
+        ax.plot(cloud[:, 0], cloud[:, 1], cloud[:, 2], lw=0.22,
+                color=style.ANNOTATION_COLOUR, alpha=0.55)
+        ax.set_xlim(-F20_ACTIVITY_LIMIT, F20_ACTIVITY_LIMIT)
+        ax.set_ylim(-F20_ACTIVITY_LIMIT, F20_ACTIVITY_LIMIT)
+        ax.set_zlim(-F20_ACTIVITY_LIMIT, F20_ACTIVITY_LIMIT)
+        ax.view_init(elev=20, azim=-58)
+        # `zoom` fills the axes with the cube: a 3-D axes reserves a wide margin by
+        # default, and at this panel size that margin is most of the panel. **1.25 is a
+        # ceiling, not a taste**: past about 1.3 the projected cube overflows its own
+        # axes and the x and y labels land in panel (e)'s titles, which is where 1.45
+        # put them. Measured on the render.
+        ax.set_box_aspect((1, 1, 1), zoom=1.25)
+        ax.set_title(title, fontsize=style.TITLE_SIZE, pad=-4)
+        for axis, colour in zip((ax.xaxis, ax.yaxis, ax.zaxis), style.UNIT_COLOURS):
+            axis.label.set_color(colour)
+        ax.set_xlabel(f"$x_{{{units[0]}}}$", labelpad=-3)
+        ax.set_ylabel(f"$x_{{{units[1]}}}$", labelpad=-3)
+        ax.set_zlabel(f"$x_{{{units[2]}}}$", labelpad=-3)
+        ax.tick_params(labelsize=style.TICK_SIZE - 3, pad=-1)
+        ax.set_xticks([-1, 0, 1])
+        ax.set_yticks([-1, 0, 1])
+        ax.set_zticks([-1, 0, 1])
+    ax_cloud_raw.quiver(0.0, 0.0, 0.0, *cloud_mean, color=style.ANNOTATION_ACCENT,
+                        lw=1.8, arrow_length_ratio=0.16, zorder=6)
+    ax_cloud_raw.text2D(0.0, 0.88, "arrow: the mean point",
+                        transform=ax_cloud_raw.transAxes, ha="left", va="top",
+                        fontsize=style.TICK_SIZE - 1, color=style.ANNOTATION_ACCENT)
+
+    # ------------------------------------------------- (e) the split, as three matrices
+    # One shared symmetric scale at +/- T_eff, which clips nothing (asserted above) and
+    # is not a percentile chosen to flatter either term. No inset and no second scale:
+    # a magnified fluctuation term would say something about the relative size of the two
+    # that this figure does not measure and section 5.2 does.
+    #
+    # **The scale is symmetric-logarithmic, and that is a correctness requirement rather
+    # than a preference.** On a linear scale the two right-hand panels are drawn at
+    # wildly different apparent strengths: the rank-one term is an outer product and so
+    # is heavy-tailed (median |entry| 83, 99th percentile 2088), while the fluctuation
+    # term is comparatively even (median 435, 99th percentile 618). A linear scale set
+    # to the shared bound therefore renders the rank-one term as strong structure and
+    # the fluctuation term as a near-blank wash -- a picture that says the fixed pattern
+    # dominates, which is a claim this figure must not make (whether it does, and whether
+    # substrates differ in it, is section 5.2's finding) and which is false of the
+    # quantity the caption quotes: the two terms carry 51.3% and 48.7% of the trace.
+    # SymLog shows both terms' structure at once, still on ONE scale under ONE bar, and
+    # still with no clipping. `linthresh` is the linear window around zero.
+    norm = mpl.colors.SymLogNorm(linthresh=F20_GRAM_LINTHRESH, linscale=0.6,
+                                 vmin=-gram_limit, vmax=gram_limit, base=10)
+    labels = (r"$A^{\mathsf{T}}\!A$", r"$\tilde{A}^{\mathsf{T}}\!\tilde{A}$",
+              r"$T_{\rm eff}\,m\,m^{\mathsf{T}}$")
+    for ax, matrix, label in zip(ax_gram, (gram, gram_fluctuation, gram_rank_one),
+                                 labels):
+        image = ax.imshow(matrix[np.ix_(order, order)], cmap=F20_SIGNED_CMAP, norm=norm,
+                          interpolation="nearest", rasterized=True)
+        for cut, width in ((boundaries, 0.25), (hemisphere_cut, 0.6)):
+            for edge in cut:
+                ax.axhline(edge - 0.5, color="0.35", lw=width, alpha=0.45)
+                ax.axvline(edge - 0.5, color="0.35", lw=width, alpha=0.45)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(label, fontsize=style.TITLE_SIZE + 1)
+        ax.grid(False)
+    ax_gram[0].set_ylabel("unit  (ordered as Fig. 19)",
+                          fontsize=style.AXIS_LABEL_SIZE - 1)
+    ax_gram[1].set_xlabel(r"$m$: each unit's mean over time;   "
+                          r"$\tilde{A} = A - \mathbf{1}m^{\mathsf{T}}$",
+                          fontsize=style.AXIS_LABEL_SIZE - 1, labelpad=2)
+    bar = fig.colorbar(image, cax=ax_colourbar, orientation="horizontal",
+                       ticks=[-1000, -100, 0, 100, 1000])
+    bar.ax.tick_params(labelsize=style.TICK_SIZE - 1)
+    bar.outline.set_linewidth(0.4)
+    bar.set_label("matrix entry   (one shared symmetric-log scale, no clipping)",
+                  fontsize=style.AXIS_LABEL_SIZE - 1, labelpad=3)
+
+    for ax, letter in ((ax_drive, "a"), (ax_raw, "b"), (ax_centred, "c"),
+                       (ax_cloud_raw, "d"), (ax_gram[0], "e")):
+        style.panel_label(ax, letter, offset_points=(-6, 3))
     return fig

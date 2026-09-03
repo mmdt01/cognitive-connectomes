@@ -127,6 +127,49 @@ CONDITION_LABEL = {
     "human_gaussian": "gaussian weights",
 }
 
+# ---------------------------------------------------------------------- single units
+# Three colours for individual reservoir UNITS -- F20 highlights three nodes of one
+# substrate throughout its five panels. A unit is not a substrate, so this is a fifth
+# small namespace alongside BASIS_COLOUR, REGIME_COLOUR, AXIS_COLOUR and
+# BOUNDARY_COLOUR, and it is **an addition, not an amendment**: VARIANT_COLOUR and
+# `src/experiment/plots._VARIANT_STYLE` are untouched and no rendered figure changes.
+#
+# **Off the Okabe-Ito wheel, and that was forced rather than chosen.** The wheel has
+# eight hues, VARIANT_COLOUR spends seven and the eighth (#F0E442) is unusable on white,
+# so every triple drawn from it *is* three substrate colours and sits at dE 0.0 from
+# one. Measured, the two candidates a reader might reach for both fail this act's own
+# separation floor as well: orange/blue/bluish green scores 14.4 among the three, and
+# the three inks not on the four-rung ladder (orange/sky blue/reddish purple) score
+# 15.2 -- and that second triple is the worse of the two in print, since orange and sky
+# blue differ by 0.011 in relative luminance and are the same grey. Reading "the four
+# ladder colours are reserved" as leaving the other three free is also wrong under
+# CONVENTIONS, which assigns all seven and says a colour existing is not licence to
+# spend it elsewhere. BASIS_COLOUR hit this wall first and left the wheel; this follows
+# it.
+#
+# **Chosen by measurement, on one floor more than BASIS_COLOUR had.** A grid search over
+# 4,096 inks scored on worst-case CIE76 dE across normal vision and the three
+# dichromacies. The extra floor is UNIT_WHITE_FLOOR: these are data traces on a white
+# page at 300 dpi, and the first triple the search returned included a pale mauve
+# (#DDBBDD) sitting dE 23.4 from white -- paler than anything the thesis draws, the
+# palest existing ink being the chance-baseline grey #9A9A9A at 36.4. It was darkened to
+# #886699 rather than swapped for a wheel colour, which is what lifts the minimum
+# white contrast to 50.6. What the set clears, against the floors below:
+#
+#   * among the three                  **55.5**  (floor 25.0; BASIS_COLOUR scores 50.8)
+#   * against all seven substrates     **11.5**  (floor  8.0; BASIS_COLOUR scores 11.5)
+#   * against white                    **50.6**  (floor 36.0)
+#   * greyscale relative luminance gap **0.103** (floor 0.08; BASIS_COLOUR scores 0.064)
+#
+# Ordered, not keyed by node: the node indices are Act II's and live in its own module,
+# so `style.py` carries no datum about which units a figure draws. Index 0 is the
+# lowest-ranked unit a figure highlights and index 2 the highest.
+UNIT_COLOURS = ("#3333BB", "#779955", "#886699")     # indigo, olive, plum
+UNIT_SEPARATION_FLOOR = 25.0       # among the three, worst case over all vision types
+UNIT_VARIANT_FLOOR = 8.0           # a unit colour against any substrate colour
+UNIT_WHITE_FLOOR = 36.0            # against the page: no ink paler than #9A9A9A's 36.4
+UNIT_GREYSCALE_FLOOR = 0.08        # relative-luminance gap between any two of the three
+
 # ------------------------------------------------------------------- bases / measures
 # Act II contrasts *bases* (F4, F5) and *dimensionality measures* (F6), neither of which
 # is a substrate. They get their own two-colour accent set, **off the Okabe-Ito wheel on
@@ -478,12 +521,27 @@ def check_regime_palette() -> dict:
     return {"between_regimes": between, "vs_variants": versus}
 
 
+def _relative_luminance(hex_colour: str) -> float:
+    """WCAG relative luminance -- what a colour becomes when the page is printed grey."""
+    import numpy as np
+    raw = hex_colour.lstrip("#")
+    rgb = np.array([int(raw[i:i + 2], 16) / 255.0 for i in (0, 2, 4)])
+    linear = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
+    return float(np.array([0.2126, 0.7152, 0.0722]) @ linear)
+
+
 def check_colour_consistency() -> None:
     """Assert the sweep palette equals the committed task-figure palette.
 
     One substrate, one colour, across the whole thesis. If ``src/experiment/plots``
     ever changes a colour this raises rather than letting the chapters drift.
+
+    Also guards ``UNIT_COLOURS``, whose whole justification is that it does **not**
+    borrow from the substrate palette: the four checks below are the ones the triple was
+    chosen on, re-derived, so an edit cannot quietly put a substrate hue on a unit or a
+    trace on the page too pale to read.
     """
+    import numpy as np
     from src.experiment.plots import _VARIANT_STYLE
     mismatched = {v: (VARIANT_COLOUR[v], _VARIANT_STYLE[v]["color"])
                   for v in VARIANT_COLOUR
@@ -491,3 +549,30 @@ def check_colour_consistency() -> None:
     assert not mismatched, (
         "figure-module palette has drifted from src/experiment/plots._VARIANT_STYLE: "
         f"{mismatched}. Fix one of the two; the thesis uses one colour per substrate.")
+
+    visions = ("normal", "protanopia", "deuteranopia", "tritanopia")
+    among = min(float(np.linalg.norm(_lab(a, v) - _lab(b, v))) for v in visions
+                for i, a in enumerate(UNIT_COLOURS) for b in UNIT_COLOURS[i + 1:])
+    versus = min(float(np.linalg.norm(_lab(u, v) - _lab(c, v))) for v in visions
+                 for u in UNIT_COLOURS for c in VARIANT_COLOUR.values())
+    on_white = min(float(np.linalg.norm(_lab(u, v) - _lab("#FFFFFF", v)))
+                   for v in visions for u in UNIT_COLOURS)
+    luminance = [_relative_luminance(u) for u in UNIT_COLOURS]
+    greyscale = min(abs(a - b) for i, a in enumerate(luminance) for b in luminance[i + 1:])
+    assert among >= UNIT_SEPARATION_FLOOR, (
+        f"UNIT_COLOURS are not separable: worst pairwise dE {among:.1f} over normal "
+        f"vision and the three dichromacies, floor {UNIT_SEPARATION_FLOOR}. Three unit "
+        "traces share a panel in F20b and F20c and have to be tellable apart.")
+    assert versus >= UNIT_VARIANT_FLOOR, (
+        f"a unit colour collides with a substrate colour: worst dE {versus:.1f}, floor "
+        f"{UNIT_VARIANT_FLOOR}. The point of this namespace is that a unit is not a "
+        "substrate; borrowing a substrate hue for one gives that hue two meanings.")
+    assert on_white >= UNIT_WHITE_FLOOR, (
+        f"a unit colour is too pale to print: worst dE {on_white:.1f} from white, floor "
+        f"{UNIT_WHITE_FLOOR}. These are data traces at 300 dpi on a white page, and the "
+        "palest ink the thesis otherwise draws is #9A9A9A at 36.4.")
+    assert greyscale >= UNIT_GREYSCALE_FLOOR, (
+        f"two unit colours share a grey: closest relative-luminance gap "
+        f"{greyscale:.3f}, floor {UNIT_GREYSCALE_FLOOR}. The encoding has to survive a "
+        "greyscale print, which is the defect that moved the whole palette to "
+        "Okabe-Ito in session 1.")
