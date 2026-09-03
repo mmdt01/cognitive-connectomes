@@ -163,6 +163,146 @@ Section~\ref{sec:act1-bulk-gap-placement} stands as written.
 
 
 
+\section{Sign selects the basis}
+\label{app:sign-basis}
+\bigskip
+% Carries A2.3, the one claim in the act that is deliberately NOT a
+% contribution. Confirmatory of Krauss 2019. Moved here from chapter 5 as
+% secondary material bounding a claim made there; F5 moves with it.
+% Sources: fact sheet 11, plus audit item 23 for the nested coverage.
+% FORBIDDEN here (sheet 11): "the manifold lives in low-frequency graph
+% harmonics"; any ladder reading of this capture; "sign-gating of the manifold
+% transition is a new result"; "balancing the signs improves the
+% representation"; quoting the capture values as evidence of how much structure
+% the bases hold; treating this as a result about the sign fraction f, which is
+% chapter 6's intervention; "compact bulk"; any graded curvature account.
+
+Section~\ref{sec:act2-perron} found the low-frequency harmonics of the graph
+Laplacian standing well above chance among the connectome's fluctuations while
+the dominant eigenvectors of $W$ fell below it. That is easy to read as a fact
+about the connectome, and it is not. It is a fact about non-negativity, and the
+way to show as much is to remove the non-negativity and leave everything else
+where it is.
+
+With non-negative weights the leading eigenmodes of $W$ have been absorbed into
+the rank-one term of Equation~\ref{eq:gram-split}, which leaves the fluctuations
+to be organised by something other than the dynamical modes themselves.
+Balancing the signs of the weights destroys the Perron guarantee, so there is no
+dominant common mode for those eigenmodes to be absorbed into, and the
+prediction is simply that they should come back.
+
+They do. Table~\ref{tab:app-basis} repeats the basis comparison across three
+weight conditions on one substrate: the empirical weights used throughout
+Chapter~\ref{chapter:act-II}, the same magnitudes with their signs balanced, and
+gaussian weights. The ordering of the two structural bases swaps between the
+first condition and the other two, it swaps in the same direction on all three
+tasks, and the topology never changes: the same graph, the same edges, and in
+the first two conditions the same weight magnitudes, with only the signs
+redistributed. Figure~\ref{fig:F5} draws the clearest of the three cases across
+the whole range of $k$.
+
+What is claimed is the swap. Nothing stronger is available, and the numbers
+invite it: on the all-positive substrate neither basis holds much of anything,
+the whole range across bases and tasks running
+0.04 to 0.17, % TIER0 3.12
+so a claim that the fluctuations live in graph harmonics would overstate what
+has been measured. Which basis leads is the measurement. How much either one
+captures is a separate question, and the answer to that one is not much.
+
+That low capture is what the other probe predicts. Supercritically the readout
+has around 413 % TIER0 3.6
+of 448 directions available to it on this substrate, so the fluctuations are
+spread over hundreds of directions and no ten-vector basis should be able to
+hold them. The agreement runs to the other end as well: where a condition's
+effective rank is low the capture is high, reaching
+0.886 % TIER0 3.12
+for the gaussian weights on NARMA-10. Two probes measuring different things on
+different bases agree about which conditions spread their activity widely, and
+neither was fitted to the other.
+
+Two limits place this result rather than extending it. The first is priority.
+That weight sign composition gates which basis the fluctuations occupy is
+largely pre-empted by Krauss et al.~\cite{krauss2019weight}, and it is reported
+here as confirmatory; it earns its place in this thesis because the counting
+argument of Section~\ref{sec:act2-counting} needs the basis established first,
+not because it is new. The second is scope. The signed and gaussian conditions
+are weight families compared side by side. Nothing has been done to the
+connectome to produce them, and the question of what happens when negative
+weights are introduced as an intervention on the real substrate belongs to
+Chapter~\ref{chapter:act-III}, where it is used to remove the common mode and to
+check whether its consequences go with it.
+
+\begin{table}[ht]
+    \centering
+    \caption[Which structural basis the fluctuations occupy]{\textbf{Which
+    structural basis the fluctuations occupy, across three weight conditions and
+    three tasks.} Fraction of time-centred state variance held by the leading
+    ten vectors of each basis, connectome substrate,
+    $N = 448$, % TIER0 2.1
+    medians over ten seeds. Each condition is measured at its own supercritical
+    operating point, 3.0526, 2.5263 and 1.2632 % A2 2.3
+    respectively, since the three do not become supercritical at the same
+    nominal radius; the three columns are therefore not one $\sigma$. The
+    harmonics lead in every cell of the first condition and the $W$ eigenmodes
+    lead in every cell of the other two, which is the result. The magnitudes are
+    not: on the all-positive substrate neither basis holds much of anything, and
+    the ordering is what is claimed. Recomputation against the published table
+    agrees to 0.00045 % A2 2.3
+    across all eighteen cells.}
+    \label{tab:app-basis}
+    \begin{tabular}{llcc}
+        \toprule
+        & & \multicolumn{2}{c}{fraction held at $k = 10$} \\
+        \cmidrule(lr){3-4}
+        weight condition & task & harmonics & $W$ eigenmodes \\
+        \midrule
+        empirical (\textbf{non-negative}) & memory capacity & \textbf{0.056} & 0.009 \\ % TIER0 3.12
+        & NARMA-10 & \textbf{0.040} & 0.002 \\ % TIER0 3.12
+        & Lorenz & \textbf{0.168} & 0.004 \\ % TIER0 3.12
+        \addlinespace
+        empirical (\textbf{signs balanced}) & memory capacity & 0.017 & \textbf{0.060} \\ % TIER0 3.12
+        & NARMA-10 & 0.005 & \textbf{0.527} \\ % TIER0 3.12
+        & Lorenz & 0.019 & \textbf{0.081} \\ % TIER0 3.12
+        \addlinespace
+        gaussian (\textbf{signs balanced}) & memory capacity & 0.020 & \textbf{0.040} \\ % TIER0 3.12
+        & NARMA-10 & 0.006 & \textbf{0.886} \\ % TIER0 3.12
+        & Lorenz & 0.012 & \textbf{0.522} \\ % TIER0 3.12
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% Figure F5.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{F5.png}
+    \caption[Sign composition selects which structural basis the fluctuations
+    occupy]{%
+    \textbf{Which structural basis the fluctuations occupy is set by the weight
+    signs, not by the topology.} Fraction of time-centred state variance held by
+    the leading $k$ vectors of each basis, connectome substrate, Lorenz task,
+    $N = 448$, % TIER0 2.1
+    medians over ten seeds, each panel at its own condition's supercritical
+    operating point. \textbf{(a)} With \textbf{non-negative} weights the graph
+    harmonics lead throughout and the dominant $W$ eigenmodes run below chance.
+    \textbf{(b)} With the \textbf{same weight magnitudes} and balanced signs the
+    ordering has already reversed. \textbf{(c)} With \textbf{gaussian} weights
+    the eigenmodes dominate outright. The rule marks $k = 10$, where the values
+    of Table~\ref{tab:app-basis} are read; the swap is visible across the whole
+    curve, and the topology is identical in all three panels. On the
+    all-positive substrate neither basis holds much in absolute terms, which is
+    why what is claimed is the ordering. The degree-preserving rewire, the only
+    other substrate this capture holds, shows the same swap at the same three
+    operating points, reading
+    0.168 against 0.002, % A2 F5
+    0.011 against 0.102, % A2 F5
+    and 0.011 against 0.355; % A2 F5
+    two substrates cannot speak to the null ladder, and no statement here does.}
+    \label{fig:F5}
+\end{figure}
+
+
+
+
 % ------------------------------
 
 % S1
