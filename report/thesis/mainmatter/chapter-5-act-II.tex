@@ -140,27 +140,27 @@ variance-weighted one is a result and not a definition, and
 Section~\ref{sec:act2-counting} makes that case; making it here would leave the
 measure looking assumed.
 
-% % Figure F20. Asset pending: build prompt not yet issued.
-% \begin{figure}[ht]
-%     \centering
-%     \includegraphics[width=\textwidth]{F20.png}
-%     \caption[From a driven network to a Gram spectrum]{%
-%     \textbf{What a readout sees.} One connectome cell, memory-capacity task,
-%     non-negative weights, $N = 448$, % TIER0 2.1
-%     at $\sigma = 3.05$; % COV 3.4
-%     three units are highlighted throughout and no null substrate appears, since
-%     this figure defines the object and makes no comparison. \textbf{(a)} The
-%     driven network and the recorded state matrix $A$, one row per retained
-%     timestep and one column per unit. \textbf{(b)} The three highlighted units'
-%     activity, with each unit's mean over time dashed. \textbf{(c)} The same three
-%     traces with those means removed, on the expanded vertical scale marked on the
-%     panel: what a readout can use is the residual, not the level.
-%     \textbf{(d)} The same three units as a trajectory in neural space, before and
-%     after centring, on shared axes. \textbf{(e)}
-%     Equation~\ref{eq:gram-split} as matrices: the Gram matrix, the fluctuation
-%     term, and the rank-one time-average term, on one colour scale.}
-%     \label{fig:F20}
-% \end{figure}
+% Figure F20.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{F20.png}
+    \caption[From a driven network to a Gram spectrum]{%
+    \textbf{What a readout sees.} One connectome cell, memory-capacity task,
+    non-negative weights, $N = 448$, % TIER0 2.1
+    at $\sigma = 3.05$; % COV 3.4
+    three units are highlighted throughout and no null substrate appears, since
+    this figure defines the object and makes no comparison. \textbf{(a)} The
+    driven network and the recorded state matrix $A$, one row per retained
+    timestep and one column per unit. \textbf{(b)} The three highlighted units'
+    activity, with each unit's mean over time dashed. \textbf{(c)} The same three
+    traces with those means removed, on the expanded vertical scale marked on the
+    panel: what a readout can use is the residual, not the level.
+    \textbf{(d)} The same three units as a trajectory in neural space, before and
+    after centring, on shared axes. \textbf{(e)}
+    Equation~\ref{eq:gram-split} as matrices: the Gram matrix, the fluctuation
+    term, and the rank-one time-average term, on one colour scale.}
+    \label{fig:F20}
+\end{figure}
 
 
 
@@ -695,8 +695,8 @@ cancels in the difference, so it reports shape and not offset.
 
 % P2: it does not move, while capacity does. Ranges named.
 That quantity was recorded alongside everything else in this chapter, on all
-three tasks, and it is reported here because it does not move. On the chaotic
-prediction task the seed-median curvature is
+three tasks, and it is reported here because it does not move. On the Lorenz chaotic
+prediction task, the seed-median curvature is
 0.261 % A2 5.15
 radians for the connectome and
 0.263 % A2 5.15
@@ -777,7 +777,7 @@ attached.
 % P3: the boundary, named not re-argued, and what it means for the next chapter.
 The third is the boundary of Section~\ref{sec:act2-temporal}. It goes forward
 unresolved, and it does not stay flat: the axis that does not move at
-$f = 0$ begins to move once negative weights enter. So the intervention runs on
+empirically non-negative weights begins to move once negative weights enter. So the intervention runs on
 both halves of the problem at once, and what it finds on the second is not a
 continuation of what this chapter has measured but a different regime, arriving
 where the geometry starts to change.
