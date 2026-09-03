@@ -25,12 +25,20 @@ this register, not the other way round.
 | A1.4 | What survives a 2.2x change in N is the **gap-ratio separation** (3.985 against 2.301 to 2.438 at N=1000), not the near-identity of the bulks, whose spread loosens to 6.4%. | F2, **S1** | §3.1 | `scale_1000/spectra_per_seed.parquet` |
 | A1.5 | The effect is weight **placement**: the weight-permuted control holds topology and the exact weight multiset fixed, scrambles only which edge carries which weight, and lands with the nulls (`bulk95` 0.5203, gap ratio 1.922). | F1, F2 | §2.1 | same |
 | A1.6 | **Neither matching axis is neutral.** Nominal `sigma` fixes the Perron root and `sigma·bulk95` fixes the bulk; the variants differ *only* in `\|lambda_1\|`, and the memory mechanism under test *is* the Perron mode, so each axis flatters a different answer (+343.3 at nominal 4.47 / -217.4, against +196.5 at 1.949 / -24.0). | F3 | §1.1, §2.2 | `criticality_matched/results/e02_panel.parquet`, `e02_axis_summary.csv` |
-| A1.7 | The normaliser is a single **non-concentrating order statistic**: for the resampling nulls the largest sampled weight takes 2 distinct values across 10 seeds and correlates +0.85 to +0.95 with `\|lambda_1\|`; freezing the multiset by permutation still leaves 6.3% relative s.d. in `\|lambda_1\|`, which is the placement contribution alone. | **none — prose** | §2.1 (recomputed, §5 below) | `spectra_per_seed.parquet` both scales |
+| ~~A1.7~~ | **RETIRED 3 September 2026. Struck, not deleted, and the number is left vacant rather than reused.** It read: ~~The normaliser is a single non-concentrating order statistic: for the resampling nulls the largest sampled weight takes 2 distinct values across 10 seeds and correlates +0.85 to +0.95 with `\|lambda_1\|`; freezing the multiset by permutation still leaves 6.3% relative s.d. in `\|lambda_1\|`, which is the placement contribution alone.~~ Two of its three clauses have no artifact and no code, and the third does not reproduce as worded under the generator's own s.d. convention. **§5 item 17** carries the finding. | ~~none — prose~~ **withdrawn** | ~~§2.1~~ **none — `TIER0` states none of it** | ~~`spectra_per_seed.parquet` both scales~~ **none — that file carries no weight column at either scale** |
 
-**A1.7 is the one claim here carried by prose rather than a figure**, and that is a
-decision, not an oversight. It had a panel (F3b) which was cut; see the F3 block. The
-numbers above are the ones the methods text must state, and `FIGURE_LIST`'s F3 flag
-carries the full set plus two phrasings that must **not** be used.
+**A1.7 is retired as of 3 September 2026, and its history is kept here rather than
+deleted.** It entered the register as the one claim carried by prose rather than a figure
+— a decision at the time, not an oversight: it had a panel (F3b) which was cut on 15
+August 2026 when the merged-in F8 was removed, and the claim moved to methods prose with
+`FIGURE_LIST`'s F3 flag carrying its numbers. What the retirement finds is that the prose
+had nothing under it. The row above is struck rather than removed so that a reader of the
+register can see the claim existed, see what it said, and see why it went; **A1.6 keeps
+its number and nothing is renumbered, so the register runs A1.1 to A1.6 with a gap at
+A1.7.** The full reason, the evidence trace and what a replacement check would have to
+capture are in **§5 item 17**. `FIGURE_LIST`'s F3 flag and
+`report/facts/00_ch3_comparison.md` still carry the retired numbers and still name A1.7;
+they are listed in item 17 and are **not** edited by this pass.
 
 **Claims deliberately NOT made here** (and why):
 
@@ -51,6 +59,14 @@ carries the full set plus two phrasings that must **not** be used.
   mapping records them as **task-free**, and no task can corroborate or refute them.
 - **That `sigma·bulk95` is the "correct" axis.** A1.6 is symmetric: it says neither axis
   is neutral, not that one is right. The claim rests on surviving both.
+- **Anything about the normaliser's own seed noise** — that `|lambda_1|` is an
+  extreme-value or non-concentrating statistic, that the largest sampled weight drives it,
+  or that the weight pool has a Hill index. This is the retired A1.7, struck from the
+  register on 3 September 2026 (§5 item 17). A1.6 does not need it: A1.6 is a statement
+  about *where* each axis pins the spectrum, which follows from F1 and F2's finding that
+  the variants differ in one quantity, and it holds whether or not the normaliser is
+  noisy across seeds. Nothing in this act may reintroduce the normaliser's instability as
+  a premise until a check exists that measures it.
 
 ---
 
@@ -376,7 +392,12 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   claim — "the normaliser is unstable" rather than "neither axis is neutral" — and two
   arguments in one figure read as two half-figures. A1.7 moved to methods prose;
   `FIGURE_LIST`'s F3 flag carries the numbers it must state. The three panels here are
-  all the *same* argument at increasing levels of aggregation.
+  all the *same* argument at increasing levels of aggregation. **Superseded in part, 3
+  September 2026:** A1.7 is retired (§5 item 17), so there is now no claim for the cut
+  panel to have carried and no prose destination for it. Cutting it was right for the
+  reason given here and is right again for a second reason — the panel would have drawn a
+  quantity the frozen sources cannot supply. F3 itself is untouched: it carries A1.6,
+  which does not depend on A1.7.
 - **Ownership:** Session 1 renders this; **Session 3 must not re-render it**, and Session
   3's E0.2 reproduction gate is what validates it.
 - **Caption (final wording):**
@@ -540,14 +561,19 @@ written by hand, not generated (see the roadmap §4b note on drafting).
    *Carries A1.6.* Figure F3.
    1. The two axes, and what each holds fixed.
    2. The same data on both (F3a): the deficit is 89% axis, the advantage 57% robust.
-   3. The normaliser's own noise, **in prose, no panel**: non-concentrating order
+   3. ~~The normaliser's own noise, **in prose, no panel**: non-concentrating order
       statistic, and the permutation control that separates weight draw from
-      placement. *Carries A1.7.* **Corrected 25 August 2026**: this item read
-      "(F3b)". That panel was cut on 15 August 2026 when the merged-in F8 was
-      removed, and A1.7 moved to methods prose. §1 marks it "none — prose" and
-      `FIGURE_LIST`'s F3 flag carries the numbers it must state. The pointer was
+      placement. *Carries A1.7.*~~ **CUT 3 September 2026 — the outline item goes with
+      the claim.** A1.7 is retired (§5 item 17), so this subsection is not written and
+      chapter 3's methods section carries A1.6 only. The item's earlier history is kept
+      because it records how the pointer decayed. **Corrected 25 August 2026**: this
+      item read "(F3b)". That panel was cut on 15 August 2026 when the merged-in F8 was
+      removed, and A1.7 moved to methods prose. §1 marked it "none — prose" and
+      `FIGURE_LIST`'s F3 flag carried the numbers it was to state. The pointer was
       worse than dead: F3's current panel (b) exists and shows the σ·bulk95 axis,
-      not the normaliser's noise. The numbers survive in §5 items 6 and 7.
+      not the normaliser's noise. The numbers survive in §5 items 6 and 7 — and item 17
+      is why they must not be stated from there. `chapter-3-methods.tex` already reads
+      "A1.7 is NOT claimed here", so no chapter prose changes.
    4. The rule adopted for the rest of the thesis: report both, state what each fixes,
       rest the claim on surviving both.
 
@@ -867,3 +893,92 @@ and anything a later session needs to know.
     drafting decision rather than a structural one and the register is what the chapter is
     written to. No other act file changed structurally in this pass except Act II's, whose
     §4 gained a section (`act2_manifold.md` item 17).
+
+17. **A1.7 RETIRED, 3 September 2026 — the claim had no rank-1 support and two of its
+    three clauses had no support of any kind.** Found by the claim-evidence trace of 3
+    September 2026, the session that audited A1.7's cited sources against the repository
+    rather than against the documents that quote them. Nothing was recomputed and nothing
+    was promoted; the finding is entirely about what the repository does and does not
+    contain.
+
+    **What the claim asserted, clause by clause, and what stands behind each.**
+
+    | clause | status |
+    |---|---|
+    | the largest sampled weight "takes 2 distinct values across 10 seeds" | **no artifact, no code.** Prose only |
+    | it "correlates +0.85 to +0.95 with `\|lambda_1\|`" | **no artifact, no code.** Prose only |
+    | permutation "still leaves 6.3% relative s.d. in `\|lambda_1\|`" | computable from the cited parquet, but the generator that owns the quantity publishes **0.060**, not 0.0628 |
+
+    **The cited artifact cannot carry two of the three.** `spectra_per_seed.parquet` has
+    twenty columns at both scales — `condition, variant, rung, seed, eig_w_real,
+    eig_w_imag, is_symmetric, perron_root, base_spectral_radius, bulk95_radius,
+    spectral_gap, n_near_degenerate_{10,25}pct, top10_eigvec_ipr, bulk95, lambda_max_raw,
+    outlier_bulk_gap, lambda2_ratio, sr_crit, max_abs_imag` — and **no weight column of
+    any kind**. The largest sampled weight is not in it, has never been in it, and cannot
+    be recovered from it: the file holds eigenvalues, not adjacency. So the register's
+    artifact column pointed at a file that could not produce the numbers in the register's
+    claim column, at either scale.
+
+    **No code computes them either.** `eigenspectrum/summary.py` builds E0.4 §5. Its
+    table — relative s.d. of `bulk95`, of the absolute bulk and of `|lambda_1|` — is
+    computed live from the parquet at `summary.py:109-137`. Everything below that table is
+    **hard-coded string literals** at `summary.py:148-165`: "+0.85 to +0.95", "2 distinct
+    values", "max-weight rel sd 0.113 → 0.158", "max-weight rel sd exactly 0", and the
+    Hill index "2.49 → 2.28". They are appended prose, not derived at build time, and a
+    repository-wide search finds no Hill estimator and no max-weight extraction anywhere
+    in `src/` or `experiments/`. `report/checks/` holds one file and it is Act II's floor
+    sensitivity; `report/scratch/` holds three audits, none on this subject; there are no
+    notebooks.
+
+    **And the file those literals live in is not tracked.** `E04_summary.md` is gitignored
+    (`.gitignore:265`), as are both `spectra_per_seed.parquet` files. The committed record
+    of the mechanism paragraph is the string constants in a generator.
+
+    **The third clause does not reproduce as worded.** `summary.py` uses `np.std`
+    (ddof = 0) and publishes weight-permuted `|lambda_1|` relative s.d. as **0.060** at
+    N = 448 and **0.037** at N = 1000. A1.7, §5 items 6 and 7, and `FIGURE_LIST`'s F3 flag
+    all state **0.0628** and **0.0385**. The act-file pair is what the generator's pair
+    becomes under ddof = 1 (a factor √(10/9)), which is the likely explanation and is
+    **not recorded anywhere** — no document states which convention it is on, and `GAPS`
+    does not list the pair as a disagreement because it never saw both. That is enough on
+    its own: a claim stated to three significant figures whose own generator prints a
+    different number, with no convention on record, cannot be quoted as written. The
+    quantity is real and the sign of the argument is unaffected; the *number* in the claim
+    is not sourced.
+
+    **What was retired and what was not.** The register row is struck and annotated, §1's
+    paragraph carries the history, §4's outline item 1.3 is cut, and this entry is the
+    reason. **A1.6 is untouched and is not renumbered** — the register now runs A1.1 to
+    A1.6 with a vacant A1.7, deliberately, so that a later session cannot reuse the number
+    and quietly inherit its citations. F3 is untouched: it carries A1.6, which rests on
+    F1/F2's one-quantity finding and needs no premise about the normaliser's seed noise.
+    `chapter-3-methods.tex` already reads "A1.7 is NOT claimed here", so no chapter prose
+    depends on this.
+
+    **What still names A1.7 and was deliberately left alone.** `FIGURE_LIST`'s F3 flag
+    (its "numbers the prose must carry" block, and its pointer to "claim A1.7"),
+    `report/facts/00_ch3_comparison.md` (its "Claims carried" line and four table rows),
+    and `report/facts/GAPS.md` (section B7 and three section-C rows). GAPS already records
+    every one of these numerals as **"Not in T0"** and unverifiable against TIER0, which is
+    the correct half of the finding; what it does not record is that two of them are
+    unverifiable against anything. Those files are the next session's to reconcile, and
+    they are listed rather than edited so the reconciliation is a decision and not a side
+    effect.
+
+    **The roadmap is the one thing that does depend on it.** Contribution 5
+    (`ACTION_PLAN_JOURNAL_ROADMAP.md:81-87`) opens on A1.7's content — "anchors the
+    nominal-sigma axis to an extreme-value statistic that does not concentrate (Hill alpha
+    ~ 2.3)" — before making A1.6's argument. That opening sentence is both retired and, in
+    that exact form, already forbidden by `FIGURE_LIST`'s F3 flag, which attributes the
+    Hill index to the empirical weight **pool** and not to `|lambda_1|`. Contribution 5's
+    substance survives on A1.6 alone; its first sentence needs deleting or rewriting, and
+    that is the author's call, not this pass's.
+
+    **If it is ever to come back, what the check would have to do.**
+    `report/artifacts/build_substrate_graphs.py` writes `substrate_edges.parquet` —
+    `[variant, seed, i, j, weight]` over the four ladder variants at ten seeds — which
+    would give the maximum sampled weight per seed directly and joins to
+    `spectra_per_seed.parquet` on `(variant, seed)`. It is **N = 448 only**
+    (`SCALE = 448`), so the N = 1000 half of the retired claim has no per-seed weight
+    artifact at all and would need a new build. A replacement claim would also have to
+    state its s.d. convention, since that is what broke the surviving clause.
