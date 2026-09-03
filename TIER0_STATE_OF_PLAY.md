@@ -1257,8 +1257,48 @@ The *ordering* swaps in all three tasks: harmonics ahead when weights are non-ne
 > capture them. Where `d_eff` is *low* the capture is high — gaussian NARMA reaches 0.886
 > — and the two probes agree on that without being fitted to each other.
 
-**Scope limit.** Probe 2 captured `connectome` and `degree_rewire` only, at four spectral
-radii. No Probe 2 statement may imply the four-variant ladder.
+**Scope limit.** Probe 2 captured `connectome` and `degree_rewire` only. Its
+spectral-radius axis is **nested inside `condition`, two radii per condition**: one shared
+canonical point at σ = 0.9474 and one at each condition's own supercritical `sr_crit`
+(3.0526 all-positive, 2.5263 signed, 1.2632 gaussian). That is **four distinct radii
+across the capture and never more than two within any one cell**. No Probe 2 statement may
+imply the four-variant ladder, and none may read the four radii as the per-cell depth.
+
+> **Amended 2 September 2026 (a): the spectral-radius axis is nested, not crossed, and
+> "four spectral radii" was being read as the per-cell depth.** This scope limit read
+> *"Probe 2 captured `connectome` and `degree_rewire` only, at four spectral radii"*. The
+> count is right for the capture as a whole and wrong for every cell in it.
+> `results/scale_448/manifold_alignment.parquet` (15,120 rows, frozen 22 July 2026) is a
+> **nested** design: `manifold/probe2.py:45-55` picks, per condition, the grid point
+> nearest 0.95 and the grid point nearest that condition's supercritical `sr_crit`, so
+> each condition holds exactly **two** radii, one of which is shared.
+>
+> | condition | radii present | rows |
+> |---|---|---|
+> | `human_empirical` | 0.9474, **3.0526** | 5040 |
+> | `human_empirical_signed` | 0.9474, **2.5263** | 5040 |
+> | `human_gaussian` | 0.9474, **1.2632** | 5040 |
+>
+> Everything else is fully crossed inside each block (`variant` 2, `task` 3, `basis` 3,
+> `seed` 10, `k` 14), giving 3 x 2 x 3 x 3 x 10 x 14 x 2 = **15,120 = actual**, with 0
+> missing cells, 0 duplicate keys, 0 NaNs and exactly 10 seeds in every innermost cell.
+> The **flat** 7-factor cross-product would be 30,240; the file is exactly half of it, and
+> the missing half is the design rather than a hole. Both substrates appear at all four
+> radii and neither appears at more than two inside any one condition, so **the ragged
+> axis is `condition`, not `variant`**, and a reader taking "four radii" for the per-cell
+> depth over-states the capture by **2x**.
+>
+> **No result and no number moves.** The four distinct radii are still four; item 2's
+> table is still read at each condition's own supercritical operating point; item 1's
+> **0.0001** is still `k` = 1, `connectome`, `human_empirical`, σ = 3.0526 against the
+> **0.0023** random-orthonormal baseline. Only the description of the coverage changes.
+> Source: `report/act2_manifold.md` §5 item 23(i) and (ii), whose coverage table was
+> recounted from the parquet in this pass and agrees row for row and cell count for cell
+> count. `report/facts/07` and `report/facts/11` carried the old phrase and were corrected
+> with this amendment; `report/FIGURE_LIST.md`, `report/CROSS_ACT_SPINE.md`,
+> `report/facts/08` and `report/act2_manifold.md` §1 and §4 still carry it and are listed
+> for the author in that pass's report. `chapter-3-methods.tex` already states the nested
+> reading.
 
 **Priority.** Sign-gating of the manifold transition is largely pre-empted by Krauss 2019
 and is presented as **confirmatory**, per the roadmap's "what must NOT be claimed".

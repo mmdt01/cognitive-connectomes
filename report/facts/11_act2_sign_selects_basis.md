@@ -15,7 +15,7 @@ Source key: **T0** = `TIER0_STATE_OF_PLAY.md`. **A2** = `report/act2_manifold.md
 
 | number as it will appear | quantity it measures | source | artifact path | aggregation convention | scale (N) | axis | required qualifier |
 |---|---|---|---|---|---|---|---|
-| MC all-positive **0.056 / 0.009**; signed **0.017 / 0.060**; gaussian **0.020 / 0.040** | captured variance at `k` = 10, harmonics against `W` eigenmodes | T0 §3.12(2) | `results/scale_448/manifold_alignment.parquet` | seed medians over 10 seeds, connectome, each condition at **its own** supercritical operating point (3.0526 / 2.5263 / 1.2632) | 448 | nominal | **Probe 2 scope: two substrates at four spectral radii.** No statement here may imply the four-variant ladder |
+| MC all-positive **0.056 / 0.009**; signed **0.017 / 0.060**; gaussian **0.020 / 0.040** | captured variance at `k` = 10, harmonics against `W` eigenmodes | T0 §3.12(2) | `results/scale_448/manifold_alignment.parquet` | seed medians over 10 seeds, connectome, each condition at **its own** supercritical operating point (3.0526 / 2.5263 / 1.2632) | 448 | nominal | **Probe 2 scope: two substrates, at two spectral radii per condition and four distinct across the capture** (T0 §3.12 as amended 2 September 2026; the radius axis is nested inside `condition`, so four is not the per-cell depth). No statement here may imply the four-variant ladder |
 | NARMA-10 all-positive **0.040 / 0.002**; signed **0.005 / 0.527**; gaussian **0.006 / 0.886** | the same at `k` = 10 | T0 §3.12(2) | as above | as above | 448 | nominal | as above |
 | Lorenz all-positive **0.168 / 0.004**; signed **0.019 / 0.081**; gaussian **0.012 / 0.522** | the same at `k` = 10 | T0 §3.12(2) | as above | as above | 448 | nominal | as above. **F5 draws Lorenz**, which is the clearest case, not the only one; the swap reproduces in MC and NARMA-10 too |
 | the **ordering swaps in all three tasks** | the claim | T0 §3.12(2) | as above | as above | 448 | nominal | harmonics ahead when weights are non-negative, `W` eigenmodes ahead once signs are balanced, **and the topology never changes**. **State the swap, not the capture** |
@@ -36,8 +36,9 @@ Source key: **T0** = `TIER0_STATE_OF_PLAY.md`. **A2** = `report/act2_manifold.md
   overstatement: on the all-positive substrate neither basis captures much at `k` = 10
   (0.04 to 0.17). The claim is which basis **wins**.
 - **Any ladder reading of Probe 2.** `manifold_alignment.parquet` holds `connectome` and
-  `degree_rewire` only, at four spectral radii. Neither F5 nor F4a may be read as a ladder
-  result, and the degree rung appears once, as a caption-level cross-check.
+  `degree_rewire` only, at two spectral radii per condition and four distinct across
+  the capture. Neither F5 nor F4a may be read as a ladder result, and the degree rung
+  appears once, as a caption-level cross-check.
 - **"sign-gating of the manifold transition is a new result."** It is largely pre-empted by
   Krauss 2019 and is presented as **confirmatory**.
 - **"balancing the signs improves the representation."** The claim is which basis the

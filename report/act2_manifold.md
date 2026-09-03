@@ -80,6 +80,14 @@ this register, not the other way round.
   through A2.2's common-mode argument**: §4 measures where the spectrum ends up, and A2.2
   is what connects that to the gap. Reading §4 as "the gap puts the spectrum clear of the
   floor" skips the step that is actually doing the work.
+- **That the fixed time-average pattern dominates the activity, or that substrates
+  differ in how much of the trace it consumes.** This is A2.1 and A2.2's territory and
+  **F20 must not pre-empt it.** F20 prints first, draws one cell and quotes one number
+  (the rank-one term carries 51.3% of `trace(A^T A)`), and its panel scales are built so
+  that neither term is made to look larger than it is: (b) and (c) share the tanh box,
+  (d)'s sub-panels share one box, and (e) is on one symmetric-log scale with no inset. A
+  linear scale in (e) would have asserted the domination visually while the caption
+  denied it in words. See §3's F20 block.
 - **That panel (c)'s migration is fitted.** It is not. Nothing regresses the measured
   ridge optimum on the floor-sensitivity curve, and no residual is bounded. What is shown
   is that the direction and the endpoint match for all four substrates, which `TIER0`
@@ -256,6 +264,55 @@ states** — see audit-log item 1.
    while `ridge_effective_rank` applies `alpha` to every Gram eigenvalue. The error is
    bounded by 1.0 `d_eff` unit and is in practice ~1e-12 (the bias column's Gram mass is
    `n_train` = 2000 against `alpha` = 1e-8). MC has no bias column, so F6 is untouched.
+
+---
+
+### 2.7 One cell re-run under `collect_states`: the eigenvalues of `A^T A` against the frozen `eig_gram`
+
+**Verdict: PASSED.** A proposed opening figure for chapter 5 (working ID F20, audit item
+21) needs the state matrix itself, which is never persisted (`CONVENTIONS`, working
+rule 5), so one cell was re-run through the evaluators' opt-in `collect_states` path and
+its design-Gram spectrum recomputed from the states.
+
+**The cell**, fixed in advance except for the seed: `task == "mc"`,
+`condition == "human_empirical"`, `variant == "connectome"`, N = 448, sigma = 3.0526,
+alpha = 1e-6. **The seed resolved to 7**, by F6a's own rule read off
+`covariance_spectra.parquet` -- the seed whose `d_eff` is nearest the median of the ten at
+that cell, 430.547 against a median of 430.380 -- and was not named in code.
+
+**The gate**: eigenvalues of `A^T A` recomputed from the re-run states, against that
+row's frozen `eig_gram`, over all 448 directions. `A` is the 2500 x 448 post-warmup state
+matrix the MC solver forms, with no bias column, per `readout_config.json`.
+
+| band of the frozen spectrum | directions | worst absolute deviation | worst relative deviation |
+|---|---|---|---|
+| `g >= 1e3` | 5 | **3.23e-03** | 3.11e-08 |
+| `1 <= g < 1e3` | 39 | 1.43e-05 | 5.49e-08 |
+| `1e-3 <= g < 1` | 188 | 2.81e-08 | 5.59e-08 |
+| `1e-6 <= g < 1e-3` | 206 | 2.90e-11 | 3.43e-07 |
+| `g < 1e-6` (below the ridge floor) | 10 | 1.37e-12 | **1.40e-04** |
+| **all 448** | 448 | **3.23e-03**, at rank 2 on 1.8130e+05 | **1.40e-04**, at rank 447 on 7.12e-09 |
+
+**Neither worst case is a disagreement, and the two are worst in different places for
+opposite reasons.** `eig_gram` is stored as `float32` (eps 1.19e-07), so the worst
+*absolute* deviation is necessarily on the largest eigenvalue, where it is 1.8e-08 of the
+value. The worst *relative* deviation is on the 447th direction, where the absolute
+deviation is 1.0e-12 -- two orders below the `eigvalsh` resolution available on a matrix
+of norm 2.3e+05, which is about 5e-11. Over the **438 directions above the ridge floor**,
+the ones `d_eff` actually counts, the worst relative deviation is **3.4e-07**. `d_eff`
+recomputed is **430.547470** against the frozen **430.547472**.
+
+**Three further quantities reproduce alongside it, none of them the gate.** The re-run's
+`mc` is **14.300548075** against the committed
+`human_mc/results/scale_448/results.parquet` value **14.300548**; its `mean_state` is
+**-0.319541** against `saturation_diagnostics.parquet`'s **-0.319541** at the same seed
+(the same signed value, not the absolute one -- this is one cell, not an aggregate, so
+§2.4's abs-before-median rule does not arise); `T_effective` = 2500 and
+`n_design_cols` = 448 match `readout_config.json`. The re-run costs 0.3 s.
+
+**Nothing was written.** The capture ran in the session scratchpad, no `results/` file was
+touched, and **no state matrix was persisted** -- `CONVENTIONS` working rule 5 forbids it,
+and that is the reason a figure drawing states has to re-run rather than read.
 
 ---
 
@@ -583,6 +640,140 @@ One block per figure ID from `FIGURE_LIST.md`. **Caption written before the figu
   > the Task B grid, so 3.58 and 3.6 are two grids' nearest points to one place and not the same number. 
   > The correspondence is consistent-with; it is not fitted.
 
+### F20 — from a driven network to a Gram spectrum
+
+- **Claim carried: NONE, deliberately.** It prints **first**, in chapter 5's opening
+  section (outline §1), which the outline registers as carrying no results. Its job is to
+  put the object on the page before anything is measured on it: a `T_eff x N` state
+  matrix, and equation 5.1's split of `A^T A` into a fluctuation term and a rank-one
+  time-average term. It is F19's position in chapter 4, one chapter later.
+- **Source:** source `gram_spectra` for the **cell identity only** (seed, sigma, alpha,
+  `T_effective`, and the frozen `eig_gram` the build gate checks against); source
+  `substrate_edges` filtered to `variant == "connectome"` for the graph and the node
+  strengths; source `substrate_order` for the node ordering, the same ordering F19 draws
+  under. **The state matrix is not a source**: it is re-run.
+- **Panels:** (a) the real drive, a ring drawing of the network with the three units and
+  their edges marked, and `A` as a `T_eff x N` image; (b) the three units' activity over
+  200 timesteps from the middle of the run, each unit's full-run mean dashed; (c) the same
+  traces with those means removed, **on the same vertical scale**; (d) the same three
+  units as a trajectory, raw and time-centred, on one shared box, with an arrow from the
+  origin to the mean point; (e) equation 5.1 as three 448 x 448 matrices on one shared
+  scale under one colour bar.
+
+- **It re-runs a reservoir, and it is the only figure in the sweep that does.**
+  `CONVENTIONS` working rule 5 forbids persisting state matrices — 10 to 44 MB per cell —
+  and this figure draws one, so the cell is regenerated through the evaluators' opt-in
+  `collect_states` path on every build. 0.3 s, nothing written, no cache. The alternative
+  would have been to freeze an artifact for it, which is the rule the repository has
+  precisely to avoid.
+- **The cell is F6a's cell and the rule is not copied.** The builder reads the seed, sigma
+  and alpha off `gram_spectra`, which already applies "the seed whose `d_eff` is nearest
+  the median of the ten"; re-implementing that rule is how two figures captioned as the
+  same cell come apart. It **asserts** the resolution is seed 7 and that the strength
+  percentiles still return 119, 346, 262, because §2.7 and the caption name them.
+- **The gate runs on every build, in a one-scalar form.** §2.7 is the full gate:
+  eigenvalues of `A^T A` from the re-run against the frozen `eig_gram`, worst absolute
+  deviation 3.23e-03 (rank 2, on 1.8130e+05) and worst relative deviation 1.40e-04
+  (rank 447, on 7.12e-09), which is **3.4e-07** over the 438 directions above the ridge
+  floor. The builder cannot afford 448 comparisons of a re-derived spectrum on every
+  render, so it compares the one scalar that summarises all of them, `d_eff`, to 1e-3.
+  Two further checks run alongside: that `A^T A - (At^T At + T m m^T)` vanishes (5.3e-15
+  relative), which is the equation panel (e) draws, and that a lag-1 readout fit on the
+  **redrawn** input series reproduces the evaluator's own `mc_per_lag[0]` — the drive in
+  panel (a) is redrawn from `default_rng(seed + INPUT_SEED_OFFSET)` rather than returned
+  by the evaluator, and that coupling to `memory_capacity._measure` is checked rather
+  than trusted.
+- **The three units, and what the figure may not say about them.** Node strength on the
+  connectome at the 10th, 50th and 90th percentiles, nearest-rank, ties broken on the
+  lowest node index. All 448 strengths are distinct on this substrate, so **the tie rule
+  never binds** — it is stated because a rule with an unresolved tie is not a rule, and
+  the builder asserts the distinctness so the caption cannot quietly become wrong.
+
+  | percentile | node | strength | binary degree | hemisphere id | Yeo network | mean over the run | s.d. |
+  |---|---|---|---|---|---|---|---|
+  | 10th | **119** | 0.03669 | 22 | 1 | DA | -0.063 | 0.487 |
+  | 50th | **346** | 0.06372 | 32 | 0 | DA | -0.162 | 0.484 |
+  | 90th | **262** | 0.14049 | 40 | 0 | DMN | -0.900 | 0.106 |
+
+  The three differ in how much of their activity is offset and how much is fluctuation,
+  and the caption says so. **It says no more than that**, and must not: three units on one
+  cell cannot support a claim about which units do which, the selection was by strength
+  rather than by anything about the activity, and 131 of the 448 units have
+  `|mean| > s.d.` while 317 do not. The consensus carries **no parcel names**
+  (`human_suarez._node_labels` writes placeholder indices), so a unit's identity is its
+  node index; the hemisphere and Yeo columns are context under F15's standing caveat and
+  nothing in the figure rests on them.
+- **The panel scales are correctness constraints. This is the part that took the work.**
+  Three of them, and one changed the answer.
+
+  **(b) and (c) share one vertical scale, and it is not a choice.** `leak_rate` is 1.0, so
+  a state is exactly `tanh(.)` and lies in (-1, 1); the panels use that box. On a shared
+  scale, centring is visibly a **shift** — each trace slides to zero and keeps its shape —
+  which is the whole content of (c). The figure's first specification asked for an
+  expanded scale in (c) with the magnification annotated; on this cell that factor is
+  **1.05x**, i.e. the centred traces need a *slightly larger* axis than the raw ones, so
+  there was no magnification to mark. See audit item 21.
+
+  **(d)'s two sub-panels share that same box**, so the raw and centred clouds are directly
+  comparable, neither is zoomed, and the arrow from the origin to the mean point is read
+  against the cloud at its true relative size.
+
+  **(e) is symmetric-logarithmic, and a linear scale here would have made a claim the
+  figure is forbidden to make.** The three matrices have very different entry
+  distributions: the rank-one term is an outer product and therefore heavy-tailed (median
+  `|entry|` **83**, 99th percentile **2088**), while the fluctuation term is comparatively
+  even (median **435**, 99th percentile **618**). On a linear scale set to the shared
+  bound, the rank-one panel reads as strong structure and the fluctuation panel as a
+  near-blank wash — a picture that says *the fixed pattern dominates the activity*. That
+  is **§5.2's finding (A2.1, A2.2, F4), not this figure's**, and it is false of the
+  quantity the caption quotes: the two terms carry **51.3%** and **48.7%** of the trace.
+  SymLog shows both terms' structure on one scale under one bar. `linthresh` is 20, below
+  the smallest of the three medians so no matrix is half-flattened into the linear core.
+  The bound `|entry| <= T_eff` — from `|x| < 1` and Cauchy-Schwarz — is asserted, so the
+  shared scale **clips nothing**, which is what lets a reader take the three panels as an
+  equation rather than as three separately-scaled pictures.
+- **The number in the caption, unrounded.** The rank-one term carries
+  **0.51318520** of `trace(A^T A)` on this cell, i.e. **51.318520%**, which rounds to the
+  caption's **51.3%**. The fluctuation term carries 48.681480%; the two sum to 1.000000.
+  `F20_RANK_ONE_TRACE_FRACTION = 0.513185` in the builder and it is asserted to 5e-6, so
+  the caption cannot outlive the datum. Source: §2.7's cell, and nowhere else.
+- **A colour namespace was added for it: `style.UNIT_COLOURS`.** `#3333BB` indigo,
+  `#779955` olive, `#886699` plum, for the three units. **Not a palette amendment** —
+  `VARIANT_COLOUR` and `src/experiment/plots._VARIANT_STYLE` are byte-identical and every
+  other figure re-renders unchanged. It had to leave the Okabe-Ito wheel, which is spent:
+  see audit item 21 for the measurement, and `CONVENTIONS.md`'s style contract for the
+  four floors `check_colour_consistency()` now asserts.
+- **What the figure does not say, checked rather than intended.** No dimensionality is
+  stated anywhere on it: it counts nothing, quotes no `d_eff`, no rank and no direction
+  count. The words *low-dimensional*, *subspace*, *sheet*, *plane* and *surface* do not
+  appear, nor *compact bulk* or *compressed bulk*; sigma = 3.05 is nowhere called critical
+  or near-critical. Where the caption needs a word for the eigenvalues of `A^T A` it is
+  **Gram spectrum**, in full, and it appears in the caption only, never on a panel.
+  Every string the figure draws was extracted from the rendered artists and checked
+  against that list, rather than read back off the source.
+- **Caption (final wording), as supplied:**
+
+  > **What a readout sees.** One connectome cell, memory-capacity task, non-negative
+  > weights, `N = 448`, at sigma = 3.05. Three units are highlighted throughout, chosen at
+  > the 10th, 50th and 90th percentiles of node strength; they differ in how much of their
+  > activity is offset and how much is fluctuation, and three units on one cell support no
+  > claim about which units do which. No null substrate appears: this figure defines the
+  > object and makes no comparison. **(a)** The driven network and the recorded state
+  > matrix `A`, one row per retained timestep and one column per unit. **(b)** The three
+  > units' activity, with each unit's mean over the full run dashed. **(c)** The same
+  > traces with those means removed, on the same vertical scale: centring slides each
+  > trace to zero and leaves its shape untouched. **(d)** The same three units as a
+  > trajectory in neural space, raw and time-centred, on shared axes, with the arrow
+  > marking the mean. **(e)** Equation 5.1 as matrices, on one shared colour scale, node
+  > ordering as Figure 19. The rank-one term carries **51.3%** of the trace on this cell:
+  > half of what the readout inverts is a single fixed pattern holding no information
+  > about the input. How much of the trace that term consumes, and whether substrates
+  > differ in it, is the section on the Perron mode.
+
+  The LaTeX source carries `\ref{eq:gram-split}`, `\ref{fig:F19}` and
+  `\ref{sec:act2-perron}` where this transcription names them in words, and the three
+  source comments (`% TIER0 2.1`, `% COV 3.4`, `% A2 2.7`) are preserved there.
+
 ---
 
 ## 4. Section outline
@@ -601,9 +792,12 @@ and show what each half of that spectrum does to the activity the readout sees. 
 by replacing the measure Act III will use.
 
 1. **What Act I handed over, and the question it leaves.** One paragraph, no results.
-   `sr_crit` as the criticality scale each substrate carries with it; the Perron mode as
-   the object to be decomposed. The question: a reservoir's readout sees a `T x N` state
-   matrix, so which part of the spectrum ends up where in that matrix?
+   **Figure F20**, which carries no claim and defines the object the rest of the chapter
+   measures. `sr_crit` as the criticality scale each substrate carries with it; the Perron
+   mode as the object to be decomposed. The question: a reservoir's readout sees a `T x N`
+   state matrix, so which part of the spectrum ends up where in that matrix? Equation 5.1
+   is stated here and F20 draws it, so §3 and §4 can measure a split the reader has
+   already seen rather than one they have only been told about.
 2. **The probes, and what each can and cannot support.** Methods. The three captures
    (basis alignment, saturation diagnostics, covariance/Gram spectra) and the operating
    points, with **Probe 2's scope stated up front rather than in a limitations section**:
@@ -1149,3 +1343,284 @@ and anything a later session needs to know.
     supplied and are en dashes now. That is the only respect in which the caption departs
     from the text handed over; the wording is otherwise verbatim, and reverting those two
     characters is a one-command change.
+
+21. **F20 was specified, gated and NOT built. The reproduction gate passed; the caption
+    did not.** Stopped at `CONVENTIONS` working rule 2 -- *"if the caption cannot be
+    written defensibly, the figure should not exist in that form"* -- and at the
+    instruction the specification itself carried, to report rather than adjust the figure
+    to fit. **Nothing was registered**: `FIGURE_LIST.md` and
+    `report/figlib/figures/__init__.py` are untouched, the count stays 18, and there is
+    no `F20` builder. What follows is the whole of what was measured, so a later session
+    does not have to re-run the cell to know what it shows.
+
+    **The specification.** A chapter-5 opening figure defining the object the chapter
+    measures: a driven reservoir, its state matrix, the trajectory of three highlighted
+    units in neural space, and equation 5.1's split of `A^T A` into a fluctuation term
+    and a rank-one time-average term. One cell (§2.7's), three units chosen at the 10th,
+    50th and 90th percentiles of node strength, no comparison between substrates and none
+    among the three units, and no claim from the register.
+
+    **The three units, by the stated rule.** Node strength on the connectome, ordered
+    ascending with ties broken on the lowest node index, nearest-rank at each percentile.
+    All 448 strengths are distinct, so **the tie rule never binds** on this substrate.
+
+    | percentile | node | strength | binary degree | hemisphere id | Yeo network |
+    |---|---|---|---|---|---|
+    | 10th | **119** | 0.03669 | 22 | 1 | DA |
+    | 50th | **346** | 0.06372 | 32 | 0 | DA |
+    | 90th | **262** | 0.14049 | 40 | 0 | DMN |
+
+    The consensus carries **no parcel names** -- `human_suarez._node_labels` writes
+    placeholder indices because the `.mat` has none -- so a unit's identity here is its
+    node index, plus the release RSN and hemisphere labels under F15's standing caveat
+    that the release node ordering is taken to match the consensus ordering. The node
+    index is the identity the state matrix, the Gram and the node ordering all share; the
+    other two columns are context.
+
+    **What the cell actually shows, and the three caption clauses it will not carry.**
+
+    | clause the caption needs | what the cell gives |
+    |---|---|
+    | (b) *"the traces sit high and move little"* | Two of the three do neither. Unit 119's mean over the full run is **-0.063** against a s.d. of **0.487**; unit 346's is **-0.162** against **0.484**. Only unit 262 is offset-dominated (**-0.900** against **0.106**). Over the drawn 200-step window units 119 and 346 swing **1.57** and **1.63** peak to peak, most of the tanh range. |
+    | (c) *"on the expanded vertical scale"* | There is no expansion to mark. A zero-including axis for (b) spans **1.746**; the mean-removed traces span **1.667**. The magnification factor is **1.05x**, so the two panels are the same picture shifted. |
+    | (d) *"almost the whole distance from the origin is one fixed offset"* | For the three-unit trajectory the mean point is **0.917** from the origin and the r.m.s. spread about it is **0.695** -- a ratio of 1.32, so the offset and the residual are the same size. The zoom factor between the two sub-panels would be **1.05x**. For the full 448-unit matrix it is closer still: the mean vector's norm is **9.430** against an r.m.s. distance from the mean of **9.185**. |
+
+    **The rank-one term carries 51.32% of `trace(A^T A)`** on this cell (fluctuation term
+    48.68%; the two sum to 1.000000 and the matrix identity holds to 5.3e-15 relative).
+    That number is defensible and is what the caption's placeholder would have been filled
+    from -- and it is also what refutes the three clauses above, each of which describes a
+    rank-one term carrying nearly everything.
+
+    **This is not a defect in the cell. It is A2.2 seen from the inside, and the caption
+    describes a null.** `|mean_state|` at sigma = 3.0526 on MC is **0.321** for the
+    connectome against **0.798 / 0.827 / 0.884** for weight-permuted, degree and
+    Erdős–Rényi (§2.4's source, same filter). The connectome is the *least*
+    common-mode-dominated substrate at this operating point, which is exactly what A2.2
+    claims and F4b draws. A figure whose caption says the offset is almost the whole story
+    is therefore describing a null rung, or the connectome much higher up the sweep --
+    `|mean_state|` reaches 0.759 only by sigma = 6 -- and drawing it on the connectome at
+    3.05 would contradict this act's own register. **131 of the 448 units have
+    `|mean| > s.d.`**; for the other 317 the fluctuation is the larger part.
+
+    **The (d) measurement that was asked for, reported and not drawn.** Principal
+    variances of the time-centred three-unit cloud over the full 2500 steps:
+    **0.4652, 0.0157, 0.00253** (96.2%, 3.2%, 0.5% of that cloud's variance; ratios 29.6
+    and 183.8). It **is** elongated along one direction. **That is a fact about a
+    three-unit projection and about these three units only**, two of which sit at opposite
+    ends of a strength range that sets how hard each unit is driven, and it says nothing
+    about the state matrix: the same cell's Gram spectrum clears the ridge floor in
+    **438 of 448** directions and its `d_eff` is **430.5**. Nothing was fitted, overlaid
+    or named on the cloud, per the specification.
+
+    **What would make the figure buildable, none of which this session may choose.**
+    (i) Re-aim the caption at what the cell shows -- a rank-one term carrying about half
+    the trace, and an offset that is a strong function of node strength -- which turns
+    panels (b) to (d) into a comparison among the three units that the specification
+    forbids. (ii) Keep the caption and move the operating point up the sweep or onto a
+    null, which makes it a comparison between substrates that the specification also
+    forbids. (iii) Keep the caption and choose the three units by common-mode amplitude
+    rather than by strength, which is choosing the units to fit the sentence. All three
+    are the author's call rather than a rendering decision, which is why this stops here.
+
+    **What was ready and is not spent.** The gate and its script (§2.7), the resolved
+    seed and the three units above, and a measured answer to the colour question -- which
+    turned out to be a finding in its own right.
+
+    **No Okabe-Ito triple satisfies the constraint, and the measurement says so plainly.**
+    The constraint was: three colours that are not variant colours, are distinguishable
+    under the three common dichromacies, and separate by luminance in greyscale. The
+    palette has eight hues, `style.VARIANT_COLOUR` spends seven of them, and the eighth
+    (`#F0E442` yellow) is unusable on white -- which is the arithmetic `style.py` already
+    records above `BASIS_COLOUR`. So every candidate triple drawn from the wheel sits at
+    **dE 0.0** from a substrate colour, because it *is* three substrate colours. Measured
+    over normal vision and the three dichromacies:
+
+    | triple | worst dE among the three | worst dE vs any substrate | greyscale luminance gap |
+    |---|---|---|---|
+    | orange / blue / bluish green (`#E69F00 #0072B2 #009E73`) | 14.4 | **0.0** | 0.104 |
+    | the three inks not on the four-rung ladder: orange / sky blue / reddish purple (`#E69F00 #56B4E9 #CC79A7`) | 15.2 | **0.0** | **0.011** |
+    | `style.BASIS_COLOUR`, for reference | **50.8** | **11.5** | 0.064 |
+    | floors `style.py` asserts for three curves in one panel | 25.0 | 8.0 | not asserted |
+
+    Both Okabe-Ito triples fall below the act's own separation floor of 25, and the
+    second -- the one that avoids the four ladder rungs -- is the worse of the two: orange
+    and sky blue differ by **0.011** in relative luminance, so they are the same grey.
+    Reading "the four variant colours are reserved" as leaving sky blue and reddish purple
+    free is also wrong under the contract: `CONVENTIONS` assigns all seven and says in
+    terms that a colour existing is not licence to spend it elsewhere.
+
+    **The precedent that applies is `BASIS_COLOUR`'s, and it is to leave the wheel.**
+    Session 2 hit this exact wall for F4a and F5, chose indigo/brick off the palette, and
+    added `check_basis_palette()` so the choice could not drift. A fourth namespace with
+    its own check is what this figure needs too. A search in that idiom -- 386 candidate
+    inks scored on worst-case CIE76 dE across normal vision and the three dichromacies,
+    against each other, against all seven substrate colours and against every furniture
+    colour already in use -- returns **`#3333BB` indigo, `#779955` olive, `#DDBBDD` pale
+    mauve**: among-triple **49.3**, vs-substrates **19.3**, vs-furniture **14.8**,
+    smallest greyscale gap **0.207**, clearing every floor with room. It is offered as a
+    measurement, not installed: **`style.py` was not touched**, per this session's scope
+    and per the contract's rule that a session wanting a new colour reports and stops.
+
+22. **RESOLVED 2 September 2026: F20 is built, under a rewritten caption. Item 21 stands
+    as the record and is not edited.** The stop was correct and the caption was the thing
+    that changed; the cell, the seed, the gate and the three units are all as item 21
+    left them, and §2.7 is untouched. **The registry goes 18 to 19** and `FIGURE_LIST.md`
+    carries the amendment and the row.
+
+    **What the rewritten caption does differently, in one line each.** It says the three
+    units *differ* in how much of their activity is offset and how much is fluctuation,
+    and that three units on one cell support no claim about which units do which — where
+    the first caption asserted that all three sit high and move little, which two of them
+    do not. It drops "expanded scale" and "zoom" and puts (b), (c) and (d) on shared
+    scales. And it replaces "almost the whole distance from the origin is one fixed
+    offset" with the measured **51.3%** of the trace, plus a forward reference to §5.2 for
+    the question of whether substrates differ in that share. Every clause is now something
+    the cell supports.
+
+    **Three panel-scale decisions follow from the same constraint and are in the F20
+    block above**: (b) and (c) on the tanh box, (d)'s two sub-panels on one box, and (e)
+    on a symmetric-log scale. The last is the one that changed on measurement rather than
+    on instruction: a linear shared scale renders the fluctuation term as a near-blank
+    wash beside the rank-one term, because the two have very different entry
+    distributions (median `|entry|` 435 against 83, 99th percentile 618 against 2088),
+    and that picture asserts the fixed pattern dominates — §5.2's question, and false of
+    the 51.3 / 48.7 split the caption quotes. **The wording constraint was met by changing
+    the colour scale, not by adding a sentence.**
+
+    **`style.UNIT_COLOURS` was authorised and added, with the pale mauve darkened.**
+    Item 21 proposed `#3333BB` / `#779955` / `#DDBBDD` off the Okabe-Ito wheel. Measured
+    against the page rather than only against the palette, `#DDBBDD` sits **dE 23.4** from
+    white — paler than any ink the thesis draws, the palest existing being the
+    chance-baseline grey `#9A9A9A` at 36.4 — which for a data trace at 300 dpi is a
+    legibility failure rather than a clash. It was **darkened to `#886699`**, per the
+    instruction not to take a colour from the wheel instead. The set as installed:
+
+    | check | measured | floor | `BASIS_COLOUR`, for reference |
+    |---|---|---|---|
+    | among the three | **55.5** | 25.0 | 50.8 |
+    | against all seven substrate colours | **11.5** | 8.0 | 11.5 |
+    | against white | **50.6** | 36.0 | 36.4 |
+    | greyscale relative-luminance gap | **0.103** | 0.08 | 0.064 |
+
+    Darkening cost nothing and bought two things: white contrast more than doubled
+    (23.4 to 56.6 for that ink) and the among-triple separation *rose* from 49.3 to 55.5.
+    All four floors are asserted inside `check_colour_consistency()` — the function that
+    already guards the variant palette, so the smoke entry point runs them with no new
+    wiring — and all four were **injection-tested, 4 of 4 firing on their own condition**.
+    `VARIANT_COLOUR` and `src/experiment/plots._VARIANT_STYLE` are unchanged;
+    `check_colour_consistency()` still passes on the variant palette, and a full
+    `--smoke` re-renders all 23 figures. Recorded in `CONVENTIONS.md` as a **namespace
+    addition and explicitly not a palette amendment**, with a general statement of the
+    distinction, since this is the fifth such namespace and the rule had never been
+    written down.
+
+    **One thing a later session should not have to rediscover.** The 3-D sub-panels in
+    (d) use `set_box_aspect(..., zoom=1.25)`, and **1.3 is a ceiling**: past it the
+    projected cube overflows its own axes and the x and y labels land inside panel (e)'s
+    titles. That was found on the render at 1.45, not by reasoning, and the number is in
+    the builder with the reason beside it.
+23. **The `k` = 1 W-eigenmode shortfall was re-checked at every radius the capture holds
+    for it, and it holds at one of the two. CHECK-FILE MATERIAL, 2 September 2026 — not
+    promoted, nothing in `TIER0` moves.** Reanalysis only; no run, no artifact
+    regenerated, no builder touched. Source:
+    `experiments/human/analysis/results/scale_448/manifold_alignment.parquet` (15,120
+    rows, frozen 22 July 2026), filter `condition == "human_empirical"`,
+    `variant == "connectome"`, `k == 1`, on the §2.1 aggregation of record (**pooled
+    median over tasks x seeds, n = 30**, not the median of per-task medians).
+
+    **(i) Coverage first, because the coverage is the reason this item exists.** The file
+    is a **nested**, not a crossed, design: `spectral_radius` is nested inside
+    `condition`, **two radii per condition**, one of which is shared. Measured:
+
+    | condition | radii present | rows |
+    |---|---|---|
+    | `human_empirical` | 0.9474, **3.0526** | 5040 |
+    | `human_empirical_signed` | 0.9474, **2.5263** | 5040 |
+    | `human_gaussian` | 0.9474, **1.2632** | 5040 |
+
+    The remaining factors are fully crossed inside each block: `variant` 2
+    (`connectome`, `degree_rewire`), `task` 3 (`mc`, `narma10`, `lorenz`), `basis` 3
+    (`harmonics`, `wmodes`, `random`), `seed` 10 (0–9), `k` 14 (1, 2, 3, 5, 10, 20, 30,
+    50, 100, 150, 200, 300, 400, 448). Expected 3 x 2 x 3 x 3 x 10 x 14 x 2 = **15,120 =
+    actual**: **0 missing cells, 0 duplicate keys, 0 NaNs**, every innermost cell exactly
+    10 seeds. The **flat** 7-factor cross-product would be 30,240; the file is exactly
+    half of it, and the missing half is not a hole but a design the flat product
+    misdescribes.
+
+    **(ii) The two standing descriptions are each half-true and must not be combined.**
+    "Two substrates at four spectral radii" (`TIER0` §3.12 scope limit, `FIGURE_LIST`'s
+    F4/F5 flag, `facts/07` and `facts/08`) and the three per-condition operating points
+    3.0526 / 2.5263 / 1.2632 (`facts/07`, A2 §2.3) are consistent **only** under the
+    reading that the four distinct radii are *one shared canonical point plus three
+    condition-specific supercritical points*. 0.9474 is the shared one:
+    `manifold/probe2.py:45-55` picks, per condition, the grid point nearest 0.95 and the
+    grid point nearest that condition's supercritical `sr_crit`. Read as "each cell was
+    captured at four radii" the phrase is **false** — no (condition, variant) pair is
+    captured at more than **two**, and the pair this item checks is captured at two.
+    The ragged axis is `condition`, not `variant`: both substrates appear at all four
+    radii, and neither appears at four radii within any one condition. The **grid is
+    ragged, complete within its own design**, and a later session reading "four radii"
+    as the per-cell depth will over-state the capture by 2x.
+
+    **(iii) Reproduction gate, before any new value.** At sigma = 3.0526 the pooled
+    median returns **0.000143** against `TIER0`'s 0.0001 (deviation **+0.000043**, 1 s.f.
+    as published) and the random-orthonormal baseline **0.002316** against 0.0023
+    (deviation **+0.000016**, 2 s.f.), with **29 of 30** (task, seed) cells below their
+    own baseline. **Both reproduce**, identically to §2.1, so the per-radius numbers
+    below are on the same computation.
+
+    **(iv) Per radius, pooled and per task.** `w` = top `W` eigenmode, `r` = random
+    orthonormal, both at `k` = 1.
+
+    | sigma | pooled `w` | pooled `r` | `w`/`r` | MC `w` / `r` | NARMA-10 `w` / `r` | Lorenz `w` / `r` | cells below own `r` |
+    |---|---|---|---|---|---|---|---|
+    | **0.9474** | **0.010841** | 0.002561 | **4.23x ABOVE** | 0.000575 / 0.002642 | 0.001899 / 0.002630 | **0.041214** / 0.002447 | **12 of 30** |
+    | **3.0526** | 0.000143 | 0.002316 | **0.062x** | 0.000642 / 0.002521 | 0.000030 / 0.002455 | 0.000098 / 0.002079 | **29 of 30** |
+
+    Per-task below-baseline counts: at 0.9474, MC **7 of 10**, NARMA-10 **5 of 10**,
+    Lorenz **0 of 10**; at 3.0526, MC **10 of 10**, NARMA-10 **10 of 10**, Lorenz
+    **9 of 10** (the single miss is `lorenz`, seed 4, `w` = 0.055754 — the same cell
+    item 6 names as the one that makes the *mean* nearly degenerate).
+
+    **(v) The harmonics control, per radius.** Same filter and aggregation. The chapter's
+    **7.6x** is the **MC per-task** ratio at 3.0526 (`facts/08`: "medians over seeds,
+    MC"), not the pooled one; it returns **7.640x** exactly.
+
+    | sigma | pooled harm | pooled `r` | pooled ratio | MC | NARMA-10 | Lorenz | cells above own `r` |
+    |---|---|---|---|---|---|---|---|
+    | **0.9474** | 0.003992 | 0.002561 | **1.56x** | **1.030x** | 1.280x | 3.878x | **19 of 30** |
+    | **3.0526** | 0.019835 | 0.002316 | 8.564x | **7.640x** | 1.768x | 17.029x | **27 of 30** |
+
+    **(vi) Verdict, plainly.** The top `W` eigenmode sits below its own random baseline
+    at **one of the two radii this filter covers, not both**. At the supercritical
+    operating point **sigma = 3.0526** it does (0.000143 against 0.002316, 29 of 30
+    cells). At the shared canonical point **sigma = 0.9474** it does **not**: the pooled
+    median is **0.010841 against 0.002561**, i.e. **4.2x above** its baseline rather than
+    16x below, and only **12 of 30** cells sit below. The reversal is driven by Lorenz,
+    which is above baseline in **10 of 10** seeds at 0.9474 (per-task median 0.041214,
+    16.8x its baseline), with MC and NARMA-10 still below in the median but only 7 and 5
+    of 10 cells. **The control reverses with it**: at 0.9474 the low-frequency harmonics
+    are at **1.03x** chance on MC (5 of 10 cells above) and 1.28x on NARMA-10 (5 of 10),
+    so the basis-separation the 7.6x provides at 3.0526 is **absent at the subcritical
+    point on the two tasks that carry it** — it survives only on Lorenz (3.88x, 9 of 10).
+    Both halves of the reading therefore fail together at 0.9474, and neither is repaired
+    by the other.
+
+    **What this does and does not bound.** It does **not** withdraw anything: A2.1 and
+    `TIER0` §3.12(1) are stated **at the supercritical operating point** and reproduce
+    there exactly. It bounds the **scope**: the shortfall is a property of the
+    supercritical regime, not of the substrate, and any sentence phrased as "on the
+    all-positive substrate the top eigenmode is below chance" without its sigma is
+    **false at the only other radius the file can answer for**. That the capture holds
+    exactly two radii for this filter means the finding cannot be resolved in sigma
+    beyond "at 0.9474 no, at 3.0526 yes" — there is no intermediate point to locate a
+    transition at, and none may be inferred. Whether the reversal is the criticality
+    crossing or the Lorenz drive is **not determined by this file**.
+
+    **Not promoted, deliberately.** This is a scope limit on a published number, and by
+    the working rules a scope limit that a chapter must carry belongs in `TIER0`. It is
+    left here because the session that computed it was reanalysis-only and could not
+    edit `TIER0`, `FIGURE_LIST`, the chapter or any builder. **A later session should
+    decide whether (vi) belongs in `TIER0` §3.12(1) as a sigma qualifier and whether
+    `FIGURE_LIST`'s F4 row needs the same**; until then the qualifier lives only in this
+    file, which is the condition item 6 was written to prevent for the aggregation.

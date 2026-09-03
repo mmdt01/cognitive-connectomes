@@ -14,7 +14,7 @@ Source key: **T0** = `TIER0_STATE_OF_PLAY.md`. **A2** = `report/act2_manifold.md
 
 | number as it will appear | quantity it measures | source | artifact path | aggregation convention | scale (N) | axis | required qualifier |
 |---|---|---|---|---|---|---|---|
-| **two** substrates (`connectome`, `degree_rewire`) at **four** spectral radii | Probe 2's entire coverage | T0 §3.12 scope limit; FL F4/F5 flag; A2 §1 | `results/scale_448/manifold_alignment.parquet` | not applicable | 448 | nominal | **stated up front.** No Probe 2 statement may imply the four-variant ladder, and neither F4a nor F5 may be read as a ladder result. This qualifier travels onto **every row sourced from Probe 2** |
+| **two** substrates (`connectome`, `degree_rewire`), each recorded at **two** spectral radii per condition, **four distinct** across the capture | Probe 2's entire coverage | T0 §3.12 scope limit, as amended 2 September 2026; FL F4/F5 flag; A2 §1, §5 item 23 | `results/scale_448/manifold_alignment.parquet` | not applicable; the radius axis is **nested inside `condition`**, not crossed with it | 448 | nominal | **stated up front.** No Probe 2 statement may imply the four-variant ladder, and neither F4a nor F5 may be read as a ladder result. **The four radii are not the per-cell depth**: one shared canonical point at 0.9474 plus each condition's own supercritical point (3.0526 / 2.5263 / 1.2632), so no (condition, variant) cell holds more than **two**. This qualifier travels onto **every row sourced from Probe 2** |
 | **3.0526** / **2.5263** / **1.2632** | the supercritical operating point of each condition (`human_empirical` / `human_empirical_signed` / `human_gaussian`) | A2 §2.3, F5 block. **Not in T0** | `manifold_alignment.parquet` | read from the data, one per condition | 448 | nominal | each condition is at **its own** operating point; the three are not one sigma |
 | `\|mean_state\|`, absolute value taken **before** any aggregation | the common-mode proxy and its sign convention | T0 §3.12 gotcha; A2 §2.4, §4 item 2 | `saturation_diagnostics.parquet`; `item2_f_extension_scale_448.parquet` | **abs then median**, never median then abs | 448 | nominal | `mean_state` is **signed and its sign is arbitrary**, set by the input realisation, so seeds straddle zero. A signed median shrinks the connectome's sigma = 6 value from **0.759** to **0.638**; A2 §5 item 1 records that it also puts the weight-permuted null at **0.575**, below the connectome, inverting the ladder |
 | `d_eff = sum_i g_i/(g_i + alpha)` | the ridge effective rank, defined | A2 F6 block, §2.6; T0 §3.6 for the derivative form | `covariance_spectra.parquet`, column `eig_gram` | exact sum over directions | 448 | not applicable | it is **exactly a sum of one weight per direction**, which is what licenses the area-as-count reading in section 5. Defined here, **justified in section 5** |
@@ -33,7 +33,8 @@ Source key: **T0** = `TIER0_STATE_OF_PLAY.md`. **A2** = `report/act2_manifold.md
 
 - **Any ladder reading of Probe 2.** "the four substrates' basis alignment", "across the
   ladder the harmonics lead", or any sentence in which F4a or F5 stands for more than
-  `connectome` and `degree_rewire` at four spectral radii.
+  `connectome` and `degree_rewire` at two spectral radii per condition, four distinct
+  across the capture.
 - **"the manifold lives in low-frequency graph harmonics."** Withdrawn as an overstatement
   before the numbers that would tempt it even appear.
 - **Justifying `d_eff` here.** The definition is a methods fact; the reason to prefer it is
