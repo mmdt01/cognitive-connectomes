@@ -78,13 +78,28 @@ organised for capacity. It is organised for not needing to be tuned.
    this holds at f > 0. At f = 0 curvature is flat at 0.26 across the whole sweep while
    VPT falls ~10x, so what sets generation there is open. *(Act III, prediction arm)*
 
-5. **Spectral-radius-matched comparison is not neutral.** Normalising `W` by `|λ₁|`
-   anchors the nominal-sigma axis to an extreme-value statistic that does not concentrate
-   (Hill alpha ~ 2.3). Since variants differ *only* in `|λ₁|`, nominal matching fixes the
-   Perron root and `sigma·bulk95` matching fixes the bulk, and the memory mechanism under
-   test *is* the Perron mode, so each axis flatters a different answer. Report both, say
-   what each holds fixed, rest the claim on surviving both. Applies to the whole
-   connectome-reservoir literature, not just to this work. *(Chapter 3, methods)*
+5. **Spectral-radius-matched comparison is not neutral.** Since variants differ *only* in
+   `|λ₁|`, nominal matching fixes the Perron root and `sigma·bulk95` matching fixes the
+   bulk, and the memory mechanism under test *is* the Perron mode, so each axis flatters
+   a different answer. Report both, say what each holds fixed, rest the claim on
+   surviving both. Applies to the whole connectome-reservoir literature, not just to this
+   work. *(Chapter 3, methods)*
+
+   **First sentence removed 3 September 2026, on three grounds.** It read: *"Normalising
+   `W` by `|λ₁|` anchors the nominal-sigma axis to an extreme-value statistic that does
+   not concentrate (Hill alpha ~ 2.3)."* (i) It stated claim **A1.7**, retired from Act
+   I's register on 3 September 2026 for want of rank-1 support: two of its three clauses
+   have no artifact and no code, and the cited `spectra_per_seed.parquet` carries no
+   weight column at either scale (`report/act1_structure.md` §5 item 17). (ii) It
+   attributed a tail index to `|λ₁|`, when the Hill index belongs to the **empirical
+   weight pool** — an attribution `report/FIGURE_LIST.md` line 445 forbids in as many
+   words. (iii) No Hill estimator exists anywhere in the repository, so the figure was
+   never computed here at all. **The contribution itself is unaffected.** Everything from
+   "Since variants differ *only* in `|λ₁|`" onward is unchanged and rests on **A1.6**,
+   which follows from the one-quantity finding (`TIER0` §3.1, §1.1) and needs no premise
+   about the normaliser's seed noise. No connective was added: the bold lead-in is a
+   sentence, and "Since ..." reads as its reason, which is the same shape contributions 1
+   and 3 use.
 
 6. **Variance-weighted dimensionality misses readout-relevant structure.** PR orders the
    memory ladder at +0.11 while `d_eff` orders it at +1.00 — **both seven-rung
