@@ -1,7 +1,8 @@
 \chapter{\textbf{Act III:} Manifold Geometry Sets Computational Capacity}
 \label{chapter:act-III}
 
-\section{What is being asked, and along which axis}
+\section{Learning to remember and predict}
+% What is being asked, and along which axis
 \label{sec:act3-frame}
 \bigskip
 % Section 6.1 (CROSS_ACT_SPINE.md, Act III, seven-section breakdown of 28 Aug).
@@ -24,34 +25,45 @@
 
 % P1: the two demands, and the mapping fixed in advance. Numerals: 0.
 Chapter~\ref{chapter:act-II} measured what a driven network's activity looks
-like. This chapter asks what that activity is worth. Two demands can be made of
-it and they are not the same demand. One is to reconstruct an input the network
-has already seen, which requires that traces of the past still be separable in
-the present state. The other is to sustain a signal with no input arriving to
-correct it, the network driving itself from its own output. The first asks how
-many independent directions survive; the second asks whether the dynamics stay
-in a regime where a trajectory can be continued at all. Both are put to the same
-four substrates along the same axis, and the question the chapter closes on is
-whether the two answers are two facts or one.
+like. This chapter asks how that activity influences the computational 
+capacity of the system. In this thesis, a network's computational capacity is
+viewed as its ability to demonstrate two essential properties; memory and prediction. 
+Memory retention is regarded as the capacity to reconstruct an input the network has already seen, 
+which requires that traces of the past still be seperable in the present state. 
+On the other hand, closed-loop prediction demands the network to sustain a signal 
+with no input arriving to correct it, the network driving itself from its own output. 
+% As we found in the previous chapter, the first property therefore asks how many independent 
+% directions survive; the second asks whether the dynamics stay in a regime where a trajectory can be continued at all. 
+The hypothesis of this thesis is that the geometry the network's activity manifold 
+forms a strong link between the network's structure and the compuatational capacities 
+is exhibits. 
+
+
+% The first property therefore asks how many independent directions survive; 
+% the second asks whether the dynamics stay in a regime where a trajectory can be continued at all. 
 
 % P2: the mapping, declared before inspection. Numerals: 0.
-Which task carries which demand was fixed before any of the data below was
-inspected, so that no claim here can be rescued by the observation that there is
-always some task on which it holds. Retention is carried by the
-\textbf{memory-capacity} task, and the mapping places NARMA-10 and Mackey-Glass
-on the same side of the dissociation rather than on the generative one.
-Generation is carried by the \textbf{Lorenz prediction} task and has \emph{no}
-corroborating task: the resistance margin and the regime switch reported below
-rest on Lorenz alone. What the joint question costs, and what became of the
-fourth task, is Section~\ref{sec:act3-scope}'s.
+To explore this, the connectome-constrained reservoir and nulls are trained to 
+perform several computational tasks. 
+To evaluate reservoir memory, the widely used memory capacity task \cite{jaeger2001short} is used, 
+which measures the reservoir’s ability to preserve the representations of past stimuli 
+in continuing iterations of its internal state computation.
+To evaluate time-series prediction, two standard reservoir computing tasks are used:
+the Lorenz and NARMA-10 tasks. Lorenz was chosen due its highly chaotic and hence challenging nature, 
+and the NARMA task because it combines nonlinearity and memory, making it highly complex.
+(See Methods for more details on the tasks).
+
 
 % P3: the primary variable and both matching axes, carried forward not derived.
 % Sources: sheet 13, movement 3, rows 2, 3, 4. Numerals: 3.
-Both demands are made along one variable. Every substrate here is run at a
-nominal spectral radius $\sigma$, and that $\sigma$ is the \textbf{operating
-point}: how hard the recurrent dynamics are driven. It is the primary variable
+To evaluate how memory and predictive capacity depend on both network structure
+and dynamics, the networks are driven to transition between stable, critical and chaotic
+regimes, by rescaling the network's connectivity eigenspectrum.
+Every substrate here is run at a
+nominal spectral radius $\sigma$, and that $\sigma$ is the operating
+point: how hard the recurrent dynamics are driven. It is the primary variable
 of this thesis, and every headline claim below is made along it.
-Two matching axes follow from the normalisation, and
+Two spectral radius matching axes follow from the normalisation, and
 Chapter~\ref{chapter:methods} establishes both (Figure~\ref{fig:F3}). Matching
 on nominal $\sigma$ holds the spectral radius fixed and lets the bulk radius
 vary; matching on $\sigma\!\cdot\!\mathrm{bulk95}$ holds the bulk radius fixed
@@ -72,28 +84,25 @@ each result below names the one it was measured on, and rests on surviving both.
 % The inhibition clause is about the ROLE of W in the dynamics, not about what
 % dMRI measures: a streamline count has no sign, a coupling does. Makes no
 % anatomical claim about long-range projections.
-Sections~\ref{sec:act3-memory-sigma} and~\ref{sec:act3-prediction-sigma} are
-measured on non-negative weights throughout, which is the recurrent connectivity
+Up until this point all experiments have instantiated a reservoir's connectivity
+with non-negative weights only, as this is the recurrent connectivity
 the human structural connectome supplies. A manipulation arrives in
 Section~\ref{sec:act3-lesion-memory}: the sign fraction $f$, the proportion of
 weights made negative. It enters as an intervention on a substrate and not as a
 second axis of the chapter. Macroscale diffusion tractography cannot represent
 the sign of a connection, so $f = 0$ is what the instrument produces rather than
-a property of the cortex, and grading $f$ upward asks what a network carrying
-inhibition would do. A streamline count is non-negative by construction, while
-the quantity it stands in for in these dynamics is a coupling, by which one
-parcel's activity raises or lowers another's. The second statement concerns how
-the results below are to be read against one another. They are measured at
-operating points that differ by more than a factor of three, and the operating
-point is not a detail of the setup but the variable the chapter is about: two of
-the findings that follow, quoted without it, make each other look false. Every
-claim below therefore names the operating point it was measured at and the axis
-it was matched on, and none should be read without them.
+a property of the cortex \footnote{A streamline tractography count is non-negative 
+by construction, while the quantity it stands in for in these dynamics is a coupling, 
+by which one cortical parcel's activity raises or lowers another's.}, and grading $f$ 
+upward asks what a network carrying inhibition would do. 
+
+
 
 
 
 
 \section{Memory along the regime axis}
+% Memory along the regime axis
 \label{sec:act3-memory-sigma}
 \bigskip
 % Section 6.2 (CROSS_ACT_SPINE.md, Act III, seven-section breakdown of 28 Aug).
@@ -134,7 +143,11 @@ it was matched on, and none should be read without them.
 % hub-targeted inhibition, all of which are 6.4's.
 
 % P1: the crossing, first. Claim A3M.1. Figure F7. Numerals: 6.
-Matched on the bulk radius, all four substrates rise together, all four reach
+To assess the extent to which the memory capacity of the networks
+depend on the dynamical regime they are being driven in, their ridge effective rank 
+was evaluated across a spectral sweep on their matched bulk radius. The input signal
+to the reservoirs is the white noise conventionally used in the memory capacity task.
+It was observed that all four substrates rise together, all four reach
 the ceiling, and they separate only on the way down (Figure~\ref{fig:F7}). The
 connectome's peak is the lowest of the four, at
 $432.4$ of a possible $448$; % TIER0 1.2
