@@ -1,0 +1,243 @@
+\chapter{Related Work}
+\label{chapter:related-work}
+
+% A few intro sentences: what is the purpose of this chapter with regards 
+% to the thesis as a whole, and how is the chapter strucured. Mention that 
+% this project is at the intersection of several deeply rooted and well 
+% established research fields, across neuroscience, dynamical systems, spectral 
+% physics, and artificial intelligence. This chapter's sole purpose is to 
+% provide the reader and adequate level of context to understand the hypothesis' 
+% motivation, and to be equipped with the necessary vocabulary and concepts to 
+% navigate the rest of this report.
+
+
+% Network Neuroscience
+\section{Networks of the brain}
+\label{section:ch3_1}
+\bigskip
+
+Network neuroscience treats a nervous system as a graph and asks what its structure implies 
+for its function. It supplies the framework within which the connectome-as-substrate question 
+of this thesis can be posed at all, since asking whether biological connectivity confers 
+computational advantage is, in the first instance, a graph-theoretic question about which 
+features of the wiring carry weight. The field's apparatus, from the construction of networks 
+out of empirical measurements to the analysis of degree, clustering, modularity, and hub 
+structure, was consolidated as a programmatic discipline by Bassett and Sporns 
+\cite{bassett2017network} and has matured into a self-conscious set of commitments 
+that this thesis inherits.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/NetworkNeuro.png}
+    \caption[Schematic of network models used in neuroscience]
+    {\textbf{Schematic of network models used in neuroscience}. 
+    Common measures of interest include \emph{degree}, which is the number of edges 
+    emanating from a node; \emph{clustering}, which is related to the prevalence of 
+    triangles; \emph{cavities}, which describe the absence of edges; \emph{hubness}, 
+    which is related to a node’s influence; \emph{paths}, which determine the potential 
+    for information transmission; \emph{communities}, or local groups of densely 
+    interconnected nodes; \emph{shortcuts}, which are one possible marker of global 
+    efficiency of information transmission; and \emph{core-periphery} structure, 
+    which facilitates local integration of information gathered from or sent to more 
+    sparsely connected areas. (Figure adapted from \cite{bassett2018nature})}
+    \label{fig:network-neuro}
+\end{figure}
+ 
+The most consistent of those commitments is that the credibility of any structural claim 
+depends on the quality of its comparison against an appropriate null model. Bassett and 
+Sporns \cite{bassett2017network} treat this as a methodological aside; Bassett et al. 
+\cite{bassett2018nature} elevate it to a validity criterion; Váša and Mišić 
+\cite{vavsa2022null} make null modelling the entire subject of a review; and Seguin et al. 
+\cite{seguin2023brain} extend the same standard to models of signal propagation. Within 
+this lineage, Váša and Mišić \cite{vavsa2022null} articulate a graded spectrum of nulls 
+running from liberal Erdős-Rényi randomisation through degree-preserving rewiring to 
+spatially and cost-constrained variants, and argue that comparison against such a spectrum 
+is how the contributions of distinct features are disentangled. This is the methodological 
+idea the thesis's null-model ladder operationalises, and which the introduction to 
+Chapter 1 named as the project's single binding commitment.
+ 
+The case for a graded ladder rather than a single null follows from two related observations. 
+The first is that what counts as non-random depends on the null chosen: Bassett and Sporns 
+\cite{bassett2017network} treat small-worldness, modularity, and rich-club structure as 
+robust regularities, but Váša and Mišić \cite{vavsa2022null} show that several dissolve under 
+degree-preserving rewiring, and Seguin et al. \cite{seguin2023brain} note that 
+small-worldness as canonically defined presupposes shortest-path signalling that is 
+biologically implausible. The second is that features induce one another as byproducts: 
+the joint presence of modules and hubs generates rich-club structure even when neither 
+was the operative driver \cite{vavsa2022null}. Attributing an effect to a single feature 
+therefore requires separating it from those it correlates with by construction, a caution 
+anticipated more loosely by Bassett et al. \cite{bassett2018nature} and Suárez et al. 
+\cite{suarez2020linking}.
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=1\textwidth]{figures/Spectrum_of_null_models.png}
+%     \caption{\textbf{A spectrum of null models}. Null models can be adapted to test a range of hypotheses. The network on the right is an observed empirical network derived from diffusion MRI. Increasing constraints imposed on the model from left to right yield graphs that retain more features from the empirical network, resulting in increasingly conservative null models. (Figure adapted from \cite{vasa2022null})}
+%     \label{fig:null-models-spectrum}
+% \end{figure}
+ 
+A further consistent finding is that direct dyadic structure cannot, on its own, 
+explain function. Suárez et al. \cite{suarez2020linking} and Seguin et al. 
+\cite{seguin2023brain} both report that roughly half the variance in functional 
+connectivity is unexplained by direct structural connectivity, because functional 
+interactions reflect polysynaptic, higher-order processes that require an explicit 
+model of signal propagation to recover. This is the field's most direct argument for 
+treating the connectome as the substrate of a dynamical process rather than a static 
+descriptor: a reservoir, in which input history is transformed by repeated propagation 
+through fixed recurrent connections, is the kind of decentralised propagation model 
+these reviews argue is necessary. Suárez et al. \cite{suarez2020linking} explicitly 
+identify reservoir computing in this role, citing the connectome-reservoir work of 
+Kawai et al. \cite{kawai2019small}, with the substantive treatment of that literature 
+deferred to Section \ref{section:ch3_3}.
+
+Running alongside this is a steady move toward annotated graphs in which microscale detail 
+such as cytoarchitecture, neurotransmitter identity, and receptor expression augments the 
+macroscale wiring \cite{bassett2017network, bassett2018nature, vavsa2022null, suarez2020linking}. 
+This is the trajectory along which the planned progression up the biological-realism axis of 
+Chapter 1 sits, with directedness, sign, and gap junctions among the annotations the field 
+is endorsing.
+ 
+Taken together, these reviews establish a graph-theoretic vocabulary for the connectome, 
+an epistemic commitment to null comparison, a recognition that structure must be coupled 
+to a propagation model to explain function, and a forward direction toward annotated graphs. 
+What they do not substantively address is the use of a connectome as the fixed recurrent 
+matrix of an artificial dynamical system in a controlled, null-laddered way: reservoir 
+computing is mentioned with substance only once across the six reviews. Cell-resolution, 
+single-organism connectomes such as that of C. elegans receive no substantive treatment, 
+the reviews being macroscale-focused on tractography-derived human and macaque networks, 
+and directed nulls preserving in- and out-degree sequences jointly, along with nulls 
+preserving sign or excitatory-inhibitory balance, receive limited treatment. These 
+omissions are taken up by the four sections that follow.
+
+
+
+
+% Connectomics
+\section{Searching for connectomes}
+\label{section:ch3_2}
+\bigskip
+
+Where network neuroscience supplies the analytic apparatus, connectomics supplies the 
+empirical substrate that apparatus operates on. Sporns et al. \cite{sporns2005human} 
+introduced the term \emph{connectome} for a comprehensive, time-invariant description 
+of the connections of a nervous system, conceived as a connection matrix whose entries 
+can be successively annotated with direction, sign, and conduction delay. Empirical maps 
+have since been produced at three nested scales: macroscale tract networks from diffusion 
+imaging \cite{sporns2011human, sporns2013human}, single-cell reconstructions of invertebrate 
+nervous systems \cite{cook2019whole, dorkenwald2024neuronal}, and a co-registered 
+structural-functional volume of mouse visual cortex \cite{microns2025functional}. 
+The thesis inherits both its current substrate and its candidate world-model substrate 
+from this lineage.
+
+\begin{figure}[ht]
+    \centering
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+            \includegraphics[width=\textwidth]{figures/C_elegans_connectome.png}
+        \caption{The C. elegans adult nervous system, neuroanatomy and connectivity. \cite{cook2019whole}}
+        \label{fig:worm-connectome}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/Mouse-visual-connectome.png}
+        \caption{Dense reconstruction of the structural connections and functions of an entire millimetre of volume of mouse visual cortex. \cite{microns2025functional}}
+        \label{fig:mouse-connectome}
+    \end{subfigure}
+    \caption{\textbf{Biological Connectomes}}
+    \label{fig:connectomes}
+\end{figure}
+ 
+A central tension organises the conceptual side of this literature. 
+The Sporns programme treats the connectome as a foundational, time-invariant ground 
+truth on which mechanistic accounts of brain function can be built 
+\cite{sporns2011human, sporns2013human}. Bargmann and Marder \cite{bargmann2013connectome} 
+push back: even the complete C. elegans connectome has been largely uninformative about 
+which connections drive specific behaviours, because parallel pathways, neuromodulatory 
+reconfiguration on a seconds-to-minutes timescale, and intrinsic neuronal dynamics together 
+let the same anatomical wiring support many different functional outputs. Recent empirical 
+work shifts the balance back. Vishwanathan et al. \cite{vishwanathan2024predicting} insert 
+a synapse-resolved zebrafish brainstem connectome directly as the weight matrix of a linear 
+rate model and statistically reproduce population-level coding properties measured in 
+separate animals, and Lin and Murthy \cite{lin2025linking} reinforce this conclusion at 
+cell-type resolution in the fly. The tension does not dissolve, since both works require 
+some biological information beyond bare topology (a sign assignment by cell type in 
+Vishwanathan, cell-type connectivity in the fly examples), but it shifts from whether 
+structure can predict function at all to how much non-structural detail is the 
+minimum needed. The thesis sits inside this updated tension, with the null-model 
+ladder designed to map which features carry weight before biological enrichment is added.
+ 
+A second pattern is the convergent retreat from treating nodes as identical, reached 
+via parcellation at macroscale \cite{sporns2011human}, via cellular dynamics and modulation 
+in invertebrates \cite{bargmann2013connectome}, and via an explicit annotated-connectome 
+programme over gene transcription, receptor density, cell-type composition, and laminar 
+architecture \cite{bazinet2023towards}. Vishwanathan et al. \cite{vishwanathan2024predicting} 
+sharpen this into a methodological necessity: their model fails without an 
+excitatory-inhibitory sign assignment by cell type. The thesis's biological-realism axis, 
+climbing through directionality, sign under Dale's principle, gap junctions, and anatomical 
+input-output routing, thus inherits a recognised programme rather than acting as an ad hoc 
+sequence, with Section \ref{subsec: networks-of-the-brain}'s field-level move toward 
+annotated graphs given specific computational consequence here.
+ 
+A third convergence is methodological. Across organisms and scales, the connectome is 
+increasingly inserted directly as the fixed weight matrix of a computational model whose 
+dynamics are then asked to recover observed activity 
+\cite{vishwanathan2024predicting, lin2025linking}. The accompanying studies of the MICrONS 
+Consortium \cite{microns2025functional} extend this into mouse cortex, identifying a general 
+wiring rule linking excitatory connection probability to functional similarity across layers 
+and visual areas, and supplying a trained foundation model that predicts cortical responses 
+to arbitrary visual stimuli \cite{wang2025foundation}. The thesis's connectome-as-reservoir 
+framing belongs to this family. The specific commitment it adds, namely fixed recurrent 
+weights with only a linear readout trained, evaluated against a graded null-model ladder, 
+is set up in Section \ref{subsec: reservoir-computing} and applied to the 
+connectome-reservoir literature in Section \ref{subsec: con-constrained-nets}.
+ 
+The empirical data the thesis can draw on now spans a continuum. Cook et al. 
+\cite{cook2019whole} provides the substrate of every experiment to date, with 
+quantitative chemical and gap junction matrices for both sexes of C. elegans, edge weights 
+obtained from counts of serial EM sections traversed by each synaptic structure, and a 
+graph organised into three feedforward interneuron layers and a fourth cross-cutting layer; 
+left-right variability of roughly 10 to 40 per cent in chemical edge weights, reported 
+alongside an explicit framing of the matrices as a conceptualisation assembled across 
+multiple animals, sets the empirical floor against which any null effect must be judged. 
+The FlyWire reconstruction of Dorkenwald et al. \cite{dorkenwald2024neuronal} at 
+approximately 140,000 neurons and the MICrONS mouse visual cortex at over 200,000 cells 
+\cite{microns2025functional} extend this continuum at single-cell resolution into vertebrate 
+cortex, with empirical synapse-resolved edge weights now a cross-scale standard and 
+completeness now a continuum rather than a binary. Wilcox et al. \cite{wilcox2026network} 
+test the same intuition at parcellated human macroscale, reporting that weak, long-range 
+connections and small-world topology jointly predict a latent general-intelligence factor. 
+The MICrONS volume in particular, as the only co-registered structural-functional cortical 
+dataset, is the natural candidate substrate for the world-model stage at which Section 
+\ref{subsec: world-models} closes the chapter.
+ 
+Taken together, this literature establishes the connectome as a concept whose empirical 
+realisation now spans the scale continuum the thesis works within, supplies multi-organism 
+precedent for treating the connectome as a fixed weight matrix, and identifies which 
+biological annotations carry computational consequence. 
+
+
+
+
+
+
+
+
+% Neuromorphic networks
+\section{Neuromorphic networks}
+\label{section:ch3_3}
+\bigskip
+
+
+% See neuromorphic hierarchical modular reservoirs paper
+% While a small number of network properties have been related to performance 
+% in reservoir computing tasks 71,72,73,74,75,76,77,78,79,80, how neural network 
+% architecture supports cognitive capacity remains largely unknown.
+
+
+% % Specral analysis
+% \section{Exploration of the eigenspectrum}
+% \label{section:ch3_4}
+% \bigskip
+
+% Very brief.
