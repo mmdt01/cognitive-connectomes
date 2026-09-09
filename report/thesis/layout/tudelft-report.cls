@@ -40,7 +40,9 @@
 \RequirePackage{bbm}
 \RequirePackage{multicol}
 \RequirePackage{tkz-euclide}
-\RequirePackage{subfig}
+% subfig conflicts with subcaption (it pre-defines c@subfigure, which makes
+% subcaption skip \DeclareCaptionSubType{figure}). Nothing here uses \subfloat.
+% \RequirePackage{subfig}
 \RequirePackage{pgfplots}
 \RequirePackage{mathrsfs}
 \RequirePackage{svg}

@@ -25,6 +25,53 @@
 % Choose accent color
 \colorlet{accent}{tudelft-red}
 
+% _____ CALLOUT BOXES _____
+
+% tcolorbox is required here rather than in main.tex because this file is
+% \input by the class (cls:87), so it must be loaded by this point for the
+% definitions below to see it.
+\RequirePackage[most]{tcolorbox}
+
+% The contributions/discoveries callout that closes a chapter. Usage:
+%     \begin{contributions}                  % default title
+%         \item \textbf{Lead-in.} Body text.
+%     \end{contributions}
+%     \begin{contributions}[Another title]   % title overridden
+\newtcolorbox{contributionsbox}[1]{
+    enhanced, breakable, sharp corners,
+    colback=primary!4, colframe=primary, boxrule=0.9pt,
+    title={#1}, fonttitle=\bfseries, coltitle=white,
+    left=5mm, right=5mm, top=4mm, bottom=4mm,
+}
+
+\newenvironment{contributions}[1][Contributions and discoveries]
+    {\begin{contributionsbox}{#1}%
+     \begin{itemize}[leftmargin=5.5mm, itemsep=1.6ex, topsep=0.5ex, parsep=0pt,
+                     label=\textcolor{primary}{\rule[0.35ex]{3.6pt}{3.6pt}}]}
+    {\end{itemize}\end{contributionsbox}}
+
+% The key-idea callout that closes a section. Deliberately lighter than the
+% contributions box above, since several appear in one chapter: white body, a
+% hairline frame and a tinted title bar rather than a solid one. Usage:
+%     \begin{keyideas}                     % title reads "Key ideas"
+%         \item \textbf{Lead-in.} Body text.
+%     \end{keyideas}
+%     \begin{keyideas}[Timescales]         % title reads "Timescales"
+\newtcolorbox{keyideasbox}[1]{
+    enhanced, breakable, arc=0.8mm,
+    colback=white, colframe=primary!55, boxrule=0.4pt,
+    colbacktitle=primary!8, coltitle=primary, fonttitle=\bfseries,
+    title={#1},
+    left=4mm, right=4mm, top=3mm, bottom=3mm,
+    before skip=3.5mm, after skip=3.5mm,
+}
+
+\newenvironment{keyideas}[1][Key ideas]
+    {\begin{keyideasbox}{#1}%
+     \begin{itemize}[leftmargin=5mm, itemsep=1.2ex, topsep=0.3ex, parsep=0pt,
+                     label=\textcolor{primary!70}{\rule[0.35ex]{3pt}{3pt}}]}
+    {\end{itemize}\end{keyideasbox}}
+
 % _____ PRIMITIVE STYLES _____
 
 \tikzstyle{block} = [
