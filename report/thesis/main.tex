@@ -13,7 +13,7 @@
 \graphicspath{{../figures/}{figures/}}
 % \usepackage{subfigure}
 \usepackage{subcaption}
-\usepackage{subfig}
+% \usepackage{subfig}  % clashes with subcaption; see cls:43
 % \usepackage{algorithm}   % clashes: the class already loads algorithm2e (cls:55)
 \usepackage{algpseudocode}
 \usepackage{listings}
@@ -25,6 +25,7 @@
 \usepackage{afterpage}
 \usepackage[figuresleft]{rotating}
 \usepackage{caption}
+\usepackage{dirtytalk}
 
 % additional helpers
 \newcommand{\bracegap}{\vphantom{\rule[-1.0ex]{0pt}{0pt}}}
@@ -104,15 +105,15 @@
     %TC:endignore
     \mainmatter
     \input{nomenclature}
-    \input{mainmatter/chapter-1-introduction}              
-    \input{mainmatter/chapter-2-related-work}   
-    \input{mainmatter/chapter-3-methods} 
+    \input{mainmatter/chapter-1-introduction}  
+    \input{mainmatter/chapter-2-prelims.tex}            
+    \input{mainmatter/chapter-3-related-work}    
     \input{mainmatter/chapter-4-act-I}
     \input{mainmatter/chapter-5-act-II}
     \input{mainmatter/chapter-6-act-III} 
-    % \input{mainmatter/chapter-7-act-IV}
     \input{mainmatter/chapter-8-discussion}
     \input{mainmatter/chapter-9-conclusion}
+    \input{mainmatter/chapter-10-methods}
     
     % Bibliography with numeric style
     \printbibliography[title=References]
