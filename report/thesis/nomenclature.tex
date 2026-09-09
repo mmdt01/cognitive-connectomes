@@ -10,31 +10,33 @@
     Term & Definition \\
     \midrule\endhead % Add abbreviations alphabetically here:
 
-    \textbf{Bulk:} & The band of eigenvalues remaining once the Perron root is set aside by position. It is not set aside by the statistic: $\mathrm{bulk95}$ is a percentile over the full spectrum with the Perron eigenvalue inside the population. \\
+    \textbf{Bulk} & The band of eigenvalues remaining once the Perron root is set aside by position. It is not set aside by the statistic: $\mathrm{bulk95}$ is a percentile over the full spectrum with the Perron eigenvalue inside the population. \\
 
-    \textbf{Cell:} & One combination of substrate, operating point and seed. Substrate-level statistics in this thesis are medians over cells, and the number of cells is stated wherever one is quoted. \\
+    \textbf{Cell} & One combination of substrate, operating point and seed. Substrate-level statistics in this thesis are medians over cells, and the number of cells is stated wherever one is quoted. \\
 
-    \textbf{Common mode:} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
+    \textbf{Common mode} & A pattern of activity in which all units move together, so that it appears in the mean of the state matrix rather than in the fluctuations about that mean. \\
 
-    \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity~\cite{atasoy2016human}. \\
+    \textbf{Connectome harmonics} & The eigenvectors of the graph Laplacian of the connectome, ordered from smoothest to most oscillatory: the network's analogue of Fourier modes, and shown to structure measured cortical activity. \\
 
     \textbf{Criticality} & The operating point at which the leading eigenvalue of the scaled recurrent matrix reaches one, which under nominal scaling is $\sigma = 1$. Distinct from $\mathrm{sr\_crit}$, which is the larger operating point at which the bulk edge reaches one. \\
 
-    \textbf{Curvature:} & The mean angle between successive displacements along the trajectory, a measure of the manifold's temporal axis. \\
+    \textbf{Curvature} & The mean angle between successive displacements along the trajectory, a measure of the manifold's temporal axis. \\
 
     \textbf{Effective spectral radius} & The spectral radius of the recurrent operator linearised about the network's driven state. An empirical locator of where free-running generation breaks, not a stability criterion. \\
 
-    \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates used here are symmetric, so their eigenvalues are real and the spectrum is a distribution on the real line. \\
+    \textbf{Eigenspectrum} & The set of eigenvalues of a matrix. The substrates are symmetric at $f = 0$, so their eigenvalues are real and the spectrum is a distribution on the real line; node-wise signing breaks this symmetry. \\
 
-    \textbf{Floor sensitivity:} & The rate at which $d_{\mathrm{eff}}$ falls per e-fold rise in the regularisation, with the note that it vanishes at both ends of the spectrum, so a low value never interprets itself. \\
+    \textbf{Floor sensitivity} & The rate at which $d_{\mathrm{eff}}$ falls per e-fold rise in the regularisation, with the note that it vanishes at both ends of the spectrum, so a low value never interprets itself. \\
 
     \textbf{Gap ratio} & The Perron root divided by the absolute bulk radius. Identically the inverse of $\mathrm{bulk95}$ and identically $\mathrm{sr\_crit}$: one quantity under three names. \\
 
-    \textbf{Gram matrix} & For a state matrix $A$, the un-centred second moment $A^{\top}A$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
+    \textbf{Gram matrix} & For a state matrix $\mathbf{A}$, the un-centred second moment $\mathbf{A}^{\top}\mathbf{A}$. It is the matrix a linear readout inverts when it is fitted, so its eigenvalues determine which directions of the state space that readout can use. \\
 
     \textbf{Gram spectrum} & The eigenvalues of the Gram matrix. A property of a substrate at an operating point under a given input, not only of its recurrent connectivity. \\
 
     \textbf{Lyapunov time} & The characteristic timescale over which nearby trajectories of a chaotic system separate; used here to express prediction horizons independently of the integration step. \\
+
+    \textbf{Mode} & A pattern of activity across the population that the connectivity returns unchanged apart from its amplitude, that is, an eigenvector of $\mathbf{W}$. The units involved keep their relative activation and so rise and fall together; a unit may belong to many modes at once. \\
 
     \textbf{Null ladder} & The family of randomised substrates the connectome is compared against, each destroying some part of its organisation and holding the rest fixed. \\
 
@@ -44,55 +46,90 @@
 
     \textbf{Perron mode} & The eigenvector belonging to the leading eigenvalue of a non-negative matrix. The Perron--Frobenius theorem guarantees that this eigenvalue is real, positive and largest in modulus, and that its eigenvector is non-negative throughout, so the mode is a pattern in which every unit has the same sign. \\
 
+    \textbf{Reservoir} & A recurrent network whose input and recurrent weights are fixed rather than trained, so that only a linear readout is fitted. The connectivity under test therefore survives training unchanged. \\
+
     \textbf{Ridge effective rank} & The number of directions of the state matrix that survive ridge regularisation, each counted by how far its Gram eigenvalue stands above the regularisation strength; equivalently, the effective degrees of freedom of the fitted readout. \\
 
     \textbf{Ridge floor} & The ridge regularisation strength seen as a level within the Gram spectrum: directions whose eigenvalues stand well above it are available to the readout, and those well below it are suppressed. \\
 
     \textbf{Spectral gap} & The separation between the Perron root and the bulk of the eigenspectrum, measured here as the gap ratio. \\
 
-    \textbf{Supercritical} & Used throughout as a label for the filter $\sigma \geq 3.05$, the connectome's own $\mathrm{sr\_crit}$ rounded to the measurement grid and applied to every substrate. It is far above criticality proper and describes the linear operator rather than the realised dynamics. \\
+    \textbf{Spectral radius} & The largest eigenvalue of a matrix in modulus, $\rho(\mathbf{W}) = \operatorname{max}_i|\lambda_i|$. It sets whether perturbations decay or grow, and rescaling $\mathbf{W}$ to a chosen value of it is how a network's operating point is fixed. \\
 
     $\mathrm{\textbf{sr\_crit}}$ & The nominal spectral radius at which a substrate's own bulk edge reaches one, identically $1/\mathrm{bulk95}$ and identically the gap ratio. It is a criticality scale each substrate carries with it. It is not a critical point: criticality proper is at $\sigma = 1$, and at $\sigma = \mathrm{sr\_crit}$ the leading mode has long been expansive while five per cent of modes have just joined it. \\
+
+    \textbf{Supercritical} & Used throughout as a label for the filter $\sigma \geq 3.05$, the connectome's own $\mathrm{sr\_crit}$ rounded to the measurement grid and applied to every substrate. It is far above criticality proper and describes the linear operator rather than the realised dynamics. \\
 
     \textbf{Time-centring} & Subtraction of each unit's mean over time from the state matrix, which separates the fixed pattern of activity a network holds throughout a run from the fluctuations about it. \\
 
     \textbf{Valid prediction time (VPT)} & The duration, in Lyapunov times, for which a free-running network's generated trajectory stays within a fixed error of the true one. \\
 
-    \textbf{Weight-permuted control:} & The connectome's own graph carrying its own weights reassigned across its own edges. It holds topology and the exact weight multiset fixed and varies only which edge carries which weight, so it is a control rather than a null, and it is what localises an effect to weight placement. \\
+    \textbf{Weight-permuted control} & The connectome's own graph carrying its own weights reassigned across its own edges. It holds topology and the exact weight multiset fixed and varies only which edge carries which weight, so it is a control rather than a null, and it is what localises an effect to weight placement. \\
 
     \bottomrule
 \end{longtable}
+
+
 
 
 \newpage
 \section*{Notation:}
 \bigskip
 
+Matrices and vectors are set in bold; scalars are not.
+
 \begin{longtable}{p{2.5cm}p{12cm}}
     \toprule
     Symbol & Meaning \\
     \midrule\endhead
 
-    $W$ & Recurrent weight matrix of the reservoir, before rescaling \\
+    % Network and dynamics
+    $\mathbf{W}$ & Recurrent weight matrix of the reservoir, before rescaling \\
+    $w_{ij}$ & Strength of the connection from unit $j$ to unit $i$; zero where no connection exists \\
     $N$ & Number of units, equal to the number of parcels of the connectome \\
-    $\sigma$ & Nominal spectral radius; the operating point \\
-    $\sigma_{eff}$ & Effective spectral radius \\
-    $\lambda_1$ & Perron root, the leading eigenvalue of $W$ \\
-    $\mathrm{abs\_bulk}$ & Absolute bulk radius in raw units of $W$ \\
+    $\mathbf{x}(t)$ & Network state at time $t$; one row of $\mathbf{A}$ \\
+    $\mathbf{u}(t)$ & Input signal at time $t$ \\
+    $\mathbf{W}_{\!\mathrm{in}}$ & Fixed input matrix, entries drawn from $\{-1,+1\}$ and scaled \\
+    $\mathbf{I}(t)$ & External input drive in the continuous-time formulation \\
+    $\phi$ & Nonlinearity mapping membrane potential to firing rate, taken as $\tanh$ \\
+    $\tau$ & Neuronal time constant \\
+    $\Delta t$ & Integration step of the forward Euler discretisation \\
+    $\gamma$ & Leak rate, $\Delta t / \tau$; the discrete counterpart of the time constant \\
+    $\mathbf{I}_N$ & Identity matrix of size $N$ \\
+    $\mathbf{1}$ & Vector of ones \\
+    \addlinespace
+
+    % Spectrum
+    $\lambda_i$ & Eigenvalues of $\mathbf{W}$ \\
+    $\lambda_1$ & Leading eigenvalue of $\mathbf{W}$; the Perron root where $\mathbf{W}$ is non-negative \\
+    $\mathbf{v}_i$ & Eigenvectors of $\mathbf{W}$; the modes of the network \\
+    $\mathbf{V}$ & Matrix whose columns are the eigenvectors $\mathbf{v}_i$ \\
+    $\boldsymbol{\Lambda}$ & Diagonal matrix of eigenvalues, $\mathbf{V}^{-1}\mathbf{W}\mathbf{V}$ \\
+    $\mathbf{c}(t)$ & State expressed in the basis of modes, $\mathbf{V}^{-1}\mathbf{x}(t)$ \\
+    $\rho(\cdot)$ & Spectral radius of a matrix, $\operatorname{max}_i|\lambda_i|$ \\
+    $\sigma$ & Nominal spectral radius; the value to which $\rho(\mathbf{W})$ is rescaled, and the operating point at which a network is run \\
+    $\sigma_{\mathrm{eff}}$ & Effective spectral radius \\
+    $\mathrm{abs\_bulk}$ & Absolute bulk radius in raw units of $\mathbf{W}$ \\
     $\mathrm{bulk95}$ & 95th percentile of $|\lambda|$ over the spectrum, as a fraction of $|\lambda_1|$ \\
     $f$ & Sign fraction, the proportion of weights made negative \\
     \addlinespace
-    $A$ & State matrix, one row per retained timestep and one column per unit \\
+
+    % States
+    $\mathbf{A}$ & State matrix, one row per retained timestep and one column per unit \\
     $T_{\mathrm{eff}}$ & Number of timesteps retained after the warmup is discarded \\
-    $m$ & Vector of per-unit means over time \\
-    $\tilde{A}$ & Time-centred state matrix, $A - \mathbf{1}m^{\top}$ \\
+    $\mathbf{m}$ & Vector of per-unit means over time \\
+    $\tilde{\mathbf{A}}$ & Time-centred state matrix, $\mathbf{A} - \mathbf{1}\mathbf{m}^{\top}$ \\
     $\bar{x}$ & Common-mode amplitude: its absolute value is taken per run before any aggregation \\
     \addlinespace
-    $G$ & Gram matrix, $A^{\top}A$ \\
-    $\lambda_i$ & Eigenvalues of $W$ \\
-    $g_i$ & Eigenvalues of $G$ \\
-    $\mu_i$ & Eigenvalues of the state covariance, $\tilde{A}^{\top}\tilde{A} / T_{\mathrm{eff}}$ \\
+
+    % Readout and measures
+    $\mathbf{Y}$ & Target matrix, one row per retained timestep and one column per target dimension \\
+    $n_y$ & Dimension of the target signal; one for the memory and scalar prediction tasks, three for Lorenz \\
+    $\mathbf{W}_{\!\mathrm{out}}$ & Trained linear readout weights \\
     $\alpha$ & Ridge regularisation strength \\
+    $\mathbf{G}$ & Gram matrix of the states, $\mathbf{A}^{\top}\mathbf{A}$; the matrix a fitted readout inverts \\
+    $g_i$ & Eigenvalues of $\mathbf{G}$ \\
+    $\mu_i$ & Eigenvalues of the state covariance, $\tilde{\mathbf{A}}^{\top}\tilde{\mathbf{A}} / T_{\mathrm{eff}}$ \\
     $d_{\mathrm{eff}}$ & Ridge effective rank: the dimensionality of the state space as the fitted readout can use it \\
     $\mathrm{PR}$ & Participation ratio \\
     $k$ & Number of leading basis vectors in a projection \\
@@ -112,11 +149,19 @@
     \midrule\endhead % Add abbreviations alphabetically here:
 
     DL & Deep Learning \\
+    E/I & Excitatory/Inhibitory \\
+    ER & Erdős–Rényi \\
+    dMRI & diffusion Magnetic Resonance Imaging \\
     DNN & Deep Neural Network \\
     GNN & Graph Neural Network \\
+    PR & Participation Ratio \\
+    RC & Reservoir Computing \\
     RNN & Recurrent Neural Network \\
     ML & Machine Learning \\
     MC & Memory Capacity \\
+    NARMA & Nonlinear AutoRegressive Moving Average \\
+    SC & Structural Connectome \\
+    VPT & Valid Prediction Time \\
 
     \bottomrule
 \end{longtable}
