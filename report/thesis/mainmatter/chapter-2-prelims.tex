@@ -125,19 +125,28 @@ from simply analysing the connectivity matrix's eigenspectrum?
 % Eigenspectrum dynamics schematic
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/Eigenspectrum-dynamics.png}
+    \includegraphics[width=1\textwidth]{figures/Eigenspectra.png}
     \caption[What the spectrum tells us about dynamics]{%
-    \textbf{What the spectrum tells us about dynamics.}
-    \textbf{(a)} Stability. Spectra at three operating points, with the unit circle marked, and the
-    activity each produces: below $\rho(\mathbf{W}) = 1$ a perturbation decays, at one it is sustained,
-    above one it grows.
-    \textbf{(b)} Timescales. Two spectra of equal radius but different arrangement. Clustered
-    eigenvalues give modes that decay together, producing synchronised activity; spread eigenvalues
-    give staggered decay across a range of timescales.
-    \textbf{(c)} Dominant directions. Two spectra sharing a leading eigenvalue but differing in their
-    separation from the bulk, with the resulting activity decomposed into the leading mode and the
-    remainder. A large gap leaves the leading mode governing the response almost alone; a small one
-    leaves activity distributed across many modes.}
+    \textbf{What the spectrum tells us about dynamics.} Each spectrum is drawn in
+    the complex plane with the unit circle marked in grey.
+    \textbf{(a)} \textit{Stability and regime.} Three operating points and the
+    activity each produces. Every mode evolves as $\lambda_i^{t}$, so activity
+    decays when the spectral radius $\rho(\mathbf{W})$ lies below one, is sustained
+    at one, and grows above it. The spectral radii are exaggerated relative to the
+    traces beneath, which would otherwise differ by several orders of magnitude over
+    the window shown.
+    \textbf{(b)} \textit{Timescales.} Two spectra of equal radius but different
+    arrangement. Clustered eigenvalues share a modulus and so decay under a common
+    envelope (dashed), differing only in frequency and giving synchronised activity;
+    spread eigenvalues decay at staggered rates, so fast modes vanish while slow
+    ones persist.
+    \textbf{(c)} \textit{Dominant directions.} Two spectra sharing a leading
+    eigenvalue $\lambda_1$ but differing in its separation from the bulk, with the
+    activity of five units shown against the leading mode alone (dashed). A wide gap
+    leaves the units decaying in parallel, all following one shared pattern and
+    differing only in how strongly they load onto it; a narrow gap leaves them
+    oscillating independently well beyond it. Both spectra are non-negative, so
+    $\lambda_1$ is real and its mode is a common mode across the population.}
     \label{fig:Eigenspectra-dynamics}
 \end{figure}
 
