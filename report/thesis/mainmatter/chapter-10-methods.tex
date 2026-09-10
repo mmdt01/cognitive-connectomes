@@ -486,10 +486,95 @@ point in this thesis.
 
 
 
+\section{Memory capacity}
+\label{sec:memory-capacity}
+\bigskip
+
+
+To evaluate reservoir memory, we chose the widely used memory capacity task, which measures 
+the reservoir’s ability to preserve the representations of past stimuli in continuing iterations 
+of its internal state computation.  In this task, the readout module is trained to reproduce a 
+time-delayed version of a random uniformly distributed input signal $\mathbf{u}(t) \sim \mathcal{U}(-1, 1)$.
+Specifically, $\mathbf{y}(t) = \mathbf{u}(t - \tau)$, where $\tau$ is a given time lag.
+Here, we consider T=X time lags, monotonically increased in one time point steps in the range.
+Note that there are as many linear units as there are time lags in the readout module, 
+and they are all trained independently.
+
+We separately generated a training and a testing input signal of 2100 time points each. 
+Different signals were used for each network evaluated. Reservoir states were simulated 
+separately for each time series. The first 100 time points were discarded from the resulting 
+reservoir state trajectories to account for initial transients. 
+The training reservoir states of the selected output nodes were then used to train the 
+readout module to reproduce the input signal at different time lags. Finally, the testing 
+reservoir states were used to test the performance. For every $\tau$, performance was measured 
+using the $\mathbf{R}^{2}$ coefficient of determination regression score.
+Regression scores were then averaged across all time delays to obtain the memory capacity (MC):
+
+\begin{equation}
+    MC = \frac{\sum_{\tau} \mathbf{R}^2(\mathbf{y}, \widehat{\mathbf{y}})}{T},
+    \label{eq:memory_capacity}
+\end{equation}
 
 
 
 
+
+\section{Predictive capacity}
+\label{sec:predictive-capacity}
+\bigskip
+
+To evaluate chaotic time series prediction, we use two standard reservoir computing tasks: 
+the Lorenz \cite{lorenz1963deterministic} and the NARMA10 tasks \cite{verstraeten2007experimental}. 
+We chose the Lorenz task because it models a real-world 
+weather system, i.e., atmospheric convection, and the NARMA task because it combines 
+nonlinearity and memory, making it highly complex. Both tasks were implemented as one-step-ahead 
+prediction tasks, and performance was measured using the $\mathbf{R}^{2}$ coefficient of determination.
+
+As for the memory capacity task, we separately generated a training and a testing input 
+signal of 2100 time points each and a warmup period of 100 time points was discarded from 
+the resulting reservoir state trajectories. The signals were generated using the reservoirpy 
+open-source package \cite{trouvain2020reservoirpy}.
+Different signals were also used for each network evaluated. An input module was randomly 
+selected among the first 8 modules. One input node per input signal was then randomly selected 
+from the input module. All the 350 nodes in all the other 7 modules were used as output. 
+A single readout module was trained for all outputs.
+
+\subsubsection{Lorenz}
+\label{subsec:lorenz}
+
+The state $(x, y, z)$ of the Lorenz system evolves according to the following set of three 
+coupled nonlinear differential equations: 
+
+\begin{equation}
+    \begin{aligned}
+        \frac{dx}{dt} &= \sigma(y - x) \\
+        \frac{dy}{dt} &= x(\rho - z) - y \\
+        \frac{dz}{dt} &= xy - \beta z,
+    \end{aligned}
+    \label{eq:lorenz_system}
+\end{equation}
+
+with standard parametrization ($\sigma$ = 10, $\beta$ = 8/3, $\rho$ = 28) for chaotic behavior. 
+The system state is initialized following a uniform distribution in [− 20, 20] for each variable, 
+and the time series is approximated using a Runge-Kutta method of order 5(4) with time step 
+$\delta t = 0.03$.
+
+
+\subsubsection{NARMA}
+\label{subsec:narma}
+
+The nonlinear autoregressive moving average (NARMA) system is defined on discrete time. 
+Let the state and input of the system at time $t$ be $y_{t}$ and $u_{t}$, respectively. 
+The tenth-order NARMA system (NARMA-10) is expressed by: 
+
+\begin{equation}
+    y_{t+1} = \alpha y_t + \beta y_t \sum_{i=0}^{9} y_{t-i} + \gamma u_t u_{t-9} + \delta
+    \label{eq:narma}
+\end{equation}
+
+Following previous work, parameters ($\alpha$, $\beta$, $\gamma$, $\delta$) are set to 
+(0.3, 0.05, 1.5, 0.1). The system state is initialized at 0, and the input signal follows 
+a uniform distribution in [0, 0.45].
 
 
 
