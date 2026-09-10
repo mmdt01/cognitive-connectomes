@@ -165,7 +165,7 @@ to 0.0431 % TIER0 1.3
 within the four-substrate ladder. The median commutes with monotone transforms,
 so the two computation orders agree and $\mathrm{sr\_crit}$ can be reproduced by
 inverting the reported central $\mathrm{bulk95}$. % TIER0 1.3
-The absolute bulk radius in raw units of $W$ is
+The absolute bulk radius in raw units of $\mathbf{W}$ is
 $\mathrm{median}(\mathrm{bulk95}) \times \mathrm{median}(|\lambda_1|)$, the
 product of the medians, which is the only aggregation under which the identity
 $|\lambda_1| / \mathrm{abs\_bulk} = 1/\mathrm{bulk95} = \mathrm{sr\_crit}$
@@ -243,7 +243,7 @@ forward rather than re-deriving it.
 
 Every measure of activity in this thesis is a function of one object. Driving a
 reservoir with an input signal and recording every unit at every timestep gives
-the state matrix $A \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$, a trajectory
+the state matrix $\mathbf{A} \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$, a trajectory
 through an $N$-dimensional space with one point per timestep, whose shape is what
 the phrase \emph{activity manifold} refers to. Runs are
 3000 timesteps with the first 500 discarded as warmup, % A2 2.5
@@ -253,22 +253,22 @@ The memory-capacity design carries no bias column, so its Gram spectrum has
 the two prediction tasks carry one and have 449. % A2 2.5
 
 A linear readout does not see the trajectory. It sees the matrix of pairwise
-inner products between the units' time series, the Gram matrix $G = A^{\top}A$,
+inner products between the units' time series, the Gram matrix $\mathbf{G} = \mathbf{A}^{\top}\mathbf{A}$,
 whose entry $(i,j)$ is unit $i$'s time series dotted with unit $j$'s. That matrix
 records how the units co-vary and nothing else, fixing the shape of the
 trajectory up to a rotation: two networks whose states have the same Gram matrix
 have the same activity manifold in every respect a readout could detect, however
 differently the two are wired. It is also, literally, the matrix a ridge readout
 inverts, since the fit is
-$\hat{w} = (G + \alpha I)^{-1}A^{\top}y$. The companion object $AA^{\top}$
+$\hat{\mathbf{w}} = (\mathbf{G} + \alpha \mathbf{I})^{-1}\mathbf{A}^{\top}\mathbf{y}$. The companion object $\mathbf{A}\mathbf{A}^{\top}$
 describes the geometry over time rather than over units and is where the shape of
 the trajectory as a path lives; the two share their non-zero eigenvalues, so the
 phrase \emph{the Gram spectrum} is unambiguous, and it is the first that is
 measured here.
 
-Writing $m = T_{\mathrm{eff}}^{-1}A^{\top}\mathbf{1}$ for each unit's mean over
-time and $\tilde{A} = A - \mathbf{1}m^{\top}$ for the time-centred states,
-expanding $A^{\top}A$ gives Equation~\ref{eq:gram-split} exactly: the
+Writing $\mathbf{m} = T_{\mathrm{eff}}^{-1}\mathbf{A}^{\top}\mathbf{1}$ for each unit's mean over
+time and $\tilde{\mathbf{A}} = \mathbf{A} - \mathbf{1}\mathbf{m}^{\top}$ for the time-centred states,
+expanding $\mathbf{A}^{\top}\mathbf{A}$ gives Equation~\ref{eq:gram-split} exactly: the
 fluctuations about the mean plus a rank-one term holding the time-average.
 Centring subtracts each unit's mean \emph{over time}, not the mean over units,
 and the implementation agrees with a direct covariance computation to
@@ -281,7 +281,7 @@ Gram matrix, deliberately, because the un-centred matrix is the one the solver
 inverts.
 
 One thing is not attempted anywhere in this thesis. The position of a Gram
-spectrum is never obtained analytically from the eigenvalues of $W$. The
+spectrum is never obtained analytically from the eigenvalues of $\mathbf{W}$. The
 nonlinearity and the statistics of the input both intervene, and the same
 recurrent matrix driven at different operating points puts its Gram spectrum in
 materially different places, so the link Chapter~\ref{chapter:act-II} draws
@@ -310,7 +310,7 @@ the approximation cannot move an ordering.
 
 The ridge effective rank of Equation~\ref{eq:deff} is not a descriptor applied to
 a fit from outside. Written in trace form,
-$d_{\mathrm{eff}}(\alpha) = \operatorname{tr}\bigl[G(G + \alpha I)^{-1}\bigr]$,
+$d_{\mathrm{eff}}(\alpha) = \operatorname{tr}\bigl[\mathbf{G}(\mathbf{G} + \alpha \mathbf{I})^{-1}\bigr]$,
 it is the effective degrees of freedom of the fitted readout in the standard
 sense~\cite{hastie2009elements}: a property of the fit itself. That is what makes
 it the natural count here rather than one choice among many. The alternatives
@@ -323,7 +323,7 @@ direction is available depends on what is reading them.
 
 The name collides with an established one. \emph{Effective rank} is also used for
 a quantity computed on the recurrent matrix
-itself~\cite{clark2025connectivity}. That is a property of $W$; the measure used
+itself~\cite{clark2025connectivity}. That is a property of $\mathbf{W}$; the measure used
 here is computed on the states the network produces when driven, at a stated
 operating point, by a stated input. The two are related, since the states are the
 network's, but they are not the same measurement and no result of this thesis
@@ -415,7 +415,7 @@ than folding them in.
     $\sigma = 1$ and one near that condition's own
     $\mathrm{sr\_crit}$, % A2 audit 23
     so its three conditions span four distinct radii between them while no cell
-    was recorded at more than two.Radii are
+    was recorded at more than two. Radii are
     nominal spectral radii. The two grids are not interchangeable, and a panel
     drawn from both says so.}
     \label{tab:methods-captures}
