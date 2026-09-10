@@ -18,7 +18,7 @@
 % \section{Measures}
 
 
-\section{The Connectivity Substrate}
+\section{The connectivity substrate}
 \label{sec:methods-substrate}
 \bigskip
 
@@ -103,7 +103,7 @@ edge count fixed.
     \begin{tabular}{lccccccc}
         \toprule
         & no. of & edges, & non-neg. & degree & clustering & modularity & weight \\
-        & nodes & density & weights & sequence &  &  & placement \\
+        & nodes & density & weights & sequence &  &  & assignment \\
         \midrule
         \textbf{connectome} & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
         weight-permuted & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & --- \\
@@ -174,72 +174,28 @@ holds. % TIER0 3.1
 
 
 
-\section{The comparison problem: two matching axes}
+\section{What the matching axis costs}
 \label{sec:methods-matching}
 \bigskip
-% Carries A1.6. Figure F3. Named in CROSS_ACT_SPINE.md under Act I as the
-% section Act I owns in chapter 3; Chapters 5 and 6 carry it forward rather
-% than re-deriving it. A1.7 is NOT claimed here: see the audit note.
+% Carries A1.6's demonstration only. The argument itself is in Section
+% sec:act1-handover; this section is the measured cost of the choice.
 % FORBIDDEN: "compact bulk"; the crossing quoted without its axis; any claim
 % that one axis is the correct one; "the connectome is a better reservoir".
 
-Comparing substrates requires putting them at the same operating point, and on
-these substrates there is no single way to do it. The reason is
-Chapter~\ref{chapter:act-I}'s result. The four absolute bulk radii agree to
-4.4\% % TIER0 3.1
-of their mean while their Perron roots run from
-0.1061 to 0.1889, % TIER0 3.1
-so the substrates differ in essentially one quantity, and a matching rule must
-choose which end of the spectrum it holds fixed.
+Section~\ref{sec:act1-handover} sets out the two axes on which these substrates
+can be matched, and why neither is neutral: the nominal spectral radius
+$\sigma$, which divides each matrix by its own $|\lambda_1|$ and so holds the
+Perron root fixed, and the product $\sigma \cdot \mathrm{bulk95}$, which holds
+the bulk edge fixed instead. What follows is what that choice costs on a
+measured result.
 
-Scaling each substrate to a nominal spectral radius $\sigma$ divides it by its
-own $|\lambda_1|$, which sets the leading eigenvalue to $\sigma$ exactly and
-leaves the bulk where it falls. It is the normalisation the connectome-reservoir
-literature uses \cite{suarez2021learning, suarez2024connectome,
-milisav2026neuromorphic}. Under it the four bulks, expressed as fractions of
-their own Perron roots, spread
-47.3\%: % TIER0 3.1
-the same bulks that agreed to 4.4\% in raw units. Nothing about them has moved
-between those two numbers, only the divisor, and the divisor is the one quantity
-the comparison is about. A nominal-matched comparison therefore holds the Perron
-root fixed and lets each substrate sit at a different distance from its own
-$\mathrm{sr\_crit}$.
-
-The alternative is the product $\sigma \cdot \mathrm{bulk95}$, which holds the
-bulk edge fixed instead: at $\sigma \cdot \mathrm{bulk95} = 1$ every substrate's
-bulk edge reaches one, whatever its Perron root. That axis exists because each
-substrate arrives carrying its own $\mathrm{bulk95}$, and it is available only
-for that reason.
-
-Neither axis is neutral, and it is worth being explicit about why not, because
-the temptation is to treat the second as a correction to the first. Each holds
-fixed exactly what the other lets vary. Since the substrates differ in one
-quantity, no third axis holds both fixed at once, and the choice is therefore a
-choice about which hypothesis is being given a hearing rather than a choice
-between a naive convention and its repair. A comparison made on the nominal axis
-is a comparison at matched Perron roots and unmatched bulks; one made on the
-matched-bulk axis is the reverse. Neither is the neutral view, and there is no
-neutral view to be had.
-
-Two consequences follow, and both are enforced throughout this thesis.
-\textbf{Every result is quoted with the axis it was measured on}, and results on
-the two axes are never set against each other as though they disagreed: they are
-two measurements of different things. And \textbf{the two axes have different
-coverage}, because holding the bulk fixed compresses the reachable range of
-operating points by each substrate's own $\mathrm{bulk95}$. A sweep that runs to
-$\sigma = 8$ on the nominal axis reaches much less far in the matched
-coordinate, so a comparison on that axis is bounded by where the substrates'
-ranges still overlap, and a feature at the edge of that overlap must not be read
-as though the sweep continued past it.
-
-Figure~\ref{fig:F3} shows what this costs on a real result, using the memory
-measure Chapter~\ref{chapter:act-II} develops. The same two substrates, the same
-recorded states, read on the two axes: a large advantage on one, a smaller one on
-the other, and a subcritical deficit that is almost entirely an artefact of the
-normalisation. It is placed here rather than with that result because it is not
-a finding about the connectome. It is what the comparison itself does, and
-Chapters~\ref{chapter:act-II} and~\ref{chapter:act-III} carry it forward rather
-than re-deriving it.
+Figure~\ref{fig:F3} draws the same two substrates and the same recorded states
+read on both axes, using the memory measure Chapter~\ref{chapter:act-II}
+develops: a large advantage on one, a smaller one on the other, and a
+subcritical deficit that is almost entirely an artefact of the normalisation. It
+sits here rather than with that result because it is not a finding about the
+connectome, and Chapters~\ref{chapter:act-II} and~\ref{chapter:act-III} carry it
+forward rather than re-deriving it.
 
 % Figure 3: two spectral radius scaling axis
 \begin{figure}[ht]
