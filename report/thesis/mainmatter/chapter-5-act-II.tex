@@ -181,15 +181,13 @@ makes the case.
     \textbf{What a readout sees.} One connectome cell, memory-capacity task,
     non-negative weights, $N = 448$, % TIER0 2.1
     at $\sigma = 3.05$; % COV 3.4
-    three units are highlighted throughout and no null substrate appears, since
-    this figure defines the object and makes no comparison. \textbf{(a)} The
-    driven network and the recorded state matrix $\mathbf{A}$, one row per retained
-    timestep and one column per unit. \textbf{(b)} The three highlighted units'
-    activity, with each unit's mean over time dashed. \textbf{(c)} The same three
-    traces with those means removed, on the expanded vertical scale marked on the
-    panel: what a readout can use is the residual, not the level.
-    \textbf{(d)} The same three units as a trajectory in neural space, before and
-    after centring, on shared axes. \textbf{(e)}
+    three units are highlighted throughout. \textbf{(a)} The driven network and
+    the recorded state matrix $\mathbf{A}$, one row per retained timestep and
+    one column per unit. \textbf{(b)} The three highlighted units' activity,
+    with each unit's mean over time dashed. \textbf{(c)} The same three traces
+    with those means removed, on the expanded vertical scale marked on the
+    panel. \textbf{(d)} The same three units as a trajectory in neural space,
+    before and after centring, on shared axes. \textbf{(e)}
     Equation~\ref{eq:gram-split} as matrices: the Gram matrix, the fluctuation
     term, and the rank-one time-average term, on one colour scale.}
     \label{fig:F20}
@@ -279,33 +277,19 @@ that changes.}
     \textbf{The Perron mode is a common mode: it carries the time-average, and
     the fluctuations the readout uses are orthogonal to it.} $N = 448$. % TIER0 2.1
     \textbf{(a)} Fraction of the \emph{time-centred} state variance held by the
-    leading $k$ vectors of three orthonormal bases: the eigenvectors of $\mathbf{W}$, the
-    low-frequency graph harmonics, and a random orthonormal basis setting the
-    chance level. Connectome alone, memory-capacity task, at
+    leading $k$ vectors of three orthonormal bases: the eigenvectors of
+    $\mathbf{W}$, the low-frequency graph harmonics, and a random orthonormal
+    basis setting the chance level. Connectome alone, memory-capacity task, at
     $\sigma = 3.05$, % COV 3.4
-    medians over ten seeds. The dominant $\mathbf{W}$ eigenmodes fall below the random
-    baseline and reach it only around
-    $k = 20$, % A2 F4
-    while the harmonics on the same states sit well above it; the grey band is
-    the across-seed range of the baseline. The values drawn here are the
-    memory-task ones, 0.0006 % A2 2.1
-    against 0.0025 % A2 2.1
-    at $k = 1$; the value of record is pooled over the three tasks the capture
-    holds, 0.0001 % TIER0 3.12
-    against 0.0023. % TIER0 3.12
-    This panel draws the connectome alone; the basis
-    comparison was never recorded across the null ladder.
-    \textbf{(b)} Common-mode amplitude against nominal
-    $\sigma$ for the four substrates, memory-capacity task, the absolute value
-    taken per seed before the seed median. The connectome is the \textbf{least}
-    dominated at every $\sigma$ above roughly 1.5,
-    0.759 % TIER0 3.7
-    at $\sigma = 6$ against 0.949 to 0.989, % TIER0 3.7
-    despite carrying much the largest Perron root
-    (Figure~\ref{fig:F2}). The dotted rule marks the connectome's
+    medians over ten seeds; the grey band is the across-seed range of the
+    baseline. The dominant $\mathbf{W}$ eigenmodes fall below that baseline and
+    the harmonics sit above it. The basis comparison was never recorded across
+    the null ladder. \textbf{(b)} Common-mode amplitude against nominal $\sigma$
+    for the four substrates, memory-capacity task, the absolute value taken per
+    seed before the seed median. The dotted rule marks the connectome's
     $\mathrm{sr\_crit}$; each null reaches its own between
-    1.81 and 1.92, % TIER0 2.1
-    well below it.}
+    1.81 and 1.92. % TIER0 2.1
+    }
     \label{fig:F4}
 \end{figure}
 
@@ -410,22 +394,18 @@ a time.
     readout floor, and what it stands to lose.} Memory-capacity task, $N = 448$, % TIER0 2.1
     medians over the fifty supercritical cells per substrate,
     $\alpha = 10^{-6}$. % TIER0 3.3
-    Position columns are percentages of all 448 directions. The four positions
-    partition each individual cell exactly, but four medians taken separately
-    are not constrained to sum to one hundred and do not: the connectome's come
-    to 102.1\%. % TIER0 3.6(e)
+    Position columns are percentages of all 448 directions; the four partition
+    each individual cell exactly, but four medians taken separately need not sum
+    to one hundred, and the connectome's come to
+    102.1\%. % TIER0 3.6(e)
     Exact zeros are dropped before the sensitivity and the effective rank are
     formed and are reported here as their own
     column. % TIER0 3.6(a)
     Sensitivity is the loss in effective rank per e-fold rise in $\alpha$,
-    Equation~\ref{eq:floor-sensitivity}; it vanishes both for a spectrum
-    standing clear of the floor and for one already beneath it, so the absolute
-    final column, the same quantity per
-    unit of surviving dimensionality, is what governs how much a substrate
-    loses. Every column is a median over a band of operating points rather than
-    a value at one, and the sensitivity in particular varies strongly with
-    radius: panel~(b) of Figure~\ref{fig:F18} draws that dependence, and each
-    substrate's interior dip falls at a different place within it.}
+    Equation~\ref{eq:floor-sensitivity}; the final column is the same quantity
+    per decade and per unit of surviving dimensionality. Every column is a
+    median over a band of operating points rather than a value at one, and
+    panel~(b) of Figure~\ref{fig:F18} draws the radius dependence.}
     \label{tab:act2-floor}
     \begin{tabular}{lrrrrrrr}
         \toprule
@@ -477,21 +457,16 @@ some four hundred to lose them from and the other has seventy-five.
     $N = 448$. % TIER0 2.1
     \textbf{(a)} Gram eigenvalues by position relative to the floor, as a
     percentage of all 448 directions; medians over the fifty supercritical cells
-    per substrate, with $d_{\mathrm{eff}}$ in the legend because it is a
-    property of the whole spectrum rather than of any one bin. Exact zeros form
-    their own bin. Bars are grouped rather than stacked, since four medians
-    taken separately need not sum to one hundred. \textbf{(b)} Sensitivity of
-    $d_{\mathrm{eff}}$ to the floor against spectral radius, medians over ten
-    seeds at each of thirteen radii. Equation~\ref{eq:floor-sensitivity} weights
-    each direction by how close it sits to the floor, so the marked
-    \emph{interior} dip is where fewest of a substrate's directions sit at the
-    margin. The curve also falls to zero on the shaded limb, where the network
-    is too weakly driven to have much spectrum above the floor at all, which is
-    why the minimum that matters is the interior one. \textbf{(c)} The measured
-    ridge-optimal radius against regularisation strength, one point per
-    substrate at each of five values of $\alpha$, migrating toward each
-    substrate's own dip in~(b). Panels~(a) and~(b) use the probe radius grid
-    and~(c) the coarser sweep grid, so
+    per substrate, with $d_{\mathrm{eff}}$ in the legend. Exact zeros form their
+    own bin, and bars are grouped rather than stacked. \textbf{(b)} Sensitivity
+    of $d_{\mathrm{eff}}$ to the floor against spectral radius,
+    Equation~\ref{eq:floor-sensitivity}, medians over ten seeds at each of
+    thirteen radii. The \emph{interior} dip between the two humps is marked; the
+    shaded limb is where the network is too weakly driven to have much spectrum
+    above the floor. \textbf{(c)} The measured ridge-optimal radius against
+    regularisation strength, one point per substrate at each of five values of
+    $\alpha$. Panels~(a) and~(b) use the probe radius grid and~(c) the coarser
+    sweep grid, so
     3.58 % TIER0 3.6(b)
     and 3.6 % TIER0 3.6
     are two grids' nearest points to one place rather than one number recovered
@@ -620,11 +595,10 @@ of a participation ratio of 1.28. % A2 2.4
     \textbf{(b, c)} The consequence across the seven substrates of the wider
     null ladder, medians over fifty cells each, against \textbf{measured} memory
     capacity. Both axes are zero-based, so the spread of the points is
-    comparable between panels: over the same substrates the effective rank moves
+    comparable between panels: the effective rank moves
     5.5-fold % TIER0 3.12
     while the participation ratio moves 16\%. % TIER0 3.12
-    Panel~(b)'s upper limit is the hard ceiling at $N$. Both correlations reported in the text are against measured
-    memory capacity.}
+    Panel~(b)'s upper limit is the hard ceiling at $N$.}
     \label{fig:F6}
 \end{figure}
 
