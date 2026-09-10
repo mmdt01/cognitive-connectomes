@@ -6,7 +6,7 @@
 \label{app:wider-ladder}
 \bigskip
 
-Section~\ref{sec:act1-bulk-gap-placement} rests the placement claim on the
+Section~\ref{sec:act1-assignment} rests the weight-assignment claim on the
 weight-permuted control and reports two further rungs as corroboration. Their
 values are here. The clustering-preserving and modularity-preserving rewires
 each hold fixed everything the degree-preserving rewire does and one further
@@ -15,8 +15,8 @@ the random gaussian rung is included for completeness and takes no part in any
 comparison, since it is not a rung of the criticality-matched ladder and matches
 the connectome's edge count only in expectation.
 
-Holding progressively more of the connectome's topology fixed recovers none of
-what placement supplies. At $N = 448$ the strongest null of all six is the
+Holding progressively more of the connectome's topology fixed recovers none
+of what the assignment supplies. At $N = 448$ the strongest null of all six is the
 clustering-preserving rewire at
 2.081, % TIER0 3.1(b)
 above every rung the figures draw, and the connectome's margin over it is
@@ -41,7 +41,7 @@ statement about the four.
     \centering
     \caption[The three off-ladder substrates]{\textbf{The three substrates
     outside the four-rung ladder.} Aggregation and units as
-    Table~\ref{tab:act1-ladder}: medians over ten seeds, raw units of $W$,
+    Table~\ref{tab:act1-ladder}: medians over ten seeds, raw units of $\mathbf{W}$,
     absolute bulk the product of the medians. All three are resampled at every
     seed, so unlike the connectome the two aggregation orders differ on every
     row, and only the product of medians satisfies the gap-ratio identity.}
@@ -101,7 +101,7 @@ statement about the four.
 \label{app:mechanism}
 \bigskip
 
-Chapter~\ref{chapter:act-I} localises the spectral gap to weight placement and
+Chapter~\ref{chapter:act-I} localises the spectral gap to weight assignment and
 claims no mechanism for it. One candidate mechanism was specific enough to
 test, and was tested. The prediction, its falsifier and the decision rule were
 committed before any of the analysis ran.
@@ -125,8 +125,8 @@ The first fails, in the direction opposite to the prediction, and
 Figure~\ref{fig:S3} is the measurement. The second was posed on a fraction of
 each substrate's own Perron root, which divides by the one quantity these
 substrates differ in, so it cannot be read: the same normalisation this thesis
-retracts in Section~\ref{sec:act1-bulk-gap-placement}. The third fails and
-leaves an account standing rather than excluding one. Weight placement
+retracts in Section~\ref{sec:act1-assignment}. The third fails and
+leaves an account standing rather than excluding one. Weight assignment
 concentrates node strength: the connectome's maximum node strength is
 2.54 times % TIER0 3.14
 the control's while its Perron root is 1.65 times, % TIER0 3.14
@@ -137,7 +137,7 @@ post-hoc move the registration exists to prevent.
 
 The registered decision rule returned equivocal, so nothing in the claims
 register changed and the limit stated in
-Section~\ref{sec:act1-bulk-gap-placement} stands as written.
+Section~\ref{sec:act1-assignment} stands as written.
 
 \bigskip
 \begin{figure}[ht]
@@ -179,12 +179,12 @@ Section~\ref{sec:act1-bulk-gap-placement} stands as written.
 
 Section~\ref{sec:act2-perron} found the low-frequency harmonics of the graph
 Laplacian standing well above chance among the connectome's fluctuations while
-the dominant eigenvectors of $W$ fell below it. That is easy to read as a fact
+the dominant eigenvectors of $\mathbf{W}$ fell below it. That is easy to read as a fact
 about the connectome, and it is not. It is a fact about non-negativity, and the
 way to show as much is to remove the non-negativity and leave everything else
 where it is.
 
-With non-negative weights the leading eigenmodes of $W$ have been absorbed into
+With non-negative weights the leading eigenmodes of $\mathbf{W}$ have been absorbed into
 the rank-one term of Equation~\ref{eq:gram-split}, which leaves the fluctuations
 to be organised by something other than the dynamical modes themselves.
 Balancing the signs of the weights destroys the Perron guarantee, so there is no
@@ -201,13 +201,13 @@ the first two conditions the same weight magnitudes, with only the signs
 redistributed. Figure~\ref{fig:F5} draws the clearest of the three cases across
 the whole range of $k$.
 
-What is claimed is the swap. Nothing stronger is available, and the numbers
-invite it: on the all-positive substrate neither basis holds much of anything,
-the whole range across bases and tasks running
+The swap is the measurement, and the magnitudes are not. On the all-positive
+substrate neither basis holds much of anything, the whole range across bases and
+tasks running
 0.04 to 0.17, % TIER0 3.12
-so a claim that the fluctuations live in graph harmonics would overstate what
-has been measured. Which basis leads is the measurement. How much either one
-captures is a separate question, and the answer to that one is not much.
+so the fluctuations are not being shown to live in graph harmonics. Which basis
+leads is what the comparison establishes; how much either one captures is a
+separate question, and the answer to that one is not much.
 
 That low capture is what the other probe predicts. Supercritically the readout
 has around 413 % TIER0 3.6
@@ -220,12 +220,11 @@ for the gaussian weights on NARMA-10. Two probes measuring different things on
 different bases agree about which conditions spread their activity widely, and
 neither was fitted to the other.
 
-Two limits place this result rather than extending it. The first is priority.
-That weight sign composition gates which basis the fluctuations occupy is
-largely pre-empted by Krauss et al.~\cite{krauss2019weight}, and it is reported
-here as confirmatory; it earns its place in this thesis because the counting
-argument of Section~\ref{sec:act2-counting} needs the basis established first,
-not because it is new. The second is scope. The signed and gaussian conditions
+Two limits. The first is priority. That weight sign composition gates which
+basis the fluctuations occupy is largely pre-empted by Krauss et
+al.~\cite{krauss2019weight}, and it is reported here as confirmatory; the
+counting argument of Section~\ref{sec:act2-counting} needs the basis established
+first. The second is scope. The signed and gaussian conditions
 are weight families compared side by side. Nothing has been done to the
 connectome to produce them, and the question of what happens when negative
 weights are introduced as an intervention on the real substrate belongs to
@@ -242,11 +241,10 @@ check whether its consequences go with it.
     medians over ten seeds. Each condition is measured at its own supercritical
     operating point, 3.0526, 2.5263 and 1.2632 % A2 2.3
     respectively, since the three do not become supercritical at the same
-    nominal radius; the three columns are therefore not one $\sigma$. The
-    harmonics lead in every cell of the first condition and the $W$ eigenmodes
-    lead in every cell of the other two, which is the result. The magnitudes are
-    not: on the all-positive substrate neither basis holds much of anything, and
-    the ordering is what is claimed. Recomputation against the published table
+    nominal radius; the three columns are therefore not one $\sigma$. The harmonics lead in every cell of the first condition and the $\mathbf{W}$ eigenmodes
+    lead in every cell of the other two. The magnitudes are small: on the
+    all-positive substrate neither basis holds much of anything, and the
+    ordering is what the table establishes. Recomputation against the published table
     agrees to 0.00045 % A2 2.3
     across all eighteen cells.}
     \label{tab:app-basis}
@@ -254,7 +252,7 @@ check whether its consequences go with it.
         \toprule
         & & \multicolumn{2}{c}{fraction held at $k = 10$} \\
         \cmidrule(lr){3-4}
-        weight condition & task & harmonics & $W$ eigenmodes \\
+        weight condition & task & harmonics & $\mathbf{W}$ eigenmodes \\
         \midrule
         empirical (\textbf{non-negative}) & memory capacity & \textbf{0.056} & 0.009 \\ % TIER0 3.12
         & NARMA-10 & \textbf{0.040} & 0.002 \\ % TIER0 3.12
@@ -283,20 +281,19 @@ check whether its consequences go with it.
     $N = 448$, % TIER0 2.1
     medians over ten seeds, each panel at its own condition's supercritical
     operating point. \textbf{(a)} With \textbf{non-negative} weights the graph
-    harmonics lead throughout and the dominant $W$ eigenmodes run below chance.
+    harmonics lead throughout and the dominant $\mathbf{W}$ eigenmodes run below chance.
     \textbf{(b)} With the \textbf{same weight magnitudes} and balanced signs the
     ordering has already reversed. \textbf{(c)} With \textbf{gaussian} weights
     the eigenmodes dominate outright. The rule marks $k = 10$, where the values
     of Table~\ref{tab:app-basis} are read; the swap is visible across the whole
-    curve, and the topology is identical in all three panels. On the
-    all-positive substrate neither basis holds much in absolute terms, which is
-    why what is claimed is the ordering. The degree-preserving rewire, the only
+    curve, and the topology is identical in all three panels. On the all-positive substrate neither basis holds much in
+    absolute terms; the ordering is what the panels establish. The degree-preserving rewire, the only
     other substrate this capture holds, shows the same swap at the same three
     operating points, reading
     0.168 against 0.002, % A2 F5
     0.011 against 0.102, % A2 F5
     and 0.011 against 0.355; % A2 F5
-    two substrates cannot speak to the null ladder, and no statement here does.}
+    two substrates cannot speak to the null ladder.}
     \label{fig:F5}
 \end{figure}
 
