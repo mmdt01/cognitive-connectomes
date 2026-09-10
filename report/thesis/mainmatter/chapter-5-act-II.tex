@@ -1,8 +1,61 @@
 \chapter{Spectrum Shapes the Geometry of Activity}
 \label{chapter:act-II}
 
+Two things arrive from Chapter~\ref{chapter:act-I}, and neither is a
+statement about activity. The first is $\mathrm{sr\_crit}$, the operating
+point at which a substrate's own bulk edge reaches one:
+3.078 % TIER0 2.1
+for the connectome against
+1.81 to 1.92 % TIER0 2.1
+for the three nulls, a scale each substrate carries with it rather than one
+the comparison imposes. The second is the Perron mode, which stands clear of
+the bulk because of the connectome's weight assignment, and which arrives as
+an object to be decomposed rather than as an explanation. A readout sees
+neither. What it sees is the activity the network produces when it is driven,
+and the question of this chapter is which part of the connectivity's
+eigenspectrum ends up where in that activity.
 
-\section{What a readout sees}
+The Perron mode ends up where a readout cannot reach it. Its eigenvector is
+positive throughout, so the pattern it drives is one every unit shares, and a
+shared pattern held throughout a run is a time-average rather than a
+fluctuation. Once the states are time-centred, the network's leading dynamical
+modes account for less of what remains than a direction drawn at random does.
+The mode Chapter~\ref{chapter:act-I} spent itself locating turns out to sit in
+the part of the activity a readout cannot use, and what a readout works with is
+everything else.
+
+How much is left differs across substrates, in the direction opposite to the
+one their connectivity spectra suggest. The connectome is the least dominated
+by its common mode at every operating point above roughly 1.5, despite carrying
+much the largest Perron root of the four. The gap rather than the root accounts
+for this. A leading eigenvalue standing well clear of its bulk can be driven
+hard while the bulk stays where it is, whereas a null whose bulk sits close
+behind its root carries the whole spectrum up together and saturates.
+Supercritically the consequence is a Gram spectrum standing further clear of
+the readout's regularisation floor, and with it several hundred more directions
+the readout can act on.
+
+Those directions carry almost none of the variance, which is why the usual
+instrument does not see them. Counted by the participation ratio, seven
+substrates whose measured memory capacity spans a factor of three occupy
+essentially the same number of dimensions. Counted by what survives the
+readout's own floor, the same recorded states spread over a factor of five and
+a half, and it is the second count that orders measured capacity. A
+dimensionality is meaningful only relative to what is reading the activity out.
+
+One thing does not move at all. The shape of a trajectory, as distinct from its
+spread, is the same on every substrate at every operating point, while over that
+same range predictive performance falls by an order of magnitude. Whatever
+governs that fall is not on the axis this chapter measures. Everything measured
+here is measured on the nominal axis of Chapter~\ref{chapter:act-I}'s two, with
+leading eigenvalues matched and bulks left where they fall, and everything
+measured here is a description: the weak common mode, the clearance from the
+floor and the usable directions were observed together, not shown to depend on
+one another. Chapter~\ref{chapter:act-III} intervenes on the connectome to find
+out whether they do.
+
+
+\section{The object a readout sees}
 \label{sec:act2-handover}
 \bigskip
 % Merged opening, replacing outline items 1 and 2 (act2_manifold.md section 4).
@@ -19,58 +72,41 @@
 % common-mode amplitude; "alpha was chosen at 1e-6 for d_eff"; "the Gram
 % spectrum is a property of W"; "compact bulk".
 
-% P1: what arrives, and the question. No results.
-Two things arrive from Chapter~\ref{chapter:act-I}, and neither is a statement
-about activity. The first is $\mathrm{sr\_crit}$, the operating point at which a
-substrate's own bulk edge reaches one:
-3.078 % TIER0 2.1
-for the connectome against
-1.81 to 1.92 % TIER0 2.1
-for the three nulls, a scale each substrate carries with it rather than one the
-comparison imposes. The second is the Perron mode. The previous chapter
-established that it stands clear of the bulk and that weight placement is what
-puts it there, and it arrives here as an object to be decomposed rather than as
-an explanation. A readout sees neither. What it sees is the activity the network
-produces when it is driven, and the question of this chapter is which part of the
-connectivity's eigenspectrum ends up where in that activity.
-
 % P2: the object, the identity, and the pointer to the schematic.
 Drive the reservoir, record every unit at every timestep and discard a warmup,
-and the result is the state matrix $A$: on the memory-capacity task,
+and the result is the state matrix $\mathbf{A}$: on the memory-capacity task,
 2500 rows by 448 columns. % A2 2.5
-A linear readout does not use $A$ directly. It inverts the \textbf{Gram matrix}
-$G = A^{\top}A$, whose eigenvalues say how much of the trajectory lies along each
-direction the activity explores, so $G$ is two things at once, a description of
+A linear readout does not use $\mathbf{A}$ directly. It inverts the \textbf{Gram matrix}
+$\mathbf{G} = \mathbf{A}^{\top}\mathbf{A}$, whose eigenvalues say how much of the trajectory lies along each
+direction the activity explores, so $\mathbf{G}$ is two things at once, a description of
 the manifold's shape and the budget a linear readout has to spend on it. It
 splits exactly:
 
 \bigskip
 \begin{equation}
-    \underbrace{A^{\top}A \bracegap}_{\text{Gram matrix}}
+    \underbrace{\mathbf{A}^{\top}\mathbf{A} \bracegap}_{\text{Gram matrix}}
     \;=\;
-    \underbrace{\tilde{A}^{\top}\tilde{A} \bracegap}_{\substack{\text{fluctuations} \\ \text{about the mean}}}
+    \underbrace{\tilde{\mathbf{A}}^{\top}\tilde{\mathbf{A}} \bracegap}_{\substack{\text{fluctuations} \\ \text{about the mean}}}
     \;+\;
-    \underbrace{T_{\mathrm{eff}}\,m\,m^{\top} \bracegap}_{\substack{\text{rank one:} \\ \text{the time-average}}}
+    \underbrace{T_{\mathrm{eff}}\,\mathbf{m}\,\mathbf{m}^{\top} \bracegap}_{\substack{\text{rank one:} \\ \text{the time-average}}}
     \label{eq:gram-split}
 \end{equation}
 
-where $m$ holds each unit's mean over time and $\tilde{A}$ the time-centred
+where $\mathbf{m}$ holds each unit's mean over time and $\tilde{\mathbf{A}}$ the time-centred
 states. The second term is built from one number per unit, the level that unit
 holds on average, so it has rank one: a single fixed pattern the network carries
 throughout the run. The first is everything that changes from timestep to
 timestep, and therefore the only part that can carry information about a changing
-input. Figure~\ref{fig:F20} draws the construction. The identity settles nothing
-on its own. It says the time-average lives in a rank-one term, not what that term
-consists of, and that is a measurement rather than an algebraic fact.
+input. Figure~\ref{fig:F20} draws the construction. The identity says the time-average lives in a
+rank-one term. What that term consists of is a measurement, not an algebraic
+fact.
 
 % P3: the two-spectra convention. Governs every later sentence.
-Two matrices have eigenvalues in this chapter and they are not both called a
-spectrum. The eigenvalues $\lambda_i$ of the connectivity $W$ are Chapter
-\ref{chapter:act-I}'s object, and where they are meant the text says so. The
-eigenvalues $g_i$ of the Gram matrix are properties of the states a network
-produces when it is driven at a given operating point by a given input, not
-properties of $W$, and where they are meant the text says \emph{Gram spectrum} in
-full. Nothing below obtains the second from the first.
+Two matrices have eigenvalues here. The $\lambda_i$ of the connectivity $\mathbf{W}$ are
+Chapter~\ref{chapter:act-I}'s object. The $g_i$ of the Gram matrix belong to the
+states a network produces when it is driven at a given operating point by a
+given input, and are called the \emph{Gram spectrum} in full wherever they
+appear. Nothing below obtains the second from the first.
 
 % P4: criticality, fixed before the word is used.
 One word needs fixing before it is used. Criticality, in the usual sense, is the
@@ -86,12 +122,10 @@ the connectome's own $\mathrm{sr\_crit}$ rounded to the measurement grid and
 applied to every substrate, which is the conservative choice for reasons
 Section~\ref{sec:act2-counting} gives. Both labels describe the linear operator.
 What the units are doing at a given operating point also depends on where the
-nonlinearity has put them, and no claim below rests on the labels.
-Where the chapter measures follows from
-what it is for. The capacity result it supplies a mechanism for is a
-supercritical one, since at the tuned optimum the substrates are at parity, so
-the geometry is measured where the difference to be explained exists rather than
-where a benchmark would look for it.
+nonlinearity has put them.
+The substrates are at parity at their tuned optima. The capacity difference
+this chapter supplies a mechanism for is therefore a supercritical one, and that
+is where the geometry is measured.
 
 % P5: scope, stated up front rather than in a limitations section.
 Three limits bind everything that follows. Every result is measured at
@@ -121,7 +155,7 @@ rank},
     \;=\; \sum_{i=1}^{N} \frac{g_i}{g_i + \alpha},
     \label{eq:deff}
 \end{equation}
-where $g_1 \ge \dots \ge g_N$ are the eigenvalues of $G$. Each direction
+where $g_1 \ge \dots \ge g_N$ are the eigenvalues of $\mathbf{G}$. Each direction
 contributes close to one when its eigenvalue stands well above $\alpha$, close to
 zero when it lies well below, and exactly one half at the crossover, so the sum
 counts how many directions survive the regularisation with a soft boundary rather
@@ -135,10 +169,9 @@ separates the two.}
 This is why $\alpha$ is called a \emph{floor} throughout: it is the level in the
 Gram spectrum below which a direction stops being worth anything to the readout.
 It is not a parameter of the measure. It is the readout's own value, the same
-number the memory task is fitted with. Why this count rather than a
-variance-weighted one is a result and not a definition, and
-Section~\ref{sec:act2-counting} makes that case; making it here would leave the
-measure looking assumed.
+number the memory task is fitted with. Why this count rather than a variance-weighted
+one is a result rather than a definition, and Section~\ref{sec:act2-counting}
+makes the case.
 
 % Figure F20.
 \begin{figure}[htbp]
@@ -150,7 +183,7 @@ measure looking assumed.
     at $\sigma = 3.05$; % COV 3.4
     three units are highlighted throughout and no null substrate appears, since
     this figure defines the object and makes no comparison. \textbf{(a)} The
-    driven network and the recorded state matrix $A$, one row per retained
+    driven network and the recorded state matrix $\mathbf{A}$, one row per retained
     timestep and one column per unit. \textbf{(b)} The three highlighted units'
     activity, with each unit's mean over time dashed. \textbf{(c)} The same three
     traces with those means removed, on the expanded vertical scale marked on the
@@ -166,7 +199,7 @@ measure looking assumed.
 
 
 
-\section{The Perron mode carries the mean}
+\section{The Perron mode and the time-average}
 \label{sec:act2-perron}
 \bigskip
 % Outline item 3 (act2_manifold.md section 4). Carries A2.1 and A2.2.
@@ -185,7 +218,7 @@ measure looking assumed.
 % P1: A2.1. The measurement, first sentence. Aggregation in the footnote.
 Once the states are time-centred, the network's own leading dynamical modes are
 almost nowhere to be found. On the connectome driven at its own $\mathrm{sr\_crit}$ 
-($\sigma = 3.05$), the top eigenvector of $W$ accounts for
+($\sigma = 3.05$), the top eigenvector of $\mathbf{W}$ accounts for
 0.0006 % A2 2.1
 of the fluctuation variance where a direction drawn at random accounts for
 0.0025, % A2 2.1
@@ -198,8 +231,7 @@ are what panel~(a) in Figure~\ref{fig:F4} draws. The value of record for this
 comparison is pooled across the three tasks the capture holds,
 0.0001 % TIER0 3.12
 against a baseline of 0.0023, % TIER0 3.12
-so the magnitude depends on which is quoted. The direction does not, and the
-claim rests on the direction:
+so the magnitude depends on which is quoted. The direction does not:
 29 of the 30 % A2 2.1
 task and seed combinations fall below their own random baseline.}
 
@@ -237,7 +269,7 @@ modes standing 4.2 times % A2 audit 23
 above chance, and the reversal is carried by the chaotic task alone
 (16.8 times % A2 audit 23
 its own baseline, in all ten seeds). Two operating points cannot locate where
-that changes, and nothing here infers a transition between them.}
+that changes.}
 
 % Figure F4.
 \begin{figure}[ht]
@@ -247,11 +279,11 @@ that changes, and nothing here infers a transition between them.}
     \textbf{The Perron mode is a common mode: it carries the time-average, and
     the fluctuations the readout uses are orthogonal to it.} $N = 448$. % TIER0 2.1
     \textbf{(a)} Fraction of the \emph{time-centred} state variance held by the
-    leading $k$ vectors of three orthonormal bases: the eigenvectors of $W$, the
+    leading $k$ vectors of three orthonormal bases: the eigenvectors of $\mathbf{W}$, the
     low-frequency graph harmonics, and a random orthonormal basis setting the
     chance level. Connectome alone, memory-capacity task, at
     $\sigma = 3.05$, % COV 3.4
-    medians over ten seeds. The dominant $W$ eigenmodes fall below the random
+    medians over ten seeds. The dominant $\mathbf{W}$ eigenmodes fall below the random
     baseline and reach it only around
     $k = 20$, % A2 F4
     while the harmonics on the same states sit well above it; the grey band is
@@ -261,8 +293,8 @@ that changes, and nothing here infers a transition between them.}
     at $k = 1$; the value of record is pooled over the three tasks the capture
     holds, 0.0001 % TIER0 3.12
     against 0.0023. % TIER0 3.12
-    This panel draws the connectome alone. The basis comparison was never
-    recorded across the null ladder, and no statement about the ladder is made.
+    This panel draws the connectome alone; the basis
+    comparison was never recorded across the null ladder.
     \textbf{(b)} Common-mode amplitude against nominal
     $\sigma$ for the four substrates, memory-capacity task, the absolute value
     taken per seed before the seed median. The connectome is the \textbf{least}
@@ -290,8 +322,8 @@ of the trace, which is to say that half of the matrix the readout inverts is a
 single fixed pattern carrying nothing about the input. Driving a network harder
 can only raise that share, since units pushed into the flat regions of their
 nonlinearity move less and less about wherever they have settled. 
-How far it grows, and whether some substrates give it more than others, the
-identity cannot settle.
+How far it grows, and whether some substrates give it more than others, is what
+panel~(b) measures.
 
 % P4: A2.2 and the inversion, which is the finding.
 Panel~(b) of Figure~\ref{fig:F4} follows the common-mode amplitude across the
@@ -302,13 +334,10 @@ where the connectome's holds out until 3.078. % TIER0 3.1
 What matters is where the curves end up. At $\sigma = 6$ the connectome sits at
 0.759 % TIER0 3.7
 against the nulls' 0.949 to 0.989, % TIER0 3.7
-and at $\sigma = 2$ the separation is wider still,
-0.114 % TIER0 3.7
-against 0.532 to 0.593. % TIER0 3.7
+and at $\sigma = 2$ the separation is wider still.
 The least common-mode dominated substrate on this ladder is the one carrying by
-far the largest Perron root. That inversion is the finding of this section, and
-it is not a paradox once the gap rather than the root is taken as the operative
-quantity: what distinguishes the connectome is the distance between its leading
+far the largest Perron root. The inversion resolves once the gap rather than the
+root is taken as the operative quantity: what distinguishes the connectome is the distance between its leading
 eigenvalue and its bulk, and a separation of that width lets the leading mode be
 driven hard while the bulk stays where it is. The nulls have no such latitude.
 Their bulk sits close behind their Perron root, so raising the gain carries the
@@ -316,16 +345,14 @@ whole spectrum up together, the units saturate in step, and an amplitude
 approaching one is what that looks like from outside.
 
 % P5: what follows, what does not, and the question for section 3.
-The decomposition is therefore clean, and the rest of this chapter can work
-inside the fluctuation term and treat the rank-one term as accounted for. It is
-also now established that the substrates differ in how much of their activity
+The rank-one term is therefore accounted for, and the rest of this chapter works
+inside the fluctuation term. The substrates differ in how much of their activity
 that term consumes, in the opposite direction to the one their connectivity
-spectra suggest. What none of this establishes is anything about capacity, since
-being least dominated by the common mode is not the same as having the most
-directions a readout can act on, and nothing measured here touches how the
-surviving fluctuations are \emph{arranged} across directions rather than how much
-of them is left. Arrangement is what a readout is finally sensitive to, through
-the floor of Equation~\ref{eq:deff}, and it is where the next section goes.
+spectra suggest. Being least dominated by the common mode is not the same as
+having the most directions a readout can act on. How much of the fluctuation
+survives says nothing about how it is \emph{arranged} across directions, and
+arrangement is what a readout is finally sensitive to, through the floor of
+Equation~\ref{eq:deff}.
 
 
 
@@ -354,18 +381,15 @@ Supercritically, the connectome holds
 89.0\% % TIER0 3.6(e)
 of its directions more than a decade clear of the ridge floor. Erdős--Rényi
 holds 11.4\%. % TIER0 3.6(e)
-The two profiles are reverses of one another: at the same floor,
-73.2\% % TIER0 3.6(c)
-of Erdős--Rényi's Gram spectrum lies at or more than a decade \emph{below} it,
-against 5.1\% % TIER0 3.6(c)
-of the connectome's. Table~\ref{tab:act2-floor} gives the four substrates in
+The two profiles are reverses of one another: at the same floor, most of
+Erdős--Rényi's Gram spectrum lies at or more than a decade \emph{below} it and
+almost none of the connectome's does. Table~\ref{tab:act2-floor} gives the four substrates in
 full, and the difference between the top and bottom rows is the difference
 between counting 412.9 % TIER0 3.6
 usable directions and counting 74.8. % TIER0 3.6
 
 % P2: what the ordering is a statement about. Regional, and not derived.
-That ordering is a statement about substrates \emph{at an operating point},
-which is a weaker claim than it may read as and a more useful one. Scaling every
+The ordering holds at an operating point, not as a property of a substrate. Scaling every
 substrate to the same nominal radius fixes its leading eigenvalue and leaves the
 rest of its connectivity spectrum where it falls, so supercritically the nulls'
 bulk sits far further from the origin than the connectome's, and
@@ -374,9 +398,9 @@ activity has collapsed into a single common pattern, and a network with little
 fluctuation left has little for its Gram spectrum to hold up. Below criticality
 the ordering runs the other way, the nulls clearing more directions than the
 connectome. % TIER0 3.2
-None of this is derived from the connectivity spectrum. It is measured, one
-operating point at a time, for the reason
-Chapter~\ref{chapter:methods} gives.
+None of this is derived from the connectivity spectrum. The nonlinearity and the
+statistics of the input both intervene, so it is measured one operating point at
+a time.
 
 % Table 5.1.
 \begin{table}[ht]
@@ -396,7 +420,7 @@ Chapter~\ref{chapter:methods} gives.
     Sensitivity is the loss in effective rank per e-fold rise in $\alpha$,
     Equation~\ref{eq:floor-sensitivity}; it vanishes both for a spectrum
     standing clear of the floor and for one already beneath it, so the absolute
-    figure does not interpret itself and the final column, the same quantity per
+    final column, the same quantity per
     unit of surviving dimensionality, is what governs how much a substrate
     loses. Every column is a median over a band of operating points rather than
     a value at one, and the sensitivity in particular varies strongly with
@@ -421,8 +445,7 @@ Chapter~\ref{chapter:methods} gives.
 
 % P3: the rate, with the both-ends warning taken off the algebra first.
 Where a Gram spectrum sits and how many directions it would lose if the floor
-rose are different questions, and the second is easier to get backwards.
-Differentiating Equation~\ref{eq:deff} with respect to the floor gives the
+rose are different questions. Differentiating Equation~\ref{eq:deff} with respect to the floor gives the
 answer directly,
 \begin{equation}
     -\frac{\mathrm{d}\,d_{\mathrm{eff}}}{\mathrm{d}\log\alpha}
@@ -435,9 +458,9 @@ direction contributes most to that sum when it sits exactly \emph{at} the floor,
 and less on either side of it. A small sum therefore has two quite different
 causes, a spectrum standing well clear of the floor and a spectrum that has
 already dropped beneath it, and a low sensitivity read on its own cannot tell
-them apart. Erdős--Rényi is the second case. Reading its low
-absolute figure as robustness would invert the truth: per unit of surviving
-dimensionality it is the \emph{most} floor-sensitive substrate on this ladder,
+them apart. Erdős--Rényi is the second case, and its low absolute figure is not robustness.
+Per unit of surviving dimensionality it is the \emph{most} floor-sensitive
+substrate on this ladder,
 shedding 29.1\% % TIER0 3.6(c)
 of its effective rank per decade of $\alpha$ against the connectome's
 5.6\%. % TIER0 3.6(c)
@@ -488,11 +511,11 @@ different radii for different substrates: the connectome's near
 3.58, % TIER0 3.6(b)
 every null's between 1.58 and 2.00, % TIER0 3.6(b)
 a separation that holds seed by seed rather than emerging from the
-medians.\footnote{The qualifier \emph{interior} is not droppable. The
-connectome's lowest sensitivity anywhere over non-zero radius lies not at its
-dip but far out on the weakly driven limb, % TIER0 3.6(b)
-where the reservoir has almost nothing left to lose; read as a global minimum,
-this half of the result does not reproduce.}
+medians.\footnote{The connectome's lowest
+sensitivity anywhere over non-zero radius lies not at its dip but far out on the
+weakly driven limb, % TIER0 3.6(b)
+where the reservoir has almost nothing left to lose. The dips compared here are
+the interior ones.}
 
 % P5: A2.7 second half, the migration, compressed. Consistent-with, not fitted.
 That dependence leaves something to check. Raising the regularisation penalises
@@ -504,21 +527,14 @@ the connectome's ridge-optimal radius moves from
 2.4 to 3.6 % TIER0 3.6
 and every null moves once, from
 1.2 to 1.6. % TIER0 3.6
-Direction and endpoint are all that is claimed. Nothing is fitted, and the dips
-in panel~(b) and the optima in panel~(c) are measured on different radius grids,
-so the connectome's 3.58 % TIER0 3.6(b)
-and its 3.6 % TIER0 3.6
-are two grids' nearest points to one place rather than one number recovered
-twice.
+Nothing is fitted.
 
 % P6: what the section amounts to, and the handover into section 4.
 Each substrate, then, has an operating point at which its Gram spectrum stands
 clear of the readout floor, and what separates them is where that point falls
-rather than whether they have one. The connectome's lies higher, so it is still
-near its own at radii where the nulls are long past theirs, which is a claim
-about the range of operating points over which a substrate stays usable rather
-than about how good any of them is at its best. One consequence of these
-positions is worth carrying into the next section. The floor lies some ten
+rather than whether they have one. The connectome's lies higher, so it is still near its own at radii where the
+nulls are long past theirs. What that buys is range, not a better best. The
+floor lies some ten
 orders of magnitude % A2 4.5.3
 below the leading variance, so a substrate can have hundreds of directions
 standing clear of it that carry almost none of the variance between them.
@@ -531,7 +547,7 @@ variance.
 
 
 
-\section{Which counting scheme sees it}
+\section{Two counts of the same states}
 \label{sec:act2-counting}
 \bigskip
 % Outline item 5 (act2_manifold.md section 4). Carries A2.4 and A2.5, together
@@ -552,7 +568,6 @@ Dimensionality of neural population activity is usually counted with the partici
 ratio \cite{gao2017theory}, which weights each direction of the state covariance by its share of the
 variance, and it is the measure this work reached for first. Across the seven
 substrates of the wider null ladder that count moves
-16\%, % TIER0 3.12
 from 1.19 to 1.38: % TIER0 3.12
 seven networks whose activity occupies essentially the same number of
 dimensions, on the ordinary reading. Measured memory capacity over those same
@@ -571,9 +586,8 @@ Figure~\ref{fig:F6} is that disagreement, and panel~(a) is where its cause
 becomes visible.
 
 % P3: both are weighted counts; the mechanism on one cell.
-The two measures are more alike than the disagreement suggests, which is what
-makes the disagreement informative rather than merely awkward. Each is exactly a
-sum of one weight per direction. For the ridge effective rank that is
+The two measures are more alike than the disagreement suggests. Each is exactly
+a sum of one weight per direction. For the ridge effective rank that is
 Equation~\ref{eq:deff} as written, every direction weighted by
 $g_i/(g_i + \alpha)$, how far its Gram eigenvalue clears the floor. For the
 participation ratio it is true but less apparent: writing
@@ -609,29 +623,25 @@ of a participation ratio of 1.28. % A2 2.4
     comparable between panels: over the same substrates the effective rank moves
     5.5-fold % TIER0 3.12
     while the participation ratio moves 16\%. % TIER0 3.12
-    Panel~(b)'s upper limit is the hard ceiling at $N$. Both correlations
-    reported in the text are against measured memory capacity, never against
-    ladder position, which is a different quantity and is not the claim.}
+    Panel~(b)'s upper limit is the hard ceiling at $N$. Both correlations reported in the text are against measured
+    memory capacity.}
     \label{fig:F6}
 \end{figure}
 
 % P4: why the variance-weighted count misses it. Consequence of section 3.
-Panel~(a) is a consequence of the previous section rather than a second finding.
-The floor lies some ten orders of magnitude % A2 4.5.3
-below the leading variance, so a direction can stand far clear of the floor,
-fully available to the readout, while holding a share of the variance too small
-to register in a weighted count. Hundreds of the connectome's directions are in
+Because the floor lies ten orders of magnitude % A2 4.5.3
+below the leading variance, a direction can stand far clear of it, fully
+available to the readout, while holding a share of the variance too small to
+register in a weighted count. Hundreds of the connectome's directions are in
 exactly that position, and Section~\ref{sec:act2-floor} is where they were
 counted. The two measures have not disagreed about the data. The quantity one of
 them weights by and the quantity that decides availability have come apart, and
 they come apart precisely where the substrates were found to differ.
 
 % P5: the test against measured capacity. One aggregation unit per sentence.
-Which of the two is registering something real is a question the data can settle,
-by asking which count orders what the readout actually achieves. Memory capacity
-enters here as the quantity a dimensionality measure is judged against rather
-than as a performance claim: what is being ordered is the counting schemes, not
-the substrates. Taking one median per substrate across the seven, the ridge
+Which of the two registers something real is settled by asking which count
+orders what the readout actually achieves. Memory capacity enters here as the
+yardstick for the counts, not as a performance claim. Taking one median per substrate across the seven, the ridge
 effective rank orders them against measured capacity at a rank correlation of
 +1.000 % TIER0 3.12
 and the participation ratio at +0.107. % TIER0 3.12
@@ -639,14 +649,12 @@ Pooled instead over all 350 % TIER0 3.12
 individual cells within the supercritical regime, the pair reads
 +0.998 % TIER0 3.12
 against +0.308. % TIER0 3.12
-Those are two tests on two aggregation units, and a number from one may not be
-set against a number from the other, though they agree on everything that
-matters. Correlating either measure against position in the null ladder is a
-different quantity again, weak and negative for both, and it is not the claim.
+The two tests use different aggregation units and
+agree.\footnote{Correlating either measure against ladder position is a different
+quantity, weak and negative for both.}
 
 % P6: the ceiling, which bounds the ordering.
-One limit belongs with that, since it bounds what the ordering can mean. Every
-substrate's effective rank peaks within a few per cent of the hard ceiling at
+Every substrate's effective rank peaks within a few per cent of the hard ceiling at
 $N$, % TIER0 3.2
 so peak dimensionality is unresolvable at this parcellation and the ordering
 above lives in the decay region beyond the peak rather than at the peak itself.
@@ -655,13 +663,11 @@ above lives in the decay region beyond the peak rather than at the peak itself.
 None of this makes the participation ratio the wrong measure. It counts what it
 claims to count, how concentrated the variance of the states is, and for the
 question a neural-manifold analysis usually asks it remains the right
-instrument. The claim is narrower and, perhaps, more interesting: that quantity
-is not the one a ridge readout can act on, so a measure of dimensionality is
+instrument. That quantity is simply not the one a ridge readout can act on, so a measure of dimensionality is
 meaningful only relative to what is reading the system out. Two counts of the
 same states can disagree this sharply without either being in error, and
 choosing between them is a question about the observer rather than about the
-data. The demonstration is empirical and its scope should be read narrowly: one
-task, one family of substrates, one readout. That total capacity is bounded by
+data. The demonstration covers one task, one family of substrates, one readout. That total capacity is bounded by
 the number of linearly independent state variables is established, and this is a
 case of that bound rather than a rival to
 it~\cite{dambre2012information}.
@@ -694,8 +700,8 @@ rather than positions, the common mode's contribution to the time-average
 cancels in the difference, so it reports shape and not offset.
 
 % P2: it does not move, while capacity does. Ranges named.
-That quantity was recorded alongside everything else in this chapter, on all
-three tasks, and it is reported here because it does not move. On the Lorenz chaotic
+It was recorded alongside everything else in this chapter, on all three tasks.
+It does not move. On the Lorenz chaotic
 prediction task, the seed-median curvature is
 0.261 % A2 5.15
 radians for the connectome and
@@ -713,15 +719,13 @@ displacements are close to uncorrelated. What the substrate contributes, on all
 three, is nothing.
 
 % P3: what that does and does not license.
-Two readings are available and only one is supported. It would be wrong to
-conclude that the geometry of the trajectory does not matter, since a quantity
-that does not vary can neither explain anything nor be ruled out. What the
-measurement establishes is narrower and more awkward: on the non-negative
-weights this chapter is measured on, prediction degrades sharply while the shape
+A quantity that does not vary can neither explain a difference nor be ruled out
+as its cause, so flat curvature does not show that trajectory geometry is
+irrelevant. What it shows is narrower: on the non-negative weights this chapter
+is measured on, prediction degrades sharply while the shape
 of the trajectory stays put, so whatever governs that degradation is not visible
 on this axis, and the dimensional account developed above does not reach it
-either. What does govern it is left open here and named as open. This is a limit
-on the chapter rather than a detail of it. The activity manifold has two axes,
+either. What does govern it is left open. The activity manifold has two axes,
 and what precedes this section is an account of one.\footnote{One qualifier
 travels with any later statement about trajectory shape. Curvature on the
 chaotic task is sharply bimodal, with under one per cent of cells falling
@@ -769,10 +773,7 @@ network is driven, so how many directions a readout can use is a property of a
 substrate at an operating point rather than of the substrate. That is what
 allows the same axis to be read twice in the next chapter: once for how much of
 a past input a network can retain, and once for how far into the future it can
-carry a signal of its own. The ridge effective rank goes forward as the
-instrument for the first of those, earned in
-Section~\ref{sec:act2-counting} rather than assumed, and with its scope
-attached.
+carry a signal of its own. The ridge effective rank goes forward as the instrument for the first.
 
 % P3: the boundary, named not re-argued, and what it means for the next chapter.
 The third is the boundary of Section~\ref{sec:act2-temporal}. It goes forward
