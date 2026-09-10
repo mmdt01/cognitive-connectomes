@@ -35,15 +35,12 @@ carry weight.
     \includegraphics[width=\textwidth]{figures/NetworkNeuro.png}
     \caption[Schematic of network models used in neuroscience]
     {\textbf{Schematic of network models used in neuroscience}.
-    Common measures of interest include \emph{degree}, which is the number of edges
-    emanating from a node; \emph{clustering}, which is related to the prevalence of
-    triangles; \emph{cavities}, which describe the absence of edges; \emph{hubness},
-    which is related to a node’s influence; \emph{paths}, which determine the potential
-    for information transmission; \emph{communities}, or local groups of densely
-    interconnected nodes; \emph{shortcuts}, which are one possible marker of global
-    efficiency of information transmission; and \emph{core-periphery} structure,
-    which facilitates local integration of information gathered from or sent to more
-    sparsely connected areas. (Figure adapted from \cite{bassett2018nature})}
+    A network is characterised through measures such as \emph{degree}, the number
+    of edges at a node; \emph{clustering}, the prevalence of triangles;
+    \emph{communities}, groups of densely interconnected nodes; and \emph{hubness},
+    a node's influence over the rest of the network. Also shown are paths,
+    shortcuts, cavities and core-periphery structure.
+    (Figure adapted from \cite{bassett2018nature})}
     \label{fig:network-neuro}
 \end{figure}
  
@@ -69,7 +66,7 @@ the operative driver \cite{vavsa2022null}. Attributing an effect to a single fea
 therefore means separating it from the features it correlates with by construction
 \cite{bassett2018nature, suarez2020linking}.
  
-A second finding motivates treating the connectome dynamically rather than descriptively.
+A further finding motivates treating the connectome dynamically rather than descriptively.
 Roughly half the variance in functional connectivity is unexplained by direct structural
 connectivity \cite{suarez2020linking, seguin2023brain}, because functional interactions
 reflect polysynaptic, higher-order processes that only an explicit model of signal
@@ -131,7 +128,16 @@ network can hold, and Section~\ref{section:spectra-capacity} returns to it.
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1\textwidth]{figures/Evolution_of_RC.png}
-    \caption{\textbf{Towards connectome-based connectivity in recurrent neural networks}. (Figure taken from \cite{suarez2024connectome})}
+    \caption[Towards connectome-based connectivity in recurrent neural networks]{
+    \textbf{Towards connectome-based connectivity in recurrent neural networks}.
+    \textbf{(a)} In a classic recurrent neural network the recurrent connections are
+    learned, and the topology that emerges from training need not resemble biological
+    connectivity.
+    \textbf{(b)} In conventional reservoir computing the recurrent weights are assigned
+    randomly and held fixed, with learning confined to the readout.
+    \textbf{(c)} Advances in imaging now allow the reservoir to be built directly from
+    empirical structural connectivity.
+    (Figure taken from \cite{suarez2024connectome})}
     \label{fig:connectome-constrained-networks}
 \end{figure}
  
@@ -289,7 +295,7 @@ The step from dynamics to computation is usually taken through geometry. A popul
 activity over time traces a trajectory through a high-dimensional state space, and
 describing the shape of that trajectory has become a standard way of relating neural
 dynamics to the computations they support \cite{chung2021neural, vyas2020computation,
-ju2020dynamic}. The first question asked of such a shape is how many dimensions it occupies,
+ju2020dynamic} (Figure~\ref{fig:neuraldynamics}). The first question asked of such a shape is how many dimensions it occupies,
 since a readout confined to few directions has correspondingly little to combine.
  
 How connectivity sets that number is an active question. Recanatesi et al.
@@ -303,7 +309,7 @@ and learning \cite{farrell2022gradient} both reshape it. Two results bear most c
 this thesis. Clark et al. \cite{clark2023dimension} give the dimension of activity in random
 networks, and in later work \cite{clark2025connectivity} show that it depends on just two
 properties of the coupling matrix, its variance and its effective rank.
- 
+
 That last result makes a terminological distinction necessary, since three different objects
 in this literature are called a dimension or a rank. The effective rank of the coupling
 matrix $\mathbf{W}$ counts the dominant rank-one components of the connectivity
@@ -313,6 +319,22 @@ directions in which the trajectory varies most, weighting each by its variance
 of the state Gram matrix under ridge regularisation, which counts the directions a
 particular readout can actually use. The three coincide only in special cases, and the
 distance between the second and the third is one of the report's findings.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/NeuralDynamicsSchematic.png}
+    \caption[Neural population dynamics and geometry]{
+    \textbf{Neural population dynamics and geometry}.
+    \textbf{(a, b)} Spikes from three neurons are binned and counted through time, and
+    each bin is plotted as a point in a state space whose axes are the three neurons
+    (n1, n2, n3), so that a sequence of bins becomes a trajectory.
+    \textbf{(c)} The dynamics can be summarised as a flow field (green arrows)
+    describing how the population state evolves.
+    \textbf{(d)} Two initial conditions (magenta and purple squares) give two distinct
+    trajectories under the same dynamics.
+    (Figure taken from \cite{vyas2020computation})}
+    \label{fig:neuraldynamics}
+\end{figure}
  
 The last of these is standard statistical machinery applied to a new object rather than a
 measure invented here. The effective degrees of freedom of a ridge estimator, summed over
