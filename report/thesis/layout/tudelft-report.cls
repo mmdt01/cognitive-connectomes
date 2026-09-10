@@ -51,7 +51,7 @@
 \usepackage{longtable}
 
 % Packages with options
-\RequirePackage[labelfont=bf,justification=centering]{caption}
+\RequirePackage[font=footnotesize,labelfont=bf,justification=centering]{caption}
 \RequirePackage[hidelinks]{hyperref}    % Improved referencing/links
 \RequirePackage[capitalise]{cleveref}
 \RequirePackage[ruled]{algorithm2e}
