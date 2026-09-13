@@ -300,22 +300,61 @@ check whether its consequences go with it.
 
 
 
+\section{Peak memory capacity against ridge strength}
+\label{app:peak-parity}
+\bigskip
+
+Section~\ref{sec:act3-memory-sigma} states parity at the peak and reports the
+interval behind it. The comparison is here in full. Each substrate is taken at
+its own best spectral radius and differences are paired within seed, so every
+comparison shares its input weights and its input series, and the whole panel is
+repeated at five ridge strengths spanning five orders of magnitude. The five are
+shown because usable dimensionality tracks measured memory at
+$+0.999$ % TIER0 3.3
+across all of them, on the seed-median statistic over
+$n = 52$; % TIER0 3.4
+raising the regularisation does not break that correspondence provided it is
+raised in both places at once, so the readout's regularisation is not what
+produces the result in either direction.
+
+The smallest ridge is also where this thesis meets an ordering in the literature
+that appears to contradict it. Nearest the pseudoinverse limit, peak memory
+orders Erdős--Rényi, degree-matching, weight-permuted, connectome, which is the
+spread-beats-compact ordering of Aceituno et al.~\cite{aceituno2020tailoring}
+reproduced exactly on these substrates. Section~\ref{sec:act3-memory-sigma} reads
+the two results as statements about different places on the operating range: spread wins at
+the peak, and a large spectral gap wins across the range.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{F10.png}
+    \caption[At its own optimum the connectome's memory is at parity with the
+    nulls]{\textbf{At its own optimum the connectome's memory is at parity with the
+    nulls, not below them all.} Paired per-seed differences in peak memory capacity,
+    each substrate taken at its own best spectral radius, ten seeds, with input
+    weights and input series shared within a pair. Bars are $95\%$ $t$-intervals and
+    filled markers are intervals excluding zero. \textbf{(a)} In memory-capacity
+    units and \textbf{(b)} as a percentage of each null's own peak. The deficit is
+    $2$ to $6\%$, and it excludes zero at all five ridge strengths against
+    Erdős--Rényi and against the weight-permuted assignment control, but at only one
+    of five against degree-matching, where the estimate also changes sign: the open
+    markers. The five strengths span five orders of magnitude and are shown because
+    usable dimensionality tracks measured memory at $+0.999$ across all of them
+    (seed-median statistic, $n = 52$), so the readout's regularisation is not what
+    produces the result.}
+    \label{fig:F10}
+\end{figure}
+
+
+
 \section{The memory margin across network scale}
 \label{app:scale}
 \bigskip
-% Destination for chapter 6 section 6.2's N = 1000 paragraph and F9, moved here
-% as a robustness check bounding A3M.4. The claim itself stays in the main text
-% with both margins and their levels; this section carries the protocol, the
-% fixed-N control, the ceiling prediction and the pre-registered falsification
-% test. Sources: TIER0 2.4, 2.5, 6.6; fact sheet 14 movement 3.
-% FORBIDDEN: "scale-invariant" full stop; "bulk95 is the ladder controller";
-% any margin without its levels; reading the inconclusive test as a pass.
-% GOVERNANCE: F9 moves from the main-text registry to SUPPLEMENTARY. The label
-% below may need renaming once that is done.
 
-Section~\ref{sec:act3-memory-sigma} reports a memory margin that holds across a
-$2.2$-fold change in network size. Two things changed between the two runs and
-they are separated by a control. The run length was scaled from
+
+Figure~\ref{fig:F9} reports a memory margin that holds across a 2.2-fold change in 
+network size. Two things changed between the two runs, and they are separated by a 
+control. The run length was scaled from
 $3000$ to $6000$ % TIER0 2.5
 so that the ratio of retained timesteps to units stayed near
 $5.5$, % TIER0 2.5
@@ -324,20 +363,8 @@ at an absolute value. At fixed $N$ the reparameterisation alone moves the
 supercritical margin from
 $4.35$ to $4.40$, % TIER0 2.4
 so anything beyond that is attributable to size.
-
-The threshold that defines ``supercritical'' decides what the run says, which is
-why both readings are drawn (Figure~\ref{fig:F9}). Taking the connectome's own
-critical scale and applying it to every variant gives a margin of
-$4.40$ and $4.42$; % TIER0 2.4
-taking each variant above its own gives
-$3.56$ and $3.85$. % TIER0 2.4
-The first is reported as primary only because it evaluates every substrate over
-an identical range of operating points, and it should be read knowing that it is
-also the filter that flatters the connectome, since it samples each null further
-above its own critical scale, where that null has already decayed further. Two
-predictions stated before the run held: the margin does not vanish, and the
-larger network does not escape the ceiling, peak usable dimensionality running
-at
+Two predictions stated before the run held: the margin does not vanish, and the
+larger network does not escape the ceiling, peak usable dimensionality running at
 $0.971$ for the connectome and $0.984$ to $0.999$ % TIER0 2.4
 of its maximum for the nulls.
 
@@ -352,29 +379,8 @@ inconclusive, and it is inconclusive because the predictor was noisy and not
 because the outcome was. The registration asserted that the test was on the sign
 rather than the size without first checking that the sign was established. The
 question it was meant to answer is asked again in
-Section~\ref{sec:act3-lesion-memory}, by an intervention that removes the
+Section~\ref{sec:act3-lesion}, by an intervention that removes the
 proposed mechanism outright and therefore does not depend on a predictor moving.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{F9.png}
-    \caption[The supercritical memory margin holds across a 2.2-fold change in
-    $N$, under both definitions of ``supercritical'']{\textbf{The supercritical
-    memory margin holds across network scale, under both definitions of
-    ``supercritical''.} Memory-capacity task, non-negative weights, four
-    substrates and ten seeds each; run length scaled from $3000$ to $6000$ to hold
-    retained timesteps per unit near $5.5$, and the ridge reparameterised to scale
-    with the Gram matrix rather than held at an absolute value. \textbf{(a)} Median
-    memory capacity against nominal $\sigma$ for the connectome and Erdős--Rényi at
-    both sizes; the dotted rules are the connectome's critical scale, $3.078$ at
-    $N = 448$ and $3.985$ at $N = 1000$. \textbf{(b)} With that threshold applied to
-    every variant, the connectome to Erdős--Rényi margin is $4.40$ and $4.42$, on
-    levels $12.32$ against $2.80$ and $13.93$ against $3.15$. \textbf{(c)} With each
-    variant taken above its own critical scale, $3.56$ and $3.85$. Both are drawn
-    because the answer depends on the filter: the margin holds either way, but only
-    (b) is flat. The larger network does not escape the $d_{\mathrm{eff}}$ ceiling.}
-    \label{fig:F9}
-\end{figure}
 
 
 
@@ -441,6 +447,97 @@ order the substrates differently, and both orderings are correct measurements of
 different things.
 
 
+\section{Regime gating against graded geometry}
+\label{app:regime-gating}
+\bigskip
+
+Section~\ref{sec:act3-branch} states that predictive capacity is gated by which
+dynamical regime a network occupies rather than graded by how curved its
+trajectory is. The comparison behind that statement is here.
+
+Across the full sweep in operating point and sign fraction, a single binary
+variable recording which curvature spike a cell belongs to explains
+$R^2 = 0.364$ % TIER0 3.10
+of the variance in valid prediction time. The full continuous curvature measure
+explains
+$0.370$. % TIER0 3.10
+The entire range of geometries lying between the two regimes is therefore worth
+less than one percentage point beyond the bit, and the bit is what the
+relationship consists of.
+
+The graded account it replaces is not a straw man but an earlier reading of these
+same data. Pooled across all cells, curvature and prediction correlate at
+$-0.78$, % TIER0 3.10
+which reads as a relationship in which capacity tracks how straight the manifold
+is. It is cluster mixing. Within the smooth cluster alone the residual
+correlation is
+$+0.145$, % TIER0 3.10
+opposite in sign, and no binning of the data recovers a graded path between the
+clusters. The pooled figure measures the separation between two groups and not a
+trend within either.
+
+
+
+
+\section{Attractor retention in long rollouts}
+\label{app:long-rollout}
+\bigskip
+
+Valid prediction time is measured over short rollout windows and scores how long
+a released network stays with the true trajectory before leaving it. A longer
+question is whether a network left running on its own output continues to
+produce the right kind of trajectory at all, which is measured over a rollout of
+$3000$ % A3P 2.6
+steps with the first
+$500$ % A3P 2.6
+discarded as settling, some
+$67.9$ % A3P 2.6
+Lyapunov times scored, and reported as a rate over cells rather than per cell
+(Section~\ref{sec:methods-closed-loop}). This section reports that measurement.
+
+A pre-registration written before the code existed made two claims about the
+long rollout: that the connectome would retain the true attractor's statistics to
+a higher sign fraction than the nulls, and that when substrates failed they would
+fail by distorting the attractor's shape while preserving its scale.
+
+The first is confirmed. Once a third of the weights are negative the connectome
+holds a faithful climate in
+$0.43$ % A3P 6.1
+of cells against the nulls'
+$0.14$, % A3P 6.1
+about three times the rate (Figure~\ref{fig:F17}).
+
+The second is refuted, and the refutation is the more informative result. The
+ratio of the free run's spread to the true trajectory's spread is sharply
+bimodal, with cells either collapsing below a twentieth of it or holding within a
+tenth of unity and almost none between. A failed rollout is therefore a collapse
+of scale and not a distortion of shape, which is the fixed-point branch of the
+map of Section~\ref{sec:act3-branch} seen in the closed loop, on a different
+quantity and a different capture from anything in that chapter.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{F17.png}
+    \caption[Released to run alone, the connectome holds the true attractor
+    further, and failure is a collapse of scale]{\textbf{Released to run alone,
+    the connectome holds the true attractor further, and failure is a collapse of
+    scale.} Free-running Lorenz rollout, $N = 448$, at $\sigma = 2$, against the
+    sign fraction $f$. \textbf{(a, b)} Example rollouts either side of the
+    separation. \textbf{(c)} The ratio of free-run spread to true spread, which
+    refutes the second registered claim: of $440$ cells, $229$ fall below $0.05$
+    and $158$ lie within a tenth of unity, with $11$ between, so failure is a
+    loss of scale rather than a distorted shape. The registered description,
+    wrong shape at right scale, fits $34$ cells. \textbf{(d)} The fraction of
+    cells whose free run keeps the true attractor's statistics, confirming the
+    first registered claim. \textbf{(e)} Where collapsed rollouts come to rest,
+    most of them several z-scored units from the origin, against an attractor
+    spanning about $\pm 2.5$ per coordinate. Panel (a) is read from the frozen
+    capture and the rate in the text from a separate fresh capture; the two are
+    not one population and are not combined.}
+    \label{fig:F17}
+\end{figure}
+
+
 
 % ------------------------------
 
@@ -472,28 +569,3 @@ different things.
     coincide exactly.}
     \label{fig:S1}
 \end{figure}
-
-% S2
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{S2.png}
-    \caption[]{
-    \textbf{}}
-    \label{fig:S2}
-\end{figure}
-
-
-
-
-% S2
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{figures/CelegansSpectra.png}
-    \caption[C.elegans eigenspectra analysis]{
-    \textbf{C.elegans eigenspectra analysis}}
-    \label{fig:celegans-spectra}
-\end{figure}
-
-
-
-
