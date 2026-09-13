@@ -1,11 +1,16 @@
 \chapter*{Glossary \& Notation}
 \addcontentsline{toc}{chapter}{Glossary \& Notation}
+% \chapter* sets no header mark, so without this the page header keeps the
+% previous chapter's title.
+\markboth{Glossary \& Notation}{Glossary \& Notation}
 
 
 \section*{Glossary:}
 \bigskip
 
-\begin{longtable}{p{2.5cm}p{12.5cm}}
+% The left column is ragged right: a justified p-column stretches the space in a
+% term that does not fit on one line and hyphenates its second word.
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.4cm}p{\dimexpr\linewidth-3.4cm-4\tabcolsep\relax}}
     \toprule
     Term & Definition \\
     \midrule\endhead % Add abbreviations alphabetically here:
@@ -78,7 +83,7 @@
 
 Matrices and vectors are set in bold; scalars are not.
 
-\begin{longtable}{p{2.5cm}p{12cm}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.4cm}p{\dimexpr\linewidth-3.4cm-4\tabcolsep\relax}}
     \toprule
     Symbol & Meaning \\
     \midrule\endhead
@@ -143,7 +148,7 @@ Matrices and vectors are set in bold; scalars are not.
 \section*{Abbreviations:}
 \bigskip
 
-\begin{longtable}{p{2.5cm}p{12cm}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.4cm}p{\dimexpr\linewidth-3.4cm-4\tabcolsep\relax}}
     \toprule
     Abbreviation & Definition \\
     \midrule\endhead % Add abbreviations alphabetically here:
