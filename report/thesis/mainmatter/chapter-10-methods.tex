@@ -2,22 +2,6 @@
 \label{chapter:methods}
 
 
-% \section{Reservoir computing}
-
-% \section{Connectivity substrates}
-
-% % Constructing a group concensus network
-
-% \section{Network null models}
-
-% \section{Computational tasks}
-
-% \subsection{Memory capacity}
-% \subsection{Dynamical systems}
-
-% \section{Measures}
-
-
 \section{The connectivity substrate}
 \label{sec:methods-substrate}
 \bigskip
@@ -245,12 +229,13 @@ Every measure of activity in this thesis is a function of one object. Driving a
 reservoir with an input signal and recording every unit at every timestep gives
 the state matrix $\mathbf{A} \in \mathbb{R}^{T_{\mathrm{eff}} \times N}$, a trajectory
 through an $N$-dimensional space with one point per timestep, whose shape is what
-the phrase \emph{activity manifold} refers to. Runs are
-3000 timesteps with the first 500 discarded as warmup, % A2 2.5
-so $T_{\mathrm{eff}} = 2500$. % A2 2.5
-The memory-capacity design carries no bias column, so its Gram spectrum has
-448 entries; % A2 2.5
-the two prediction tasks carry one and have 449. % A2 2.5
+the phrase \emph{activity manifold} refers to. Run lengths are set per task
+and given with each; the memory-capacity task, on which most of what follows is
+measured, retains
+2500 timesteps. % A2 2.5
+Its design carries no bias column, so its Gram spectrum has
+448 entries, % A2 2.5
+against 449 for the two tasks that carry one.
 
 A linear readout does not see the trajectory. It sees the matrix of pairwise
 inner products between the units' time series, the Gram matrix $\mathbf{G} = \mathbf{A}^{\top}\mathbf{A}$,
@@ -333,8 +318,8 @@ The regularisation strength is the readout's own. For the memory-capacity task i
 is $\alpha = 10^{-6}$, % TIER0 3.3
 taken from the same parameter dictionary that configures the evaluator rather
 than set separately for the measure, so the two are the same float and not two
-copies of one number. The prediction tasks carry
-$10^{-8}$ and $10^{-7}$. % CHK Task 2
+copies of one number. Lorenz carries
+$10^{-7}$ and NARMA-10 $10^{-8}$. % CHK Task 2
 This identity is load-bearing: the correspondence between $d_{\mathrm{eff}}$ and
 measured memory capacity holds at
 +0.999 % TIER0 3.3
@@ -433,29 +418,129 @@ than folding them in.
 
 
 
-\section{The closed loop, and what a prediction horizon measures}
+\section{The memory-capacity task}
+\label{sec:methods-memory-capacity}
+\bigskip
+
+Memory is evaluated with the memory-capacity task, which asks how much of an
+input a network has already received can still be recovered from its present
+state.
+
+The network is driven by a scalar white-noise signal drawn uniformly on
+$[-1, 1]$, delivered to every unit through the fixed input matrix
+$\mathbf{W}_{\!\mathrm{in}}$ of Section~\ref{section:ch2_3}, whose entries are
+$\pm 1$ at the same scale. One readout is fitted for each delay $\tau$ to
+reconstruct $u(t - \tau)$ from the state at $t$, so the task is a bank of
+parallel regressions on a single recorded trajectory rather than a sequence of
+runs. Delays run from
+1 to 50 in unit steps. % A2 2.5
+At a given seed index every network receives the identical input series, so
+substrates are compared on paired drives rather than on independent ones.
+
+Performance at each delay is the squared Pearson correlation between the
+delayed input and its reconstruction, and capacity is the sum of those scores
+across delays,
+
+\begin{equation}
+    \mathrm{MC} \;=\; \sum_{\tau=1}^{50} r^{2}\!\left(y_{\tau}, \hat{y}_{\tau}\right),
+    \label{eq:memory_capacity}
+\end{equation}
+
+a sum and not an average. A network reconstructing the input perfectly at every
+delay scores the number of delays, so capacity carries the units of a delay
+count rather than of a correlation, and the values reported in
+Chapters~\ref{chapter:act-II} and~\ref{chapter:act-III} should be read that way.
+It is bounded above by the number of delays summed over, and, for an i.i.d.
+input read out linearly, by the number of units
+$N$~\cite{jaeger2001short, dambre2012information}; what that bound implies for a
+comparison between substrates of equal size is in
+Section~\ref{section:spectra-capacity}.
+
+States come from one run of
+3000 timesteps with the first 500 discarded as warmup, % A2 2.5
+so $T_{\mathrm{eff}} = 2500$, and the readout is fitted and scored on those same
+rows. Scores are therefore in-sample and are not estimates of generalisation.
+What the comparison in this thesis turns on is the ordering of substrates of
+equal size, driven by identical inputs and read out at an identical
+regularisation, and that ordering is what $d_{\mathrm{eff}}$ predicts; the
+absolute level is not interpreted anywhere. The ridge is fixed at
+$\alpha = 10^{-6}$, % TIER0 3.3
+taken from the same parameter object that configures the effective-rank
+measurement for the reason Section~\ref{sec:methods-counts} gives, and the
+design carries no bias column.
+
+Two things change at the larger parcellation. The run is lengthened from
+3000 to 6000 timesteps % TIER0 2.5
+so that the ratio of retained timesteps to units holds near
+5.5, % TIER0 2.5
+and the ridge is reparameterised to scale with the trace of the Gram matrix,
+with its constant pinned so that the median realised value over the
+supercritical region at $N = 448$ reproduces the frozen
+$10^{-6}$; % TIER0 2.5
+Appendix~\ref{app:scale} separates the two changes with a control at fixed $N$.
+
+A third input signal, NARMA-10, is also used to drive the networks whose states
+Chapter~\ref{chapter:act-II} measures. It is never scored and no claim rests on
+its performance; it is present so that the state-geometry results there can be
+shown not to depend on one particular drive.
+
+
+
+
+\section{The Lorenz prediction task}
 \label{sec:methods-closed-loop}
 \bigskip
-% Destination for chapter 6 section 6.3's protocol paragraph, moved here in the
-% length pass. Carries no claim. Sources: A3P 2.6 findings 3 and 5; TIER0 2.6.
-% FORBIDDEN: any per-cell climate_error value, anywhere in the thesis.
 
-The tasks in this thesis are scored in two different ways, and the difference
-decides what a number from each one means. On a driven task the input the network
-receives at every step is the true one, so an error made at one step does not
-propagate into the state scored at the next. A free-running network has no such
-correction. It is initialised on a true trajectory, released, and thereafter
-driven by its own output, so errors compound and what is scored is how long the
-generated trajectory stays with the true one before leaving it.
+Prediction is evaluated on the Lorenz system~\cite{lorenz1963deterministic}, a
+three-dimensional flow whose trajectory is chaotic under the standard
+parametrisation and therefore has a finite horizon beyond which no model can
+track it.
 
-That duration is the \textbf{valid prediction time}. A window is counted as valid
-while the Euclidean distance between the generated and true states, divided by
-the root-mean-square norm of the z-scored three-dimensional series, stays below
+The state $(x, y, z)$ evolves according to
+
+\begin{equation}
+    \begin{aligned}
+        \frac{\mathrm{d}x}{\mathrm{d}t} &= s\,(y - x), &
+        \frac{\mathrm{d}y}{\mathrm{d}t} &= x(r - z) - y, &
+        \frac{\mathrm{d}z}{\mathrm{d}t} &= xy - b z,
+    \end{aligned}
+    \label{eq:lorenz_system}
+\end{equation}
+
+with $s = 10$, $r = 28$ and $b = 8/3$. The first of these is conventionally
+written $\sigma$; it is written $s$ here because $\sigma$ denotes the operating
+point throughout this thesis, and the two have nothing to do with one another.
+Trajectories are integrated in fourth-order Runge--Kutta at a step of
+$h = 0.03$ % A3P 2.6
+from a lightly perturbed fixed start, the first
+1000 steps % A3P 2.6
+are discarded as transient, and the series is z-scored per coordinate on the
+teacher-forced region. Inputs, targets and both reference trajectories below are
+in those units. The readout is fitted at
+$\alpha = 10^{-7}$ % A3P 2.6
+with the intercept left out of the penalty.
+
+The task is scored in two different ways, and the difference decides what a
+number from each one means. On a driven task the input the network receives at
+every step is the true one, so an error made at one step does not propagate into
+the state scored at the next. A free-running network has no such correction. It
+is initialised on a true trajectory, released, and thereafter driven by its own
+output, so errors compound and what is scored is how long the generated
+trajectory stays with the true one before leaving it. Trajectory geometry is
+measured on the driven trajectory and predictive performance on the free run,
+and figures drawing both say so.
+
+That duration is the \textbf{valid prediction time}. A window is counted as
+valid while the Euclidean distance between the generated and true states,
+divided by the root-mean-square norm of the z-scored training trajectory, stays
+below
 $0.4$; % A3P 2.6
 the reported value is the mean over
 $20$ % A3P 2.6
-rollout windows, expressed in Lyapunov times so that it is a property of the
-dynamics rather than of the integration step.
+evenly spaced windows, each synchronised on the true trajectory before release,
+and is expressed in Lyapunov times using the literature exponent
+$\lambda_{\operatorname{max}} = 0.9056$ % A3P 2.6
+so that it is a property of the dynamics rather than of the integration step.
 
 The instrument's range does not bind. The rollout horizon corresponds to
 $16.3$ % TIER0 2.6
@@ -467,125 +552,62 @@ so lengthening the horizon would buy nothing. The floor is live, and a value of
 exactly zero means every window failed at the first predicted step.
 
 One further quantity is measured on the free run and reported under a
-restriction. The climate error compares the statistics of a long autonomous
-rollout with those of the true attractor, over
-$3000$ % A3P 2.6
-steps, which is some
-$81.5$ % A3P 2.6
-Lyapunov times. Over that length a difference of machine epsilon in the order of
-a floating-point reduction decorrelates the trajectory, so individual cells are
-not reproducible even on identical hardware. Climate error is therefore reported
-only as seed medians and as rates over cells, never as a per-cell value, at any
-point in this thesis.
+restriction. The climate error asks whether a network left running alone still
+visits the right region of state space, comparing the distribution of each
+coordinate of a long autonomous rollout against the true attractor's under the
+Wasserstein-1 distance and averaging over the three. The rollout is
+3000 steps % A3P 2.6
+long, of which the first
+500 % A3P 2.6
+are discarded as settling, leaving some
+$67.9$ % A3P 2.6 (arithmetic: 2500 x 0.03 x 0.9056)
+Lyapunov times scored; Appendix~\ref{app:long-rollout} reports it. Over that
+length a difference of machine epsilon in the order of a floating-point
+reduction decorrelates the trajectory, so individual cells are not reproducible
+even on identical hardware. Climate error is therefore reported only as seed
+medians and as rates over cells, never as a per-cell value, at any point in this
+thesis.
 
 
 
 
-
-
-
-
-
-\section{Memory capacity}
-\label{sec:memory-capacity}
+\section{The sign-composition intervention}
+\label{sec:methods-sign}
 \bigskip
 
+Chapter~\ref{chapter:act-III} varies the fraction $f$ of a substrate's weights
+that are negative. The intervention changes signs and nothing else: magnitudes,
+the zero pattern and the diagonal are left exactly as they were, so a comparison
+across $f$ holds topology and weight distribution fixed.
 
-To evaluate reservoir memory, we chose the widely used memory capacity task, which measures 
-the reservoir’s ability to preserve the representations of past stimuli in continuing iterations 
-of its internal state computation.  In this task, the readout module is trained to reproduce a 
-time-delayed version of a random uniformly distributed input signal $\mathbf{u}(t) \sim \mathcal{U}(-1, 1)$.
-Specifically, $\mathbf{y}(t) = \mathbf{u}(t - \tau)$, where $\tau$ is a given time lag.
-Here, we consider T=X time lags, monotonically increased in one time point steps in the range.
-Note that there are as many linear units as there are time lags in the readout module, 
-and they are all trained independently.
+Flips are applied edge-wise. Each present edge is scored by the product of its
+two endpoints' degrees, the edges are divided into
+ten % A3P C4
+equal-count strata by that score, and a fraction $f$ of each stratum is drawn at
+random and negated together with its mirror entry. Stratifying in this way fixes
+the hub-to-periphery composition of the inverted set, so that raising $f$ varies
+how much negative weight a network carries and not where it sits, which is what
+lets the amount of inhibition be separated from its assignment. Because both
+entries of an edge are flipped, the matrix stays symmetric at every $f$, and at
+$f = 0$ the transform is the identity. Node scores are computed once per
+substrate and seed on the unsigned matrix and reused across the sweep, and the
+flip is applied before the matrix is rescaled to its operating point.
 
-We separately generated a training and a testing input signal of 2100 time points each. 
-Different signals were used for each network evaluated. Reservoir states were simulated 
-separately for each time series. The first 100 time points were discarded from the resulting 
-reservoir state trajectories to account for initial transients. 
-The training reservoir states of the selected output nodes were then used to train the 
-readout module to reproduce the input signal at different time lags. Finally, the testing 
-reservoir states were used to test the performance. For every $\tau$, performance was measured 
-using the $\mathbf{R}^{2}$ coefficient of determination regression score.
-Regression scores were then averaged across all time delays to obtain the memory capacity (MC):
+The grid runs from
+$0$ to $0.5$ in steps of $0.05$, % A3P C6
+with
+ten seeds and three draws % A3P C6
+per cell. Rounding within strata means the realised negative fraction can fall
+slightly below the nominal $f$, and it is recorded per cell rather than assumed.
+Each value of $f$ is an independent draw rather than a superset of the one
+below it.
 
-\begin{equation}
-    MC = \frac{\sum_{\tau} \mathbf{R}^2(\mathbf{y}, \widehat{\mathbf{y}})}{T},
-    \label{eq:memory_capacity}
-\end{equation}
-
-
-
-
-
-\section{Predictive capacity}
-\label{sec:predictive-capacity}
-\bigskip
-
-To evaluate chaotic time series prediction, we use two standard reservoir computing tasks: 
-the Lorenz \cite{lorenz1963deterministic} and the NARMA10 tasks \cite{verstraeten2007experimental}. 
-We chose the Lorenz task because it models a real-world 
-weather system, i.e., atmospheric convection, and the NARMA task because it combines 
-nonlinearity and memory, making it highly complex. Both tasks were implemented as one-step-ahead 
-prediction tasks, and performance was measured using the $\mathbf{R}^{2}$ coefficient of determination.
-
-As for the memory capacity task, we separately generated a training and a testing input 
-signal of 2100 time points each and a warmup period of 100 time points was discarded from 
-the resulting reservoir state trajectories. The signals were generated using the reservoirpy 
-open-source package \cite{trouvain2020reservoirpy}.
-Different signals were also used for each network evaluated. An input module was randomly 
-selected among the first 8 modules. One input node per input signal was then randomly selected 
-from the input module. All the 350 nodes in all the other 7 modules were used as output. 
-A single readout module was trained for all outputs.
-
-\subsubsection{Lorenz}
-\label{subsec:lorenz}
-
-The state $(x, y, z)$ of the Lorenz system evolves according to the following set of three 
-coupled nonlinear differential equations: 
-
-\begin{equation}
-    \begin{aligned}
-        \frac{dx}{dt} &= \sigma(y - x) \\
-        \frac{dy}{dt} &= x(\rho - z) - y \\
-        \frac{dz}{dt} &= xy - \beta z,
-    \end{aligned}
-    \label{eq:lorenz_system}
-\end{equation}
-
-with standard parametrization ($\sigma$ = 10, $\beta$ = 8/3, $\rho$ = 28) for chaotic behavior. 
-The system state is initialized following a uniform distribution in [− 20, 20] for each variable, 
-and the time series is approximated using a Runge-Kutta method of order 5(4) with time step 
-$\delta t = 0.03$.
-
-
-\subsubsection{NARMA}
-\label{subsec:narma}
-
-The nonlinear autoregressive moving average (NARMA) system is defined on discrete time. 
-Let the state and input of the system at time $t$ be $y_{t}$ and $u_{t}$, respectively. 
-The tenth-order NARMA system (NARMA-10) is expressed by: 
-
-\begin{equation}
-    y_{t+1} = \alpha y_t + \beta y_t \sum_{i=0}^{9} y_{t-i} + \gamma u_t u_{t-9} + \delta
-    \label{eq:narma}
-\end{equation}
-
-Following previous work, parameters ($\alpha$, $\beta$, $\gamma$, $\delta$) are set to 
-(0.3, 0.05, 1.5, 0.1). The system state is initialized at 0, and the input signal follows 
-a uniform distribution in [0, 0.45].
-
-
-
-
-
-
-
-
-
-
-
+A second, node-wise mode is implemented, in which a fraction of units has all of
+its outgoing weights negated, after the fashion of Dale's law. It is not the
+arm reported in Chapter~\ref{chapter:act-III}. Negating columns rather than
+edges breaks the symmetry of $\mathbf{W}$, and so confounds the sign fraction
+with departure from normality; the edge-wise mode is used throughout precisely
+because it leaves normality untouched and isolates sign.
 
 
 
